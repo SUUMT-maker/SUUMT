@@ -1,0 +1,4833 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>숨트레이너</title>
+    
+    <!-- Google Analytics 4 - 숨트레이너 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-TFYK5NK44V"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-TFYK5NK44V');
+    </script>
+    
+    <!-- 🌙 다크모드 문제 해결: 색상 스키마 고정 -->
+    <meta name="color-scheme" content="light">
+    <meta name="supported-color-schemes" content="light">
+    
+    <!-- PWA 메타 태그 -->
+    <meta name="description" content="숨트 호흡운동기구 전용 가이드 앱">
+    <meta name="keywords" content="숨트, 호흡운동기구, 호흡근육트레이닝, 폐활량, 호흡근육강화">
+    <meta name="author" content="숨트레이너">
+    <meta name="theme-color" content="#667eea">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="숨트레이너">
+    
+    <!-- 매니페스트 링크 -->
+    <link rel="manifest" href="/manifest.json">
+    
+    <!-- 파비콘 및 아이콘 -->
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/icons/icon-16x16.png">
+    <link rel="apple-touch-icon" href="/icons/icon-180x180.png">
+    
+    <style>
+        /* 🌙 다크모드 강제 방지 */
+        :root {
+            color-scheme: light !important;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            color-scheme: light !important;
+        }
+
+        body {
+            font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #F9FAFC !important;
+            min-height: 100vh;
+            color: #1E1E1E !important;
+            -webkit-color-scheme: light !important;
+            overflow-x: hidden;
+        }
+
+        /* 🎬 숨트 제품 노출 스플래시 화면 */
+        #introScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: #000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            cursor: pointer;
+            opacity: 1;
+            transition: opacity 0.8s ease-out;
+        }
+
+        #introScreen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .splash-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        .progress-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            width: 0;
+            animation: progressFill 5s linear;
+            z-index: 2001;
+        }
+
+        .fallback-splash {
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+        }
+
+        .fallback-logo {
+            font-size: 4rem;
+            margin-bottom: 2rem;
+            animation: breathe 5s ease-in-out infinite;
+        }
+
+        .fallback-title {
+            font-size: 3rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        .fallback-subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+        }
+
+        @keyframes progressFill {
+            0% { width: 0%; }
+            100% { width: 100%; }
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+
+        /* 📱 모던 컨테이너 디자인 */
+        .app-container {
+            max-width: 420px;
+            width: 100%;
+            margin: 0 auto;
+            min-height: 100vh;
+            background: #F9FAFC;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .screen {
+            display: none;
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* 🎨 메인 헤더 */
+        .main-header {
+            padding: 20px;
+        }
+
+        .user-greeting {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .user-avatar {
+            width: 48px;
+            height: 48px;
+            background: #EEF1F3;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .user-avatar img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .user-text h4 {
+            font-size: 14px;
+            font-weight: 400;
+            color: #1E1E1E;
+            margin-bottom: 2px;
+        }
+
+        .user-text h3 {
+            font-size: 16px;
+            font-weight: 500;
+            color: #1E1E1E;
+        }
+
+        /* 🔥 새로운 기능: 메인화면 실시간 현황 */
+        .live-users-badge {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
+            animation: liveGlow 2s ease-in-out infinite;
+        }
+
+        .live-indicator {
+            width: 6px;
+            height: 6px;
+            background: #fff;
+            border-radius: 50%;
+            animation: livePulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes liveGlow {
+            0%, 100% { box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3); }
+            50% { box-shadow: 0 4px 16px rgba(79, 172, 254, 0.5); }
+        }
+
+        @keyframes livePulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.7; transform: scale(0.8); }
+        }
+
+        /* 📊 통계 섹션 */
+        .stats-section {
+            margin-bottom: 24px;
+        }
+
+        /* 📊 섹션 헤더 개선 */
+        .section-header {
+            background: white;
+            border: 1px solid #E7E7E7;
+            border-radius: 16px;
+            padding: 16px 20px;
+            margin: 0 20px 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border-left: 4px solid #667eea;
+        }
+
+        .section-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1E1E1E;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-icon {
+            font-size: 22px;
+        }
+
+        .section-subtitle {
+            font-size: 13px;
+            color: #666;
+            margin-top: 4px;
+            font-weight: 400;
+        }
+
+        /* 📱 통계 카드 그리드 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            padding: 0 20px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: white;
+            border: 1px solid #E7E7E7;
+            border-radius: 24px;
+            padding: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .stat-card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .stat-card-title {
+            font-size: 14px;
+            font-weight: 500;
+            color: #1E1E1E;
+        }
+
+        .stat-card-icon {
+            font-size: 20px;
+        }
+
+        .stat-card-value {
+            display: flex;
+            align-items: end;
+            gap: 2px;
+        }
+
+        .stat-number {
+            font-size: 32px;
+            font-weight: 500;
+            color: #1E1E1E;
+            line-height: 1;
+        }
+
+        .stat-unit {
+            font-size: 14px;
+            font-weight: 500;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        /* 🔧 운동 가이드 카드 */
+        .guide-card {
+            background: white;
+            border: 1px solid #E7E7E7;
+            border-radius: 24px;
+            margin: 0 20px 24px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .guide-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .guide-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1E1E1E;
+        }
+
+        .important-notice {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            background: rgba(102, 126, 234, 0.08);
+            border-radius: 8px;
+            border: 1px solid rgba(102, 126, 234, 0.15);
+        }
+
+        .important-icon {
+            color: #667eea;
+            font-size: 14px;
+            margin-right: 6px;
+            margin-top: 1px;
+            flex-shrink: 0;
+        }
+
+        .important-text {
+            color: #1E1E1E;
+            font-weight: 500;
+            font-size: 13px;
+            line-height: 1.4;
+        }
+
+        .guide-step {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 8px;
+            padding-left: 16px;
+            position: relative;
+        }
+
+        .guide-step::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .guide-step:last-child {
+            margin-bottom: 0;
+        }
+
+        /* 🎯 저항 설정 카드 */
+        .resistance-card {
+            background: white;
+            border: 1px solid #E7E7E7;
+            border-radius: 24px;
+            margin: 0 20px 24px;
+            padding: 20px;
+            border-left: 4px solid #667eea;
+        }
+
+        .resistance-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .resistance-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1E1E1E;
+        }
+
+        .resistance-controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .resistance-control {
+            background: #F8F9FA;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .resistance-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1E1E1E;
+            margin-bottom: 12px;
+        }
+
+        .resistance-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 12px;
+        }
+
+        .resistance-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .resistance-btn:hover:not(:disabled) {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .resistance-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .resistance-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            min-width: 40px;
+        }
+
+        .resistance-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #E7E7E7;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            transform: scale(1.2);
+        }
+
+        .resistance-tip {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            background: rgba(102, 126, 234, 0.1);
+            padding: 12px;
+            border-radius: 12px;
+            line-height: 1.4;
+        }
+
+        /* 📈 차트 섹션 */
+        .chart-section {
+            margin-bottom: 24px;
+        }
+
+        .chart-container {
+            background: white;
+            border: 1px solid #E7E7E7;
+            border-radius: 24px;
+            margin: 0 20px 24px;
+            padding: 20px 20px 30px 20px;
+            overflow: visible;
+        }
+
+        .chart-legend {
+            text-align: center;
+            margin-bottom: 16px;
+            padding: 8px 12px;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            font-size: 12px;
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .chart-area {
+            position: relative;
+            height: 150px;
+            margin: 20px 0;
+            overflow: visible;
+        }
+
+        .chart-y-axis {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 40px;
+        }
+
+        .y-label {
+            font-size: 12px;
+            color: #666;
+            text-align: right;
+            height: 20px;
+            line-height: 20px;
+        }
+
+        .chart-bars {
+            position: absolute;
+            left: 50px;
+            bottom: 0;
+            right: 0;
+            height: 130px;
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .chart-bar {
+            flex: 1;
+            background: #D6F1FF;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .chart-bar.highlight {
+            background: linear-gradient(to top, #5BC8FF, #2DB5F9);
+            box-shadow: 0 -2px 8px rgba(45, 181, 249, 0.3);
+        }
+
+        .chart-bar.super-achiever {
+            background: linear-gradient(to top, #FFD700, #FFA500);
+            box-shadow: 0 -2px 12px rgba(255, 215, 0, 0.5);
+            animation: superGlow 2s ease-in-out infinite;
+        }
+
+        .achievement-crown {
+            position: absolute;
+            top: -25px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 16px;
+            animation: crownBounce 1.5s ease-in-out infinite;
+        }
+
+        @keyframes superGlow {
+            0%, 100% { 
+                box-shadow: 0 -2px 12px rgba(255, 215, 0, 0.5);
+                filter: brightness(1);
+            }
+            50% { 
+                box-shadow: 0 -4px 20px rgba(255, 215, 0, 0.8);
+                filter: brightness(1.1);
+            }
+        }
+
+        @keyframes crownBounce {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-3px); }
+        }
+
+        .chart-bar:hover {
+            transform: translateY(-4px);
+            filter: brightness(1.1);
+        }
+
+        .chart-x-axis {
+            display: flex;
+            justify-content: space-between;
+            margin-left: 56px;
+            margin-top: 8px;
+        }
+
+        .x-label {
+            font-size: 12px;
+            color: #666;
+            text-align: center;
+            flex: 1;
+        }
+
+        /* 🎯 트레이닝 시작 버튼 */
+        .start-training-section {
+            padding: 0 20px 40px;
+        }
+
+        .start-button {
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .start-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .start-button:active {
+            transform: translateY(0);
+        }
+
+        /* 🔥 새로운 기능: 사회적 증명 섹션 (결과화면용) */
+        .social-proof-section {
+            margin: 20px 20px 24px;
+        }
+
+        .social-proof-card {
+            background: white;
+            border: 1px solid #E7E7E7;
+            border-radius: 24px;
+            padding: 20px;
+            border-left: 4px solid #4facfe;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .social-proof-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+
+        .social-proof-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #1E1E1E;
+        }
+
+        .live-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .live-stat {
+            background: #F8F9FA;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .live-stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #4facfe;
+            margin-bottom: 4px;
+        }
+
+        .live-stat-label {
+            font-size: 12px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .reviews-carousel {
+            background: #F8F9FA;
+            border-radius: 16px;
+            padding: 16px;
+            overflow: hidden;
+            position: relative;
+            height: 140px;
+        }
+
+        .reviews-slider {
+            display: flex;
+            transition: transform 0.5s ease;
+            height: 100%;
+        }
+
+        .review-card {
+            min-width: 100%;
+            padding: 0 8px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .review-text {
+            font-size: 14px;
+            color: #333;
+            line-height: 1.5;
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .review-author {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .review-avatar {
+            width: 32px;
+            height: 32px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .review-info {
+            text-align: left;
+        }
+
+        .review-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .review-rating {
+            color: #FFD700;
+            font-size: 12px;
+        }
+
+        .carousel-dots {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 12px;
+        }
+
+        .carousel-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ccc;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .carousel-dot.active {
+            background: #4facfe;
+            transform: scale(1.2);
+        }
+
+        /* 기존 화면들 스타일 유지 */
+        .breathing-circle {
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #667eea, #764ba2) !important;
+            margin: 1.5rem auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white !important;
+            font-size: 1.1rem;
+            font-weight: bold;
+            box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+            transform: scale(0.7);
+        }
+
+        .breathing-circle.inhale {
+            transform: scale(1.2);
+            box-shadow: 0 0 50px rgba(102, 126, 234, 0.6);
+            transition: all 4s ease;
+        }
+
+        .breathing-circle.hold {
+            transform: scale(1.2);
+            box-shadow: 0 0 50px rgba(102, 126, 234, 0.6);
+            transition: none;
+        }
+
+        .breathing-circle.exhale {
+            transform: scale(0.7);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+            transition: all 4s ease;
+        }
+
+        .breathing-circle.exhale-hold {
+            transform: scale(0.7);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+            transition: none;
+        }
+
+        .countdown {
+            font-size: 3.5rem;
+            font-weight: bold;
+            color: #667eea !important;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 0 auto;
+            max-width: 400px;
+            width: 95%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        /* 🏆 결과화면 전용 컨테이너 레이아웃 */
+        #resultScreen .container {
+            position: static;
+            transform: none;
+            margin: 2rem auto;
+            min-height: auto;
+            overflow: visible;
+        }
+
+        #resultScreen {
+            padding: 2rem 0;
+        }
+
+        .container h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #333;
+            font-size: 1.5rem;
+        }
+
+        .container .celebration {
+            text-align: center;
+        }
+
+        /* 🎯 카운트다운 섹션 완벽한 중앙정렬 */
+        #countdownSection {
+            text-align: center;
+        }
+
+        #countdownSection h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            color: #333;
+            font-size: 1.4rem;
+        }
+
+        .progress-container {
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: rgba(255, 255, 255, 0.95) !important;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+        }
+
+        .sets-progress {
+            margin-bottom: 2rem;
+        }
+
+        .progress-label {
+            font-size: 1rem;
+            color: #333 !important;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            text-align: center;
+        }
+
+        .sets-indicators {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 0.8rem;
+        }
+
+        .set-indicator {
+            width: 80px;
+            height: 12px;
+            background: rgba(102, 126, 234, 0.2);
+            border-radius: 6px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .set-indicator.active {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .set-indicator.current {
+            background: rgba(102, 126, 234, 0.5);
+            animation: setGlow 2s ease-in-out infinite;
+        }
+
+        .breaths-progress {
+            margin-bottom: 1rem;
+        }
+
+        .breaths-indicators {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 0.5rem;
+            justify-items: center;
+            margin-bottom: 0.8rem;
+            max-width: 100%;
+        }
+
+        .breath-indicator {
+            width: 16px;
+            height: 16px;
+            background: rgba(102, 126, 234, 0.2);
+            border-radius: 50%;
+            transition: all 0.3s ease;
+        }
+
+        .breath-indicator.completed {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+            transform: scale(1.1);
+        }
+
+        .breath-indicator.current {
+            background: #4facfe;
+            animation: breathGlow 1s ease-in-out infinite;
+            transform: scale(1.2);
+        }
+
+        .progress-numbers {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666 !important;
+            font-weight: 500;
+        }
+
+        /* 🔧 휴식시간 텍스트 중앙정렬 개선 */
+        #restSection p {
+            text-align: center !important;
+            color: #666 !important;
+            margin: 1rem 0 !important;
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+
+        #restProgressText {
+            text-align: center !important;
+            font-size: 1.1rem !important;
+            margin: 1rem 0 !important;
+            color: #333 !important;
+            font-weight: 600;
+        }
+
+        /* 🎮 퀴즈 시스템 스타일 */
+        #quizOfferSection {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .quiz-offer-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            color: white;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-offer-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        .quiz-offer-title {
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 0.8rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quiz-offer-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quiz-offer-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quiz-offer-primary {
+            background: rgba(255, 255, 255, 0.9);
+            color: #667eea;
+            border: none;
+            border-radius: 25px;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .quiz-offer-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .quiz-offer-secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.5);
+            border-radius: 25px;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-offer-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        /* 퀴즈 진행 화면 */
+        #quizProgressSection {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .quiz-progress-header {
+            margin-bottom: 2rem;
+        }
+
+        .quiz-progress-bar {
+            background: #E7E7E7;
+            height: 8px;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            overflow: hidden;
+        }
+
+        .quiz-progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .quiz-progress-text {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-question-card {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .quiz-question {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 1.5rem;
+            line-height: 1.4;
+        }
+
+        .quiz-options {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .quiz-option {
+            background: #F8F9FA;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            padding: 1rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .quiz-option:hover {
+            background: #E3F2FD;
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .quiz-option.correct {
+            background: #E8F5E8;
+            border-color: #4CAF50;
+            color: #2E7D32;
+        }
+
+        .quiz-option.incorrect {
+            background: #FFEBEE;
+            border-color: #F44336;
+            color: #C62828;
+        }
+
+        .quiz-explanation {
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            color: #333;
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        /* 퀴즈 보상 화면 */
+        #quizRewardSection {
+            text-align: center;
+            padding: 1.5rem;
+        }
+
+        .quiz-reward-card {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            border-radius: 20px;
+            padding: 2rem;
+            color: white;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .quiz-reward-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        .quiz-reward-title {
+            font-size: 1.6rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quiz-reward-subtitle {
+            font-size: 1rem;
+            opacity: 0.9;
+            margin-bottom: 1.5rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quiz-product-showcase {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #333;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quiz-product-image {
+            width: 100px;
+            height: 100px;
+            background: #F8F9FA;
+            border-radius: 12px;
+            margin: 0 auto 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            overflow: hidden;
+            border: 2px solid #E7E7E7;
+        }
+
+        .quiz-product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .quiz-product-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .quiz-product-description {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 1rem;
+        }
+
+        .quiz-product-price-line {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .quiz-original-price {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.9rem;
+        }
+
+        .quiz-price-arrow {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .quiz-discount-price {
+            color: #F44336;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+
+        .quiz-discount-badge {
+            background: #F44336;
+            color: white;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .quiz-dual-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .quiz-check-button {
+            background: rgba(255, 255, 255, 0.9);
+            color: #4facfe;
+            border: none;
+            border-radius: 25px;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .quiz-check-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .quiz-continue-button {
+            background: transparent;
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.7);
+            border-radius: 25px;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-continue-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 1);
+            transform: translateY(-2px);
+        }
+
+        @keyframes setGlow {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes breathGlow {
+            0%, 100% { opacity: 0.8; transform: scale(1.2); }
+            50% { opacity: 1; transform: scale(1.3); }
+        }
+
+        .control-buttons {
+            margin-top: 1.5rem;
+            text-align: center;
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2) !important;
+            color: white !important;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 20px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0.4rem;
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(45deg, #f093fb, #f5576c) !important;
+        }
+
+        .btn-success {
+            background: linear-gradient(45deg, #4facfe, #00f2fe) !important;
+        }
+
+        /* 🎯 피드백 화면 - 스크롤 없이 3개 선택지 완벽 표시 */
+        .feedback-options {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .feedback-option {
+            background: white;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            padding: 0.7rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .feedback-option:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+        }
+
+        .feedback-option.easy {
+            border-color: #4facfe;
+        }
+
+        .feedback-option.easy:hover {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+        }
+
+        .feedback-option.perfect {
+            border-color: #667eea;
+        }
+
+        .feedback-option.perfect:hover {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .feedback-option.hard {
+            border-color: #f093fb;
+        }
+
+        .feedback-option.hard:hover {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .feedback-emoji {
+            font-size: 1.6rem;
+            margin-bottom: 0.2rem;
+        }
+
+        .feedback-text {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .feedback-option:hover .feedback-text {
+            color: white;
+        }
+
+        .feedback-desc {
+            font-size: 0.75rem;
+            color: #666;
+            line-height: 1.3;
+        }
+
+        .feedback-option:hover .feedback-desc {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        /* 🏆 결과 화면 레이아웃 개선 */
+        .result-header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .result-stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 1.5rem;
+        }
+
+        .result-stat-card {
+            background: white;
+            border: 1px solid #E7E7E7;
+            border-radius: 16px;
+            padding: 16px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-stat-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+
+        .result-stat-title {
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .result-stat-icon {
+            font-size: 14px;
+        }
+
+        .result-stat-value {
+            font-size: 20px;
+            font-weight: bold;
+            color: #1E1E1E;
+        }
+
+        /* 🎮 게임화 배지 시스템 */
+        .badges-system {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 20px 20px 40px 20px;
+            text-align: center;
+            color: white;
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: visible;
+        }
+
+        .badges-system::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s ease-in-out infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.1); }
+        }
+
+        .badges-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .badges-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .badges-progress {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .badges-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            position: relative;
+            z-index: 1;
+            overflow: visible;
+        }
+
+        .badge-slot {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px dashed rgba(255, 255, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .badge-slot.earned {
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid #FFD700;
+            color: #333;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+            animation: badgeGlow 2s ease-in-out infinite;
+        }
+
+        .badge-slot:hover {
+            transform: scale(1.1);
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .badge-slot.earned:hover {
+            transform: scale(1.2);
+        }
+
+        .badge-icon {
+            font-size: 20px;
+        }
+
+        .badge-slot.earned .badge-icon {
+            font-size: 22px;
+        }
+
+        .badge-hint {
+            position: absolute;
+            bottom: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 9px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 6px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            white-space: nowrap;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+            pointer-events: none;
+        }
+
+        .badge-hint::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 4px solid transparent;
+            border-right: 4px solid transparent;
+            border-bottom: 4px solid rgba(0, 0, 0, 0.9);
+        }
+
+        .badge-slot:hover .badge-hint {
+            opacity: 1;
+        }
+
+        @keyframes badgeGlow {
+            0%, 100% { box-shadow: 0 0 15px rgba(255, 215, 0, 0.5); }
+            50% { box-shadow: 0 0 25px rgba(255, 215, 0, 0.8); }
+        }
+
+        /* 배지 획득 팝업 */
+        .badge-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+
+        .badge-popup-overlay.show {
+            display: flex;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        .badge-popup {
+            background: white;
+            border-radius: 24px;
+            padding: 2rem;
+            text-align: center;
+            max-width: 320px;
+            width: 90%;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: badgePopIn 0.6s ease-out;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .badge-popup::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 215, 0, 0.4), transparent);
+            animation: goldShine 2s ease-in-out infinite;
+        }
+
+        @keyframes goldShine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes badgePopIn {
+            0% { transform: scale(0.5) rotate(180deg); opacity: 0; }
+            50% { transform: scale(1.1) rotate(0deg); }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+
+        .badge-popup-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #FFD700, #FFA500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-align: center;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .badge-popup h3 {
+            color: #333;
+            margin-bottom: 0.5rem;
+            font-size: 1.4rem;
+        }
+
+        .badge-popup .badge-name {
+            color: #667eea;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .badge-popup p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+        }
+
+        .badge-popup-close {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .badge-popup-close:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .result-content {
+            text-align: left;
+            margin: 1.5rem 0;
+        }
+
+        .result-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.2rem;
+            margin: 1rem 0;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .result-section h4 {
+            color: #333;
+            margin-bottom: 0.8rem;
+            font-size: 1.2rem;
+        }
+
+        .result-section p {
+            color: #555;
+            line-height: 1.8;
+            font-size: 1rem;
+            font-weight: 400;
+        }
+
+        .result-section strong {
+            color: #333;
+            font-weight: 600;
+        }
+
+        .celebration {
+            font-size: 2.5rem;
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .achievement-badge {
+            background: linear-gradient(45deg, #4facfe, #00f2fe);
+            color: white;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            margin: 0.3rem;
+            display: inline-block;
+        }
+
+        /* 모달 스타일 */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .modal {
+            background: white;
+            border-radius: 20px;
+            padding: 1.5rem;
+            max-width: 300px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            animation: scaleIn 0.3s ease-out;
+        }
+
+        .modal h3 {
+            color: #333;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+
+        .modal p {
+            color: #666;
+            margin-bottom: 1.5rem;
+            line-height: 1.5;
+            font-size: 0.9rem;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+        }
+
+        .modal-btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            min-width: 70px;
+        }
+
+        .modal-btn-cancel {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .modal-btn-confirm {
+            background: linear-gradient(45deg, #f093fb, #f5576c);
+            color: white;
+        }
+
+        .modal-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes scaleIn {
+            from { transform: scale(0.9); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        /* 📱 모바일 최적화 */
+        @media (max-width: 480px) {
+            .app-container {
+                max-width: 100%;
+            }
+
+            .container {
+                max-width: 95%;
+                width: 95%;
+                padding: 1.5rem;
+            }
+
+            .stats-grid {
+                padding: 0 16px;
+                gap: 12px;
+            }
+
+            .resistance-card {
+                margin: 0 16px 24px;
+                padding: 16px;
+            }
+
+            .chart-container {
+                margin: 0 16px 24px;
+                padding: 16px 16px 26px 16px;
+            }
+
+            .start-training-section {
+                padding: 0 16px 40px;
+            }
+
+            .resistance-controls {
+                gap: 12px;
+            }
+
+            .resistance-btn {
+                width: 32px;
+                height: 32px;
+                font-size: 16px;
+            }
+
+            .resistance-value {
+                font-size: 20px;
+            }
+
+            .breaths-indicators {
+                gap: 0.4rem;
+            }
+
+            .breath-indicator {
+                width: 12px;
+                height: 12px;
+            }
+
+            .feedback-emoji {
+                font-size: 1.4rem;
+            }
+
+            .achievement-crown {
+                font-size: 14px;
+                top: -20px;
+            }
+
+            .badges-grid {
+                grid-template-columns: repeat(5, 1fr);
+                overflow: visible;
+            }
+
+            .badges-system {
+                padding: 16px 16px 35px 16px;
+            }
+
+            .badge-slot {
+                width: 36px;
+                height: 36px;
+            }
+            
+            .badge-hint {
+                font-size: 8px;
+                padding: 3px 6px;
+                bottom: -30px;
+            }
+            
+            .badge-hint::before {
+                border-left: 3px solid transparent;
+                border-right: 3px solid transparent;
+                border-bottom: 3px solid rgba(0, 0, 0, 0.9);
+            }
+
+            /* 사회적 증명 모바일 최적화 */
+            .social-proof-section {
+                margin: 16px 16px 20px;
+            }
+
+            .live-stats {
+                gap: 12px;
+            }
+
+            .live-stat {
+                padding: 12px;
+            }
+
+            .live-stat-number {
+                font-size: 20px;
+            }
+
+            .reviews-carousel {
+                padding: 12px;
+                height: 120px;
+            }
+
+            .review-text {
+                font-size: 13px;
+            }
+
+            .live-users-badge {
+                font-size: 11px;
+                padding: 4px 8px;
+            }
+
+            /* 🎮 퀴즈 시스템 모바일 최적화 */
+            .quiz-offer-card {
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .quiz-offer-title {
+                font-size: 1.2rem;
+            }
+
+            .quiz-offer-buttons {
+                gap: 0.8rem;
+            }
+
+            .quiz-offer-primary,
+            .quiz-offer-secondary {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+
+            .quiz-question-card {
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .quiz-question {
+                font-size: 1.1rem;
+                margin-bottom: 1.2rem;
+            }
+
+            .quiz-option {
+                padding: 0.8rem 1rem;
+                font-size: 0.9rem;
+            }
+
+            .quiz-explanation {
+                padding: 0.8rem;
+                font-size: 0.8rem;
+            }
+
+            .quiz-reward-card {
+                padding: 1.5rem;
+                margin-bottom: 1rem;
+            }
+
+            .quiz-reward-title {
+                font-size: 1.4rem;
+            }
+
+            .quiz-product-showcase {
+                padding: 1.2rem;
+            }
+
+            .quiz-product-image {
+                width: 80px;
+                height: 80px;
+                font-size: 1.5rem;
+            }
+
+            .quiz-product-name {
+                font-size: 1rem;
+            }
+
+            .quiz-product-price-line {
+                gap: 0.4rem;
+            }
+
+            .quiz-discount-price {
+                font-size: 1.1rem;
+            }
+
+            .quiz-dual-buttons {
+                gap: 0.8rem;
+            }
+
+            .quiz-check-button,
+            .quiz-continue-button {
+                padding: 0.8rem 1.5rem;
+                font-size: 1rem;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+  <!-- 🎬 2단계 온보딩 스플래시 화면 -->
+<div id="introScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #CFEFFF 0%, #B8E8FF 50%, #A1E1FF 100%); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 1; transition: opacity 0.8s ease-out; overflow: hidden;">
+    
+    <!-- 전체 배경 블러 효과들 -->
+    <div style="position: absolute; top: -50%; left: -50%; width: 200%; height: 200%; background: radial-gradient(circle at 20% 30%, rgba(46, 181, 250, 0.3) 0%, transparent 50%), radial-gradient(circle at 80% 70%, rgba(46, 181, 250, 0.2) 0%, transparent 50%), radial-gradient(circle at 40% 80%, rgba(46, 181, 250, 0.25) 0%, transparent 40%); animation: float 20s ease-in-out infinite;"></div>
+    
+    <!-- 첫 번째 온보딩 화면 -->
+    <div id="onboardingStep1" class="onboarding-step active" style="width: 375px; height: 812px; position: relative; overflow: hidden; display: flex;">
+        <!-- 메인 콘텐츠 컨테이너 -->
+        <div style="height: 702px; left: 20px; top: 61px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: center; gap: 23px; display: inline-flex;">
+            
+            <!-- 메인 이미지 -->
+            <div style="width: 335px; height: 419px; position: relative; overflow: hidden; border-radius: 12px;">
+                <img src="./images/suumt-usage.png" alt="숨트 사용 모습" style="width: 350px; height: 525px; left: -5px; top: -33px; position: absolute; object-fit: cover;" onerror="this.style.display='none';">
+            </div>
+            
+            <!-- 텍스트 및 버튼 영역 -->
+            <div style="flex-direction: column; justify-content: flex-start; align-items: center; gap: 40px; display: flex;">
+                
+                <!-- 텍스트와 인디케이터 -->
+                <div style="flex-direction: column; justify-content: flex-start; align-items: center; gap: 32px; display: flex;">
+                    
+                    <!-- 텍스트 영역 -->
+                    <div style="flex-direction: column; justify-content: flex-start; align-items: center; gap: 16px; display: flex;">
+                        <div style="width: 320px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #1E1E1E; font-size: 28px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; line-height: 32px; word-wrap: break-word;">건강한 호흡, 더 나은 삶</div>
+                        <div style="width: 280px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #626262; font-size: 14px; font-family: 'Space Grotesk', sans-serif; font-weight: 400; line-height: 20px; word-wrap: break-word;">AI가 분석하는 개인 맞춤 호흡 강화!<br>당신만의 스마트 호흡 트레이닝 </div>
+                    </div>
+                    
+                    <!-- 페이지 인디케이터 -->
+                    <div style="justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex;">
+                        <div style="width: 16.97px; height: 4px; background: #1E1E1E; border-radius: 56px;"></div>
+                        <div style="width: 4.17px; height: 4px; opacity: 0.30; background: #3D3C3C; border-radius: 56px;"></div>
+                    </div>
+                    
+                </div>
+                
+                <!-- 버튼 영역 -->
+                <div style="justify-content: flex-start; align-items: flex-start; gap: 16px; display: inline-flex;">
+                    <button onclick="skipOnboarding()" style="width: 160px; height: 48px; padding: 16px; border-radius: 24px; outline: 1px #2EB5FA solid; outline-offset: -1px; justify-content: center; align-items: center; gap: 10px; display: flex; background: transparent; border: none; cursor: pointer; transition: all 0.3s ease;">
+                        <div style="justify-content: center; display: flex; flex-direction: column; color: #2EB5FA; font-size: 16px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; line-height: 16px; word-wrap: break-word;">Skip</div>
+                    </button>
+                    <button onclick="nextOnboardingStep()" style="width: 159px; height: 48px; padding: 16px; background: #2EB5FA; border-radius: 24px; justify-content: center; align-items: center; gap: 10px; display: flex; border: none; cursor: pointer; transition: all 0.3s ease;">
+                        <div style="justify-content: center; display: flex; flex-direction: column; color: white; font-size: 16px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; line-height: 16px; word-wrap: break-word;">Next</div>
+                    </button>
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+    
+    <!-- 두 번째 온보딩 화면 -->
+    <div id="onboardingStep2" class="onboarding-step" style="width: 375px; height: 812px; position: relative; overflow: hidden; display: none;">
+        <!-- 메인 콘텐츠 컨테이너 -->
+        <div style="height: 702px; left: 20px; top: 61px; position: absolute; flex-direction: column; justify-content: flex-start; align-items: center; gap: 23px; display: inline-flex;">
+            
+            <!-- 메인 이미지 -->
+            <div style="width: 335px; height: 419px; position: relative; overflow: hidden; border-radius: 12px;">
+                <img src="./images/suumt-onboarding.png" alt="숨트 제품" style="width: 350px; height: 419px; left: -5px; top: 0px; position: absolute; object-fit: cover;" onerror="this.style.display='none';">
+            </div>
+            
+            <!-- 텍스트 및 버튼 영역 -->
+            <div style="flex-direction: column; justify-content: flex-start; align-items: center; gap: 40px; display: flex;">
+                
+                <!-- 텍스트와 인디케이터 -->
+                <div style="flex-direction: column; justify-content: flex-start; align-items: center; gap: 32px; display: flex;">
+                    
+                    <!-- 텍스트 영역 -->
+                    <div style="flex-direction: column; justify-content: flex-start; align-items: center; gap: 16px; display: flex;">
+                        <div style="width: 320px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #1E1E1E; font-size: 26px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; line-height: 30px; word-wrap: break-word;">숨트와 함께 시작하세요</div>
+                        <div style="width: 280px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #626262; font-size: 14px; font-family: 'Space Grotesk', sans-serif; font-weight: 400; line-height: 20px; word-wrap: break-word;">AI 숨트레이너와 함께<br>나만의 호흡운동을 시작해보세요</div>
+                    </div>
+                    
+                    <!-- 페이지 인디케이터 -->
+                    <div style="justify-content: flex-start; align-items: flex-start; gap: 4px; display: inline-flex;">
+                        <div style="width: 4.17px; height: 4px; opacity: 0.30; background: #3D3C3C; border-radius: 56px;"></div>
+                        <div style="width: 16.97px; height: 4px; background: #1E1E1E; border-radius: 56px;"></div>
+                    </div>
+                    
+                </div>
+                
+                <!-- 버튼 영역 -->
+                <div style="justify-content: flex-start; align-items: flex-start; gap: 16px; display: inline-flex;">
+                    <button onclick="skipOnboarding()" style="width: 160px; height: 48px; padding: 16px; border-radius: 24px; outline: 1px #2EB5FA solid; outline-offset: -1px; justify-content: center; align-items: center; gap: 10px; display: flex; background: transparent; border: none; cursor: pointer; transition: all 0.3s ease;">
+                        <div style="justify-content: center; display: flex; flex-direction: column; color: #2EB5FA; font-size: 16px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; line-height: 16px; word-wrap: break-word;">Skip</div>
+                    </button>
+                    <button onclick="skipOnboarding()" style="width: 159px; height: 48px; padding: 16px; background: #2EB5FA; border-radius: 24px; justify-content: center; align-items: center; gap: 10px; display: flex; border: none; cursor: pointer; transition: all 0.3s ease;">
+                        <div style="justify-content: center; display: flex; flex-direction: column; color: white; font-size: 16px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; line-height: 16px; word-wrap: break-word;">Start</div>
+                    </button>
+                </div>
+                
+            </div>
+            
+        </div>
+    </div>
+    
+</div>
+
+<style>
+@keyframes float {
+    0%, 100% { transform: translateY(0px) rotate(0deg); }
+    33% { transform: translateY(-20px) rotate(1deg); }
+    66% { transform: translateY(10px) rotate(-1deg); }
+}
+</style>
+
+    <!-- 🎯 커스텀 확인 모달 -->
+    <div id="confirmModal" class="modal-overlay">
+        <div class="modal">
+            <h3>트레이닝 중단</h3>
+            <p>정말 숨트레이닝을 중단하시겠습니까?</p>
+            <div class="modal-buttons">
+                <button class="modal-btn modal-btn-cancel" onclick="hideModal()">취소</button>
+                <button class="modal-btn modal-btn-confirm" onclick="confirmStop()">중단</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🎮 배지 획득 팝업 -->
+    <div id="badgePopup" class="badge-popup-overlay">
+        <div class="badge-popup">
+            <div class="badge-popup-icon" id="badgePopupIcon">🏆</div>
+            <h3>배지 획득!</h3>
+            <div class="badge-name" id="badgePopupName">첫 걸음</div>
+            <p id="badgePopupDescription">첫 번째 호흡 트레이닝을 완료하셨습니다!</p>
+            <button class="badge-popup-close" onclick="closeBadgePopup()">확인</button>
+        </div>
+    </div>
+
+    <div class="app-container">
+        <!-- 메인 화면 -->
+        <div id="mainScreen" class="screen active">
+            <!-- 메인 헤더 -->
+            <div class="main-header">
+                <div class="user-greeting">
+                    <div class="user-info">
+                        <div class="user-avatar">
+                            <img src="./images/suumt-logo.png" alt="숨트 로고" onerror="this.style.display='none'; this.parentNode.innerHTML='🫁';">
+                        </div>
+                        <div class="user-text">
+                            <h4>안녕하세요,</h4>
+                            <h3 id="userName">AI 숨트레이너</h3>
+                            <!-- 🔥 새로운 기능: 메인화면 실시간 현황 -->
+                            <div class="live-users-badge" id="mainLiveUsers">
+                                <div class="live-indicator"></div>
+                                <span id="mainLiveUsersText">오늘 247명 트레이닝 중</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 통계 섹션 -->
+            <div class="stats-section">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">
+                            <span class="section-icon">📊</span>
+                            <span>오늘의 기록</span>
+                        </h2>
+                        <div class="section-subtitle">오늘 하루 나의 호흡 트레이닝 현황</div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div class="stat-card-title">오늘 호흡</div>
+                            <div class="stat-card-icon">🫁</div>
+                        </div>
+                        <div class="stat-card-value">
+                            <div class="stat-number" id="totalBreaths">0</div>
+                            <div class="stat-unit">회</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div class="stat-card-title">오늘 완료</div>
+                            <div class="stat-card-icon">💪</div>
+                        </div>
+                        <div class="stat-card-value">
+                            <div class="stat-number" id="averageSets">0</div>
+                            <div class="stat-unit">세트</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div class="stat-card-title">연속 일수</div>
+                            <div class="stat-card-icon">🔥</div>
+                        </div>
+                        <div class="stat-card-value">
+                            <div class="stat-number" id="consecutiveDays">0</div>
+                            <div class="stat-unit">일</div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card">
+                        <div class="stat-card-header">
+                            <div class="stat-card-title">총 트레이닝</div>
+                            <div class="stat-card-icon">🏆</div>
+                        </div>
+                        <div class="stat-card-value">
+                            <div class="stat-number" id="totalExercises">0</div>
+                            <div class="stat-unit">회</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 운동 가이드 -->
+            <div class="guide-card">
+                <div class="guide-header">
+                    <div class="guide-title">📋 숨트 트레이닝 가이드</div>
+                </div>
+                
+                <div class="important-notice">
+                    <span class="important-icon">💡</span>
+                    <span class="important-text">호흡할 때는 의식적으로 힘을 주어 깊게 호흡하세요!</span>
+                </div>
+                
+                <div class="guide-step">숨트 기구의 다이얼을 돌려 저항 강도를 설정해주세요</div>
+                <div class="guide-step">설정한 저항 강도를 아래 화면에 똑같이 입력하세요</div>
+                <div class="guide-step">복식호흡으로 코가 아닌 입으로만 호흡하세요</div>
+            </div>
+
+            <!-- 저항 설정 -->
+            <div class="resistance-card">
+                <div class="resistance-header">
+                    <div class="resistance-title">🎯 저항 강도 설정</div>
+                </div>
+                
+                <div class="resistance-controls">
+                    <div class="resistance-control">
+                        <div class="resistance-label">들숨 (Inhale)</div>
+                        <div class="resistance-selector">
+                            <button class="resistance-btn" onclick="adjustResistance('inhale', -1)">−</button>
+                            <div class="resistance-value" id="inhaleLevel">1</div>
+                            <button class="resistance-btn" onclick="adjustResistance('inhale', 1)">+</button>
+                        </div>
+                        <div class="resistance-dots" id="inhaleScale">
+                            <div class="dot active"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
+
+                    <div class="resistance-control">
+                        <div class="resistance-label">날숨 (Exhale)</div>
+                        <div class="resistance-selector">
+                            <button class="resistance-btn" onclick="adjustResistance('exhale', -1)">−</button>
+                            <div class="resistance-value" id="exhaleLevel">1</div>
+                            <button class="resistance-btn" onclick="adjustResistance('exhale', 1)">+</button>
+                        </div>
+                        <div class="resistance-dots" id="exhaleScale">
+                            <div class="dot active"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="resistance-tip">
+                    💡 처음이시면 1단계 추천 • 적당히 힘든 강도가 최적이에요!
+                </div>
+            </div>
+
+            <!-- 차트 섹션 -->
+            <div class="chart-section">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">
+                            <span class="section-icon">📈</span>
+                            <span>주간 활동</span>
+                        </h2>
+                        <div class="section-subtitle" id="chartSubtitle">이번 주 트레이닝 성과를 한눈에</div>
+                    </div>
+                </div>
+
+                <div class="chart-container">
+                    <div class="chart-legend">완료한 세트 수 (일별)</div>
+                    <div class="chart-area">
+                        <div class="chart-y-axis">
+                            <div class="y-label">4</div>
+                            <div class="y-label">3</div>
+                            <div class="y-label">2</div>
+                            <div class="y-label">1</div>
+                            <div class="y-label">0</div>
+                        </div>
+                        <div class="chart-bars" id="chartBars">
+                            <div class="chart-bar" style="height: 0%" data-day="0"></div>
+                            <div class="chart-bar" style="height: 0%" data-day="1"></div>
+                            <div class="chart-bar" style="height: 0%" data-day="2"></div>
+                            <div class="chart-bar" style="height: 0%" data-day="3"></div>
+                            <div class="chart-bar" style="height: 0%" data-day="4"></div>
+                            <div class="chart-bar" style="height: 0%" data-day="5"></div>
+                            <div class="chart-bar" style="height: 0%" data-day="6"></div>
+                        </div>
+                    </div>
+                    <div class="chart-x-axis" id="chartXAxis">
+                        <div class="x-label">일</div>
+                        <div class="x-label">월</div>
+                        <div class="x-label">화</div>
+                        <div class="x-label">수</div>
+                        <div class="x-label">목</div>
+                        <div class="x-label">금</div>
+                        <div class="x-label">토</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 트레이닝 시작 -->
+            <div class="start-training-section">
+                <button class="start-button" onclick="startExercise()">
+                    <span>🚀</span>
+                    <span>트레이닝 시작</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- 운동 화면 -->
+        <div id="exerciseScreen" class="screen">
+            <div class="container">
+                <div id="countdownSection">
+                    <h2>트레이닝을 시작할게요</h2>
+                    <div class="countdown" id="countdown">3</div>
+                </div>
+
+                <div id="breathingSection" style="display: none;">
+                    <div class="breathing-circle" id="breathingCircle">
+                        <span id="circleText">준비</span>
+                    </div>
+                    
+                    <div class="progress-container">
+                        <div class="sets-progress">
+                            <div class="progress-label">세트 진행도</div>
+                            <div class="sets-indicators" id="setsIndicators">
+                                <div class="set-indicator"></div>
+                                <div class="set-indicator"></div>
+                            </div>
+                            <div class="progress-numbers" id="setNumbers">1 / 2 세트</div>
+                        </div>
+                        
+                        <div class="breaths-progress">
+                            <div class="progress-label">호흡 횟수</div>
+                            <div class="breaths-indicators" id="breathsIndicators">
+                                <!-- 10개의 호흡 점들이 JavaScript로 생성됨 -->
+                            </div>
+                            <div class="progress-numbers" id="breathNumbers">1 / 10 회</div>
+                        </div>
+                    </div>
+                    
+                    <div class="control-buttons">
+                        <button class="btn btn-secondary" onclick="pauseExercise()">일시정지</button>
+                        <button class="btn btn-secondary" onclick="showStopModal()">중단</button>
+                    </div>
+                </div>
+
+                <div id="restSection" style="display: none;">
+                    <h2>휴식 시간</h2>
+                    <div class="countdown" id="restCountdown">120</div>
+                    <p>다음 세트까지 호흡을 정리하세요</p>
+                    <div class="progress-numbers" id="restProgressText">1세트 완료</div>
+                    
+                    <div class="control-buttons" id="restControlButtons" style="display: none;">
+                        <button class="btn btn-success" onclick="skipRest()">휴식 건너뛰기</button>
+                        <button class="btn btn-secondary" onclick="showStopModal()">중단</button>
+                    </div>
+                </div>
+
+                <!-- 🎮 퀴즈 제안 화면 -->
+                <div id="quizOfferSection" style="display: none;">
+                    <h2>휴식 시간</h2>
+                    <div class="countdown" id="quizOfferCountdown">120</div>
+                    
+                    <div class="quiz-offer-card">
+                        <div class="quiz-offer-title">간단한 퀴즈 풀까요?</div>
+                        <div class="quiz-offer-subtitle" id="quizOfferSubtitle">2문제만! 특별 혜택도 받으세요</div>
+                        
+                        <div class="quiz-offer-buttons">
+                            <button class="quiz-offer-primary" onclick="startQuiz()" id="quizOfferButton">
+                                퀴즈 풀고 15% 할인받기
+                            </button>
+                            <button class="quiz-offer-secondary" onclick="chooseRestOnly()">
+                                휴식만 하기
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 🧠 퀴즈 진행 화면 -->
+                <div id="quizProgressSection" style="display: none;">
+                    <div class="quiz-progress-header">
+                        <h2>퀴즈 타임!</h2>
+                        <div class="countdown" id="quizCountdown">120</div>
+                        
+                        <div class="quiz-progress-bar">
+                            <div class="quiz-progress-fill" id="quizProgressFill" style="width: 50%"></div>
+                        </div>
+                        <div class="quiz-progress-text" id="quizProgressText">문제 1 / 2</div>
+                    </div>
+                    
+                    <div class="quiz-question-card">
+                        <div class="quiz-question" id="quizQuestion">문제가 여기에 표시됩니다</div>
+                        <div class="quiz-options" id="quizOptions">
+                            <!-- 선택지들이 JavaScript로 생성됨 -->
+                        </div>
+                        <div class="quiz-explanation" id="quizExplanation" style="display: none;">
+                            설명이 여기에 표시됩니다
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 🎁 퀴즈 보상 화면 -->
+                <div id="quizRewardSection" style="display: none;">
+                    <h2>휴식 시간</h2>
+                    <div class="countdown" id="quizRewardCountdown">120</div>
+                    
+                    <div class="quiz-reward-card">
+                        <div class="quiz-reward-title">🎉 퀴즈 완료!</div>
+                        <div class="quiz-reward-subtitle" id="quizRewardSubtitle">2문제 모두 정답! 특별 혜택을 받으세요</div>
+                        
+                        <div class="quiz-product-showcase">
+                            <div class="quiz-product-image">
+                                <img src="./images/suumt-product.png" alt="숨트 제품" id="rewardProductImage" 
+                                     onerror="this.style.display='none'; this.parentNode.innerHTML='🎁';">
+                            </div>
+                            <div class="quiz-product-name" id="rewardProductName">숨트 호흡운동기구</div>
+                            <div class="quiz-product-description" id="rewardProductDescription">앱 사용자만을 위한 특별가</div>
+                            <div class="quiz-product-price-line">
+                                <span class="quiz-original-price" id="rewardOriginalPrice">89,000원</span>
+                                <span class="quiz-price-arrow">→</span>
+                                <span class="quiz-discount-price" id="rewardDiscountPrice">75,650원</span>
+                                <span class="quiz-discount-badge" id="rewardDiscountBadge">15%↓</span>
+                            </div>
+                        </div>
+                        
+                        <div class="quiz-dual-buttons">
+                            <button class="quiz-check-button" onclick="checkSpecialOffer()">
+                                👀 특가 확인하기
+                            </button>
+                            <button class="quiz-continue-button" onclick="continueToNextSet()">
+                                💪 다음 세트 시작
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 피드백 페이지 -->
+        <div id="feedbackScreen" class="screen">
+            <div class="container">
+                <div class="celebration">🤖</div>
+                <h2 id="feedbackTitle">지금 호흡하는 느낌이 어떠세요?</h2>
+                <p class="subtitle" id="feedbackDescription">방금 완료한 트레이닝의 강도는 어떠셨나요?</p>
+                
+                <div class="feedback-options">
+                    <button class="feedback-option easy" onclick="selectFeedback('easy')">
+                        <div class="feedback-emoji">😌</div>
+                        <div class="feedback-text">너무 편해요</div>
+                        <div class="feedback-desc">더 강한 강도로 도전할 수 있어요</div>
+                    </button>
+                    
+                    <button class="feedback-option perfect" onclick="selectFeedback('perfect')">
+                        <div class="feedback-emoji">💪</div>
+                        <div class="feedback-text">딱 좋아요</div>
+                        <div class="feedback-desc">적당히 힘들면서 완주할 수 있었어요</div>
+                    </button>
+                    
+                    <button class="feedback-option hard" onclick="selectFeedback('hard')">
+                        <div class="feedback-emoji">😤</div>
+                        <div class="feedback-text">너무 힘들어요</div>
+                        <div class="feedback-desc">강도를 낮춰서 안전하게 운동하고 싶어요</div>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 결과 화면 -->
+        <div id="resultScreen" class="screen">
+            <div class="container">
+                <div class="result-header">
+                    <div class="celebration">🎉</div>
+                    <h2>트레이닝 완료!</h2>
+                </div>
+                
+                <div class="result-stats-grid">
+                    <div class="result-stat-card">
+                        <div class="result-stat-header">
+                            <span class="result-stat-title">저항 강도</span>
+                            <span class="result-stat-icon">🎯</span>
+                        </div>
+                        <div class="result-stat-value" id="resistanceInfo">1/1</div>
+                    </div>
+                    
+                    <div class="result-stat-card">
+                        <div class="result-stat-header">
+                            <span class="result-stat-title">총 시간</span>
+                            <span class="result-stat-icon">⏱️</span>
+                        </div>
+                        <div class="result-stat-value" id="totalTime">0분</div>
+                    </div>
+                    
+                    <div class="result-stat-card">
+                        <div class="result-stat-header">
+                            <span class="result-stat-title">완료 세트</span>
+                            <span class="result-stat-icon">✅</span>
+                        </div>
+                        <div class="result-stat-value" id="completedSets">0/2</div>
+                    </div>
+                    
+                    <div class="result-stat-card">
+                        <div class="result-stat-header">
+                            <span class="result-stat-title">총 호흡횟수</span>
+                            <span class="result-stat-icon">🫁</span>
+                        </div>
+                        <div class="result-stat-value" id="totalBreathsResult">0회</div>
+                    </div>
+                </div>
+
+                <!-- 🎮 배지 시스템 -->
+                <div class="badges-system">
+                    <div class="badges-header">
+                        <span class="section-icon">🏆</span>
+                        <span class="badges-title">배지 컬렉션</span>
+                    </div>
+                    <div class="badges-progress" id="badgesProgress">수집한 배지: 0/15</div>
+                    <div class="badges-grid" id="badgesGrid">
+                        <!-- 배지들이 JavaScript로 생성됨 -->
+                    </div>
+                </div>
+
+                <!-- 🔥 새로운 기능: 사회적 증명 섹션 -->
+                <div class="social-proof-section">
+                    <div class="social-proof-card">
+                        <div class="social-proof-header">
+                            <span class="section-icon">👥</span>
+                            <span class="social-proof-title">함께하는 숨트 커뮤니티</span>
+                        </div>
+                        
+                        <div class="live-stats">
+                            <div class="live-stat">
+                                <div class="live-stat-number" id="liveUsersCount">1,247</div>
+                                <div class="live-stat-label">오늘 활동 중</div>
+                            </div>
+                            <div class="live-stat">
+                                <div class="live-stat-number" id="totalUsersCount">12,543</div>
+                                <div class="live-stat-label">전체 사용자</div>
+                            </div>
+                        </div>
+                        
+                        <div class="reviews-carousel">
+                            <div class="reviews-slider" id="reviewsSlider">
+                                <!-- 리뷰 카드들이 JavaScript로 생성됨 -->
+                            </div>
+                            <div class="carousel-dots" id="carouselDots">
+                                <!-- 점들이 JavaScript로 생성됨 -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="achievementBadges"></div>
+
+                <div class="result-content">
+                    <div class="result-section">
+                        <h4>💪 저항 강도 분석</h4>
+                        <p id="intensityAdvice">강도 조절 분석을 진행하고 있습니다...</p>
+                    </div>
+
+                    <div class="result-section">
+                        <h4>🏆 AI 숨트레이너 종합평가</h4>
+                        <p id="comprehensiveAdvice">AI 숨트레이너가 당신의 트레이닝을 분석하고 있습니다...</p>
+                    </div>
+                </div>
+
+                <div class="control-buttons">
+                    <button class="btn btn-success" onclick="startExercise()">다시 트레이닝하기</button>
+                    <button class="btn" onclick="goToMain()">메인으로</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 🎬 온보딩 네비게이션 함수들
+function nextOnboardingStep() {
+    document.getElementById('onboardingStep1').style.display = 'none';
+    document.getElementById('onboardingStep2').style.display = 'flex';
+    
+    gtag('event', 'onboarding_next', {
+        step: 1
+    });
+}
+
+function skipOnboarding() {
+    hideIntro();
+    
+    gtag('event', 'onboarding_skip', {
+        step: document.getElementById('onboardingStep1').style.display === 'none' ? 2 : 1
+    });
+}
+
+// 🔥 새로운 기능: 스와이프 네비게이션
+let touchStartX = 0;
+let touchEndX = 0;
+let isOnboarding = true;
+
+function handleSwipeGesture() {
+    const swipeThreshold = 50; // 최소 스와이프 거리 (픽셀)
+    const swipeDistance = touchEndX - touchStartX;
+    
+    // 왼쪽 스와이프 (다음으로)
+    if (swipeDistance < -swipeThreshold) {
+        const step1 = document.getElementById('onboardingStep1');
+        const step2 = document.getElementById('onboardingStep2');
+        
+        if (step1 && step1.style.display !== 'none') {
+            // 첫 번째 화면 → 두 번째 화면
+            nextOnboardingStep();
+            
+            gtag('event', 'onboarding_swipe', {
+                action: 'next',
+                step: 1
+            });
+        } else if (step2 && step2.style.display !== 'none') {
+            // 두 번째 화면 → 메인 화면
+            skipOnboarding();
+            
+            gtag('event', 'onboarding_swipe', {
+                action: 'finish',
+                step: 2
+            });
+        }
+    }
+    
+    // 오른쪽 스와이프 (이전으로)
+    else if (swipeDistance > swipeThreshold) {
+        const step2 = document.getElementById('onboardingStep2');
+        
+        if (step2 && step2.style.display !== 'none') {
+            // 두 번째 화면 → 첫 번째 화면
+            document.getElementById('onboardingStep2').style.display = 'none';
+            document.getElementById('onboardingStep1').style.display = 'flex';
+            
+            gtag('event', 'onboarding_swipe', {
+                action: 'back',
+                step: 2
+            });
+        }
+    }
+}
+
+// 온보딩 화면에 터치 이벤트 리스너 추가
+function initializeOnboardingSwipe() {
+    const introScreen = document.getElementById('introScreen');
+    
+    if (introScreen) {
+        // 터치 시작
+        introScreen.addEventListener('touchstart', (e) => {
+            if (isOnboarding) {
+                touchStartX = e.changedTouches[0].screenX;
+            }
+        }, { passive: true });
+        
+        // 터치 종료
+        introScreen.addEventListener('touchend', (e) => {
+            if (isOnboarding) {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipeGesture();
+            }
+        }, { passive: true });
+        
+        // 마우스 지원 (데스크톱 테스트용)
+        let mouseStartX = 0;
+        
+        introScreen.addEventListener('mousedown', (e) => {
+            if (isOnboarding) {
+                mouseStartX = e.clientX;
+            }
+        });
+        
+        introScreen.addEventListener('mouseup', (e) => {
+            if (isOnboarding) {
+                touchStartX = mouseStartX;
+                touchEndX = e.clientX;
+                handleSwipeGesture();
+            }
+        });
+    }
+}
+
+// hideIntro 함수 수정 (온보딩 종료 시 스와이프 비활성화)
+function hideIntro() {
+    isOnboarding = false; // 스와이프 비활성화
+    
+    const introScreen = document.getElementById('introScreen');
+    introScreen.classList.add('hidden');
+    setTimeout(() => {
+        introScreen.style.display = 'none';
+    }, 800);
+}
+        
+        // Apps Script URL (AI 조언만 사용)
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8iRnFGheIKcPUBkmSqOUAJ4_jPhSFRR593Ukfk1j6Da1oIPOkUlAboDdqr-CA2u29rw/exec';
+
+        // 🎮 퀴즈 시스템 설정 (쉬운 관리를 위한 구역)
+        const QUIZ_CONFIG = {
+            // 🛒 쇼핑몰 설정 (나중에 쉽게 변경)
+            SHOP_URL: "https://example-shop.com", // 추후 실제 URL로 변경 예정
+            SPECIAL_PRODUCT_PATH: "/product/detail.html?product_no=123",
+            
+            // 🎁 상품 설정 (2개 상품 로테이션)
+            PRODUCTS: [
+                {
+                    // 첫 번째 상품: 숨트 호흡운동기구
+                    id: 'suumt_device',
+                    name: "숨트 호흡운동기구",
+                    originalPrice: "65,900원",
+                    discountPrice: "55,900원",
+                    discountPercent: 15,
+                    image: "./images/suumt-product.png",
+                    description: "앱 사용자만을 위한 특별가",
+                    specialPath: "/product/detail.html?product_no=123"
+                },
+                {
+                    // 두 번째 상품: 다른 주력 상품
+                    id: 'suumt_accessory',
+                    name: "숨실틈 디퓨저 세트",
+                    originalPrice: "29,500원", 
+                    discountPrice: "24,900원",
+                    discountPercent: 15,
+                    image: "./images/suumt-accessory.png",
+                    description: "앱 사용자만을 위한 특별가",
+                    specialPath: "/product/detail.html?product_no=456"
+                }
+            ],
+            
+            // 🔧 퀴즈 활성화 설정
+            QUIZ_ENABLED: true,
+            QUIZ_SKIP_ALLOWED: true,
+            OFFER_DELAY: 5000 // 5초 후 퀴즈 제안
+        };
+
+        // 🧠 퀴즈 문제 풀 (6문제 중 2문제 랜덤 선택)
+        const QUIZ_QUESTIONS = [
+            {
+                question: "호흡근 운동을 하면 어떤 변화가 생길까요?",
+                options: ["숨이 더 차진다", "더 깊게 숨쉴 수 있다", "변화가 없다"],
+                correct: 1,
+                explanation: "호흡근이 강해지면 폐활량이 늘어나고 더 깊게 숨쉴 수 있어요!"
+            },
+            {
+                question: "운동할 때 올바른 호흡법은?",
+                options: ["숨을 참으며 운동", "일정한 리듬으로 호흡", "무작정 빠르게 호흡"],
+                correct: 1,
+                explanation: "규칙적인 호흡이 운동 효과를 극대화하고 부상을 예방해요!"
+            },
+            {
+                question: "스트레스 해소에 좋은 호흡법은?",
+                options: ["4초 들이쉬고 4초 내쉬기", "빠르게 얕게 호흡", "호흡 참기"],
+                correct: 0,
+                explanation: "깊고 천천히 하는 호흡이 마음을 진정시키고 스트레스를 줄여줘요!"
+            },
+            {
+                question: "호흡근을 강화하면 얻는 가장 큰 효과는?",
+                options: ["체중 감량", "지구력 향상", "근육량 증가"],
+                correct: 1,
+                explanation: "호흡근 강화로 산소 공급이 원활해져 전체적인 지구력이 향상돼요!"
+            },
+            {
+                question: "일상에서 호흡을 의식하면 좋은 점은?",
+                options: ["집중력 향상", "소화 촉진", "시력 개선"],
+                correct: 0,
+                explanation: "의식적인 호흡은 뇌에 산소를 충분히 공급해 집중력을 높여줘요!"
+            },
+            {
+                question: "깊은 호흡의 가장 중요한 포인트는?",
+                options: ["빠른 속도", "배까지 내려가는 느낌", "소리 내기"],
+                correct: 1,
+                explanation: "배까지 공기가 내려가는 복식호흡이 가장 효과적이에요!"
+            }
+        ];
+
+        // 🎮 퀴즈 시스템 전역 변수
+        let currentQuizQuestion = 0;
+        let quizCorrectAnswers = 0;
+        let quizStartTime = null;
+        let quizOfferTimer = null;
+        let selectedQuestions = []; // 선택된 2문제
+        let solvedQuestions = []; // 지금까지 푼 문제들 (배지용)
+        let globalRestTimer = null; // 🔧 전역 휴식 타이머
+        let globalRestTime = 120; // 🔧 전역 휴식 시간
+
+        // 전역 변수
+        let currentSet = 1;
+        let currentBreath = 1;
+        let exerciseStartTime;
+        let breathingTimer;
+        let restTimer;
+        let isPaused = false;
+        let isAborted = false;
+        let breathingPhase = 'inhale';
+        
+        let resistanceSettings = {
+            inhale: 1,
+            exhale: 1
+        };
+        
+        let userFeedback = null;
+
+        // 🔥 새로운 기능: 사회적 증명 데이터
+        const SOCIAL_PROOF_REVIEWS = [
+            {
+                text: "숨트로 폐활량이 정말 늘었어요! 계단 오를 때 숨이 덜 차요 👍",
+                author: "김상우",
+                rating: "⭐⭐⭐⭐⭐",
+                avatar: "김"
+            },
+            {
+                text: "운동 후 호흡이 훨씬 편해졌습니다. 꾸준히 하니까 확실히 달라져요!",
+                author: "박영희",
+                rating: "⭐⭐⭐⭐⭐",
+                avatar: "박"
+            },
+            {
+                text: "처음엔 힘들었는데 이제 2단계까지 할 수 있어요. 성취감 최고!",
+                author: "이민수",
+                rating: "⭐⭐⭐⭐⭐",
+                avatar: "이"
+            },
+            {
+                text: "숨트 앱 덕분에 매일 꾸준히 하게 되네요. UI도 예쁘고 재미있어요!",
+                author: "정하나",
+                rating: "⭐⭐⭐⭐⭐",
+                avatar: "정"
+            },
+            {
+                text: "호흡근 운동이 이렇게 중요한 줄 몰랐어요. 숨트 강력 추천합니다!",
+                author: "최준호",
+                rating: "⭐⭐⭐⭐⭐",
+                avatar: "최"
+            }
+        ];
+
+        let reviewCarouselInterval;
+        let currentReviewIndex = 0;
+
+        // 🔥 새로운 기능: 스마트 실시간 데이터 생성
+        function generateSmartLiveData() {
+            const now = getCurrentUserTime();
+            const hour = now.getHours();
+            const day = now.getDay(); // 0=일요일
+            const baseDate = new Date('2024-01-01'); // 앱 시작일
+            const daysSinceStart = Math.floor((now - baseDate) / (1000 * 60 * 60 * 24));
+            
+            // 기본 사용자 수 (시간이 지날수록 증가)
+            let baseUsers = 8500 + (daysSinceStart * 15); // 하루에 15명씩 증가
+            
+            // 시간대별 활동 패턴
+            let hourMultiplier = 1.0;
+            if (hour >= 6 && hour <= 9) hourMultiplier = 1.8; // 아침 피크
+            else if (hour >= 12 && hour <= 14) hourMultiplier = 1.3; // 점심 시간
+            else if (hour >= 18 && hour <= 22) hourMultiplier = 2.2; // 저녁 피크
+            else if (hour >= 23 || hour <= 5) hourMultiplier = 0.4; // 새벽
+            
+            // 요일별 패턴
+            let dayMultiplier = 1.0;
+            if (day === 0 || day === 6) dayMultiplier = 0.7; // 주말은 70%
+            else if (day >= 1 && day <= 5) dayMultiplier = 1.0; // 평일
+            
+            // 랜덤 변동 (±10%)
+            const randomFactor = 0.9 + (Math.random() * 0.2);
+            
+            const todayActiveUsers = Math.floor(baseUsers * hourMultiplier * dayMultiplier * randomFactor);
+            const totalUsers = Math.floor(baseUsers * 1.5); // 전체 사용자는 더 많음
+            
+            return {
+                todayActive: Math.max(200, todayActiveUsers), // 최소 200명
+                totalUsers: Math.max(8000, totalUsers), // 최소 8000명
+                isGrowing: daysSinceStart > 0
+            };
+        }
+
+        // 🔥 새로운 기능: 사회적 증명 UI 업데이트
+        function updateSocialProofData() {
+            const liveData = generateSmartLiveData();
+            
+            // 메인화면 실시간 현황 업데이트
+            const mainLiveUsersText = document.getElementById('mainLiveUsersText');
+            if (mainLiveUsersText) {
+                mainLiveUsersText.textContent = `오늘 ${liveData.todayActive.toLocaleString()}명 트레이닝 중`;
+            }
+            
+            // 결과화면 상세 현황 업데이트
+            const liveUsersCount = document.getElementById('liveUsersCount');
+            const totalUsersCount = document.getElementById('totalUsersCount');
+            
+            if (liveUsersCount) {
+                liveUsersCount.textContent = liveData.todayActive.toLocaleString();
+            }
+            if (totalUsersCount) {
+                totalUsersCount.textContent = liveData.totalUsers.toLocaleString();
+            }
+        }
+
+        // 🔥 새로운 기능: 리뷰 슬라이더 생성
+        function initReviewsCarousel() {
+            const reviewsSlider = document.getElementById('reviewsSlider');
+            const carouselDots = document.getElementById('carouselDots');
+            
+            if (!reviewsSlider || !carouselDots) return;
+            
+            // 리뷰 카드들 생성
+            reviewsSlider.innerHTML = '';
+            SOCIAL_PROOF_REVIEWS.forEach((review, index) => {
+                const reviewCard = document.createElement('div');
+                reviewCard.className = 'review-card';
+                reviewCard.innerHTML = `
+                    <div class="review-text">"${review.text}"</div>
+                    <div class="review-author">
+                        <div class="review-avatar">${review.avatar}</div>
+                        <div class="review-info">
+                            <div class="review-name">${review.author}</div>
+                            <div class="review-rating">${review.rating}</div>
+                        </div>
+                    </div>
+                `;
+                reviewsSlider.appendChild(reviewCard);
+            });
+            
+            // 캐러셀 점들 생성
+            carouselDots.innerHTML = '';
+            SOCIAL_PROOF_REVIEWS.forEach((_, index) => {
+                const dot = document.createElement('div');
+                dot.className = `carousel-dot ${index === 0 ? 'active' : ''}`;
+                dot.addEventListener('click', () => goToReview(index));
+                carouselDots.appendChild(dot);
+            });
+            
+            // 자동 슬라이드 시작
+            startReviewCarousel();
+            
+            // GA 이벤트: 사회적 증명 노출
+            gtag('event', 'social_proof_impression', {
+                total_reviews: SOCIAL_PROOF_REVIEWS.length,
+                current_live_users: generateSmartLiveData().todayActive
+            });
+        }
+
+        // 🔥 새로운 기능: 리뷰 캐러셀 자동 재생
+        function startReviewCarousel() {
+            if (reviewCarouselInterval) {
+                clearInterval(reviewCarouselInterval);
+            }
+            
+            reviewCarouselInterval = setInterval(() => {
+                currentReviewIndex = (currentReviewIndex + 1) % SOCIAL_PROOF_REVIEWS.length;
+                goToReview(currentReviewIndex);
+            }, 4000); // 4초마다 변경
+        }
+
+        // 🔥 새로운 기능: 특정 리뷰로 이동
+        function goToReview(index) {
+            const reviewsSlider = document.getElementById('reviewsSlider');
+            const carouselDots = document.getElementById('carouselDots');
+            
+            if (!reviewsSlider || !carouselDots) return;
+            
+            currentReviewIndex = index;
+            
+            // 슬라이더 이동
+            reviewsSlider.style.transform = `translateX(-${index * 100}%)`;
+            
+            // 점 활성화 상태 업데이트
+            carouselDots.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+                if (i === index) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+            
+            // GA 이벤트: 리뷰 조회
+            gtag('event', 'review_view', {
+                review_index: index,
+                review_author: SOCIAL_PROOF_REVIEWS[index].author
+            });
+        }
+
+        // 🎮 배지 시스템 데이터
+        const BADGES_CONFIG = [
+            {
+                id: 'first_step',
+                name: '첫 걸음',
+                icon: '🌱',
+                description: '첫 번째 호흡 트레이닝 완료',
+                hint: '첫 트레이닝',
+                condition: (stats) => stats.totalExercises >= 1
+            },
+            {
+                id: 'daily_warrior',
+                name: '일일 전사',
+                icon: '⚡',
+                description: '하루에 3번 이상 트레이닝 완료',
+                hint: '하루 3회',
+                condition: (stats) => getTodayExerciseCount() >= 3
+            },
+            {
+                id: 'week_master',
+                name: '주간 마스터',
+                icon: '🔥',
+                description: '7일 연속 트레이닝 완료',
+                hint: '7일 연속',
+                condition: (stats) => stats.consecutiveDays >= 7
+            },
+            {
+                id: 'breath_collector',
+                name: '호흡 수집가',
+                icon: '🫁',
+                description: '총 1000회 호흡 달성',
+                hint: '총 1000회',
+                condition: (stats) => stats.totalBreaths >= 1000
+            },
+            {
+                id: 'endurance_king',
+                name: '지구력 왕',
+                icon: '👑',
+                description: '50회 트레이닝 완주',
+                hint: '50회 완주',
+                condition: (stats) => stats.totalExercises >= 50
+            },
+            {
+                id: 'high_intensity',
+                name: '고강도 도전자',
+                icon: '💪',
+                description: '들숨/날숨 모두 4단계 이상 달성',
+                hint: '고강도 달성',
+                condition: (stats) => getMaxIntensityEver().inhale >= 4 && getMaxIntensityEver().exhale >= 4
+            },
+            {
+                id: 'perfect_month',
+                name: '완벽한 달',
+                icon: '🌟',
+                description: '30일 연속 트레이닝 완료',
+                hint: '30일 연속',
+                condition: (stats) => stats.consecutiveDays >= 30
+            },
+            {
+                id: 'speed_demon',
+                name: '스피드 데몬',
+                icon: '🚀',
+                description: '휴식시간 없이 2세트 연속 완주',
+                hint: '휴식 스킵',
+                condition: (stats) => getSkippedRestCount() >= 1 && stats.totalExercises >= 2
+            },
+            {
+                id: 'consistency_hero',
+                name: '꾸준함의 영웅',
+                icon: '🎯',
+                description: '100회 트레이닝 완주',
+                hint: '100회 완주',
+                condition: (stats) => stats.totalExercises >= 100
+            },
+            {
+                id: 'breath_master',
+                name: '호흡 마스터',
+                icon: '🧘',
+                description: '총 5000회 호흡 달성',
+                hint: '총 5000회',
+                condition: (stats) => stats.totalBreaths >= 5000
+            },
+            {
+                id: 'legend',
+                name: '레전드',
+                icon: '🏆',
+                description: '모든 조건을 달성한 진정한 마스터',
+                hint: '??? 미스터리',
+                condition: (stats) => {
+                    const earnedBadges = getEarnedBadges();
+                    return earnedBadges.length >= 14; // 자기 자신 제외한 모든 배지
+                }
+            },
+            {
+                id: 'quiz_explorer',
+                name: '퀴즈 탐험가',
+                icon: '🔍',
+                description: '퀴즈 2문제를 모두 정답으로 맞혔어요',
+                hint: '퀴즈 2문제',
+                condition: (stats) => getQuizPerfectCount() >= 1
+            },
+            {
+                id: 'quiz_perfectionist',
+                name: '퀴즈 완벽주의자',
+                icon: '🎯',
+                description: '3번 연속으로 퀴즈를 완벽하게 풀었어요',
+                hint: '3번 연속 완벽',
+                condition: (stats) => getConsecutivePerfectCount() >= 3
+            },
+            {
+                id: 'quiz_master',
+                name: '퀴즈 마스터',
+                icon: '🧠',
+                description: '6가지 퀴즈 문제를 모두 경험했어요',
+                hint: '모든 문제',
+                condition: (stats) => getSolvedQuestionsCount() >= 6
+            },
+            {
+                id: 'early_bird',
+                name: '일찍 일어나는 새',
+                icon: '🌅',
+                description: '오전 6시 이전에 트레이닝 완료',
+                hint: '새벽 운동',
+                condition: (stats) => getEarlyMorningCount() >= 1
+            }
+        ];
+
+        // 🕐 사용자 위치 기반 시간대 자동 설정
+        function getUserTimezone() {
+            return Intl.DateTimeFormat().resolvedOptions().timeZone;
+        }
+
+        function getCurrentUserTime() {
+            return new Date();
+        }
+
+        function formatDateForUser(date) {
+            return date.toLocaleDateString('ko-KR', {
+                weekday: 'short',
+                month: 'numeric',
+                day: 'numeric',
+                timeZone: getUserTimezone()
+            });
+        }
+
+        function getWeekStartDate() {
+            const now = getCurrentUserTime();
+            const dayOfWeek = now.getDay(); // 0 = 일요일
+            const startDate = new Date(now);
+            startDate.setDate(now.getDate() - dayOfWeek);
+            startDate.setHours(0, 0, 0, 0);
+            return startDate;
+        }
+
+        function getWeekEndDate() {
+            const startDate = getWeekStartDate();
+            const endDate = new Date(startDate);
+            endDate.setDate(startDate.getDate() + 6);
+            endDate.setHours(23, 59, 59, 999);
+            return endDate;
+        }
+
+        function isDateInCurrentWeek(date) {
+            const checkDate = new Date(date);
+            const weekStart = getWeekStartDate();
+            const weekEnd = getWeekEndDate();
+            return checkDate >= weekStart && checkDate <= weekEnd;
+        }
+
+        // 차트 데이터 업데이트 (개선된 주간 구분 + 동적 스케일링)
+        function updateChart() {
+            const history = getExerciseHistory();
+            const chartBars = document.getElementById('chartBars');
+            const chartXAxis = document.getElementById('chartXAxis');
+            const chartSubtitle = document.getElementById('chartSubtitle');
+            const chartYAxis = document.querySelector('.chart-y-axis');
+            const bars = chartBars.querySelectorAll('.chart-bar');
+            
+            // 현재 주의 시작일 계산
+            const weekStart = getWeekStartDate();
+            const weekDates = Array.from({length: 7}, (_, i) => {
+                const date = new Date(weekStart);
+                date.setDate(weekStart.getDate() + i);
+                return date;
+            });
+
+            // 차트 하단 요일 업데이트
+            const dayLabels = ['일', '월', '화', '수', '목', '금', '토'];
+            chartXAxis.querySelectorAll('.x-label').forEach((label, index) => {
+                const date = weekDates[index];
+                const dayName = dayLabels[index];
+                const isToday = date.toDateString() === getCurrentUserTime().toDateString();
+                
+                label.textContent = dayName;
+                if (isToday) {
+                    label.style.fontWeight = 'bold';
+                    label.style.color = '#667eea';
+                } else {
+                    label.style.fontWeight = 'normal';
+                    label.style.color = '#666';
+                }
+            });
+
+            // 주간 제목 업데이트
+            const weekStartStr = formatDateForUser(weekStart);
+            const weekEndStr = formatDateForUser(weekDates[6]);
+            chartSubtitle.textContent = `${weekStartStr} ~ ${weekEndStr} 트레이닝 성과`;
+
+            // 🔧 각 날짜별 완료 세트 수 계산
+            const dailySets = weekDates.map(targetDate => {
+                const dayData = history.filter(record => {
+                    const recordDate = new Date(record.date);
+                    return recordDate.toDateString() === targetDate.toDateString();
+                });
+                return dayData.reduce((sum, record) => sum + record.completedSets, 0);
+            });
+
+            // 🎯 동적 Y축 스케일 계산
+            const maxSets = Math.max(...dailySets, 4); // 최소 4까지는 표시
+            const yAxisMax = maxSets <= 4 ? 4 : Math.ceil(maxSets / 2) * 2; // 짝수로 올림
+            const yAxisSteps = yAxisMax <= 4 ? [4, 3, 2, 1, 0] : 
+                              yAxisMax <= 6 ? [6, 4, 2, 0] : 
+                              yAxisMax <= 8 ? [8, 6, 4, 2, 0] : 
+                              [yAxisMax, Math.floor(yAxisMax * 0.75), Math.floor(yAxisMax * 0.5), Math.floor(yAxisMax * 0.25), 0];
+
+            // Y축 라벨 업데이트
+            const yLabels = chartYAxis.querySelectorAll('.y-label');
+            yLabels.forEach((label, index) => {
+                if (index < yAxisSteps.length) {
+                    label.textContent = yAxisSteps[index];
+                    label.style.display = 'block';
+                } else {
+                    label.style.display = 'none';
+                }
+            });
+
+            // 막대 그래프 업데이트
+            bars.forEach((bar, index) => {
+                const totalSets = dailySets[index];
+                const height = Math.min(100, (totalSets / yAxisMax) * 100);
+                
+                bar.style.height = `${height}%`;
+                
+                // 기본 클래스 제거
+                bar.classList.remove('highlight', 'super-achiever');
+                
+                // 데이터에 따른 스타일 적용
+                if (totalSets > 0) {
+                    if (totalSets > 4) {
+                        // 🌟 4세트 초과 시 특별한 스타일
+                        bar.classList.add('super-achiever');
+                        bar.innerHTML = `<div class="achievement-crown">👑</div>`;
+                    } else {
+                        bar.classList.add('highlight');
+                        bar.innerHTML = '';
+                    }
+                } else {
+                    bar.innerHTML = '';
+                }
+
+                // 툴팁 업데이트
+                const dateStr = formatDateForUser(weekDates[index]);
+                if (totalSets > 4) {
+                    bar.title = `${dateStr}: ${totalSets}세트 완료 🌟 수퍼 달성!`;
+                } else {
+                    bar.title = `${dateStr}: ${totalSets}세트 완료`;
+                }
+            });
+        }
+
+        // 🎮 배지 시스템 헬퍼 함수들
+        function getTodayExerciseCount() {
+            const history = getExerciseHistory();
+            const today = getCurrentUserTime().toDateString();
+            return history.filter(record => {
+                const recordDate = new Date(record.date);
+                return recordDate.toDateString() === today;
+            }).length;
+        }
+
+        function getMaxIntensityEver() {
+            const history = getExerciseHistory();
+            let maxInhale = 1;
+            let maxExhale = 1;
+            
+            history.forEach(record => {
+                if (record.resistanceSettings) {
+                    maxInhale = Math.max(maxInhale, record.resistanceSettings.inhale || 1);
+                    maxExhale = Math.max(maxExhale, record.resistanceSettings.exhale || 1);
+                }
+            });
+            
+            return { inhale: maxInhale, exhale: maxExhale };
+        }
+
+        function getSkippedRestCount() {
+            return parseInt(localStorage.getItem('skippedRestCount') || '0');
+        }
+
+        function incrementSkippedRestCount() {
+            const count = getSkippedRestCount() + 1;
+            localStorage.setItem('skippedRestCount', count.toString());
+        }
+
+        function getEarlyMorningCount() {
+            const history = getExerciseHistory();
+            return history.filter(record => {
+                const recordDate = new Date(record.date);
+                const hour = recordDate.getHours();
+                return hour < 6;
+            }).length;
+        }
+
+        // 🎮 새로운 배지 관련 헬퍼 함수들
+        function getQuizPerfectCount() {
+            return parseInt(localStorage.getItem('quizPerfectCount') || '0');
+        }
+
+        function incrementQuizPerfectCount() {
+            const count = getQuizPerfectCount() + 1;
+            localStorage.setItem('quizPerfectCount', count.toString());
+        }
+
+        function getConsecutivePerfectCount() {
+            return parseInt(localStorage.getItem('consecutivePerfectCount') || '0');
+        }
+
+        function updateConsecutivePerfectCount(isPerfect) {
+            if (isPerfect) {
+                const count = getConsecutivePerfectCount() + 1;
+                localStorage.setItem('consecutivePerfectCount', count.toString());
+            } else {
+                localStorage.setItem('consecutivePerfectCount', '0');
+            }
+        }
+
+        function getSolvedQuestionsCount() {
+            const solved = JSON.parse(localStorage.getItem('solvedQuestions') || '[]');
+            return solved.length;
+        }
+
+        function addSolvedQuestion(questionIndex) {
+            const solved = JSON.parse(localStorage.getItem('solvedQuestions') || '[]');
+            if (!solved.includes(questionIndex)) {
+                solved.push(questionIndex);
+                localStorage.setItem('solvedQuestions', JSON.stringify(solved));
+            }
+        }
+
+        // 🎁 상품 로테이션 시스템
+        function getTotalQuizCount() {
+            return parseInt(localStorage.getItem('totalQuizCount') || '0');
+        }
+
+        function incrementQuizCount() {
+            const count = getTotalQuizCount() + 1;
+            localStorage.setItem('totalQuizCount', count.toString());
+            return count;
+        }
+
+        function getCurrentProduct() {
+            const quizCount = getTotalQuizCount();
+            const productIndex = quizCount % 2; // 0 또는 1
+            return QUIZ_CONFIG.PRODUCTS[productIndex];
+        }
+
+        // 🎮 퀴즈 문제 랜덤 선택 함수
+        function selectRandomQuestions() {
+            const questionIndices = Array.from({length: QUIZ_QUESTIONS.length}, (_, i) => i);
+            
+            // 피셔-예이츠 셔플 알고리즘
+            for (let i = questionIndices.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [questionIndices[i], questionIndices[j]] = [questionIndices[j], questionIndices[i]];
+            }
+            
+            // 처음 2개 문제 선택
+            selectedQuestions = questionIndices.slice(0, 2);
+            console.log('🎯 선택된 문제:', selectedQuestions);
+        }
+
+        function getEarnedBadges() {
+            return JSON.parse(localStorage.getItem('earnedBadges') || '[]');
+        }
+
+        function saveBadge(badgeId) {
+            const earnedBadges = getEarnedBadges();
+            if (!earnedBadges.includes(badgeId)) {
+                earnedBadges.push(badgeId);
+                localStorage.setItem('earnedBadges', JSON.stringify(earnedBadges));
+                return true; // 새로 획득함
+            }
+            return false; // 이미 있음
+        }
+
+        function checkNewBadges(stats) {
+            const newBadges = [];
+            
+            BADGES_CONFIG.forEach(badge => {
+                if (badge.condition(stats)) {
+                    const isNew = saveBadge(badge.id);
+                    if (isNew) {
+                        newBadges.push(badge);
+                    }
+                }
+            });
+            
+            return newBadges;
+        }
+
+        function showBadgePopup(badge) {
+            const popup = document.getElementById('badgePopup');
+            const icon = document.getElementById('badgePopupIcon');
+            const name = document.getElementById('badgePopupName');
+            const description = document.getElementById('badgePopupDescription');
+            
+            icon.textContent = badge.icon;
+            name.textContent = badge.name;
+            description.textContent = badge.description;
+            
+            popup.classList.add('show');
+            
+            // 팝업 표시 이벤트 추가
+            gtag('event', 'badge_earned', {
+                badge_id: badge.id,
+                badge_name: badge.name
+            });
+        }
+
+        function closeBadgePopup() {
+            document.getElementById('badgePopup').classList.remove('show');
+        }
+
+        function updateBadgesDisplay() {
+            const earnedBadges = getEarnedBadges();
+            const badgesGrid = document.getElementById('badgesGrid');
+            const badgesProgress = document.getElementById('badgesProgress');
+            
+            // 진행도 업데이트
+            badgesProgress.textContent = `수집한 배지: ${earnedBadges.length}/${BADGES_CONFIG.length}`;
+            
+            // 배지 그리드 생성
+            badgesGrid.innerHTML = '';
+            BADGES_CONFIG.forEach(badge => {
+                const isEarned = earnedBadges.includes(badge.id);
+                const badgeSlot = document.createElement('div');
+                badgeSlot.className = `badge-slot ${isEarned ? 'earned' : ''}`;
+                
+                badgeSlot.innerHTML = `
+                    <div class="badge-icon">${isEarned ? badge.icon : '?'}</div>
+                    <div class="badge-hint">${isEarned ? badge.name : badge.hint}</div>
+                `;
+                
+                badgesGrid.appendChild(badgeSlot);
+            });
+        }
+
+        // 🎯 피드백 히스토리 관리 함수 (스마트 분석용)
+        function getFeedbackHistory() {
+            return JSON.parse(localStorage.getItem('feedbackHistory') || '[]');
+        }
+
+        function addFeedbackHistory(feedback, resistanceSettings) {
+            const history = getFeedbackHistory();
+            const today = getCurrentUserTime().toDateString();
+            const currentHour = getCurrentUserTime().getHours();
+            const timeOfDay = currentHour < 14 ? 'morning' : 'afternoon';
+            
+            const newRecord = {
+                date: today,
+                timeOfDay: timeOfDay,
+                feedback: feedback,
+                inhaleLevel: resistanceSettings.inhale,
+                exhaleLevel: resistanceSettings.exhale,
+                timestamp: getCurrentUserTime().toISOString()
+            };
+            
+            history.unshift(newRecord);
+            
+            if (history.length > 60) {
+                history.splice(60);
+            }
+            
+            localStorage.setItem('feedbackHistory', JSON.stringify(history));
+            return history;
+        }
+
+        // 🎯 스마트 피드백 패턴 분석
+        function analyzeFeedbackPattern(currentFeedback, resistanceSettings) {
+            const history = getFeedbackHistory();
+            
+            let consecutivePerfectCount = 0;
+            let consecutiveEasyCount = 0;
+            let consecutiveHardCount = 0;
+            
+            if (currentFeedback === 'perfect') {
+                consecutivePerfectCount = 1;
+            } else if (currentFeedback === 'easy') {
+                consecutiveEasyCount = 1;
+            } else if (currentFeedback === 'hard') {
+                consecutiveHardCount = 1;
+            }
+            
+            for (let record of history) {
+                if (currentFeedback === 'perfect' && record.feedback === 'perfect') {
+                    consecutivePerfectCount++;
+                } else if (currentFeedback === 'easy' && record.feedback === 'easy') {
+                    consecutiveEasyCount++;
+                } else if (currentFeedback === 'hard' && record.feedback === 'hard') {
+                    consecutiveHardCount++;
+                } else {
+                    break;
+                }
+            }
+            
+            const previousFeedback = history.length > 0 ? history[0].feedback : null;
+            
+            return {
+                consecutivePerfectCount: consecutivePerfectCount,
+                consecutiveEasyCount: consecutiveEasyCount,
+                consecutiveHardCount: consecutiveHardCount,
+                previousFeedback: previousFeedback,
+                hasImproved: previousFeedback === 'hard' && currentFeedback === 'perfect',
+                hasProgressed: previousFeedback === 'perfect' && currentFeedback === 'easy',
+                readyForChallenge: consecutivePerfectCount >= 14,
+                shouldIncrease: consecutiveEasyCount >= 3,
+                needsDecrease: consecutiveHardCount >= 2,
+                totalHistory: history.length
+            };
+        }
+
+        // 🎯 스마트 조언 생성
+        function generateLocalAdviceAddition(analysis, currentFeedback, isAborted) {
+            let additionalAdvice = '';
+            
+            if (!isAborted) {
+                if (analysis.readyForChallenge) {
+                    additionalAdvice += '<br><br><strong>🚀 장기 분석</strong><br>1주일간 꾸준히 적당한 강도를 유지하셨네요!<br>이제 한 단계 도전해보시겠어요?';
+                } else if (analysis.shouldIncrease) {
+                    additionalAdvice += '<br><br><strong>⬆️ 진행 단계</strong><br>연속으로 쉬우셨으니 저항을 올려보세요!';
+                } else if (analysis.hasProgressed) {
+                    additionalAdvice += '<br><br><strong>🌟 실력 향상</strong><br>적당했던 강도가 이제 쉬워졌네요!<br>성장하고 계십니다!';
+                } else if (analysis.hasImproved) {
+                    additionalAdvice += '<br><br><strong>💪 회복 완료</strong><br>힘들던 강도가 이제 적당해졌어요!<br>좋은 적응력이네요!';
+                }
+            } else {
+                if (analysis.needsDecrease) {
+                    additionalAdvice += '<br><br><strong>🛡️ 안전 우선</strong><br>무리하지 마시고 강도를 낮춰보세요.<br>꾸준함이 더 중요해요!';
+                } else if (analysis.totalHistory >= 5) {
+                    additionalAdvice += '<br><br><strong>💙 계속 도전</strong><br>그동안 꾸준히 하신 모습이 멋져요!<br>컨디션 좋을 때 다시 해봐요!';
+                }
+            }
+            
+            return additionalAdvice;
+        }
+
+        // 저항 설정 관리 함수들
+        function loadResistanceSettings() {
+            const saved = JSON.parse(localStorage.getItem('resistanceSettings') || '{"inhale": 1, "exhale": 1}');
+            resistanceSettings = saved;
+            updateResistanceUI();
+        }
+
+        function saveResistanceSettings() {
+            localStorage.setItem('resistanceSettings', JSON.stringify(resistanceSettings));
+        }
+
+        function adjustResistance(type, change) {
+            const maxLevels = { inhale: 6, exhale: 5 };
+            const newLevel = resistanceSettings[type] + change;
+            
+            if (newLevel >= 1 && newLevel <= maxLevels[type]) {
+                resistanceSettings[type] = newLevel;
+                saveResistanceSettings();
+                updateResistanceUI();
+            }
+        }
+
+        function updateResistanceUI() {
+            document.getElementById('inhaleLevel').textContent = resistanceSettings.inhale;
+            document.getElementById('exhaleLevel').textContent = resistanceSettings.exhale;
+            
+            updateResistanceScale('inhale', resistanceSettings.inhale);
+            updateResistanceScale('exhale', resistanceSettings.exhale);
+            
+            updateResistanceButtons();
+        }
+
+        function updateResistanceScale(type, level) {
+            const scale = document.getElementById(type + 'Scale');
+            const dots = scale.querySelectorAll('.dot');
+            
+            dots.forEach((dot, index) => {
+                if (index < level) {
+                    dot.classList.add('active');
+                } else {
+                    dot.classList.remove('active');
+                }
+            });
+        }
+
+        function updateResistanceButtons() {
+            const inhaleMinusBtn = document.querySelector('.resistance-control:first-child .resistance-btn:first-child');
+            const inhalePlusBtn = document.querySelector('.resistance-control:first-child .resistance-btn:last-child');
+            const exhaleMinusBtn = document.querySelector('.resistance-control:last-child .resistance-btn:first-child');
+            const exhalePlusBtn = document.querySelector('.resistance-control:last-child .resistance-btn:last-child');
+            
+            inhaleMinusBtn.disabled = resistanceSettings.inhale <= 1;
+            inhalePlusBtn.disabled = resistanceSettings.inhale >= 6;
+            exhaleMinusBtn.disabled = resistanceSettings.exhale <= 1;
+            exhalePlusBtn.disabled = resistanceSettings.exhale >= 5;
+        }
+
+        function showFeedbackScreen() {
+            updateFeedbackScreenContent();
+            showScreen('feedbackScreen');
+        }
+
+        function updateFeedbackScreenContent() {
+            const title = document.getElementById('feedbackTitle');
+            const description = document.getElementById('feedbackDescription');
+            
+            if (isAborted) {
+                title.textContent = '중단하신 이유를 알려주세요';
+                description.textContent = '트레이닝을 중단하기 전까지의 강도는 어떠셨나요?';
+            } else {
+                title.textContent = '지금 호흡하는 느낌이 어떠세요?';
+                description.textContent = '방금 완료한 트레이닝의 강도는 어떠셨나요?';
+            }
+        }
+
+        function selectFeedback(feedback) {
+            userFeedback = feedback;
+            
+            gtag('event', 'feedback_selected', {
+                feedback_type: feedback,
+                completed_sets: window.exerciseData ? window.exerciseData.completedSets : 0,
+                is_aborted: isAborted
+            });
+            
+            showResultScreen();
+        }
+
+        function hideIntro() {
+            
+            const introScreen = document.getElementById('introScreen');
+            introScreen.classList.add('hidden');
+            setTimeout(() => {
+                introScreen.style.display = 'none';
+            }, 800);
+        }
+
+        window.addEventListener('load', function() {
+            const mainImage = document.getElementById('mainSplashImage');
+            const fallbackSplash = document.getElementById('fallbackSplash');
+            
+            mainImage.addEventListener('error', function() {
+                console.log('⚠️ 메인 스플래시 이미지 로드 실패');
+                this.src = './images/suumt-splash-wide.png';
+                
+                this.addEventListener('error', function() {
+                    console.log('⚠️ 모든 이미지 로드 실패, 대체 화면 표시');
+                    this.style.display = 'none';
+                    fallbackSplash.style.display = 'flex';
+                });
+            });
+
+            console.log('🎬 스플래시 화면 로딩 완료');
+        });
+
+        function initializeProgressIndicators() {
+            const breathsContainer = document.getElementById('breathsIndicators');
+            breathsContainer.innerHTML = '';
+            
+            for (let i = 0; i < 10; i++) {
+                const breathDot = document.createElement('div');
+                breathDot.className = 'breath-indicator';
+                breathDot.setAttribute('data-breath', i + 1);
+                breathsContainer.appendChild(breathDot);
+            }
+            
+            updateProgressIndicators();
+        }
+
+        function updateProgressIndicators() {
+            const setIndicators = document.querySelectorAll('.set-indicator');
+            setIndicators.forEach((indicator, index) => {
+                indicator.classList.remove('active', 'current');
+                if (index < currentSet - 1) {
+                    indicator.classList.add('active');
+                } else if (index === currentSet - 1) {
+                    indicator.classList.add('current');
+                }
+            });
+            
+            const breathIndicators = document.querySelectorAll('.breath-indicator');
+            breathIndicators.forEach((indicator, index) => {
+                indicator.classList.remove('completed', 'current');
+                if (index < currentBreath - 1) {
+                    indicator.classList.add('completed');
+                } else if (index === currentBreath - 1) {
+                    indicator.classList.add('current');
+                }
+            });
+            
+            document.getElementById('setNumbers').textContent = `${currentSet} / 2 세트`;
+            document.getElementById('breathNumbers').textContent = `${currentBreath} / 10 회`;
+        }
+
+        function showStopModal() {
+            document.getElementById('confirmModal').classList.add('show');
+        }
+
+        function hideModal() {
+            document.getElementById('confirmModal').classList.remove('show');
+        }
+
+        function confirmStop() {
+            hideModal();
+            isAborted = true;
+            clearTimeout(breathingTimer);
+            
+            // 🔧 모든 타이머 정리
+            stopGlobalRestTimer();
+            clearInterval(restTimer);
+            
+            gtag('event', 'exercise_aborted', {
+                completed_sets: Math.max(0, currentSet - 1),
+                completed_breaths: Math.max(0, (currentSet - 1) * 10 + (currentBreath - 1))
+            });
+            
+            completeExercise();
+        }
+
+        // 로컬 스토리지 기반 통계 관리
+        function getLocalStats() {
+            const stats = JSON.parse(localStorage.getItem('breathTrainerStats') || '{}');
+            return {
+                totalExercises: stats.totalExercises || 0,
+                totalSets: stats.totalSets || 0,
+                totalBreaths: stats.totalBreaths || 0,
+                consecutiveDays: stats.consecutiveDays || 0,
+                lastExerciseDate: stats.lastExerciseDate || null,
+                averageSets: stats.totalExercises > 0 ? Math.round((stats.totalSets / stats.totalExercises) * 10) / 10 : 0
+            };
+        }
+
+        function getExerciseHistory() {
+            return JSON.parse(localStorage.getItem('breathTrainerHistory') || '[]');
+        }
+
+        function addExerciseHistory(exerciseData) {
+            const history = getExerciseHistory();
+            const newRecord = {
+                date: getCurrentUserTime().toISOString(), // 사용자 시간대 적용
+                exerciseTime: exerciseData.exerciseTime,
+                completedSets: exerciseData.completedSets,
+                completedBreaths: exerciseData.completedBreaths,
+                isAborted: exerciseData.isAborted,
+                userFeedback: exerciseData.userFeedback,
+                resistanceSettings: exerciseData.resistanceSettings
+            };
+            
+            history.unshift(newRecord);
+            
+            if (history.length > 10) {
+                history.splice(10);
+            }
+            
+            localStorage.setItem('breathTrainerHistory', JSON.stringify(history));
+        }
+
+        function updateLocalStats(exerciseData) {
+            const stats = getLocalStats();
+            
+            stats.totalExercises += 1;
+            stats.totalSets += exerciseData.completedSets;
+            stats.totalBreaths += exerciseData.completedBreaths;
+            
+            const today = getCurrentUserTime().toDateString();
+            const lastDate = stats.lastExerciseDate ? new Date(stats.lastExerciseDate).toDateString() : null;
+            
+            if (lastDate === today) {
+                // 오늘 이미 트레이닝함
+            } else if (lastDate === new Date(Date.now() - 24*60*60*1000).toDateString()) {
+                // 어제 트레이닝함
+                stats.consecutiveDays += 1;
+            } else {
+                // 연속 끊김
+                stats.consecutiveDays = 1;
+            }
+            
+            stats.lastExerciseDate = getCurrentUserTime().toISOString();
+            stats.averageSets = stats.totalExercises > 0 ? Math.round((stats.totalSets / stats.totalExercises) * 10) / 10 : 0;
+            
+            localStorage.setItem('breathTrainerStats', JSON.stringify(stats));
+            return stats;
+        }
+
+        // 🔧 AI 조언 요청
+        async function getTrainerAdvice(exerciseData) {
+            try {
+                console.log('🤖 AI 조언 요청 시작');
+                console.log('📊 전달할 운동 데이터:', exerciseData);
+                
+                const params = new URLSearchParams({
+                    function: 'getAIAdvice',
+                    exerciseTime: exerciseData.exerciseTime,
+                    completedSets: exerciseData.completedSets.toString(),
+                    completedBreaths: exerciseData.completedBreaths.toString(),
+                    isAborted: exerciseData.isAborted.toString(),
+                    userFeedback: exerciseData.userFeedback || '',
+                    inhaleResistance: exerciseData.resistanceSettings ? exerciseData.resistanceSettings.inhale.toString() : '1',
+                    exhaleResistance: exerciseData.resistanceSettings ? exerciseData.resistanceSettings.exhale.toString() : '1'
+                });
+                
+                console.log('🌐 요청 파라미터:', params.toString());
+                
+                const response = await fetch(`${SCRIPT_URL}?${params}`);
+                
+                if (!response.ok) {
+                    throw new Error(`연결 오류: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('📦 Apps Script 응답:', result);
+                
+                if (result.success) {
+                    if (result.advice && typeof result.advice === 'object') {
+                        return {
+                            intensityAdvice: result.advice.intensityAdvice || result.advice,
+                            comprehensiveAdvice: result.advice.comprehensiveAdvice || "AI 트레이너가 당신의 꾸준한 노력을 응원합니다!"
+                        };
+                    } else if (typeof result.advice === 'string') {
+                        return {
+                            intensityAdvice: result.advice,
+                            comprehensiveAdvice: "AI 트레이너가 당신의 꾸준한 노력을 응원합니다!"
+                        };
+                    }
+                } 
+                
+                throw new Error(result.message || 'AI 조언 생성 실패');
+                
+            } catch (error) {
+                console.error('🚨 AI 조언 요청 오류:', error);
+                
+                const defaultAdvices = [
+                    `${exerciseData.completedSets}세트 완주! 숨트의 저항을 이겨내며 호흡근이 한층 강해졌습니다.`,
+                    `${exerciseData.exerciseTime} 동안의 집중적인 호흡 트레이닝, 수고하셨습니다!`,
+                    `호흡근육 강화 여정에서 또 한 걸음 전진하셨네요!`
+                ];
+                
+                const randomIndex = Math.floor(Math.random() * defaultAdvices.length);
+                return {
+                    intensityAdvice: defaultAdvices[randomIndex],
+                    comprehensiveAdvice: "꾸준히 도전하는 의지가 정말 대단해요!"
+                };
+            }
+        }
+
+        function showScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+            });
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        function goToMain() {
+            showScreen('mainScreen');
+            resetExercise();
+            loadUserData();
+        }
+
+        function loadUserData() {
+            const stats = getLocalStats();
+            displayUserStats(stats);
+            updateChart();
+            updateSocialProofData(); // 🔥 새로운 기능: 사회적 증명 데이터 업데이트
+        }
+
+        function displayUserStats(stats) {
+            document.getElementById('totalExercises').textContent = stats.totalExercises;
+            document.getElementById('consecutiveDays').textContent = stats.consecutiveDays;
+            
+            // 🔧 오늘 완료한 세트 수 계산 (평균이 아닌 오늘 실제 완료 세트)
+            const todayCompletedSets = getTodayCompletedSets();
+            document.getElementById('averageSets').textContent = todayCompletedSets;
+            
+            // 🔧 오늘 완료한 호흡 횟수 계산
+            const todayBreaths = getTodayBreaths();
+            document.getElementById('totalBreaths').textContent = todayBreaths;
+        }
+
+        // 🔧 오늘 완료한 세트 수 계산 함수
+        function getTodayCompletedSets() {
+            const history = getExerciseHistory();
+            const today = getCurrentUserTime().toDateString();
+            
+            const todayData = history.filter(record => {
+                const recordDate = new Date(record.date);
+                return recordDate.toDateString() === today;
+            });
+            
+            return todayData.reduce((sum, record) => sum + record.completedSets, 0);
+        }
+
+        // 🔧 오늘 완료한 호흡 횟수 계산 함수
+        function getTodayBreaths() {
+            const history = getExerciseHistory();
+            const today = getCurrentUserTime().toDateString();
+            
+            const todayData = history.filter(record => {
+                const recordDate = new Date(record.date);
+                return recordDate.toDateString() === today;
+            });
+            
+            return todayData.reduce((sum, record) => sum + record.completedBreaths, 0);
+        }
+
+        function startExercise() {
+            resetExercise();
+            showScreen('exerciseScreen');
+            
+            gtag('event', 'exercise_start', {
+                inhale_resistance: resistanceSettings.inhale,
+                exhale_resistance: resistanceSettings.exhale
+            });
+            
+            startCountdown();
+        }
+
+        function startCountdown() {
+            let count = 3;
+            const countdownEl = document.getElementById('countdown');
+            
+            const countdownInterval = setInterval(() => {
+                countdownEl.textContent = count;
+                count--;
+                
+                if (count < 0) {
+                    clearInterval(countdownInterval);
+                    startBreathing();
+                }
+            }, 1000);
+        }
+
+        function startBreathing() {
+            document.getElementById('countdownSection').style.display = 'none';
+            document.getElementById('breathingSection').style.display = 'block';
+            
+            const circle = document.getElementById('breathingCircle');
+            circle.className = 'breathing-circle exhale';
+            
+            initializeProgressIndicators();
+            
+            exerciseStartTime = getCurrentUserTime(); // 사용자 시간대 적용
+            
+            setTimeout(() => {
+                breathingCycle();
+            }, 500);
+        }
+
+        function breathingCycle() {
+            if (isPaused || isAborted) return;
+
+            const circle = document.getElementById('breathingCircle');
+            const circleText = document.getElementById('circleText');
+
+            updateProgressIndicators();
+
+            if (breathingPhase === 'inhale') {
+                circleText.textContent = '깊게 들이마셔요';
+                circle.className = 'breathing-circle inhale';
+                
+                breathingTimer = setTimeout(() => {
+                    breathingPhase = 'hold';
+                    breathingCycle();
+                }, 3000);
+
+            } else if (breathingPhase === 'hold') {
+                circleText.textContent = '잠시 멈추세요';
+                circle.className = 'breathing-circle hold';
+                
+                breathingTimer = setTimeout(() => {
+                    breathingPhase = 'exhale';
+                    breathingCycle();
+                }, 1000);
+
+            } else if (breathingPhase === 'exhale') {
+                circleText.textContent = '끝까지 내쉬어요';
+                circle.className = 'breathing-circle exhale';
+                
+                breathingTimer = setTimeout(() => {
+                    breathingPhase = 'exhale-hold';
+                    breathingCycle();
+                }, 3000);
+
+            } else if (breathingPhase === 'exhale-hold') {
+                circleText.textContent = '잠시 멈추세요';
+                circle.className = 'breathing-circle exhale-hold';
+                
+                breathingTimer = setTimeout(() => {
+                    currentBreath++;
+                    breathingPhase = 'inhale';
+                    
+                    if (currentBreath > 10) {
+                        currentSet++;
+                        currentBreath = 1;
+                        
+                        if (currentSet > 2) {
+                            completeExercise();
+                        } else {
+                            startRest();
+                        }
+                    } else {
+                        breathingCycle();
+                    }
+                }, 1000);
+            }
+        }
+
+        function startRest() {
+            document.getElementById('breathingSection').style.display = 'none';
+            
+            // 🔧 기존 타이머 정리
+            stopGlobalRestTimer();
+            clearInterval(restTimer);
+            
+            // 🎮 퀴즈 시스템이 활성화되어 있으면 퀴즈 제안부터 시작
+            if (QUIZ_CONFIG.QUIZ_ENABLED) {
+                showRestIntro();
+            } else {
+                showNormalRest();
+            }
+        }
+
+        // 🔧 전역 타이머 관리 함수들
+        function startGlobalRestTimer() {
+            globalRestTime = 120;
+            
+            if (globalRestTimer) {
+                clearInterval(globalRestTimer);
+            }
+            
+            globalRestTimer = setInterval(() => {
+                if (isAborted) {
+                    clearInterval(globalRestTimer);
+                    return;
+                }
+                
+                // 모든 화면의 카운트다운 업데이트
+                updateAllCountdowns();
+                globalRestTime--;
+                
+                if (globalRestTime < 0) {
+                    clearInterval(globalRestTimer);
+                    startNextSet();
+                }
+            }, 1000);
+        }
+
+        function updateAllCountdowns() {
+            const countdownElements = [
+                'restCountdown',
+                'quizOfferCountdown', 
+                'quizCountdown',
+                'quizRewardCountdown'  // 🔧 보상 화면 카운트다운 추가
+            ];
+            
+            countdownElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.textContent = globalRestTime;
+                }
+            });
+        }
+
+        function stopGlobalRestTimer() {
+            if (globalRestTimer) {
+                clearInterval(globalRestTimer);
+                globalRestTimer = null;
+            }
+        }
+
+        // 🎮 새로운 기능: 휴식 시간 소개 (개선된 버전)
+        function showRestIntro() {
+            document.getElementById('restSection').style.display = 'block';
+            document.getElementById('restControlButtons').style.display = 'none';
+            
+            const restProgressEl = document.getElementById('restProgressText');
+            restProgressEl.textContent = `${currentSet - 1}세트 완료`;
+            
+            // 🔧 전역 타이머 시작
+            startGlobalRestTimer();
+            
+            // GA 이벤트: 휴식 시작
+            gtag('event', 'rest_started', {
+                set_number: currentSet - 1,
+                quiz_enabled: QUIZ_CONFIG.QUIZ_ENABLED
+            });
+            
+            // 5초 후 퀴즈 제안 화면으로 전환
+            quizOfferTimer = setTimeout(() => {
+                if (!isAborted) {
+                    showQuizOffer();
+                }
+            }, QUIZ_CONFIG.OFFER_DELAY);
+        }
+
+        // 🎮 새로운 기능: 퀴즈 제안 화면 (타이머 연속성 개선)
+        function showQuizOffer() {
+            document.getElementById('restSection').style.display = 'none';
+            document.getElementById('quizOfferSection').style.display = 'block';
+            
+            // GA 이벤트: 퀴즈 제안 노출
+            gtag('event', 'quiz_offer_shown', {
+                set_number: currentSet - 1,
+                remaining_rest_time: globalRestTime
+            });
+        }
+
+        // 🎮 새로운 기능: 퀴즈 시작
+        function startQuiz() {
+            document.getElementById('quizOfferSection').style.display = 'none';
+            document.getElementById('quizProgressSection').style.display = 'block';
+            
+            // 퀴즈 상태 초기화
+            currentQuizQuestion = 0;
+            quizCorrectAnswers = 0;
+            quizStartTime = getCurrentUserTime();
+            
+            // 🎯 랜덤 2문제 선택
+            selectRandomQuestions();
+            
+            // GA 이벤트: 퀴즈 시작
+            gtag('event', 'quiz_started', {
+                set_number: currentSet - 1,
+                remaining_rest_time: parseInt(document.getElementById('restCountdown').textContent),
+                selected_questions: selectedQuestions
+            });
+            
+            showQuizQuestion();
+        }
+
+        // 🎮 새로운 기능: 퀴즈 문제 표시 (랜덤 문제 지원)
+        function showQuizQuestion() {
+            const questionIndex = selectedQuestions[currentQuizQuestion];
+            const question = QUIZ_QUESTIONS[questionIndex];
+            const questionEl = document.getElementById('quizQuestion');
+            const optionsEl = document.getElementById('quizOptions');
+            const explanationEl = document.getElementById('quizExplanation');
+            const progressFillEl = document.getElementById('quizProgressFill');
+            const progressTextEl = document.getElementById('quizProgressText');
+            const quizCountdownEl = document.getElementById('quizCountdown');
+            
+            // 문제 표시
+            questionEl.textContent = question.question;
+            
+            // 선택지 생성
+            optionsEl.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const optionEl = document.createElement('div');
+                optionEl.className = 'quiz-option';
+                optionEl.textContent = option;
+                optionEl.onclick = () => selectQuizAnswer(index, questionIndex);
+                optionsEl.appendChild(optionEl);
+            });
+            
+            // 설명 숨기기
+            explanationEl.style.display = 'none';
+            
+            // 진행률 업데이트 (2문제 기준)
+            const progress = ((currentQuizQuestion + 1) / 2) * 100;
+            progressFillEl.style.width = `${progress}%`;
+            progressTextEl.textContent = `문제 ${currentQuizQuestion + 1} / 2`;
+            
+            // 카운트다운 동기화
+            const syncInterval = setInterval(() => {
+                const restCountdownEl = document.getElementById('restCountdown');
+                const currentTime = restCountdownEl.textContent;
+                quizCountdownEl.textContent = currentTime;
+                
+                if (parseInt(currentTime) <= 0) {
+                    clearInterval(syncInterval);
+                }
+            }, 1000);
+        }
+
+        // 🎮 새로운 기능: 퀴즈 답안 선택 (배지 추적 추가)
+        function selectQuizAnswer(selectedIndex, questionIndex) {
+            const question = QUIZ_QUESTIONS[questionIndex];
+            const optionsEl = document.getElementById('quizOptions');
+            const explanationEl = document.getElementById('quizExplanation');
+            const options = optionsEl.querySelectorAll('.quiz-option');
+            
+            // 선택지 비활성화
+            options.forEach(option => {
+                option.style.pointerEvents = 'none';
+            });
+            
+            // 정답/오답 표시
+            options[selectedIndex].classList.add(selectedIndex === question.correct ? 'correct' : 'incorrect');
+            if (selectedIndex !== question.correct) {
+                options[question.correct].classList.add('correct');
+            }
+            
+            // 정답 카운트
+            if (selectedIndex === question.correct) {
+                quizCorrectAnswers++;
+            }
+            
+            // 🎮 푼 문제 기록 (배지용)
+            addSolvedQuestion(questionIndex);
+            
+            // 설명 표시
+            explanationEl.textContent = question.explanation;
+            explanationEl.style.display = 'block';
+            
+            // GA 이벤트: 답안 선택
+            gtag('event', 'quiz_answer_selected', {
+                question_number: currentQuizQuestion + 1,
+                question_index: questionIndex,
+                selected_answer: selectedIndex,
+                correct_answer: question.correct,
+                is_correct: selectedIndex === question.correct
+            });
+            
+            // 2초 후 다음 문제 또는 결과 화면
+            setTimeout(() => {
+                currentQuizQuestion++;
+                if (currentQuizQuestion < 2) { // 2문제로 변경
+                    showQuizQuestion();
+                } else {
+                    showQuizResult();
+                }
+            }, 2500);
+        }
+
+        // 🎮 새로운 기능: 퀴즈 결과 화면
+        function showQuizResult() {
+            document.getElementById('quizProgressSection').style.display = 'none';
+            document.getElementById('quizRewardSection').style.display = 'block';
+            
+            const quizEndTime = getCurrentUserTime();
+            const quizDuration = Math.floor((quizEndTime - quizStartTime) / 1000);
+            
+            // 🎮 퀴즈 완료 배지 처리
+            handleQuizCompletionBadges();
+            
+            // 보상 내용 업데이트 (현재 상품 로테이션 사용)
+            updateRewardContent();
+            
+            // GA 이벤트: 퀴즈 완료
+            gtag('event', 'quiz_completed', {
+                correct_answers: quizCorrectAnswers,
+                total_questions: 2,
+                quiz_duration_seconds: quizDuration,
+                accuracy_percentage: Math.round((quizCorrectAnswers / 2) * 100)
+            });
+        }
+
+        // 🎮 새로운 기능: 퀴즈 완료 배지 처리
+        function handleQuizCompletionBadges() {
+            let badgesToShow = [];
+            
+            // 퀴즈 탐험가: 2문제를 모두 정답으로 맞혔을 때
+            if (quizCorrectAnswers === 2) {
+                incrementQuizPerfectCount();
+                updateConsecutivePerfectCount(true);
+                
+                const isNewBadge = saveBadge('quiz_explorer');
+                if (isNewBadge) {
+                    const badge = BADGES_CONFIG.find(b => b.id === 'quiz_explorer');
+                    badgesToShow.push(badge);
+                }
+            } else {
+                updateConsecutivePerfectCount(false);
+            }
+            
+            // 퀴즈 완벽주의자: 3번 연속 완벽
+            if (getConsecutivePerfectCount() >= 3) {
+                const isNewBadge = saveBadge('quiz_perfectionist');
+                if (isNewBadge) {
+                    const badge = BADGES_CONFIG.find(b => b.id === 'quiz_perfectionist');
+                    badgesToShow.push(badge);
+                }
+            }
+            
+            // 퀴즈 마스터: 모든 문제 경험
+            if (getSolvedQuestionsCount() >= 6) {
+                const isNewBadge = saveBadge('quiz_master');
+                if (isNewBadge) {
+                    const badge = BADGES_CONFIG.find(b => b.id === 'quiz_master');
+                    badgesToShow.push(badge);
+                }
+            }
+            
+            // 배지가 있으면 첫 번째 배지 즉시 팝업 표시
+            if (badgesToShow.length > 0) {
+                setTimeout(() => {
+                    showBadgePopup(badgesToShow[0]);
+                }, 1000);
+            }
+        }
+
+        // 🎮 새로운 기능: 보상 내용 업데이트 (상품 로테이션 적용)
+        function updateRewardContent() {
+            const rewardSubtitle = document.getElementById('quizRewardSubtitle');
+            const productName = document.getElementById('rewardProductName');
+            const productDescription = document.getElementById('rewardProductDescription');
+            const productImage = document.getElementById('rewardProductImage');
+            const originalPrice = document.getElementById('rewardOriginalPrice');
+            const discountPrice = document.getElementById('rewardDiscountPrice');
+            const discountBadge = document.getElementById('rewardDiscountBadge');
+            
+            // 정답 개수에 따른 메시지
+            if (quizCorrectAnswers === 2) {
+                rewardSubtitle.textContent = '🌟 완벽! 모든 문제를 맞혔어요!';
+            } else if (quizCorrectAnswers >= 1) {
+                rewardSubtitle.textContent = `👍 훌륭해요! ${quizCorrectAnswers}문제 정답!`;
+            } else {
+                rewardSubtitle.textContent = `💪 좋아요! 도전해주셔서 감사해요!`;
+            }
+            
+            // 🎁 현재 상품 로테이션 적용
+            const currentProduct = getCurrentProduct();
+            
+            productName.textContent = currentProduct.name;
+            productDescription.textContent = currentProduct.description;
+            productImage.src = currentProduct.image;
+            originalPrice.textContent = currentProduct.originalPrice;
+            discountPrice.textContent = currentProduct.discountPrice;
+            discountBadge.textContent = `${currentProduct.discountPercent}% 할인`;
+            
+            // 퀴즈 카운트 증가
+            incrementQuizCount();
+        }
+
+        // 🎮 새로운 기능: 특가 확인하기 (새 탭으로 열기)
+        function checkSpecialOffer() {
+            const shopUrl = generateShopUrl();
+            
+            // GA 이벤트: 특가 확인
+            gtag('event', 'special_offer_checked', {
+                correct_answers: quizCorrectAnswers,
+                total_questions: 2,
+                discount_percentage: getCurrentProduct().discountPercent,
+                shop_url: shopUrl,
+                open_method: 'new_tab'
+            });
+            
+            // 새 탭에서 쇼핑몰 열기 (앱은 그대로 유지)
+            window.open(shopUrl, '_blank');
+            
+            // 사용자에게 피드백 제공
+            const checkButton = document.querySelector('.quiz-check-button');
+            const originalText = checkButton.textContent;
+            checkButton.textContent = '✅ 새 탭에서 열림';
+            checkButton.style.background = 'rgba(76, 175, 80, 0.9)';
+            checkButton.style.color = 'white';
+            
+            // 3초 후 원래 상태로 복원
+            setTimeout(() => {
+                checkButton.textContent = originalText;
+                checkButton.style.background = '';
+                checkButton.style.color = '';
+            }, 3000);
+        }
+
+        // 🎮 새로운 기능: 쇼핑몰 URL 생성 (상품 로테이션 적용)
+        function generateShopUrl() {
+            const currentProduct = getCurrentProduct();
+            const baseUrl = `${QUIZ_CONFIG.SHOP_URL}${currentProduct.specialPath}`;
+            const params = new URLSearchParams({
+                utm_source: 'breath_app',
+                utm_medium: 'quiz_reward',
+                utm_campaign: 'rest_quiz',
+                utm_content: `${quizCorrectAnswers}_of_2_correct`,
+                quiz_score: quizCorrectAnswers,
+                discount: currentProduct.discountPercent,
+                product_id: currentProduct.id,
+                questions_solved: getSolvedQuestionsCount()
+            });
+            
+            return `${baseUrl}?${params.toString()}`;
+        }
+
+        // 🎮 새로운 기능: 퀴즈 후 다음 세트로
+        function continueToNextSet() {
+            // 퀴즈 관련 화면 모두 숨기기
+            document.getElementById('quizRewardSection').style.display = 'none';
+            
+            // 기존 휴식 타이머 정리
+            clearInterval(restTimer);
+            clearTimeout(quizOfferTimer);
+            
+            // 다음 세트 시작
+            startNextSet();
+        }
+
+        // 🎮 새로운 기능: 휴식만 선택
+        function chooseRestOnly() {
+            document.getElementById('quizOfferSection').style.display = 'none';
+            
+            // GA 이벤트: 휴식만 선택
+            gtag('event', 'quiz_declined', {
+                set_number: currentSet - 1,
+                remaining_rest_time: parseInt(document.getElementById('restCountdown').textContent)
+            });
+            
+            showNormalRest();
+        }
+
+        // 🎮 새로운 기능: 일반 휴식 화면 (기존 방식)
+        function showNormalRest() {
+            document.getElementById('restSection').style.display = 'block';
+            document.getElementById('restControlButtons').style.display = 'block'; // 이때 건너뛰기 버튼 활성화!
+            
+            let restTime = parseInt(document.getElementById('restCountdown').textContent) || 120;
+            const restCountdownEl = document.getElementById('restCountdown');
+            const restProgressEl = document.getElementById('restProgressText');
+            
+            restProgressEl.textContent = `${currentSet - 1}세트 완료`;
+            
+            restTimer = setInterval(() => {
+                if (isAborted) {
+                    clearInterval(restTimer);
+                    return;
+                }
+                
+                restCountdownEl.textContent = restTime;
+                restTime--;
+                
+                if (restTime < 0) {
+                    clearInterval(restTimer);
+                    startNextSet();
+                }
+            }, 1000);
+        }
+
+        function skipRest() {
+            stopGlobalRestTimer(); // 🔧 전역 타이머 정리
+            incrementSkippedRestCount(); // 🎮 배지 조건용 카운트
+            startNextSet();
+        }
+
+        function startNextSet() {
+            // 🔧 모든 휴식/퀴즈 관련 화면 숨기기
+            document.getElementById('restSection').style.display = 'none';
+            document.getElementById('quizOfferSection').style.display = 'none';
+            document.getElementById('quizProgressSection').style.display = 'none';
+            document.getElementById('quizRewardSection').style.display = 'none';
+            
+            // 🔧 모든 타이머 정리
+            stopGlobalRestTimer();
+            clearTimeout(quizOfferTimer);
+            
+            // 🚀 호흡 화면 표시
+            document.getElementById('breathingSection').style.display = 'block';
+            
+            const circle = document.getElementById('breathingCircle');
+            circle.className = 'breathing-circle exhale';
+            
+            initializeProgressIndicators();
+            
+            setTimeout(() => {
+                breathingCycle();
+            }, 500);
+        }
+
+        function pauseExercise() {
+            isPaused = !isPaused;
+            const button = event.target;
+            
+            if (isPaused) {
+                clearTimeout(breathingTimer);
+                button.textContent = '계속하기';
+                document.getElementById('circleText').textContent = '일시정지';
+            } else {
+                button.textContent = '일시정지';
+                breathingCycle();
+            }
+        }
+
+        async function completeExercise() {
+            clearTimeout(breathingTimer);
+            clearInterval(restTimer);
+            
+            const exerciseTime = Math.floor((getCurrentUserTime() - exerciseStartTime) / 1000);
+            const minutes = Math.floor(exerciseTime / 60);
+            const seconds = exerciseTime % 60;
+            
+            // 🔧 완료 세트 계산 수정: 10회 호흡을 완료한 세트만 카운트
+            let actualCompletedSets = 0;
+            if (!isAborted) {
+                actualCompletedSets = 2; // 완전히 끝까지 한 경우
+            } else {
+                // 중단한 경우: 완료된 세트 수 정확히 계산
+                if (currentSet === 1) {
+                    // 첫 세트 도중에 중단: 0세트 완료
+                    actualCompletedSets = 0;
+                } else if (currentSet === 2) {
+                    // 첫 세트 완료 후 중단 (휴식시간 또는 2세트 중): 1세트 완료
+                    actualCompletedSets = 1;
+                } else {
+                    // currentSet > 2인 경우는 없지만 안전장치
+                    actualCompletedSets = 2;
+                }
+            }
+            
+            // 🔧 완료 호흡 횟수 계산 개선
+            let actualCompletedBreaths = 0;
+            if (!isAborted) {
+                actualCompletedBreaths = 20;
+            } else {
+                if (currentSet === 1) {
+                    // 첫 세트 도중: 현재 호흡 - 1
+                    actualCompletedBreaths = Math.max(0, currentBreath - 1);
+                } else if (currentSet === 2) {
+                    // 두 번째 세트: 첫 세트 10회 + 현재 호흡 - 1
+                    actualCompletedBreaths = 10 + Math.max(0, currentBreath - 1);
+                }
+            }
+            
+            window.exerciseData = {
+                exerciseTime: `${minutes}:${seconds.toString().padStart(2, '0')}`,
+                completedSets: actualCompletedSets,
+                completedBreaths: actualCompletedBreaths,
+                isAborted: isAborted,
+                resistanceSettings: { ...resistanceSettings },
+                userFeedback: userFeedback
+            };
+
+            setTimeout(() => {
+                showFeedbackScreen();
+            }, 1000);
+        }
+
+        async function showResultScreen() {
+            try {
+                console.log('📋 결과 화면 표시 시작');
+                
+                showScreen('resultScreen');
+                
+                const timeData = window.exerciseData.exerciseTime.split(':');
+                const minutes = parseInt(timeData[0]);
+                const seconds = parseInt(timeData[1]);
+                
+                // 결과 통계 업데이트
+                document.getElementById('resistanceInfo').textContent = `${window.exerciseData.resistanceSettings.inhale}/${window.exerciseData.resistanceSettings.exhale}`;
+                document.getElementById('totalTime').textContent = `${minutes}분 ${seconds}초`;
+                document.getElementById('completedSets').textContent = `${window.exerciseData.completedSets}/2`;
+                document.getElementById('totalBreathsResult').textContent = `${window.exerciseData.completedBreaths}회`;
+                
+                document.getElementById('intensityAdvice').textContent = '강도 조절 분석을 진행하고 있습니다...';
+                document.getElementById('comprehensiveAdvice').textContent = 'AI 숨트레이너가 당신의 트레이닝을 분석하고 있습니다...';
+                
+                const exerciseDataWithFeedback = {
+                    ...window.exerciseData,
+                    userFeedback: userFeedback
+                };
+                
+                console.log('🎯 AI 분석용 최종 데이터:', exerciseDataWithFeedback);
+                
+                gtag('event', 'exercise_complete', {
+                    exercise_duration: exerciseDataWithFeedback.exerciseTime,
+                    completed_sets: exerciseDataWithFeedback.completedSets,
+                    completed_breaths: exerciseDataWithFeedback.completedBreaths,
+                    is_aborted: exerciseDataWithFeedback.isAborted,
+                    user_feedback: exerciseDataWithFeedback.userFeedback,
+                    inhale_resistance: exerciseDataWithFeedback.resistanceSettings.inhale,
+                    exhale_resistance: exerciseDataWithFeedback.resistanceSettings.exhale
+                });
+                
+                // 🎮 통계 업데이트 및 배지 체크
+                const updatedStats = updateLocalStats(window.exerciseData);
+                addExerciseHistory(exerciseDataWithFeedback);
+                
+                // 🎮 새 배지 체크 및 표시
+                const newBadges = checkNewBadges(updatedStats);
+                updateBadgesDisplay();
+                
+                // 🔥 새로운 기능: 사회적 증명 UI 초기화
+                updateSocialProofData();
+                initReviewsCarousel();
+                
+                if (newBadges.length > 0) {
+                    // 첫 번째 새 배지만 팝업으로 표시 (여러 개면 순차적으로)
+                    setTimeout(() => {
+                        showBadgePopup(newBadges[0]);
+                    }, 1000);
+                }
+                
+                const aiAdvice = await getTrainerAdvice(exerciseDataWithFeedback);
+                
+                console.log('🤖 AI 조언 결과:', aiAdvice);
+                
+                if (typeof aiAdvice === 'object' && aiAdvice.intensityAdvice && aiAdvice.comprehensiveAdvice) {
+                    handleExerciseResult({
+                        success: true,
+                        intensityAdvice: aiAdvice.intensityAdvice,
+                        comprehensiveAdvice: aiAdvice.comprehensiveAdvice,
+                        stats: updatedStats
+                    });
+                } else if (typeof aiAdvice === 'string') {
+                    handleExerciseResult({
+                        success: true,
+                        intensityAdvice: aiAdvice,
+                        comprehensiveAdvice: "AI 트레이너가 당신의 꾸준한 노력을 응원합니다!",
+                        stats: updatedStats
+                    });
+                } else {
+                    throw new Error('AI 조언 형식 오류');
+                }
+                
+                console.log('✅ 결과 화면 처리 완료');
+                
+            } catch (error) {
+                console.error('❌ showResultScreen 오류:', error);
+                
+                document.getElementById('intensityAdvice').textContent = '분석을 불러오는 중 문제가 발생했습니다.';
+                document.getElementById('comprehensiveAdvice').textContent = '네트워크 연결을 확인하고 다시 시도해주세요.';
+                
+                const updatedStats = updateLocalStats(window.exerciseData);
+                addExerciseHistory(window.exerciseData);
+                updateBadgesDisplay();
+                updateSocialProofData();
+                initReviewsCarousel();
+            }
+        }
+
+        // 🎯 개선된 결과 처리 함수 (스마트 분석 적용)
+        function handleExerciseResult(result) {
+            addFeedbackHistory(userFeedback, resistanceSettings);
+            const analysis = analyzeFeedbackPattern(userFeedback, resistanceSettings);
+            
+            console.log('🧠 스마트 분석 결과:', analysis);
+            
+            let finalIntensityAdvice = result.intensityAdvice;
+            let finalComprehensiveAdvice = result.comprehensiveAdvice;
+            
+            const additionalAdvice = generateLocalAdviceAddition(analysis, userFeedback, window.exerciseData.isAborted);
+            if (additionalAdvice) {
+                finalIntensityAdvice += additionalAdvice;
+            }
+            
+            document.getElementById('intensityAdvice').innerHTML = finalIntensityAdvice.replace(/\n/g, '<br>');
+            document.getElementById('comprehensiveAdvice').innerHTML = finalComprehensiveAdvice.replace(/\n/g, '<br>');
+        }
+
+        function resetExercise() {
+            currentSet = 1;
+            currentBreath = 1;
+            isPaused = false;
+            isAborted = false;
+            breathingPhase = 'inhale';
+            userFeedback = null;
+            clearTimeout(breathingTimer);
+            clearInterval(restTimer);
+            
+            // 🎮 퀴즈 시스템 초기화
+            currentQuizQuestion = 0;
+            quizCorrectAnswers = 0;
+            quizStartTime = null;
+            selectedQuestions = [];
+            clearTimeout(quizOfferTimer);
+            
+            // 🔥 새로운 기능: 리뷰 캐러셀 정리
+            if (reviewCarouselInterval) {
+                clearInterval(reviewCarouselInterval);
+            }
+            
+            // 모든 화면 숨기기
+            document.getElementById('countdownSection').style.display = 'block';
+            document.getElementById('breathingSection').style.display = 'none';
+            document.getElementById('restSection').style.display = 'none';
+            document.getElementById('quizOfferSection').style.display = 'none';
+            document.getElementById('quizProgressSection').style.display = 'none';
+            document.getElementById('quizRewardSection').style.display = 'none';
+        }
+
+        window.onload = function() {
+            loadUserData();
+            loadResistanceSettings();
+            updateBadgesDisplay();
+            
+            // 🔥 새로운 기능: 페이지 로드시 사회적 증명 데이터 업데이트
+            updateSocialProofData();
+            
+            // 🔥 새로운 기능: 메인화면 실시간 현황 주기적 업데이트 (2분마다)
+            setInterval(() => {
+                updateSocialProofData();
+            }, 120000);
+            // 🔥 새로운 기능: 온보딩 스와이프 초기화
+            initializeOnboardingSwipe();
+        };
+
+        // Service Worker 등록
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function() {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(function(registration) {
+                        console.log('✅ ServiceWorker 등록 성공:', registration.scope);
+                        registration.update();
+                    })
+                    .catch(function(error) {
+                        console.log('❌ ServiceWorker 등록 실패:', error);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
