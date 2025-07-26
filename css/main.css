@@ -1,0 +1,91 @@
+/* 숨트레이너 - 기본 스타일 (GitHub 웹 에디터에서 생성) */
+
+/* 다크모드 방지 */
+:root {
+    color-scheme: light !important;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    color-scheme: light !important;
+}
+
+body {
+    font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #F9FAFC !important;
+    min-height: 100vh;
+    color: #1E1E1E !important;
+    -webkit-color-scheme: light !important;
+    overflow-x: hidden;
+}
+
+/* 앱 컨테이너 */
+.app-container {
+    max-width: 420px;
+    width: 100%;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: #F9FAFC;
+    position: relative;
+    overflow: hidden;
+}
+
+.screen {
+    display: none;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* 메인 헤더 */
+.main-header {
+    padding: 20px;
+}
+
+.user-greeting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-avatar {
+    width: 48px;
+    height: 48px;
+    background: #EEF1F3;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.user-avatar img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.user-text h4 {
+    font-size: 14px;
+    font-weight: 400;
+    color: #1E1E1E;
+    margin-bottom: 2px;
+}
+
+.user-text h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1E1E1E;
+}
