@@ -1,7 +1,8 @@
-const CACHE_NAME = 'breath-trainer-v1.0.1';
+const CACHE_NAME = 'breath-trainer-v1.0.2';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/styles.css',
   '/manifest.json',
   '/icons/icon-192x192.png',
   '/icons/icon-512x512.png'
