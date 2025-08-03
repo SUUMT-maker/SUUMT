@@ -3,6 +3,14 @@
 // Apps Script URL (AI 조언만 사용)
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8iRnFGheIKcPUBkmSqOUAJ4_jPhSFRR593Ukfk1j6Da1oIPOkUlAboDdqr-CA2u29rw/exec';
 
+// 🚀 스마트 업데이트 알림 시스템
+const UPDATE_MESSAGES = {
+  '1.0.2': '코드 구조가 대폭 개선되어 더 빨라졌어요! ⚡',
+  '1.0.3': null, // 조용한 업데이트 (메시지 없음)
+  '1.0.4': '새로운 배지 시스템이 추가되었어요! 🏆',
+  '1.0.5': '퀴즈 기능이 더 재미있어졌어요! 🎮'
+};
+
 // 🔥 새로운 기능: 사회적 증명 데이터
 const SOCIAL_PROOF_REVIEWS = [
     {
@@ -860,13 +868,111 @@ window.onload = function() {
     initializeOnboardingSwipe();
 };
 
-// Service Worker 등록
+// 🚀 스마트 업데이트 알림 함수들
+
+// 현재 앱 버전 가져오기
+function getCurrentAppVersion() {
+    // manifest.json에서 버전 정보 가져오기
+    const manifestLink = document.querySelector('link[rel="manifest"]');
+    if (manifestLink) {
+        return fetch(manifestLink.href)
+            .then(response => response.json())
+            .then(manifest => manifest.version)
+            .catch(() => '1.0.2'); // 기본값
+    }
+    return Promise.resolve('1.0.2'); // 기본값
+}
+
+// 업데이트 토스트 표시
+function showUpdateToast() {
+    getCurrentAppVersion().then(currentVersion => {
+        const message = UPDATE_MESSAGES[currentVersion];
+        
+        if (message) {
+            createToast(message);
+            console.log('🎉 업데이트 알림 표시:', currentVersion);
+        } else {
+            console.log('🔇 조용한 업데이트:', currentVersion);
+        }
+    });
+}
+
+// 토스트 생성 및 표시
+function createToast(message) {
+    // 기존 토스트 제거
+    const existingToast = document.querySelector('.update-toast');
+    if (existingToast) {
+        existingToast.remove();
+    }
+    
+    const toast = document.createElement('div');
+    toast.className = 'update-toast';
+    toast.innerHTML = `
+        <div class="toast-content">
+            <span class="toast-icon">🎉</span>
+            <span class="toast-text">${message}</span>
+        </div>
+    `;
+    
+    // 토스트 스타일 적용
+    toast.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 16px 20px;
+        border-radius: 12px;
+        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
+        z-index: 10000;
+        transform: translateX(400px);
+        transition: transform 0.3s ease-out;
+        max-width: 300px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 14px;
+        line-height: 1.4;
+    `;
+    
+    document.body.appendChild(toast);
+    
+    // 슬라이드 인 애니메이션
+    setTimeout(() => {
+        toast.style.transform = 'translateX(0)';
+    }, 100);
+    
+    // 3초 후 자동 제거
+    setTimeout(() => {
+        toast.style.transform = 'translateX(400px)';
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 300);
+    }, 3000);
+}
+
+// Service Worker 등록 및 업데이트 감지
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
         navigator.serviceWorker.register('/sw.js')
             .then(function(registration) {
                 console.log('✅ ServiceWorker 등록 성공:', registration.scope);
-                registration.update();
+                
+                // 업데이트 감지
+                registration.addEventListener('updatefound', () => {
+                    console.log('🔄 새 Service Worker 감지됨');
+                });
+                
+                // 새 Service Worker가 제어권을 가질 때
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    console.log('⚡ 새 Service Worker 활성화됨');
+                    showUpdateToast();
+                });
+                
+                // 주기적 업데이트 확인
+                setInterval(() => {
+                    registration.update();
+                }, 60000); // 1분마다 확인
             })
             .catch(function(error) {
                 console.log('❌ ServiceWorker 등록 실패:', error);
