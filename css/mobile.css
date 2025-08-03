@@ -1,0 +1,201 @@
+/* 📱 모바일 최적화 */
+@media (max-width: 480px) {
+    .app-container {
+        max-width: 100%;
+    }
+
+    .container {
+        max-width: 95%;
+        width: 95%;
+        padding: 1.5rem;
+    }
+
+    .stats-grid {
+        padding: 0 16px;
+        gap: 12px;
+    }
+
+    .resistance-card {
+        margin: 0 16px 24px;
+        padding: 16px;
+    }
+
+    .chart-container {
+        margin: 0 16px 24px;
+        padding: 16px 16px 26px 16px;
+    }
+
+    .start-training-section {
+        padding: 0 16px 40px;
+    }
+
+    .resistance-controls {
+        gap: 12px;
+    }
+
+    .resistance-btn {
+        width: 32px;
+        height: 32px;
+        font-size: 16px;
+    }
+
+    .resistance-value {
+        font-size: 20px;
+    }
+
+    .breaths-indicators {
+        gap: 0.4rem;
+    }
+
+    .breath-indicator {
+        width: 12px;
+        height: 12px;
+    }
+
+    .feedback-emoji {
+        font-size: 1.4rem;
+    }
+
+    .achievement-crown {
+        font-size: 14px;
+        top: -20px;
+    }
+
+    .badges-grid {
+        grid-template-columns: repeat(5, 1fr);
+        overflow: visible;
+    }
+
+    .badges-system {
+        padding: 16px 16px 35px 16px;
+    }
+
+    .badge-slot {
+        width: 36px;
+        height: 36px;
+    }
+    
+    .badge-hint {
+        font-size: 8px;
+        padding: 3px 6px;
+        bottom: -30px;
+    }
+    
+    .badge-hint::before {
+        border-left: 3px solid transparent;
+        border-right: 3px solid transparent;
+        border-bottom: 3px solid rgba(0, 0, 0, 0.9);
+    }
+
+    /* 사회적 증명 모바일 최적화 */
+    .social-proof-section {
+        margin: 16px 16px 20px;
+    }
+
+    .live-stats {
+        gap: 12px;
+    }
+
+    .live-stat {
+        padding: 12px;
+    }
+
+    .live-stat-number {
+        font-size: 20px;
+    }
+
+    .reviews-carousel {
+        padding: 12px;
+        height: 120px;
+    }
+
+    .review-text {
+        font-size: 13px;
+    }
+
+    .live-users-badge {
+        font-size: 11px;
+        padding: 4px 8px;
+    }
+
+    /* 🎮 퀴즈 시스템 모바일 최적화 */
+    .quiz-offer-card {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .quiz-offer-title {
+        font-size: 1.2rem;
+    }
+
+    .quiz-offer-buttons {
+        gap: 0.8rem;
+    }
+
+    .quiz-offer-primary,
+    .quiz-offer-secondary {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+
+    .quiz-question-card {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .quiz-question {
+        font-size: 1.1rem;
+        margin-bottom: 1.2rem;
+    }
+
+    .quiz-option {
+        padding: 0.8rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .quiz-explanation {
+        padding: 0.8rem;
+        font-size: 0.8rem;
+    }
+
+    .quiz-reward-card {
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .quiz-reward-title {
+        font-size: 1.4rem;
+    }
+
+    .quiz-product-showcase {
+        padding: 1.2rem;
+    }
+
+    .quiz-product-image {
+        width: 80px;
+        height: 80px;
+        font-size: 1.5rem;
+    }
+
+    .quiz-product-name {
+        font-size: 1rem;
+    }
+
+    .quiz-product-price-line {
+        gap: 0.4rem;
+    }
+
+    .quiz-discount-price {
+        font-size: 1.1rem;
+    }
+
+    .quiz-dual-buttons {
+        gap: 0.8rem;
+    }
+
+    .quiz-check-button,
+    .quiz-continue-button {
+        padding: 0.8rem 1.5rem;
+        font-size: 1rem;
+    }
+}

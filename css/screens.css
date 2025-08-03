@@ -1,0 +1,518 @@
+/* 📱 화면별 스타일 */
+
+/* 모던 컨테이너 디자인 */
+.app-container {
+    max-width: 420px;
+    width: 100%;
+    margin: 0 auto;
+    min-height: 100vh;
+    background: #F9FAFC;
+    position: relative;
+    overflow: hidden;
+}
+
+/* 화면 기본 스타일 */
+.screen {
+    display: none;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.screen.active {
+    display: block;
+}
+
+/* 메인 헤더 */
+.main-header {
+    padding: 20px;
+}
+
+.user-greeting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.user-avatar {
+    width: 48px;
+    height: 48px;
+    background: #EEF1F3;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.user-avatar img {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+}
+
+.user-text h4 {
+    font-size: 14px;
+    font-weight: 400;
+    color: #1E1E1E;
+    margin-bottom: 2px;
+}
+
+.user-text h3 {
+    font-size: 16px;
+    font-weight: 500;
+    color: #1E1E1E;
+}
+
+/* 실시간 현황 배지 */
+.live-users-badge {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    box-shadow: 0 2px 8px rgba(79, 172, 254, 0.3);
+    animation: liveGlow 2s ease-in-out infinite;
+}
+
+.live-indicator {
+    width: 6px;
+    height: 6px;
+    background: #fff;
+    border-radius: 50%;
+    animation: livePulse 1.5s ease-in-out infinite;
+}
+
+/* 호흡 원형 */
+.breathing-circle {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #667eea, #764ba2) !important;
+    margin: 1.5rem auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white !important;
+    font-size: 1.1rem;
+    font-weight: bold;
+    box-shadow: 0 0 30px rgba(102, 126, 234, 0.3);
+    transform: scale(0.7);
+}
+
+.breathing-circle.inhale {
+    transform: scale(1.2);
+    box-shadow: 0 0 50px rgba(102, 126, 234, 0.6);
+    transition: all 4s ease;
+}
+
+.breathing-circle.hold {
+    transform: scale(1.2);
+    box-shadow: 0 0 50px rgba(102, 126, 234, 0.6);
+    transition: none;
+}
+
+.breathing-circle.exhale {
+    transform: scale(0.7);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+    transition: all 4s ease;
+}
+
+.breathing-circle.exhale-hold {
+    transform: scale(0.7);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+    transition: none;
+}
+
+/* 카운트다운 */
+.countdown {
+    font-size: 3.5rem;
+    font-weight: bold;
+    color: #667eea !important;
+    margin: 1.5rem 0;
+    text-align: center;
+}
+
+/* 운동 화면 컨테이너 */
+.container {
+    background: white;
+    border-radius: 20px;
+    padding: 2rem;
+    margin: 0 auto;
+    max-width: 400px;
+    width: 95%;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+/* 결과화면 전용 컨테이너 레이아웃 */
+#resultScreen .container {
+    position: static;
+    transform: none;
+    margin: 2rem auto;
+    min-height: auto;
+    overflow: visible;
+}
+
+#resultScreen {
+    padding: 2rem 0;
+}
+
+.container h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #333;
+    font-size: 1.5rem;
+}
+
+.container .celebration {
+    text-align: center;
+}
+
+/* 카운트다운 섹션 완벽한 중앙정렬 */
+#countdownSection {
+    text-align: center;
+}
+
+#countdownSection h2 {
+    text-align: center;
+    margin-bottom: 1.5rem;
+    color: #333;
+    font-size: 1.4rem;
+}
+
+/* 진행도 컨테이너 */
+.progress-container {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.95) !important;
+    border-radius: 15px;
+    border-left: 4px solid #667eea;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.1);
+}
+
+/* 세트 진행도 */
+.sets-progress {
+    margin-bottom: 2rem;
+}
+
+.progress-label {
+    font-size: 1rem;
+    color: #333 !important;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    text-align: center;
+}
+
+.sets-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 1.5rem;
+    margin-bottom: 0.8rem;
+}
+
+.set-indicator {
+    width: 80px;
+    height: 12px;
+    background: rgba(102, 126, 234, 0.2);
+    border-radius: 6px;
+    position: relative;
+    overflow: hidden;
+}
+
+.set-indicator.active {
+    background: linear-gradient(90deg, #667eea, #764ba2);
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.set-indicator.current {
+    background: rgba(102, 126, 234, 0.5);
+    animation: setGlow 2s ease-in-out infinite;
+}
+
+/* 호흡 진행도 */
+.breaths-progress {
+    margin-bottom: 1rem;
+}
+
+.breaths-indicators {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 0.5rem;
+    justify-items: center;
+    margin-bottom: 0.8rem;
+    max-width: 100%;
+}
+
+.breath-indicator {
+    width: 16px;
+    height: 16px;
+    background: rgba(102, 126, 234, 0.2);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+.breath-indicator.completed {
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.4);
+    transform: scale(1.1);
+}
+
+.breath-indicator.current {
+    background: #4facfe;
+    animation: breathGlow 1s ease-in-out infinite;
+    transform: scale(1.2);
+}
+
+.progress-numbers {
+    text-align: center;
+    font-size: 0.9rem;
+    color: #666 !important;
+    font-weight: 500;
+}
+
+/* 휴식시간 텍스트 중앙정렬 개선 */
+#restSection p {
+    text-align: center !important;
+    color: #666 !important;
+    margin: 1rem 0 !important;
+    font-size: 1rem !important;
+    line-height: 1.5 !important;
+}
+
+/* 결과 화면 */
+.celebration {
+    font-size: 2.5rem;
+    margin: 1rem 0;
+    text-align: center;
+}
+
+.achievement-badge {
+    background: linear-gradient(45deg, #4facfe, #00f2fe);
+    color: white;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    margin: 0.3rem;
+    display: inline-block;
+}
+
+/* 모달 스타일 */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-overlay.show {
+    display: flex;
+    animation: fadeIn 0.3s ease-out;
+}
+
+.modal {
+    background: white;
+    border-radius: 20px;
+    padding: 1.5rem;
+    max-width: 300px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+    animation: scaleIn 0.3s ease-out;
+}
+
+.modal h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.modal p {
+    color: #666;
+    margin-bottom: 1.5rem;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: center;
+}
+
+/* 로딩 스피너 */
+.loading {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top-color: #fff;
+    animation: spin 1s ease-in-out infinite;
+}
+
+/* 📊 통계 섹션 */
+.stats-section {
+    margin-bottom: 24px;
+}
+
+/* 📊 섹션 헤더 개선 */
+.section-header {
+    background: white;
+    border: 1px solid #E7E7E7;
+    border-radius: 16px;
+    padding: 16px 20px;
+    margin: 0 20px 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border-left: 4px solid #667eea;
+}
+
+.section-title {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1E1E1E;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.section-icon {
+    font-size: 22px;
+}
+
+.section-subtitle {
+    font-size: 13px;
+    color: #666;
+    margin-top: 4px;
+    font-weight: 400;
+}
+
+/* 📱 통계 카드 그리드 */
+.stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding: 0 20px;
+    margin-bottom: 24px;
+}
+
+/* 📈 차트 섹션 */
+.chart-section {
+    margin-bottom: 24px;
+}
+
+/* 🎯 트레이닝 시작 버튼 */
+.start-training-section {
+    padding: 0 20px 40px;
+}
+
+/* 🔥 새로운 기능: 사회적 증명 섹션 (결과화면용) */
+.social-proof-section {
+    margin: 20px 20px 24px;
+}
+
+/* 휴식 진행도 텍스트 */
+#restProgressText {
+    text-align: center !important;
+    font-size: 1.1rem !important;
+    margin: 1rem 0 !important;
+    color: #333 !important;
+    font-weight: 600;
+}
+
+/* 🏆 결과 화면 레이아웃 개선 */
+.result-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.result-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 1.5rem;
+}
+
+.result-stat-card {
+    background: white;
+    border: 1px solid #E7E7E7;
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.result-stat-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.result-stat-title {
+    font-size: 13px;
+    color: #666;
+    font-weight: 500;
+}
+
+.result-stat-icon {
+    font-size: 14px;
+}
+
+.result-stat-value {
+    font-size: 20px;
+    font-weight: bold;
+    color: #1E1E1E;
+}
+
+.result-content {
+    text-align: left;
+    margin: 1.5rem 0;
+}
+
+.result-section {
+    background: white;
+    border-radius: 12px;
+    padding: 1.2rem;
+    margin: 1rem 0;
+    border-left: 4px solid #667eea;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.result-section h4 {
+    color: #333;
+    margin-bottom: 0.8rem;
+    font-size: 1.2rem;
+}
+
+.result-section p {
+    color: #555;
+    line-height: 1.8;
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.result-section strong {
+    color: #333;
+    font-weight: 600;
+}
