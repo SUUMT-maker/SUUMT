@@ -914,35 +914,11 @@ function createToast(message) {
         </div>
     `;
     
-    // 토스트 스타일 적용
-    toast.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 16px 20px;
-        border-radius: 12px;
-        box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
-        z-index: 10000;
-        transform: translateX(400px);
-        transition: transform 0.3s ease-out;
-        max-width: 300px;
-        font-family: 'Space Grotesk', sans-serif;
-        font-size: 14px;
-        line-height: 1.4;
-    `;
-    
     document.body.appendChild(toast);
-    
-    // 슬라이드 인 애니메이션
-    setTimeout(() => {
-        toast.style.transform = 'translateX(0)';
-    }, 100);
     
     // 3초 후 자동 제거
     setTimeout(() => {
-        toast.style.transform = 'translateX(400px)';
+        toast.classList.add('slide-out');
         setTimeout(() => {
             if (toast.parentNode) {
                 toast.remove();
