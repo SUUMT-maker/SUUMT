@@ -32,10 +32,7 @@ function startBreathing() {
     document.getElementById('breathingSection').style.display = 'block';
     
     const circle = document.getElementById('breathingCircle');
-    const exerciseScreen = document.getElementById('exerciseScreen');
-    
     circle.className = 'breathing-circle exhale';
-    exerciseScreen.className = 'screen exhale';
     
     initializeProgressIndicators();
     
@@ -51,14 +48,12 @@ function breathingCycle() {
 
     const circle = document.getElementById('breathingCircle');
     const circleText = document.getElementById('circleText');
-    const exerciseScreen = document.getElementById('exerciseScreen');
 
     updateProgressIndicators();
 
     if (breathingPhase === 'inhale') {
         circleText.textContent = '깊게 들이마셔요';
         circle.className = 'breathing-circle inhale';
-        exerciseScreen.className = 'screen inhale';
         
         breathingTimer = setTimeout(() => {
             breathingPhase = 'hold';
@@ -68,7 +63,6 @@ function breathingCycle() {
     } else if (breathingPhase === 'hold') {
         circleText.textContent = '잠시 멈추세요';
         circle.className = 'breathing-circle hold';
-        exerciseScreen.className = 'screen hold';
         
         breathingTimer = setTimeout(() => {
             breathingPhase = 'exhale';
@@ -78,7 +72,6 @@ function breathingCycle() {
     } else if (breathingPhase === 'exhale') {
         circleText.textContent = '끝까지 내쉬어요';
         circle.className = 'breathing-circle exhale';
-        exerciseScreen.className = 'screen exhale';
         
         breathingTimer = setTimeout(() => {
             breathingPhase = 'exhale-hold';
@@ -88,7 +81,6 @@ function breathingCycle() {
     } else if (breathingPhase === 'exhale-hold') {
         circleText.textContent = '잠시 멈추세요';
         circle.className = 'breathing-circle exhale-hold';
-        exerciseScreen.className = 'screen exhale-hold';
         
         breathingTimer = setTimeout(() => {
             currentBreath++;
@@ -146,10 +138,7 @@ function startNextSet() {
     document.getElementById('breathingSection').style.display = 'block';
     
     const circle = document.getElementById('breathingCircle');
-    const exerciseScreen = document.getElementById('exerciseScreen');
-    
     circle.className = 'breathing-circle exhale';
-    exerciseScreen.className = 'screen exhale';
     
     initializeProgressIndicators();
     

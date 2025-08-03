@@ -110,27 +110,7 @@
     transform: scale(0.7);
 }
 
-/* 🫁 안전한 배경 호흡 애니메이션 */
-#exerciseScreen {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    transition: background 4s ease;
-}
 
-#exerciseScreen.inhale {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-#exerciseScreen.hold {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-#exerciseScreen.exhale {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-}
-
-#exerciseScreen.exhale-hold {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-}
 
 /* 호흡 원 애니메이션 (기본 버전으로 복원) */
 .breathing-circle.inhale {
