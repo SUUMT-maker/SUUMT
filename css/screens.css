@@ -110,43 +110,29 @@
     transform: scale(0.7);
 }
 
-/* 🫁 전체 화면 호흡 애니메이션 적용 */
-#exerciseScreen {
-    background: transparent;
-    transition: background 4s ease;
-}
-
-#exerciseScreen.inhale {
-    animation: screenInhale 4s ease forwards;
-}
-
-#exerciseScreen.hold {
-    animation: screenHold 2s ease forwards;
-}
-
-#exerciseScreen.exhale {
-    animation: screenExhale 4s ease forwards;
-}
-
-#exerciseScreen.exhale-hold {
-    animation: screenHold 2s ease forwards;
-}
-
-/* 호흡 원 애니메이션 개선 */
+/* 호흡 원 애니메이션 (기본 버전으로 복원) */
 .breathing-circle.inhale {
-    animation: circleInhale 4s ease forwards;
+    transform: scale(1.2);
+    box-shadow: 0 0 50px rgba(102, 126, 234, 0.6);
+    transition: all 4s ease;
 }
 
 .breathing-circle.hold {
-    animation: circleHold 2s ease forwards;
+    transform: scale(1.2);
+    box-shadow: 0 0 50px rgba(102, 126, 234, 0.6);
+    transition: none;
 }
 
 .breathing-circle.exhale {
-    animation: circleExhale 4s ease forwards;
+    transform: scale(0.7);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+    transition: all 4s ease;
 }
 
 .breathing-circle.exhale-hold {
-    animation: circleHold 2s ease forwards;
+    transform: scale(0.7);
+    box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
+    transition: none;
 }
 
 /* 카운트다운 */
@@ -160,8 +146,7 @@
 
 /* 운동 화면 컨테이너 */
 .container {
-    background: rgba(255, 255, 255, 0.95);
-    backdrop-filter: blur(10px);
+    background: white;
     border-radius: 20px;
     padding: 2rem;
     margin: 0 auto;
@@ -172,7 +157,6 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    z-index: 10;
 }
 
 /* 결과화면 전용 컨테이너 레이아웃 */
