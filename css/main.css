@@ -1,6 +1,18 @@
 /* 🌙 다크모드 강제 방지 */
 :root {
     color-scheme: light !important;
+    
+    /* 🌈 전체 화면 그라데이션 색상 */
+    --inhale-gradient-start: #8B5CF6;
+    --inhale-gradient-end: #3B82F6;
+    --exhale-gradient-start: #3B82F6;
+    --exhale-gradient-end: #06B6D4;
+    
+    /* ⏱️ 애니메이션 타이밍 */
+    --breathing-duration: 3s;
+    --hold-duration: 1s;
+    --color-transition: 0.8s;
+    --transition-smooth: cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * {
