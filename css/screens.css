@@ -112,7 +112,7 @@
 
 /* 🫁 전체 화면 호흡 애니메이션 적용 */
 #exerciseScreen {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 0%);
+    background: transparent;
     transition: background 4s ease;
 }
 
@@ -160,7 +160,8 @@
 
 /* 운동 화면 컨테이너 */
 .container {
-    background: white;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
     border-radius: 20px;
     padding: 2rem;
     margin: 0 auto;
@@ -171,6 +172,7 @@
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
+    z-index: 10;
 }
 
 /* 결과화면 전용 컨테이너 레이아웃 */
