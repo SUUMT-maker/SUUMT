@@ -110,28 +110,43 @@
     transform: scale(0.7);
 }
 
+/* 🫁 전체 화면 호흡 애니메이션 적용 */
+#exerciseScreen {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 0%);
+    transition: background 4s ease;
+}
+
+#exerciseScreen.inhale {
+    animation: screenInhale 4s ease forwards;
+}
+
+#exerciseScreen.hold {
+    animation: screenHold 2s ease forwards;
+}
+
+#exerciseScreen.exhale {
+    animation: screenExhale 4s ease forwards;
+}
+
+#exerciseScreen.exhale-hold {
+    animation: screenHold 2s ease forwards;
+}
+
+/* 호흡 원 애니메이션 개선 */
 .breathing-circle.inhale {
-    transform: scale(1.2);
-    box-shadow: 0 0 50px rgba(102, 126, 234, 0.6);
-    transition: all 4s ease;
+    animation: circleInhale 4s ease forwards;
 }
 
 .breathing-circle.hold {
-    transform: scale(1.2);
-    box-shadow: 0 0 50px rgba(102, 126, 234, 0.6);
-    transition: none;
+    animation: circleHold 2s ease forwards;
 }
 
 .breathing-circle.exhale {
-    transform: scale(0.7);
-    box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
-    transition: all 4s ease;
+    animation: circleExhale 4s ease forwards;
 }
 
 .breathing-circle.exhale-hold {
-    transform: scale(0.7);
-    box-shadow: 0 0 20px rgba(102, 126, 234, 0.2);
-    transition: none;
+    animation: circleHold 2s ease forwards;
 }
 
 /* 카운트다운 */
