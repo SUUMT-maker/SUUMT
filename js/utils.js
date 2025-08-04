@@ -32,3 +32,10 @@ function getWeekEndDate() {
     endDate.setHours(23, 59, 59, 999);
     return endDate;
 }
+
+function isDateInCurrentWeek(date) {
+    const checkDate = new Date(date);
+    const weekStart = getWeekStartDate();
+    const weekEnd = getWeekEndDate();
+    return checkDate >= weekStart && checkDate <= weekEnd;
+}

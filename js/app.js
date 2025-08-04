@@ -185,6 +185,7 @@ let userFeedback = null;
 let currentQuizQuestion = 0;
 let quizCorrectAnswers = 0;
 let selectedQuestions = []; // 선택된 2문제
+let solvedQuestions = []; // 지금까지 푼 문제들 (배지용)
 let quizStartTime = null;
 
 // 🔥 리뷰 캐러셀 전역 변수
