@@ -113,7 +113,7 @@ function selectRandomQuestions() {
 // 🎮 새로운 기능: 퀴즈 제안 화면 (타이머 연속성 개선)
 function showQuizOffer() {
     document.getElementById('restSection').style.display = 'none';
-    document.getElementById('quizOfferSection').style.display = 'block';
+    document.getElementById('quizOfferSection').classList.add('active');
     
     // GA 이벤트: 퀴즈 제안 노출
     gtag('event', 'quiz_offer_shown', {
@@ -124,8 +124,8 @@ function showQuizOffer() {
 
 // 🎮 새로운 기능: 퀴즈 시작
 function startQuiz() {
-    document.getElementById('quizOfferSection').style.display = 'none';
-    document.getElementById('quizProgressSection').style.display = 'block';
+    document.getElementById('quizOfferSection').classList.remove('active');
+    document.getElementById('quizProgressSection').classList.add('active');
     
     // 퀴즈 상태 초기화
     currentQuizQuestion = 0;
@@ -241,8 +241,8 @@ function selectQuizAnswer(selectedIndex, questionIndex) {
 
 // 🎮 새로운 기능: 퀴즈 결과 화면
 function showQuizResult() {
-    document.getElementById('quizProgressSection').style.display = 'none';
-    document.getElementById('quizRewardSection').style.display = 'block';
+    document.getElementById('quizProgressSection').classList.remove('active');
+    document.getElementById('quizRewardSection').classList.add('active');
     
     const quizEndTime = getCurrentUserTime();
     const quizDuration = Math.floor((quizEndTime - quizStartTime) / 1000);
@@ -347,7 +347,7 @@ function generateShopUrl() {
 // 🎮 새로운 기능: 퀴즈 후 다음 세트로
 function continueToNextSet() {
     // 퀴즈 관련 화면 모두 숨기기
-    document.getElementById('quizRewardSection').style.display = 'none';
+    document.getElementById('quizRewardSection').classList.remove('active');
     
     // 기존 휴식 타이머 정리
     clearInterval(restTimer);
@@ -359,7 +359,7 @@ function continueToNextSet() {
 
 // 🎮 새로운 기능: 휴식만 선택
 function chooseRestOnly() {
-    document.getElementById('quizOfferSection').style.display = 'none';
+    document.getElementById('quizOfferSection').classList.remove('active');
     
     // GA 이벤트: 휴식만 선택
     gtag('event', 'quiz_declined', {

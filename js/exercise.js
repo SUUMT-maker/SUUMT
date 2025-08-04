@@ -126,9 +126,15 @@ function skipRest() {
 function startNextSet() {
     // 🔧 모든 휴식/퀴즈 관련 화면 숨기기
     document.getElementById('restSection').style.display = 'none';
-    document.getElementById('quizOfferSection').style.display = 'none';
-    document.getElementById('quizProgressSection').style.display = 'none';
-    document.getElementById('quizRewardSection').style.display = 'none';
+    
+    // 퀴즈 화면들 클래스 기반으로 숨김
+    const quizScreens = ['quizOfferSection', 'quizProgressSection', 'quizRewardSection'];
+    quizScreens.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.classList.remove('active');
+        }
+    });
     
     // 🔧 모든 타이머 정리
     stopGlobalRestTimer();
@@ -308,9 +314,15 @@ function resetExercise() {
     document.getElementById('countdownSection').style.display = 'block';
     document.getElementById('breathingSection').style.display = 'none';
     document.getElementById('restSection').style.display = 'none';
-    document.getElementById('quizOfferSection').style.display = 'none';
-    document.getElementById('quizProgressSection').style.display = 'none';
-    document.getElementById('quizRewardSection').style.display = 'none';
+    
+    // 퀴즈 화면들 클래스 기반으로 숨김
+    const quizScreens = ['quizOfferSection', 'quizProgressSection', 'quizRewardSection'];
+    quizScreens.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.classList.remove('active');
+        }
+    });
 }
 
 // 🔧 전역 휴식 타이머 관련 함수들

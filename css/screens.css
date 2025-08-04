@@ -22,6 +22,17 @@
     display: block;
 }
 
+/* 퀴즈 화면 기본 스타일 */
+.quiz-screen {
+    display: none;
+    width: 100%;
+    min-height: 100vh;
+}
+
+.quiz-screen.active {
+    display: block;
+}
+
 /* 메인 헤더 */
 .main-header {
     padding: 20px;
