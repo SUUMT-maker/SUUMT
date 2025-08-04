@@ -341,6 +341,9 @@ function startGlobalRestTimer() {
     console.log('🔧 startGlobalRestTimer 함수 시작');
     stopGlobalRestTimer(); // 기존 타이머 정리
     
+    // 초기 카운트다운 값 설정 (2:00 형식으로 표시)
+    updateAllCountdowns();
+    
     console.log('⏰ 휴식 타이머 시작 - 남은 시간:', globalRestTime, '초');
     
     globalRestTimer = setInterval(() => {
@@ -471,8 +474,13 @@ function showNormalRest() {
     }
     
     // 개별 타이머 사용 (원본과 동일)
-    let restTime = parseInt(document.getElementById('restCountdown').textContent) || 120;
+    let restTime = 120; // 2분
     const restCountdownEl = document.getElementById('restCountdown');
+    
+    // 초기 카운트다운 값 설정 (2:00 형식)
+    const initialMinutes = Math.floor(restTime / 60);
+    const initialSeconds = restTime % 60;
+    restCountdownEl.textContent = `${initialMinutes}:${initialSeconds.toString().padStart(2, '0')}`;
     
     restTimer = setInterval(() => {
         if (isAborted) {
@@ -480,8 +488,12 @@ function showNormalRest() {
             return;
         }
         
-        restCountdownEl.textContent = restTime;
         restTime--;
+        
+        // 2:00 형식으로 표시
+        const minutes = Math.floor(restTime / 60);
+        const seconds = restTime % 60;
+        restCountdownEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
         
         if (restTime < 0) {
             clearInterval(restTimer);
