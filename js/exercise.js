@@ -109,6 +109,11 @@ function startRest() {
     stopGlobalRestTimer();
     clearInterval(restTimer);
     
+    // ⏰ 휴식 시간 초기화 및 타이머 즉시 시작
+    globalRestTime = 120; // 2분
+    console.log('⏰ 휴식 타이머 즉시 시작:', globalRestTime, '초');
+    startGlobalRestTimer();
+    
     // 🎮 퀴즈 시스템이 활성화되어 있으면 퀴즈 제안부터 시작
     if (QUIZ_CONFIG.QUIZ_ENABLED) {
         showRestIntro();
@@ -360,53 +365,50 @@ function startGlobalRestTimer() {
     }, 1000);
 }
 
+// 🕐 시간 포맷팅 함수
+function formatTime(seconds) {
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = seconds % 60;
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
 function updateAllCountdowns() {
+    console.log('⏰ 카운트다운 업데이트:', globalRestTime, '→', formatTime(globalRestTime));
+    
     // 메인 화면의 카운트다운 업데이트
     const mainCountdown = document.getElementById('mainRestCountdown');
     if (mainCountdown) {
-        const minutes = Math.floor(globalRestTime / 60);
-        const seconds = globalRestTime % 60;
-        mainCountdown.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        mainCountdown.textContent = formatTime(globalRestTime);
     }
     
     // 운동 화면의 카운트다운 업데이트
     const exerciseCountdown = document.getElementById('exerciseRestCountdown');
     if (exerciseCountdown) {
-        const minutes = Math.floor(globalRestTime / 60);
-        const seconds = globalRestTime % 60;
-        exerciseCountdown.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        exerciseCountdown.textContent = formatTime(globalRestTime);
     }
     
     // 휴식 화면의 메인 카운트다운 업데이트
     const restCountdown = document.getElementById('restCountdown');
     if (restCountdown) {
-        const minutes = Math.floor(globalRestTime / 60);
-        const seconds = globalRestTime % 60;
-        restCountdown.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        restCountdown.textContent = formatTime(globalRestTime);
     }
     
     // 퀴즈 제안 화면의 카운트다운 업데이트
     const quizOfferCountdown = document.getElementById('quizOfferCountdown');
     if (quizOfferCountdown) {
-        const minutes = Math.floor(globalRestTime / 60);
-        const seconds = globalRestTime % 60;
-        quizOfferCountdown.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        quizOfferCountdown.textContent = formatTime(globalRestTime);
     }
     
     // 퀴즈 진행 화면의 카운트다운 업데이트
     const quizCountdown = document.getElementById('quizCountdown');
     if (quizCountdown) {
-        const minutes = Math.floor(globalRestTime / 60);
-        const seconds = globalRestTime % 60;
-        quizCountdown.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        quizCountdown.textContent = formatTime(globalRestTime);
     }
     
     // 퀴즈 보상 화면의 카운트다운 업데이트
     const quizRewardCountdown = document.getElementById('quizRewardCountdown');
     if (quizRewardCountdown) {
-        const minutes = Math.floor(globalRestTime / 60);
-        const seconds = globalRestTime % 60;
-        quizRewardCountdown.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        quizRewardCountdown.textContent = formatTime(globalRestTime);
     }
 }
 
@@ -430,10 +432,6 @@ function showRestIntro() {
     if (restProgressEl) {
         restProgressEl.textContent = `${currentSet - 1}세트 완료`;
     }
-    
-    // 🔧 전역 타이머 시작 (원본과 동일)
-    globalRestTime = 120; // 2분
-    startGlobalRestTimer();
     
     // GA 이벤트: 휴식 시작 (원본과 동일)
     gtag('event', 'rest_started', {
@@ -473,41 +471,6 @@ function showNormalRest() {
         restProgressEl.textContent = `${currentSet - 1}세트 완료`;
     }
     
-    // 🔧 전역 타이머 정리 (개별 타이머로 전환)
-    stopGlobalRestTimer();
-    
-    // 개별 타이머 사용 (원본과 동일) - 전역 타이머의 남은 시간을 이어받음
-    let restTime = 120; // 기본값
-    const restCountdownText = document.getElementById('restCountdown').textContent;
-    
-    // "1:44" 형식을 초 단위로 변환
-    if (restCountdownText.includes(':')) {
-        const [minutes, seconds] = restCountdownText.split(':').map(Number);
-        restTime = minutes * 60 + seconds;
-    } else {
-        restTime = parseInt(restCountdownText) || 120;
-    }
-    
-    const restCountdownEl = document.getElementById('restCountdown');
-    
-    restTimer = setInterval(() => {
-        if (isAborted) {
-            clearInterval(restTimer);
-            return;
-        }
-        
-        restTime--;
-        
-        // 2:00 형식으로 표시
-        const minutes = Math.floor(restTime / 60);
-        const seconds = restTime % 60;
-        restCountdownEl.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        
-        if (restTime < 0) {
-            clearInterval(restTimer);
-            startNextSet();
-        }
-    }, 1000);
-    
-    console.log('⏰ 휴식 타이머 시작됨 (개별 타이머) - 남은 시간:', restTime, '초');
+    // 전역 타이머는 이미 startRest에서 시작됨
+    console.log('⏰ 전역 휴식 타이머 계속 사용 - 남은 시간:', globalRestTime, '초');
 }

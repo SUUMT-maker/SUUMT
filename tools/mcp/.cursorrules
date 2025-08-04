@@ -1,0 +1,16 @@
+# Cursor IDE MCP 설정
+# Supabase 공식 MCP 서버 연동
+
+# MCP 서버 설정 (공식 Supabase MCP 서버 사용)
+mcpServers:
+  supabase:
+    command: npx
+    args: [
+      "-y",
+      "@supabase/mcp-server-supabase@latest",
+      "--access-token",
+      "<sbp_c6deddbc3fa378e9fc9483b9a6fe02ff20e6cf93>"
+    ]
+
+# MCP 설정 활성화
+enableMCP: true 
