@@ -112,8 +112,16 @@ function selectRandomQuestions() {
 
 // 🎮 새로운 기능: 퀴즈 제안 화면 (타이머 연속성 개선)
 function showQuizOffer() {
+    console.log('🎮 showQuizOffer 함수 시작');
+    
     document.getElementById('restSection').style.display = 'none';
     document.getElementById('quizOfferSection').classList.add('active');
+    
+    // 타이머 시작 (5초 대기 후 선택 카드가 표시되므로)
+    globalRestTime = 120; // 2분
+    startGlobalRestTimer();
+    
+    console.log('⏰ 퀴즈 제안 타이머 시작됨');
     
     // GA 이벤트: 퀴즈 제안 노출
     gtag('event', 'quiz_offer_shown', {
@@ -124,6 +132,8 @@ function showQuizOffer() {
 
 // 🎮 새로운 기능: 퀴즈 시작
 function startQuiz() {
+    console.log('🎮 startQuiz 함수 시작');
+    
     document.getElementById('quizOfferSection').classList.remove('active');
     document.getElementById('quizProgressSection').classList.add('active');
     
@@ -134,6 +144,12 @@ function startQuiz() {
     
     // 🎯 랜덤 2문제 선택
     selectRandomQuestions();
+    
+    // 타이머 시작
+    globalRestTime = 120; // 2분
+    startGlobalRestTimer();
+    
+    console.log('⏰ 퀴즈 타이머 시작됨');
     
     // GA 이벤트: 퀴즈 시작
     gtag('event', 'quiz_started', {
@@ -346,12 +362,16 @@ function generateShopUrl() {
 
 // 🎮 새로운 기능: 퀴즈 후 다음 세트로
 function continueToNextSet() {
+    console.log('🎮 continueToNextSet 함수 시작');
+    
     // 퀴즈 관련 화면 모두 숨기기
     document.getElementById('quizRewardSection').classList.remove('active');
     
     // 기존 휴식 타이머 정리
-    clearInterval(restTimer);
+    stopGlobalRestTimer();
     clearTimeout(quizOfferTimer);
+    
+    console.log('⏰ 퀴즈 타이머 정리 완료');
     
     // 다음 세트 시작
     startNextSet();
@@ -359,7 +379,15 @@ function continueToNextSet() {
 
 // 🎮 새로운 기능: 휴식만 선택
 function chooseRestOnly() {
+    console.log('🎮 chooseRestOnly 함수 시작');
+    
     document.getElementById('quizOfferSection').classList.remove('active');
+    
+    // 타이머 시작
+    globalRestTime = 120; // 2분
+    startGlobalRestTimer();
+    
+    console.log('⏰ 휴식 타이머 시작됨');
     
     // GA 이벤트: 휴식만 선택
     gtag('event', 'quiz_declined', {

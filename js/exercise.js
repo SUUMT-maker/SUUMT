@@ -118,12 +118,21 @@ function startRest() {
 }
 
 function skipRest() {
+    console.log('🔧 skipRest 함수 시작');
+    
     stopGlobalRestTimer(); // 🔧 전역 타이머 정리
+    clearTimeout(quizOfferTimer); // 퀴즈 제안 타이머도 정리
+    
     incrementSkippedRestCount(); // 🎮 배지 조건용 카운트
+    
+    console.log('⏰ 휴식 타이머 건너뛰기 완료');
+    
     startNextSet();
 }
 
 function startNextSet() {
+    console.log('🔧 startNextSet 함수 시작');
+    
     // 🔧 모든 휴식/퀴즈 관련 화면 숨기기
     document.getElementById('restSection').style.display = 'none';
     
@@ -139,6 +148,8 @@ function startNextSet() {
     // 🔧 모든 타이머 정리
     stopGlobalRestTimer();
     clearTimeout(quizOfferTimer);
+    
+    console.log('⏰ 모든 타이머 정리 완료');
     
     // 🚀 호흡 화면 표시
     document.getElementById('breathingSection').style.display = 'block';
@@ -289,6 +300,8 @@ function updateProgressIndicators() {
 }
 
 function resetExercise() {
+    console.log('🔧 resetExercise 함수 시작');
+    
     currentSet = 1;
     currentBreath = 1;
     isPaused = false;
@@ -304,6 +317,9 @@ function resetExercise() {
     quizStartTime = null;
     selectedQuestions = [];
     clearTimeout(quizOfferTimer);
+    
+    // 🔧 전역 휴식 타이머 정리
+    stopGlobalRestTimer();
     
     // 🔥 새로운 기능: 리뷰 캐러셀 정리
     if (reviewCarouselInterval) {
@@ -323,6 +339,8 @@ function resetExercise() {
             element.classList.remove('active');
         }
     });
+    
+    console.log('🔧 운동 상태 초기화 완료');
 }
 
 // 🔧 전역 휴식 타이머 관련 함수들
@@ -334,13 +352,19 @@ function stopGlobalRestTimer() {
 }
 
 function startGlobalRestTimer() {
+    console.log('🔧 startGlobalRestTimer 함수 시작');
     stopGlobalRestTimer(); // 기존 타이머 정리
+    
+    console.log('⏰ 휴식 타이머 시작 - 남은 시간:', globalRestTime, '초');
     
     globalRestTimer = setInterval(() => {
         globalRestTime--;
         updateAllCountdowns();
         
+        console.log('⏰ 휴식 타이머 틱:', globalRestTime, '초');
+        
         if (globalRestTime <= 0) {
+            console.log('⏰ 휴식 타이머 완료 - 다음 세트 시작');
             stopGlobalRestTimer();
             startNextSet();
         }
@@ -363,20 +387,87 @@ function updateAllCountdowns() {
         const seconds = globalRestTime % 60;
         exerciseCountdown.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
     }
+    
+    // 휴식 화면의 메인 카운트다운 업데이트
+    const restCountdown = document.getElementById('restCountdown');
+    if (restCountdown) {
+        const minutes = Math.floor(globalRestTime / 60);
+        const seconds = globalRestTime % 60;
+        restCountdown.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    // 퀴즈 제안 화면의 카운트다운 업데이트
+    const quizOfferCountdown = document.getElementById('quizOfferCountdown');
+    if (quizOfferCountdown) {
+        const minutes = Math.floor(globalRestTime / 60);
+        const seconds = globalRestTime % 60;
+        quizOfferCountdown.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    // 퀴즈 진행 화면의 카운트다운 업데이트
+    const quizCountdown = document.getElementById('quizCountdown');
+    if (quizCountdown) {
+        const minutes = Math.floor(globalRestTime / 60);
+        const seconds = globalRestTime % 60;
+        quizCountdown.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+    
+    // 퀴즈 보상 화면의 카운트다운 업데이트
+    const quizRewardCountdown = document.getElementById('quizRewardCountdown');
+    if (quizRewardCountdown) {
+        const minutes = Math.floor(globalRestTime / 60);
+        const seconds = globalRestTime % 60;
+        quizRewardCountdown.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
 }
 
 function showRestIntro() {
+    console.log('🔍 showRestIntro 함수 시작');
+    
+    // 호흡 화면 숨기기
+    document.getElementById('breathingSection').style.display = 'none';
+    
+    // 휴식 화면 표시
+    document.getElementById('restSection').style.display = 'block';
+    
+    // 휴식 텍스트 설정
     const restIntroText = document.getElementById('restIntroText');
     const restNormalText = document.getElementById('restNormalText');
     
-    if (restIntroText) restIntroText.style.display = 'block';
+    if (restIntroText) {
+        restIntroText.style.display = 'block';
+        restIntroText.innerHTML = '<p>잠시 후 퀴즈를 풀 기회가 있어요!</p>';
+    }
     if (restNormalText) restNormalText.style.display = 'none';
+    
+    console.log('⏰ 5초 후 퀴즈/휴식 선택 카드 표시 예정');
+    
+    // 5초 대기 후 퀴즈/휴식 선택 카드 표시
+    quizOfferTimer = setTimeout(() => {
+        console.log('⏰ 5초 경과 - 퀴즈/휴식 선택 카드 표시 시작');
+        showQuizOffer();
+    }, QUIZ_CONFIG.OFFER_DELAY);
 }
 
 function showNormalRest() {
+    console.log('🔍 showNormalRest 함수 시작');
+    
+    // 호흡 화면 숨기기
+    document.getElementById('breathingSection').style.display = 'none';
+    
+    // 휴식 화면 표시
+    document.getElementById('restSection').style.display = 'block';
+    
+    // 휴식 텍스트 설정
     const restIntroText = document.getElementById('restIntroText');
     const restNormalText = document.getElementById('restNormalText');
     
     if (restIntroText) restIntroText.style.display = 'none';
     if (restNormalText) restNormalText.style.display = 'block';
+    
+    // 타이머 즉시 시작
+    globalRestTime = 120; // 2분
+    startGlobalRestTimer();
+    
+    console.log('⏰ 휴식 타이머 시작됨');
 }
