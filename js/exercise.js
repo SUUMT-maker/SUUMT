@@ -476,7 +476,7 @@ function showNormalRest() {
     // 🔧 전역 타이머 정리 (개별 타이머로 전환)
     stopGlobalRestTimer();
     
-    // 개별 타이머 사용 (원본과 동일)
+    // 개별 타이머 사용 (원본과 동일) - 전역 타이머의 남은 시간을 이어받음
     let restTime = parseInt(document.getElementById('restCountdown').textContent) || 120;
     const restCountdownEl = document.getElementById('restCountdown');
     
@@ -499,5 +499,5 @@ function showNormalRest() {
         }
     }, 1000);
     
-    console.log('⏰ 휴식 타이머 시작됨 (개별 타이머)');
+    console.log('⏰ 휴식 타이머 시작됨 (개별 타이머) - 남은 시간:', restTime, '초');
 }
