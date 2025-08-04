@@ -115,7 +115,7 @@ function showQuizOffer() {
     console.log('🎮 showQuizOffer 함수 시작');
     
     document.getElementById('restSection').style.display = 'none';
-    document.getElementById('quizOfferSection').classList.add('active');
+    document.getElementById('quizOfferSection').style.display = 'block';
     
     // GA 이벤트: 퀴즈 제안 노출
     gtag('event', 'quiz_offer_shown', {
@@ -128,8 +128,8 @@ function showQuizOffer() {
 function startQuiz() {
     console.log('🎮 startQuiz 함수 시작');
     
-    document.getElementById('quizOfferSection').classList.remove('active');
-    document.getElementById('quizProgressSection').classList.add('active');
+    document.getElementById('quizOfferSection').style.display = 'none';
+    document.getElementById('quizProgressSection').style.display = 'block';
     
     // 퀴즈 상태 초기화
     currentQuizQuestion = 0;
@@ -245,8 +245,8 @@ function selectQuizAnswer(selectedIndex, questionIndex) {
 
 // 🎮 새로운 기능: 퀴즈 결과 화면
 function showQuizResult() {
-    document.getElementById('quizProgressSection').classList.remove('active');
-    document.getElementById('quizRewardSection').classList.add('active');
+    document.getElementById('quizProgressSection').style.display = 'none';
+    document.getElementById('quizRewardSection').style.display = 'block';
     
     const quizEndTime = getCurrentUserTime();
     const quizDuration = Math.floor((quizEndTime - quizStartTime) / 1000);
@@ -353,7 +353,7 @@ function continueToNextSet() {
     console.log('🎮 continueToNextSet 함수 시작');
     
     // 퀴즈 관련 화면 모두 숨기기
-    document.getElementById('quizRewardSection').classList.remove('active');
+    document.getElementById('quizRewardSection').style.display = 'none';
     
     // 기존 휴식 타이머 정리
     stopGlobalRestTimer();
@@ -369,7 +369,7 @@ function continueToNextSet() {
 function chooseRestOnly() {
     console.log('🎮 chooseRestOnly 함수 시작');
     
-    document.getElementById('quizOfferSection').classList.remove('active');
+    document.getElementById('quizOfferSection').style.display = 'none';
     
     // GA 이벤트: 휴식만 선택
     gtag('event', 'quiz_declined', {

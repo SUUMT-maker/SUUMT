@@ -425,24 +425,11 @@ function showRestIntro() {
         restControlButtons.style.display = 'none';
     }
     
-    // 휴식 텍스트 설정
-    const restIntroText = document.getElementById('restIntroText');
-    const restNormalText = document.getElementById('restNormalText');
-    
-    if (restIntroText) {
-        restIntroText.style.display = 'block';
-        restIntroText.innerHTML = '<p>잠시 후 퀴즈를 풀 기회가 있어요!</p>';
+    // 휴식 진행도 텍스트 설정 (원본과 동일)
+    const restProgressEl = document.getElementById('restProgressText');
+    if (restProgressEl) {
+        restProgressEl.textContent = `${currentSet - 1}세트 완료`;
     }
-    if (restNormalText) restNormalText.style.display = 'none';
-    
-    // 퀴즈 관련 화면들 숨기기
-    const quizScreens = ['quizOfferSection', 'quizProgressSection', 'quizRewardSection'];
-    quizScreens.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.classList.remove('active');
-        }
-    });
     
     // 🔧 전역 타이머 시작 (원본과 동일)
     globalRestTime = 120; // 2분
@@ -480,19 +467,15 @@ function showNormalRest() {
         restControlButtons.style.display = 'block';
     }
     
-    // 휴식 텍스트 설정
-    const restIntroText = document.getElementById('restIntroText');
-    const restNormalText = document.getElementById('restNormalText');
-    
-    if (restIntroText) restIntroText.style.display = 'none';
-    if (restNormalText) restNormalText.style.display = 'block';
+    // 휴식 진행도 텍스트 설정 (원본과 동일)
+    const restProgressEl = document.getElementById('restProgressText');
+    if (restProgressEl) {
+        restProgressEl.textContent = `${currentSet - 1}세트 완료`;
+    }
     
     // 개별 타이머 사용 (원본과 동일)
     let restTime = parseInt(document.getElementById('restCountdown').textContent) || 120;
     const restCountdownEl = document.getElementById('restCountdown');
-    const restProgressEl = document.getElementById('restProgressText');
-    
-    restProgressEl.textContent = `${currentSet - 1}세트 완료`;
     
     restTimer = setInterval(() => {
         if (isAborted) {
