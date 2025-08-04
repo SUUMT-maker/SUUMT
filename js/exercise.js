@@ -133,21 +133,16 @@ function skipRest() {
 function startNextSet() {
     console.log('🔧 startNextSet 함수 시작');
     
-    // 🔧 모든 휴식/퀴즈 관련 화면 숨기기
+    // 🔧 모든 휴식/퀴즈 관련 화면 숨기기 (원본과 동일)
     document.getElementById('restSection').style.display = 'none';
-    
-    // 퀴즈 화면들 클래스 기반으로 숨김
-    const quizScreens = ['quizOfferSection', 'quizProgressSection', 'quizRewardSection'];
-    quizScreens.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.classList.remove('active');
-        }
-    });
+    document.getElementById('quizOfferSection').style.display = 'none';
+    document.getElementById('quizProgressSection').style.display = 'none';
+    document.getElementById('quizRewardSection').style.display = 'none';
     
     // 🔧 모든 타이머 정리
     stopGlobalRestTimer();
     clearTimeout(quizOfferTimer);
+    clearInterval(restTimer);
     
     console.log('⏰ 모든 타이머 정리 완료');
     
@@ -326,19 +321,13 @@ function resetExercise() {
         clearInterval(reviewCarouselInterval);
     }
     
-    // 모든 화면 숨기기
+    // 모든 화면 숨기기 (원본과 동일)
     document.getElementById('countdownSection').style.display = 'block';
     document.getElementById('breathingSection').style.display = 'none';
     document.getElementById('restSection').style.display = 'none';
-    
-    // 퀴즈 화면들 클래스 기반으로 숨김
-    const quizScreens = ['quizOfferSection', 'quizProgressSection', 'quizRewardSection'];
-    quizScreens.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.classList.remove('active');
-        }
-    });
+    document.getElementById('quizOfferSection').style.display = 'none';
+    document.getElementById('quizProgressSection').style.display = 'none';
+    document.getElementById('quizRewardSection').style.display = 'none';
     
     console.log('🔧 운동 상태 초기화 완료');
 }
@@ -430,6 +419,12 @@ function showRestIntro() {
     // 휴식 화면 표시
     document.getElementById('restSection').style.display = 'block';
     
+    // 휴식 제어 버튼 숨기기 (원본과 동일)
+    const restControlButtons = document.getElementById('restControlButtons');
+    if (restControlButtons) {
+        restControlButtons.style.display = 'none';
+    }
+    
     // 휴식 텍스트 설정
     const restIntroText = document.getElementById('restIntroText');
     const restNormalText = document.getElementById('restNormalText');
@@ -440,12 +435,33 @@ function showRestIntro() {
     }
     if (restNormalText) restNormalText.style.display = 'none';
     
+    // 퀴즈 관련 화면들 숨기기
+    const quizScreens = ['quizOfferSection', 'quizProgressSection', 'quizRewardSection'];
+    quizScreens.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.classList.remove('active');
+        }
+    });
+    
+    // 🔧 전역 타이머 시작 (원본과 동일)
+    globalRestTime = 120; // 2분
+    startGlobalRestTimer();
+    
+    // GA 이벤트: 휴식 시작 (원본과 동일)
+    gtag('event', 'rest_started', {
+        set_number: currentSet - 1,
+        quiz_enabled: QUIZ_CONFIG.QUIZ_ENABLED
+    });
+    
     console.log('⏰ 5초 후 퀴즈/휴식 선택 카드 표시 예정');
     
-    // 5초 대기 후 퀴즈/휴식 선택 카드 표시
+    // 5초 후 퀴즈 제안 화면으로 전환 (원본과 동일)
     quizOfferTimer = setTimeout(() => {
-        console.log('⏰ 5초 경과 - 퀴즈/휴식 선택 카드 표시 시작');
-        showQuizOffer();
+        if (!isAborted) {
+            console.log('⏰ 5초 경과 - 퀴즈/휴식 선택 카드 표시 시작');
+            showQuizOffer();
+        }
     }, QUIZ_CONFIG.OFFER_DELAY);
 }
 
@@ -458,6 +474,12 @@ function showNormalRest() {
     // 휴식 화면 표시
     document.getElementById('restSection').style.display = 'block';
     
+    // 휴식 제어 버튼 표시 (원본과 동일)
+    const restControlButtons = document.getElementById('restControlButtons');
+    if (restControlButtons) {
+        restControlButtons.style.display = 'block';
+    }
+    
     // 휴식 텍스트 설정
     const restIntroText = document.getElementById('restIntroText');
     const restNormalText = document.getElementById('restNormalText');
@@ -465,9 +487,27 @@ function showNormalRest() {
     if (restIntroText) restIntroText.style.display = 'none';
     if (restNormalText) restNormalText.style.display = 'block';
     
-    // 타이머 즉시 시작
-    globalRestTime = 120; // 2분
-    startGlobalRestTimer();
+    // 개별 타이머 사용 (원본과 동일)
+    let restTime = parseInt(document.getElementById('restCountdown').textContent) || 120;
+    const restCountdownEl = document.getElementById('restCountdown');
+    const restProgressEl = document.getElementById('restProgressText');
     
-    console.log('⏰ 휴식 타이머 시작됨');
+    restProgressEl.textContent = `${currentSet - 1}세트 완료`;
+    
+    restTimer = setInterval(() => {
+        if (isAborted) {
+            clearInterval(restTimer);
+            return;
+        }
+        
+        restCountdownEl.textContent = restTime;
+        restTime--;
+        
+        if (restTime < 0) {
+            clearInterval(restTimer);
+            startNextSet();
+        }
+    }, 1000);
+    
+    console.log('⏰ 휴식 타이머 시작됨 (개별 타이머)');
 }

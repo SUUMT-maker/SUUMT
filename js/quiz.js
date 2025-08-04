@@ -117,12 +117,6 @@ function showQuizOffer() {
     document.getElementById('restSection').style.display = 'none';
     document.getElementById('quizOfferSection').classList.add('active');
     
-    // 타이머 시작 (5초 대기 후 선택 카드가 표시되므로)
-    globalRestTime = 120; // 2분
-    startGlobalRestTimer();
-    
-    console.log('⏰ 퀴즈 제안 타이머 시작됨');
-    
     // GA 이벤트: 퀴즈 제안 노출
     gtag('event', 'quiz_offer_shown', {
         set_number: currentSet - 1,
@@ -144,12 +138,6 @@ function startQuiz() {
     
     // 🎯 랜덤 2문제 선택
     selectRandomQuestions();
-    
-    // 타이머 시작
-    globalRestTime = 120; // 2분
-    startGlobalRestTimer();
-    
-    console.log('⏰ 퀴즈 타이머 시작됨');
     
     // GA 이벤트: 퀴즈 시작
     gtag('event', 'quiz_started', {
@@ -382,12 +370,6 @@ function chooseRestOnly() {
     console.log('🎮 chooseRestOnly 함수 시작');
     
     document.getElementById('quizOfferSection').classList.remove('active');
-    
-    // 타이머 시작
-    globalRestTime = 120; // 2분
-    startGlobalRestTimer();
-    
-    console.log('⏰ 휴식 타이머 시작됨');
     
     // GA 이벤트: 휴식만 선택
     gtag('event', 'quiz_declined', {
