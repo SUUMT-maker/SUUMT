@@ -474,13 +474,8 @@ function showNormalRest() {
     }
     
     // 개별 타이머 사용 (원본과 동일)
-    let restTime = 120; // 2분
+    let restTime = parseInt(document.getElementById('restCountdown').textContent) || 120;
     const restCountdownEl = document.getElementById('restCountdown');
-    
-    // 초기 카운트다운 값 설정 (2:00 형식)
-    const initialMinutes = Math.floor(restTime / 60);
-    const initialSeconds = restTime % 60;
-    restCountdownEl.textContent = `${initialMinutes}:${initialSeconds.toString().padStart(2, '0')}`;
     
     restTimer = setInterval(() => {
         if (isAborted) {
