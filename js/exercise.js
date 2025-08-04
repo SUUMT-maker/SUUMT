@@ -354,11 +354,17 @@ function updateAllCountdowns() {
 }
 
 function showRestIntro() {
-    document.getElementById('restIntroText').style.display = 'block';
-    document.getElementById('restNormalText').style.display = 'none';
+    const restIntroText = document.getElementById('restIntroText');
+    const restNormalText = document.getElementById('restNormalText');
+    
+    if (restIntroText) restIntroText.style.display = 'block';
+    if (restNormalText) restNormalText.style.display = 'none';
 }
 
 function showNormalRest() {
-    document.getElementById('restIntroText').style.display = 'none';
-    document.getElementById('restNormalText').style.display = 'block';
+    const restIntroText = document.getElementById('restIntroText');
+    const restNormalText = document.getElementById('restNormalText');
+    
+    if (restIntroText) restIntroText.style.display = 'none';
+    if (restNormalText) restNormalText.style.display = 'block';
 }

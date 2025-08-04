@@ -424,6 +424,18 @@
                     <p>다음 세트까지 호흡을 정리하세요</p>
                     <div class="progress-numbers" id="restProgressText">1세트 완료</div>
                     
+                    <!-- 휴식 텍스트 요소들 추가 -->
+                    <div id="restIntroText" style="display: none;">
+                        <p>간단한 퀴즈를 풀어보시겠어요?</p>
+                    </div>
+                    <div id="restNormalText" style="display: block;">
+                        <p>다음 세트까지 호흡을 정리하세요</p>
+                    </div>
+                    
+                    <!-- 카운트다운 요소들 추가 -->
+                    <div class="countdown" id="mainRestCountdown" style="display: none;">120</div>
+                    <div class="countdown" id="exerciseRestCountdown" style="display: none;">120</div>
+                    
                     <div class="control-buttons" id="restControlButtons" style="display: none;">
                         <button class="btn btn-success" onclick="skipRest()">휴식 건너뛰기</button>
                         <button class="btn btn-secondary" onclick="showStopModal()">중단</button>
