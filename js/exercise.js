@@ -473,6 +473,9 @@ function showNormalRest() {
         restProgressEl.textContent = `${currentSet - 1}세트 완료`;
     }
     
+    // 🔧 전역 타이머 정리 (개별 타이머로 전환)
+    stopGlobalRestTimer();
+    
     // 개별 타이머 사용 (원본과 동일)
     let restTime = parseInt(document.getElementById('restCountdown').textContent) || 120;
     const restCountdownEl = document.getElementById('restCountdown');
