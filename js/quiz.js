@@ -333,7 +333,7 @@ function checkSpecialOffer() {
 // 🎮 새로운 기능: 쇼핑몰 URL 생성 (상품 로테이션 적용)
 function generateShopUrl() {
     const currentProduct = getCurrentProduct();
-    const baseUrl = `${QUIZ_CONFIG.SHOP_URL}${currentProduct.specialPath}`;
+    const baseUrl = QUIZ_CONFIG.SHOP_URL; // suumt.com으로 직접 연결
     const params = new URLSearchParams({
         utm_source: 'breath_app',
         utm_medium: 'quiz_reward',
