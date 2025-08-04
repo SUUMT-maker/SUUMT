@@ -1,0 +1,26 @@
+{
+  "name": "breath-trainer-supabase",
+  "version": "1.0.3",
+  "description": "숨트레이너 앱 - Supabase 백엔드 연동",
+  "main": "index.js",
+  "scripts": {
+    "dev": "npx @modelcontextprotocol/server-supabase",
+    "start": "npx @modelcontextprotocol/server-supabase",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@supabase/mcp-server-supabase": "latest",
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "dotenv": "^16.3.1"
+  },
+  "keywords": [
+    "supabase",
+    "mcp",
+    "breath-trainer",
+    "pwa"
+  ],
+  "author": "숨트레이너",
+  "license": "MIT"
+} 
