@@ -221,13 +221,10 @@ async function completeExercise() {
         resistanceSettings: { ...resistanceSettings },
         userFeedback: userFeedback
     };
-    
-    // 통계 업데이트
-    const updatedStats = updateLocalStats(window.exerciseData);
-    addExerciseHistory(window.exerciseData);
-    
-    // 결과 화면 표시
-    showResultScreen();
+
+    setTimeout(() => {
+        showFeedbackScreen();
+    }, 1000);
 }
 
 function showStopModal() {
