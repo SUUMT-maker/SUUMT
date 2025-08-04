@@ -477,7 +477,17 @@ function showNormalRest() {
     stopGlobalRestTimer();
     
     // 개별 타이머 사용 (원본과 동일) - 전역 타이머의 남은 시간을 이어받음
-    let restTime = parseInt(document.getElementById('restCountdown').textContent) || 120;
+    let restTime = 120; // 기본값
+    const restCountdownText = document.getElementById('restCountdown').textContent;
+    
+    // "1:44" 형식을 초 단위로 변환
+    if (restCountdownText.includes(':')) {
+        const [minutes, seconds] = restCountdownText.split(':').map(Number);
+        restTime = minutes * 60 + seconds;
+    } else {
+        restTime = parseInt(restCountdownText) || 120;
+    }
+    
     const restCountdownEl = document.getElementById('restCountdown');
     
     restTimer = setInterval(() => {
