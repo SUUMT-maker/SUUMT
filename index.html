@@ -665,7 +665,7 @@
 
     <!-- 운동 모드 선택 화면 -->
     <div id="workoutModeScreen" class="screen" style="display: none;">
-        <div class="container" style="display: flex; flex-direction: column; justify-content: center; min-height: 100vh; padding: 20px 0;">
+        <div class="container" style="display: flex; flex-direction: column; justify-content: flex-start; padding: 20px 0;">
             <div class="screen-header">
                 <h1 class="screen-title">💪 운동 모드 선택</h1>
                 <p class="screen-subtitle">원하는 운동 모드를 선택하세요</p>
@@ -733,7 +733,8 @@
         #workoutModeScreen {
             padding-bottom: 90px;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
+            overflow: hidden;
         }
 
         /* 운동 모드 선택 화면 스타일 */
@@ -842,11 +843,10 @@
         @media (max-width: 768px) {
             #workoutModeScreen {
                 padding-bottom: 80px;
-                align-items: center;
+                align-items: flex-start;
             }
             
             #workoutModeScreen .container {
-                min-height: calc(100vh - 120px);
                 padding: 15px 0;
             }
             
