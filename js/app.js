@@ -1000,6 +1000,37 @@ window.onload = function() {
     initializeOnboardingSwipe();
 };
 
+// 네비게이션 탭 전환 함수
+function switchTab(tabName) {
+    // 모든 네비게이션 아이템 비활성화
+    const navItems = document.querySelectorAll('.nav-item');
+    navItems.forEach(item => {
+        item.classList.remove('active');
+    });
+    
+    // 선택된 네비게이션 아이템 활성화
+    const targetNavItem = document.querySelector(`[onclick="switchTab('${tabName}')"]`);
+    if (targetNavItem) {
+        targetNavItem.classList.add('active');
+    }
+    
+    // 탭별 로직 (현재는 홈 탭만 구현)
+    switch(tabName) {
+        case 'home':
+            // 홈 탭에서는 통계 데이터 새로고침
+            loadUserData();
+            break;
+        case 'workout':
+            // 운동 탭 (나중에 구현)
+            console.log('운동 탭 - 나중에 구현 예정');
+            break;
+        case 'records':
+            // 기록 탭 (나중에 구현)
+            console.log('기록 탭 - 나중에 구현 예정');
+            break;
+    }
+}
+
 // Service Worker 등록
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', function() {
