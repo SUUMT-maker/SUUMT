@@ -1014,21 +1014,64 @@ function switchTab(tabName) {
         targetNavItem.classList.add('active');
     }
     
-    // 탭별 로직 (현재는 홈 탭만 구현)
+    // 탭별 로직
     switch(tabName) {
         case 'home':
             // 홈 탭에서는 통계 데이터 새로고침
             loadUserData();
+            showMainScreen();
             break;
         case 'workout':
-            // 운동 탭 (나중에 구현)
-            console.log('운동 탭 - 나중에 구현 예정');
+            // 운동 탭 - 운동 모드 선택 화면으로 이동
+            showWorkoutModeScreen();
             break;
         case 'records':
             // 기록 탭 (나중에 구현)
             console.log('기록 탭 - 나중에 구현 예정');
             break;
     }
+}
+
+// 운동 모드 선택 화면 표시
+function showWorkoutModeScreen() {
+    // 모든 화면 숨기기
+    hideAllScreens();
+    
+    // 운동 모드 선택 화면 표시
+    const workoutModeScreen = document.getElementById('workoutModeScreen');
+    if (workoutModeScreen) {
+        workoutModeScreen.style.display = 'block';
+    }
+}
+
+// 메인 화면 표시
+function showMainScreen() {
+    // 모든 화면 숨기기
+    hideAllScreens();
+    
+    // 메인 화면 표시
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        mainScreen.style.display = 'block';
+    }
+}
+
+// 운동 모드 선택
+function selectWorkoutMode(mode) {
+    if (mode === 'suumt') {
+        console.log('숨트레이닝 운동 모드 선택됨 - 나중에 구현 예정');
+        // 나중에 숨트레이닝 설정 화면으로 이동할 예정
+    } else {
+        console.log('다른 운동 모드는 나중에 구현 예정');
+    }
+}
+
+// 모든 화면 숨기기
+function hideAllScreens() {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => {
+        screen.style.display = 'none';
+    });
 }
 
 // Service Worker 등록
