@@ -935,9 +935,24 @@
         // 운동 화면으로 이동할 때 네비게이션 숨기기
         function startExerciseWithNavigation() {
             hideNavigation();
-            // 기존 startExercise 함수 호출
+            
+            // 모든 화면 숨기기
+            hideAllScreens();
+            
+            // 운동 화면 표시
+            const exerciseScreen = document.getElementById('exerciseScreen');
+            if (exerciseScreen) {
+                exerciseScreen.style.display = 'block';
+            }
+            
+            // 기존 startExercise 함수 호출 (카운트다운 시작)
             if (typeof window.startExercise === 'function') {
                 window.startExercise();
+            } else {
+                // fallback: 직접 카운트다운 시작
+                if (typeof window.startCountdown === 'function') {
+                    window.startCountdown();
+                }
             }
         }
 
