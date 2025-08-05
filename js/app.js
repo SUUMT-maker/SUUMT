@@ -226,7 +226,25 @@ function showScreen(screenId) {
 
 // 메인 화면으로 이동
 function goToMain() {
-    showScreen('mainScreen');
+    // 새로운 네비게이션 시스템과 호환되도록 수정
+    // 모든 화면 숨기기
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => {
+        screen.style.display = 'none';
+    });
+    
+    // 메인 화면 표시
+    const mainScreen = document.getElementById('mainScreen');
+    if (mainScreen) {
+        mainScreen.style.display = 'block';
+    }
+    
+    // 네비게이션 표시
+    const navigation = document.getElementById('globalNavigation');
+    if (navigation) {
+        navigation.style.display = 'flex';
+    }
+    
     resetExercise();
     loadUserData();
 }
@@ -299,7 +317,25 @@ function updateResistanceButtons() {
 // 피드백 화면 관련 함수들
 function showFeedbackScreen() {
     updateFeedbackScreenContent();
-    showScreen('feedbackScreen');
+    
+    // 새로운 네비게이션 시스템과 호환되도록 수정
+    // 모든 화면 숨기기
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(screen => {
+        screen.style.display = 'none';
+    });
+    
+    // 피드백 화면 표시
+    const feedbackScreen = document.getElementById('feedbackScreen');
+    if (feedbackScreen) {
+        feedbackScreen.style.display = 'block';
+    }
+    
+    // 네비게이션 숨기기 (피드백 화면에서는 네비게이션 불필요)
+    const navigation = document.getElementById('globalNavigation');
+    if (navigation) {
+        navigation.style.display = 'none';
+    }
 }
 
 function updateFeedbackScreenContent() {
@@ -332,7 +368,24 @@ async function showResultScreen() {
     try {
         console.log('📋 결과 화면 표시 시작');
         
-        showScreen('resultScreen');
+        // 새로운 네비게이션 시스템과 호환되도록 수정
+        // 모든 화면 숨기기
+        const screens = document.querySelectorAll('.screen');
+        screens.forEach(screen => {
+            screen.style.display = 'none';
+        });
+        
+        // 결과 화면 표시
+        const resultScreen = document.getElementById('resultScreen');
+        if (resultScreen) {
+            resultScreen.style.display = 'block';
+        }
+        
+        // 네비게이션 숨기기 (결과 화면에서는 네비게이션 불필요)
+        const navigation = document.getElementById('globalNavigation');
+        if (navigation) {
+            navigation.style.display = 'none';
+        }
         
         const timeData = window.exerciseData.exerciseTime.split(':');
         const minutes = parseInt(timeData[0]);
