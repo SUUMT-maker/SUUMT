@@ -665,7 +665,7 @@
 
     <!-- 운동 모드 선택 화면 -->
     <div id="workoutModeScreen" class="screen" style="display: none;">
-        <div class="container">
+        <div class="container" style="display: flex; flex-direction: column; justify-content: center; min-height: 100vh; padding: 20px 0;">
             <div class="screen-header">
                 <h1 class="screen-title">💪 운동 모드 선택</h1>
                 <p class="screen-subtitle">원하는 운동 모드를 선택하세요</p>
@@ -731,24 +731,26 @@
 
         /* 운동 모드 선택 화면 전용 패딩 최적화 */
         #workoutModeScreen {
-            padding-bottom: 100px;
+            padding-bottom: 90px;
+            display: flex;
+            align-items: center;
         }
 
         /* 운동 모드 선택 화면 스타일 */
         .workout-modes-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 12px;
-            margin: 15px 0;
+            gap: 14px;
+            margin: 20px 0;
         }
 
         .workout-mode-card {
             display: flex;
             align-items: center;
-            padding: 16px;
+            padding: 18px;
             background: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 16px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             cursor: pointer;
             transition: all 0.3s ease;
             border: 2px solid transparent;
@@ -840,6 +842,12 @@
         @media (max-width: 768px) {
             #workoutModeScreen {
                 padding-bottom: 80px;
+                align-items: center;
+            }
+            
+            #workoutModeScreen .container {
+                min-height: calc(100vh - 120px);
+                padding: 15px 0;
             }
             
             .workout-modes-grid {
