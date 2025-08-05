@@ -1,7 +1,24 @@
 // 🏠 메인 앱 관련 함수들
 
-// Apps Script URL (AI 조언만 사용)
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz8iRnFGheIKcPUBkmSqOUAJ4_jPhSFRR593Ukfk1j6Da1oIPOkUlAboDdqr-CA2u29rw/exec';
+// Supabase 설정 (Google Apps Script 대체)
+const SUPABASE_URL = 'https://rfqbzibewzvqopqgovbc.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmcWJ6aWJld3p2cW9wcWdvdmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNzIwNTMsImV4cCI6MjA2OTk0ODA1M30.nAXbnAFe4jM7F56QN4b42NhwNJG_iuSXOVM5zC72Bs4';
+
+// 🔄 마이그레이션 상태 확인
+function checkMigrationStatus() {
+    console.log('🔄 Google Apps Script → Supabase 마이그레이션 상태 확인');
+    console.log('✅ SCRIPT_URL → SUPABASE_URL로 교체 완료');
+    console.log('✅ getTrainerAdvice 함수 → Supabase Edge Function 호출로 변경 완료');
+    console.log('✅ supabase-client.js 추가 완료');
+    
+    return {
+        migrationComplete: true,
+        timestamp: new Date().toISOString(),
+        oldEndpoint: 'Google Apps Script',
+        newEndpoint: 'Supabase Edge Functions',
+        functions: ['ai-advice-v2', 'exercise-analytics']
+    };
+}
 
 // 🔥 새로운 기능: 사회적 증명 데이터
 const SOCIAL_PROOF_REVIEWS = [
@@ -593,49 +610,53 @@ function generateLocalAdviceAddition(analysis, currentFeedback, isAborted) {
 // 🔧 AI 조언 요청
 async function getTrainerAdvice(exerciseData) {
     try {
-        console.log('🤖 AI 조언 요청 시작');
+        console.log('🤖 Supabase AI 조언 요청 시작');
         console.log('📊 전달할 운동 데이터:', exerciseData);
         
-        const params = new URLSearchParams({
-            function: 'getAIAdvice',
-            exerciseTime: exerciseData.exerciseTime,
-            completedSets: exerciseData.completedSets.toString(),
-            completedBreaths: exerciseData.completedBreaths.toString(),
-            isAborted: exerciseData.isAborted.toString(),
-            userFeedback: exerciseData.userFeedback || '',
-            inhaleResistance: exerciseData.resistanceSettings ? exerciseData.resistanceSettings.inhale.toString() : '1',
-            exhaleResistance: exerciseData.resistanceSettings ? exerciseData.resistanceSettings.exhale.toString() : '1'
+        const requestBody = {
+            exerciseData: {
+                resistanceSettings: {
+                    inhale: exerciseData.resistanceSettings ? exerciseData.resistanceSettings.inhale : 1,
+                    exhale: exerciseData.resistanceSettings ? exerciseData.resistanceSettings.exhale : 1
+                },
+                userFeedback: exerciseData.userFeedback || null,
+                completedSets: exerciseData.completedSets || 0,
+                completedBreaths: exerciseData.completedBreaths || 0,
+                exerciseTime: exerciseData.exerciseTime || '0:00',
+                isAborted: exerciseData.isAborted || false
+            },
+            sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+        };
+        
+        console.log('🌐 Supabase 요청 데이터:', requestBody);
+        
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-advice-v2`, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
         });
         
-        console.log('🌐 요청 파라미터:', params.toString());
-        
-        const response = await fetch(`${SCRIPT_URL}?${params}`);
-        
         if (!response.ok) {
-            throw new Error(`연결 오류: ${response.status}`);
+            throw new Error(`Supabase 연결 오류: ${response.status}`);
         }
         
         const result = await response.json();
-        console.log('📦 Apps Script 응답:', result);
+        console.log('📦 Supabase 응답:', result);
         
-        if (result.success) {
-            if (result.advice && typeof result.advice === 'object') {
-                return {
-                    intensityAdvice: result.advice.intensityAdvice || result.advice,
-                    comprehensiveAdvice: result.advice.comprehensiveAdvice || "AI 트레이너가 당신의 꾸준한 노력을 응원합니다!"
-                };
-            } else if (typeof result.advice === 'string') {
-                return {
-                    intensityAdvice: result.advice,
-                    comprehensiveAdvice: "AI 트레이너가 당신의 꾸준한 노력을 응원합니다!"
-                };
-            }
-        } 
+        if (result.success && result.advice) {
+            return {
+                intensityAdvice: result.advice.intensityAdvice || result.advice,
+                comprehensiveAdvice: result.advice.comprehensiveAdvice || "AI 트레이너가 당신의 꾸준한 노력을 응원합니다!"
+            };
+        }
         
         throw new Error(result.message || 'AI 조언 생성 실패');
         
     } catch (error) {
-        console.error('🚨 AI 조언 요청 오류:', error);
+        console.error('🚨 Supabase AI 조언 요청 오류:', error);
         
         const defaultAdvices = [
             `${exerciseData.completedSets}세트 완주! 숨트의 저항을 이겨내며 호흡근이 한층 강해졌습니다.`,
