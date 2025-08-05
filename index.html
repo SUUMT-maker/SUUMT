@@ -729,21 +729,26 @@
             padding-bottom: 120px;
         }
 
+        /* 운동 모드 선택 화면 전용 패딩 최적화 */
+        #workoutModeScreen {
+            padding-bottom: 100px;
+        }
+
         /* 운동 모드 선택 화면 스타일 */
         .workout-modes-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 16px;
-            margin: 20px 0;
+            gap: 12px;
+            margin: 15px 0;
         }
 
         .workout-mode-card {
             display: flex;
             align-items: center;
-            padding: 20px;
+            padding: 16px;
             background: white;
-            border-radius: 16px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             cursor: pointer;
             transition: all 0.3s ease;
             border: 2px solid transparent;
@@ -768,8 +773,8 @@
         }
 
         .workout-mode-icon {
-            font-size: 42px;
-            margin-right: 16px;
+            font-size: 36px;
+            margin-right: 12px;
             flex-shrink: 0;
         }
 
@@ -778,26 +783,26 @@
         }
 
         .workout-mode-title {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 600;
             color: #1f2937;
-            margin: 0 0 6px 0;
+            margin: 0 0 4px 0;
         }
 
         .workout-mode-description {
-            font-size: 15px;
+            font-size: 14px;
             color: #6b7280;
-            margin: 0 0 10px 0;
-            line-height: 1.4;
+            margin: 0 0 8px 0;
+            line-height: 1.3;
         }
 
         .workout-mode-technique {
-            font-size: 14px;
+            font-size: 12px;
             color: #2563eb;
             font-weight: 500;
             background: #eff6ff;
-            padding: 6px 12px;
-            border-radius: 20px;
+            padding: 4px 10px;
+            border-radius: 16px;
             display: inline-block;
         }
 
@@ -815,59 +820,68 @@
 
         .screen-header {
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         .screen-title {
-            font-size: 24px;
+            font-size: 22px;
             font-weight: 700;
             color: #1f2937;
-            margin: 0 0 6px 0;
+            margin: 0 0 4px 0;
         }
 
         .screen-subtitle {
-            font-size: 15px;
+            font-size: 14px;
             color: #6b7280;
             margin: 0;
         }
 
         /* 모바일 최적화 */
         @media (max-width: 768px) {
+            #workoutModeScreen {
+                padding-bottom: 80px;
+            }
+            
             .workout-modes-grid {
-                gap: 12px;
-                margin: 15px 0;
+                gap: 8px;
+                margin: 10px 0;
             }
             
             .workout-mode-card {
-                padding: 16px;
+                padding: 12px;
             }
             
             .workout-mode-icon {
-                font-size: 36px;
-                margin-right: 12px;
+                font-size: 32px;
+                margin-right: 10px;
             }
             
             .workout-mode-title {
-                font-size: 16px;
-                margin: 0 0 4px 0;
+                font-size: 15px;
+                margin: 0 0 3px 0;
             }
             
             .workout-mode-description {
-                font-size: 14px;
-                margin: 0 0 8px 0;
+                font-size: 13px;
+                margin: 0 0 6px 0;
+            }
+            
+            .workout-mode-technique {
+                font-size: 11px;
+                padding: 3px 8px;
             }
             
             .screen-header {
-                margin-bottom: 15px;
+                margin-bottom: 10px;
             }
             
             .screen-title {
-                font-size: 22px;
-                margin: 0 0 4px 0;
+                font-size: 20px;
+                margin: 0 0 3px 0;
             }
             
             .screen-subtitle {
-                font-size: 14px;
+                font-size: 13px;
             }
         }
     </style>
