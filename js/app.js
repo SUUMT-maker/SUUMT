@@ -16,7 +16,7 @@ function checkMigrationStatus() {
         timestamp: new Date().toISOString(),
         oldEndpoint: 'Google Apps Script',
         newEndpoint: 'Supabase Edge Functions',
-        functions: ['ai-advice-v2', 'exercise-analytics']
+        functions: ['ai-advice']
     };
 }
 
@@ -630,7 +630,7 @@ async function getTrainerAdvice(exerciseData) {
         
         console.log('🌐 Supabase 요청 데이터:', requestBody);
         
-        const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-advice-v3`, {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-advice`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,

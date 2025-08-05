@@ -1,4 +1,4 @@
 {
-  "connectionString": "postgresql://user:password@host:port/dbname",
+  "connectionString": "postgresql://postgres:[YOUR-PASSWORD]@db.rfqbzibewzvqopqgovbc.supabase.co:5432/postgres",
   "port": 5433
 } 

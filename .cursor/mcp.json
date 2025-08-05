@@ -1,0 +1,8 @@
+{
+  "servers": [
+    {
+      "name": "Supabase MCP",
+      "url": "http://localhost:5433"
+    }
+  ]
+} 
