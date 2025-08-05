@@ -630,7 +630,7 @@ async function getTrainerAdvice(exerciseData) {
         
         console.log('🌐 Supabase 요청 데이터:', requestBody);
         
-        const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-advice-simple`, {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-advice-v3`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
