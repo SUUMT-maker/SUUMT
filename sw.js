@@ -54,9 +54,10 @@ self.addEventListener('activate', function(event) {
 
 // 네트워크 요청 가로채기
 self.addEventListener('fetch', function(event) {
-  // 구글 Apps Script URL은 캐싱하지 않음
+  // Supabase Edge Functions와 구글 Apps Script URL은 캐싱하지 않음
   if (event.request.url.includes('script.google.com') || 
-      event.request.url.includes('googleapis.com')) {
+      event.request.url.includes('googleapis.com') ||
+      event.request.url.includes('supabase.co/functions/v1/')) {
     return;
   }
 
