@@ -1,0 +1,4 @@
+{
+  "connectionString": "postgresql://user:password@host:port/dbname",
+  "port": 5433
+} 
