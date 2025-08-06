@@ -16,7 +16,7 @@
     
     <!-- 🏠 네비게이션 탭 전환 스크립트 -->
     <script>
-        // 🏠 네비게이션 탭 전환 함수 (2단계: 홈탭만)
+        // 🏠 네비게이션 탭 전환 함수 (부드러운 페이드 전환)
         function switchTab(tabName) {
             console.log('🔄 탭 전환:', tabName);
             
@@ -31,64 +31,59 @@
                 activeBtn.classList.add('active');
             }
             
-            // 2단계에서는 홈탭만 처리
+            // 현재 활성화된 화면 찾기
+            const currentScreen = document.querySelector('.screen.active');
+            
+            // 새 화면 결정
+            let newScreen = null;
             if (tabName === 'home') {
-                // 모든 화면 숨기기
-                document.querySelectorAll('.screen').forEach(screen => {
-                    screen.classList.remove('active');
-                });
-                
-                // 메인스크린 표시
-                const mainScreen = document.getElementById('mainScreen');
-                if (mainScreen) {
-                    mainScreen.classList.add('active');
-                    // 부드러운 전환 효과
-                    mainScreen.style.opacity = '0';
-                    setTimeout(() => {
-                        mainScreen.style.opacity = '1';
-                    }, 50);
-                }
+                newScreen = document.getElementById('mainScreen');
             } else if (tabName === 'workout') {
-                // 모든 화면 숨기기
-                document.querySelectorAll('.screen').forEach(screen => {
-                    screen.classList.remove('active');
-                });
-                
-                // 운동모드 선택 화면 표시
-                const workoutModeScreen = document.getElementById('workoutModeScreen');
-                if (workoutModeScreen) {
-                    workoutModeScreen.classList.add('active');
-                    // 부드러운 전환 효과
-                    workoutModeScreen.style.opacity = '0';
-                    setTimeout(() => {
-                        workoutModeScreen.style.opacity = '1';
-                    }, 50);
-                }
-            } else {
+                newScreen = document.getElementById('workoutModeScreen');
+            } else if (tabName === 'records') {
                 // 기록 탭은 아직 개발 중
                 console.log(`${tabName} 탭은 다음 단계에서 개발 예정`);
+                return;
             }
+            
+            // 새 화면이 없거나 현재 화면과 같으면 리턴
+            if (!newScreen || currentScreen === newScreen) return;
+            
+            // 현재 화면이 있으면 페이드 아웃
+            if (currentScreen) {
+                currentScreen.classList.add('fade-out');
+                currentScreen.addEventListener('transitionend', function handler() {
+                    currentScreen.classList.remove('active', 'fade-out');
+                    currentScreen.removeEventListener('transitionend', handler);
+                });
+            }
+            
+            // 새 화면 페이드 인
+            newScreen.classList.add('active');
         }
 
         // 💪 운동모드 선택 함수 (숨트레이닝 모드 화면으로 전환)
         function selectWorkoutMode(mode) {
             console.log('🎯 운동모드 선택:', mode);
             if (mode === 'breathtraining') {
-                // 모든 화면 숨기기
-                document.querySelectorAll('.screen').forEach(screen => {
-                    screen.classList.remove('active');
-                });
+                // 현재 활성화된 화면 찾기
+                const currentScreen = document.querySelector('.screen.active');
+                const newScreen = document.getElementById('breathTrainingScreen');
                 
-                // 숨트레이닝 모드 화면 표시
-                const breathTrainingScreen = document.getElementById('breathTrainingScreen');
-                if (breathTrainingScreen) {
-                    breathTrainingScreen.classList.add('active');
-                    // 부드러운 전환 효과
-                    breathTrainingScreen.style.opacity = '0';
-                    setTimeout(() => {
-                        breathTrainingScreen.style.opacity = '1';
-                    }, 50);
+                // 새 화면이 없거나 현재 화면과 같으면 리턴
+                if (!newScreen || currentScreen === newScreen) return;
+                
+                // 현재 화면이 있으면 페이드 아웃
+                if (currentScreen) {
+                    currentScreen.classList.add('fade-out');
+                    currentScreen.addEventListener('transitionend', function handler() {
+                        currentScreen.classList.remove('active', 'fade-out');
+                        currentScreen.removeEventListener('transitionend', handler);
+                    });
                 }
+                
+                // 새 화면 페이드 인
+                newScreen.classList.add('active');
                 
                 console.log('숨트레이닝 모드 화면으로 전환됨');
             }
@@ -917,6 +912,10 @@
         display: block;
         opacity: 1;
     }
+    
+    .screen.fade-out {
+        opacity: 0;
+    }
 
     /* 모바일 최적화 */
     @media (max-width: 480px) {
@@ -944,6 +943,10 @@
         .screen.active {
             display: block;
             opacity: 1;
+        }
+        
+        .screen.fade-out {
+            opacity: 0;
         }
     }
 
