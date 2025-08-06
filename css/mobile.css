@@ -17,7 +17,8 @@
 
     .resistance-card {
         margin: 0 16px 24px;
-        padding: 16px;
+        padding: 12px;
+        min-height: 160px;
     }
 
     .chart-container {
@@ -30,17 +31,19 @@
     }
 
     .resistance-controls {
-        gap: 12px;
+        gap: 8px;
+        flex-wrap: wrap;
     }
 
     .resistance-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 16px;
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
     }
 
     .resistance-value {
-        font-size: 20px;
+        font-size: 18px;
+        min-width: 28px;
     }
 
     .breaths-indicators {
@@ -197,5 +200,48 @@
     .quiz-continue-button {
         padding: 0.8rem 1.5rem;
         font-size: 1rem;
+    }
+}
+
+/* 📱 매우 작은 화면 최적화 (iPhone SE, Galaxy S8+ 등) */
+@media (max-width: 375px) {
+    .resistance-card {
+        padding: 10px;
+        min-height: 150px;
+    }
+    
+    .resistance-controls {
+        gap: 6px;
+    }
+    
+    .resistance-control {
+        padding: 8px;
+    }
+    
+    .resistance-btn {
+        width: 26px;
+        height: 26px;
+        font-size: 13px;
+    }
+    
+    .resistance-value {
+        font-size: 16px;
+        min-width: 24px;
+    }
+    
+    .resistance-label {
+        font-size: 12px;
+        margin-bottom: 6px;
+    }
+    
+    .resistance-selector {
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+    
+    .resistance-tip {
+        font-size: 10px;
+        padding: 6px 10px;
+        margin-top: 6px;
     }
 }
