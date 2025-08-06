@@ -228,6 +228,45 @@ function hideBottomNav() {
 }
 
 // 📒 Records 관련 함수들
+async function fetchAiAdviceForDate(date) {
+    const client = window.supabaseClient;
+    if (!client) return null;
+
+    try {
+        // Step 1: Get all session IDs for the selected date
+        const { data: sessions, error: sessionError } = await client
+            .from('exercise_sessions')
+            .select('id')
+            .eq('exercise_date', date);
+
+        if (sessionError || !sessions?.length) {
+            console.warn('⚠️ No exercise sessions found for', date);
+            return null;
+        }
+
+        const sessionIds = sessions.map(s => s.id);
+
+        // Step 2: Get the latest AI advice for those sessions
+        const { data: advices, error: adviceError } = await client
+            .from('ai_advice')
+            .select('comprehensive_advice, session_id, created_at')
+            .in('session_id', sessionIds)
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+        if (adviceError || !advices?.length) {
+            console.warn('⚠️ No AI advice found for', date);
+            return null;
+        }
+
+        console.log('✅ AI advice fetched for', date, ':', advices[0].comprehensive_advice);
+        return advices[0].comprehensive_advice;
+    } catch (err) {
+        console.error('❌ Error fetching AI advice:', err);
+        return null;
+    }
+}
+
 async function fetchExerciseSessions() {
     const client = window.supabaseClient;
     if (!client) {
@@ -281,29 +320,37 @@ function renderCalendar(sessions) {
     calendarContainer.innerHTML = html;
 
     calendarContainer.querySelectorAll('td').forEach(td => {
-        td.addEventListener('click', () => {
+        td.addEventListener('click', async () => {
             const day = td.getAttribute('data-day');
             const selected = records.filter(r => r.date === day && r.sets > 0);
-            renderRecordSummary(selected[0]);
+            await renderRecordSummary(selected[0]);
         });
     });
 }
 
-function renderRecordSummary(record) {
+async function renderRecordSummary(record) {
+    const dateEl = document.getElementById('selectedDate');
+    const summaryEl = document.getElementById('recordSummaryList');
+    const adviceEl = document.getElementById('aiAdviceSummary');
+
     if (!record) {
-        document.getElementById('selectedDate').innerText = '-';
-        document.getElementById('recordSummaryList').innerHTML = '<li>운동 기록 없음</li>';
-        document.getElementById('aiAdviceSummary').innerText = '-';
+        dateEl.innerText = '-';
+        summaryEl.innerHTML = '<li>운동 기록 없음</li>';
+        adviceEl.innerText = '운동 기록이 없어 AI 조언을 제공할 수 없습니다.';
         return;
     }
 
-    document.getElementById('selectedDate').innerText = record.date;
-    document.getElementById('recordSummaryList').innerHTML = `
+    dateEl.innerText = record.date;
+    summaryEl.innerHTML = `
         <li>운동 세트 수: ${record.sets}</li>
         <li>총 운동 시간: ${record.duration}</li>
         <li>평균 저항 강도: ${record.avg_resistance}</li>
     `;
-    document.getElementById('aiAdviceSummary').innerText = record.ai_summary;
+
+    // Fetch latest AI advice for the selected date
+    console.log('🔍 Fetching AI advice for date:', record.date);
+    const advice = await fetchAiAdviceForDate(record.date);
+    adviceEl.innerText = advice || '운동 기록이 없어 AI 조언을 제공할 수 없습니다.';
 }
 
 async function onRecordsTabClick() {
@@ -325,6 +372,8 @@ window.hideBottomNav = hideBottomNav;
 window.switchTab = switchTab;
 window.selectWorkoutMode = selectWorkoutMode;
 window.onRecordsTabClick = onRecordsTabClick;
+window.fetchAiAdviceForDate = fetchAiAdviceForDate;
+window.renderRecordSummary = renderRecordSummary;
 
 // 화면 전환 함수
 function showScreen(screenId) {
