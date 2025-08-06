@@ -229,8 +229,13 @@ function hideBottomNav() {
 
 // 📒 Records 관련 함수들
 async function fetchExerciseSessions() {
+    if (!window.supabase) {
+        console.error('❌ Supabase not initialized');
+        return [];
+    }
+
     try {
-        const { data, error } = await window.supabaseClient
+        const { data, error } = await window.supabase
             .from('exercise_sessions')
             .select('*')
             .order('exercise_date', { ascending: true });
@@ -239,10 +244,11 @@ async function fetchExerciseSessions() {
             console.error('❌ Error fetching sessions:', error);
             return [];
         }
-        console.log('📒 Exercise sessions fetched:', data);
+
+        console.log(`📒 ${data.length} sessions fetched`, data);
         return data || [];
-    } catch (error) {
-        console.error('❌ Error fetching sessions:', error);
+    } catch (err) {
+        console.error('❌ Unexpected fetch error:', err);
         return [];
     }
 }
@@ -301,7 +307,14 @@ function renderRecordSummary(record) {
 
 async function onRecordsTabClick() {
     showBottomNav();
+
+    console.log('📒 Records tab clicked, fetching sessions...');
     const sessions = await fetchExerciseSessions();
+
+    if (!sessions.length) {
+        console.warn('⚠️ No exercise sessions found.');
+    }
+
     renderCalendar(sessions);
 }
 
