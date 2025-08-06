@@ -908,6 +908,14 @@
     /* 메인 콘텐츠 하단 여백 확보 (네비게이션 공간) */
     .screen {
         padding-bottom: 80px;
+        display: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .screen.active {
+        display: block;
+        opacity: 1;
     }
 
     /* 모바일 최적화 */
@@ -928,6 +936,14 @@
         
         .screen {
             padding-bottom: 75px;
+            display: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .screen.active {
+            display: block;
+            opacity: 1;
         }
     }
 
