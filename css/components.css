@@ -1373,6 +1373,78 @@
     color: rgba(255, 255, 255, 0.9);
 }
 
+/* 📒 Records 화면 스타일 */
+.records-calendar {
+    background: white;
+    border: 1px solid #E7E7E7;
+    border-radius: 24px;
+    margin: 0 20px 24px;
+    padding: 20px;
+    text-align: center;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666;
+    font-size: 16px;
+}
+
+.records-summary {
+    background: white;
+    border: 1px solid #E7E7E7;
+    border-radius: 24px;
+    margin: 0 20px 24px;
+    padding: 20px;
+    border-left: 4px solid #667eea;
+}
+
+.records-summary h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1E1E1E;
+    margin-bottom: 16px;
+}
+
+.records-summary ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.records-summary li {
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+    color: #555;
+    font-size: 14px;
+}
+
+.records-summary li:last-child {
+    border-bottom: none;
+}
+
+.records-ai-advice {
+    background: white;
+    border: 1px solid #E7E7E7;
+    border-radius: 24px;
+    margin: 0 20px 24px;
+    padding: 20px;
+    border-left: 4px solid #4facfe;
+}
+
+.records-ai-advice h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1E1E1E;
+    margin-bottom: 12px;
+}
+
+.records-ai-advice p {
+    color: #666;
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0;
+}
+
 /* 🔧 추가 컴포넌트 스타일 */
 
 /* 섹션 헤더 */

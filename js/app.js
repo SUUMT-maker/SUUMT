@@ -241,7 +241,7 @@ function showScreen(screenId) {
     document.getElementById(screenId).classList.add('active');
     
     // 화면에 따른 하단 네비게이션 바 표시/숨김 처리
-    const screensWithNav = ['mainScreen', 'workoutModeScreen', 'breathTrainingScreen'];
+    const screensWithNav = ['mainScreen', 'workoutModeScreen', 'breathTrainingScreen', 'recordsScreen'];
     const screensWithoutNav = ['exerciseScreen', 'resultScreen', 'feedbackScreen'];
     
     if (screensWithNav.includes(screenId)) {

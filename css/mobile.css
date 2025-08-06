@@ -201,6 +201,43 @@
         padding: 0.8rem 1.5rem;
         font-size: 1rem;
     }
+
+    /* 📒 Records 화면 모바일 최적화 */
+    .records-calendar {
+        margin: 0 16px 24px;
+        padding: 16px;
+        min-height: 160px;
+        font-size: 14px;
+    }
+
+    .records-summary {
+        margin: 0 16px 24px;
+        padding: 16px;
+    }
+
+    .records-summary h3 {
+        font-size: 16px;
+        margin-bottom: 12px;
+    }
+
+    .records-summary li {
+        font-size: 13px;
+        padding: 6px 0;
+    }
+
+    .records-ai-advice {
+        margin: 0 16px 24px;
+        padding: 16px;
+    }
+
+    .records-ai-advice h3 {
+        font-size: 16px;
+        margin-bottom: 10px;
+    }
+
+    .records-ai-advice p {
+        font-size: 13px;
+    }
 }
 
 /* 📱 매우 작은 화면 최적화 (iPhone SE, Galaxy S8+ 등) */

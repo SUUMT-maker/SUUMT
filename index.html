@@ -786,6 +786,35 @@
                 </button>
             </div>
         </div>
+
+        <!-- 📒 운동 기록 화면 -->
+        <div id="recordsScreen" class="screen">
+            <div class="section-header">
+                <h2 class="section-title"><span class="section-icon">📒</span> 운동 기록</h2>
+                <p class="section-subtitle">운동한 날과 AI 조언 요약을 확인하세요</p>
+            </div>
+
+            <!-- Calendar -->
+            <div class="records-calendar card">
+                <p style="text-align:center;">[달력 자리 - 추후 Supabase 연동]</p>
+            </div>
+
+            <!-- Selected Day Summary -->
+            <div class="records-summary card">
+                <h3>선택한 날짜: <span id="selectedDate">-</span></h3>
+                <ul id="recordSummaryList">
+                    <li>운동 세트 수: -</li>
+                    <li>총 운동 시간: -</li>
+                    <li>평균 저항 강도: -</li>
+                </ul>
+            </div>
+
+            <!-- AI Advice Summary -->
+            <div class="records-ai-advice card">
+                <h3>AI 조언 요약</h3>
+                <p id="aiAdviceSummary">운동 기록이 쌓이면 AI가 조언을 제공합니다.</p>
+            </div>
+        </div>
     </div>
 
     <!-- 🚀 하단 네비게이션 바 -->
