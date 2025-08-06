@@ -4,6 +4,11 @@ function startExercise() {
     resetExercise();
     showScreen('exerciseScreen');
     
+    // 운동 중에는 하단 네비게이션 바 숨김
+    if (typeof window.hideBottomNav === 'function') {
+        window.hideBottomNav();
+    }
+    
     gtag('event', 'exercise_start', {
         inhale_resistance: resistanceSettings.inhale,
         exhale_resistance: resistanceSettings.exhale

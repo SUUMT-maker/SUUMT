@@ -216,12 +216,39 @@ let globalRestTime = 120;
 // 🎯 퀴즈 오퍼 타이머
 let quizOfferTimer = null;
 
+// 하단 네비게이션 바 제어 함수들
+function showBottomNav() {
+    const nav = document.getElementById('bottomNavigation');
+    if (nav) nav.style.display = 'flex';
+}
+
+function hideBottomNav() {
+    const nav = document.getElementById('bottomNavigation');
+    if (nav) nav.style.display = 'none';
+}
+
+// 전역 함수로 노출
+window.showBottomNav = showBottomNav;
+window.hideBottomNav = hideBottomNav;
+window.switchTab = switchTab;
+window.selectWorkoutMode = selectWorkoutMode;
+
 // 화면 전환 함수
 function showScreen(screenId) {
     document.querySelectorAll('.screen').forEach(screen => {
         screen.classList.remove('active');
     });
     document.getElementById(screenId).classList.add('active');
+    
+    // 화면에 따른 하단 네비게이션 바 표시/숨김 처리
+    const screensWithNav = ['mainScreen', 'workoutModeScreen', 'breathTrainingScreen'];
+    const screensWithoutNav = ['exerciseScreen', 'resultScreen', 'feedbackScreen'];
+    
+    if (screensWithNav.includes(screenId)) {
+        showBottomNav();
+    } else if (screensWithoutNav.includes(screenId)) {
+        hideBottomNav();
+    }
 }
 
 // 메인 화면으로 이동
@@ -229,6 +256,43 @@ function goToMain() {
     showScreen('mainScreen');
     resetExercise();
     loadUserData();
+}
+
+// 하단 네비게이션 탭 전환 함수
+function switchTab(tabName) {
+    const screens = document.querySelectorAll('.screen');
+    screens.forEach(s => s.classList.remove('active'));
+
+    const newScreen = document.getElementById(
+        tabName === 'home' ? 'mainScreen' :
+        tabName === 'workout' ? 'workoutModeScreen' :
+        tabName === 'records' ? 'recordsScreen' : null
+    );
+    if (!newScreen) return;
+
+    // 메인/운동모드 탭에서는 하단 네비게이션 바 표시
+    showBottomNav();
+
+    newScreen.classList.add('active');
+    
+    // 탭 버튼 활성화 상태 업데이트
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+}
+
+// 운동 모드 선택 함수
+function selectWorkoutMode(mode) {
+    if (mode === 'breathtraining') {
+        const screen = document.getElementById('breathTrainingScreen');
+        // 모든 화면 숨김
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        screen.classList.add('active');
+
+        // 숨트레이닝 화면에서는 하단 네비게이션 바 표시
+        showBottomNav();
+    }
 }
 
 // 사용자 데이터 로드
