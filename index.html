@@ -1104,6 +1104,12 @@
             font-size: 13px;
         }
     }
+
+    /* 상단 안전 여백 처리 */
+    #breathTrainingScreen .section-header {
+        margin-top: max(24px, env(safe-area-inset-top));
+        /* 모바일 notch 고려 */
+    }
     </style>
 
 </body>
