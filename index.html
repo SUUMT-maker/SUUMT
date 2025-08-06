@@ -48,9 +48,34 @@
                         mainScreen.style.opacity = '1';
                     }, 50);
                 }
+            } else if (tabName === 'workout') {
+                // 모든 화면 숨기기
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.remove('active');
+                });
+                
+                // 운동모드 선택 화면 표시
+                const workoutModeScreen = document.getElementById('workoutModeScreen');
+                if (workoutModeScreen) {
+                    workoutModeScreen.classList.add('active');
+                    // 부드러운 전환 효과
+                    workoutModeScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        workoutModeScreen.style.opacity = '1';
+                    }, 50);
+                }
             } else {
-                // 다른 탭들은 아직 개발 중 메시지
+                // 기록 탭은 아직 개발 중
                 console.log(`${tabName} 탭은 다음 단계에서 개발 예정`);
+            }
+        }
+
+        // 💪 운동모드 선택 함수 (3단계에서는 로그만)
+        function selectWorkoutMode(mode) {
+            console.log('🎯 운동모드 선택:', mode);
+            if (mode === 'breathtraining') {
+                console.log('✅ 숨트레이닝 모드 선택됨 (4단계에서 상세 화면으로 이동 예정)');
+                // 4단계에서 상세 화면으로 이동하는 기능 추가 예정
             }
         }
     </script>
@@ -685,6 +710,64 @@
                 </div>
             </div>
         </div>
+
+        <!-- 💪 운동모드 선택 화면 -->
+        <div id="workoutModeScreen" class="screen">
+            <div class="workout-mode-header">
+                <h2>💪 운동모드 선택</h2>
+                <p>오늘은 어떤 호흡 운동을 하시겠어요?</p>
+            </div>
+            
+            <div class="workout-modes-container">
+                <!-- 웜업 모드 (비활성화) -->
+                <div class="workout-mode-card disabled">
+                    <div class="mode-illustration">
+                        <div class="mode-avatar">
+                            <div class="avatar-bg warmup"></div>
+                            <div class="avatar-icon">🌅</div>
+                        </div>
+                    </div>
+                    <div class="mode-content">
+                        <h3>웜업</h3>
+                        <p>가벼운 호흡으로 몸을 깨우고 하루를 준비하세요.</p>
+                        <div class="mode-pattern">2 - 2 - 2 호흡</div>
+                    </div>
+                    <div class="mode-status">곧 출시</div>
+                </div>
+                
+                <!-- 숨트레이닝 모드 (활성화) -->
+                <div class="workout-mode-card active" onclick="selectWorkoutMode('breathtraining')">
+                    <div class="mode-illustration">
+                        <div class="mode-avatar">
+                            <div class="avatar-bg breathtraining"></div>
+                            <div class="avatar-icon">🫁</div>
+                        </div>
+                    </div>
+                    <div class="mode-content">
+                        <h3>숨트레이닝</h3>
+                        <p>호흡근육을 강화하고 폐활량을 늘려보세요.</p>
+                        <div class="mode-pattern">4 - 4 - 4 호흡</div>
+                    </div>
+                    <div class="mode-status">선택 가능</div>
+                </div>
+                
+                <!-- 잠들기전 모드 (비활성화) -->
+                <div class="workout-mode-card disabled">
+                    <div class="mode-illustration">
+                        <div class="mode-avatar">
+                            <div class="avatar-bg sleep"></div>
+                            <div class="avatar-icon">🌙</div>
+                        </div>
+                    </div>
+                    <div class="mode-content">
+                        <h3>잠들기전</h3>
+                        <p>긴장을 풀고 편안한 수면을 위한 호흡법입니다.</p>
+                        <div class="mode-pattern">4 - 7 - 8 호흡</div>
+                    </div>
+                    <div class="mode-status">곧 출시</div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- 🚀 하단 네비게이션 바 -->
@@ -822,6 +905,180 @@
         
         .screen {
             padding-bottom: 75px;
+        }
+    }
+
+    /* 💪 운동모드 선택 화면 스타일 */
+    .workout-mode-header {
+        text-align: center;
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+
+    .workout-mode-header h2 {
+        font-size: 24px;
+        font-weight: 700;
+        color: #1f2937;
+        margin-bottom: 8px;
+    }
+
+    .workout-mode-header p {
+        font-size: 16px;
+        color: #6b7280;
+        margin: 0;
+    }
+
+    .workout-modes-container {
+        padding: 0 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .workout-mode-card {
+        background: white;
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+        border: 2px solid transparent;
+        transition: all 0.3s ease;
+        cursor: pointer;
+        position: relative;
+    }
+
+    .workout-mode-card.active {
+        border-color: #667eea;
+        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
+        transform: translateY(-2px);
+    }
+
+    .workout-mode-card.active:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.2);
+    }
+
+    .workout-mode-card.disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        background: #f9fafb;
+    }
+
+    .mode-illustration {
+        flex-shrink: 0;
+    }
+
+    .mode-avatar {
+        width: 60px;
+        height: 60px;
+        position: relative;
+        border-radius: 50%;
+        overflow: hidden;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .avatar-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-radius: 50%;
+    }
+
+    .avatar-bg.warmup {
+        background: linear-gradient(135deg, #fef3c7 0%, #fbbf24 100%);
+    }
+
+    .avatar-bg.breathtraining {
+        background: linear-gradient(135deg, #ddd6fe 0%, #8b5cf6 100%);
+    }
+
+    .avatar-bg.sleep {
+        background: linear-gradient(135deg, #e0e7ff 0%, #6366f1 100%);
+    }
+
+    .avatar-icon {
+        font-size: 24px;
+        position: relative;
+        z-index: 1;
+    }
+
+    .mode-content {
+        flex-grow: 1;
+    }
+
+    .mode-content h3 {
+        font-size: 18px;
+        font-weight: 600;
+        color: #1f2937;
+        margin: 0 0 4px 0;
+    }
+
+    .mode-content p {
+        font-size: 14px;
+        color: #6b7280;
+        margin: 0 0 8px 0;
+        line-height: 1.4;
+    }
+
+    .mode-pattern {
+        font-size: 12px;
+        font-weight: 600;
+        color: #667eea;
+        background: rgba(102, 126, 234, 0.1);
+        padding: 4px 8px;
+        border-radius: 6px;
+        display: inline-block;
+    }
+
+    .mode-status {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        font-size: 10px;
+        font-weight: 600;
+        padding: 4px 8px;
+        border-radius: 8px;
+        text-transform: uppercase;
+    }
+
+    .workout-mode-card.active .mode-status {
+        background: #667eea;
+        color: white;
+    }
+
+    .workout-mode-card.disabled .mode-status {
+        background: #e5e7eb;
+        color: #9ca3af;
+    }
+
+    /* 모바일 최적화 - 운동모드 화면 */
+    @media (max-width: 480px) {
+        .workout-mode-card {
+            padding: 16px;
+            gap: 12px;
+        }
+        
+        .mode-avatar {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .avatar-icon {
+            font-size: 20px;
+        }
+        
+        .mode-content h3 {
+            font-size: 16px;
+        }
+        
+        .mode-content p {
+            font-size: 13px;
         }
     }
     </style>
