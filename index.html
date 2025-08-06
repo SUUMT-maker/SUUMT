@@ -70,12 +70,27 @@
             }
         }
 
-        // 💪 운동모드 선택 함수 (3단계에서는 로그만)
+        // 💪 운동모드 선택 함수 (숨트레이닝 모드 화면으로 전환)
         function selectWorkoutMode(mode) {
             console.log('🎯 운동모드 선택:', mode);
             if (mode === 'breathtraining') {
-                console.log('✅ 숨트레이닝 모드 선택됨 (4단계에서 상세 화면으로 이동 예정)');
-                // 4단계에서 상세 화면으로 이동하는 기능 추가 예정
+                // 모든 화면 숨기기
+                document.querySelectorAll('.screen').forEach(screen => {
+                    screen.classList.remove('active');
+                });
+                
+                // 숨트레이닝 모드 화면 표시
+                const breathTrainingScreen = document.getElementById('breathTrainingScreen');
+                if (breathTrainingScreen) {
+                    breathTrainingScreen.classList.add('active');
+                    // 부드러운 전환 효과
+                    breathTrainingScreen.style.opacity = '0';
+                    setTimeout(() => {
+                        breathTrainingScreen.style.opacity = '1';
+                    }, 50);
+                }
+                
+                console.log('숨트레이닝 모드 화면으로 전환됨');
             }
         }
     </script>
@@ -332,68 +347,6 @@
                 </div>
             </div>
 
-            <!-- 운동 가이드 -->
-            <div class="guide-card">
-                <div class="guide-header">
-                    <div class="guide-title">📋 숨트 트레이닝 가이드</div>
-                </div>
-                
-                <div class="important-notice">
-                    <span class="important-icon">💡</span>
-                    <span class="important-text">호흡할 때는 의식적으로 힘을 주어 깊게 호흡하세요!</span>
-                </div>
-                
-                <div class="guide-step">숨트 기구의 다이얼을 돌려 저항 강도를 설정해주세요</div>
-                <div class="guide-step">설정한 저항 강도를 아래 화면에 똑같이 입력하세요</div>
-                <div class="guide-step">복식호흡으로 코가 아닌 입으로만 호흡하세요</div>
-            </div>
-
-            <!-- 저항 설정 -->
-            <div class="resistance-card">
-                <div class="resistance-header">
-                    <div class="resistance-title">🎯 저항 강도 설정</div>
-                </div>
-                
-                <div class="resistance-controls">
-                    <div class="resistance-control">
-                        <div class="resistance-label">들숨 (Inhale)</div>
-                        <div class="resistance-selector">
-                            <button class="resistance-btn" onclick="adjustResistance('inhale', -1)">−</button>
-                            <div class="resistance-value" id="inhaleLevel">1</div>
-                            <button class="resistance-btn" onclick="adjustResistance('inhale', 1)">+</button>
-                        </div>
-                        <div class="resistance-dots" id="inhaleScale">
-                            <div class="dot active"></div>
-                            <div class="dot"></div>
-                            <div class="dot"></div>
-                            <div class="dot"></div>
-                            <div class="dot"></div>
-                            <div class="dot"></div>
-                        </div>
-                    </div>
-
-                    <div class="resistance-control">
-                        <div class="resistance-label">날숨 (Exhale)</div>
-                        <div class="resistance-selector">
-                            <button class="resistance-btn" onclick="adjustResistance('exhale', -1)">−</button>
-                            <div class="resistance-value" id="exhaleLevel">1</div>
-                            <button class="resistance-btn" onclick="adjustResistance('exhale', 1)">+</button>
-                        </div>
-                        <div class="resistance-dots" id="exhaleScale">
-                            <div class="dot active"></div>
-                            <div class="dot"></div>
-                            <div class="dot"></div>
-                            <div class="dot"></div>
-                            <div class="dot"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="resistance-tip">
-                    💡 처음이시면 1단계 추천 • 적당히 힘든 강도가 최적이에요!
-                </div>
-            </div>
-
             <!-- 차트 섹션 -->
             <div class="chart-section">
                 <div class="section-header">
@@ -436,14 +389,6 @@
                         <div class="x-label">토</div>
                     </div>
                 </div>
-            </div>
-
-            <!-- 트레이닝 시작 -->
-            <div class="start-training-section">
-                <button class="start-button" onclick="startExercise()">
-                    <span>🚀</span>
-                    <span>트레이닝 시작</span>
-                </button>
             </div>
         </div>
 
@@ -766,6 +711,84 @@
                     </div>
                     <div class="mode-status">곧 출시</div>
                 </div>
+            </div>
+        </div>
+
+        <!-- 🫁 숨트레이닝 모드 화면 -->
+        <div id="breathTrainingScreen" class="screen">
+            <div class="section-header">
+                <h2 class="section-title"><span class="section-icon">🫁</span> 숨트레이닝 모드</h2>
+                <p class="section-subtitle">호흡 가이드, 저항 설정, 트레이닝 시작</p>
+            </div>
+            
+            <!-- 가이드 카드 -->
+            <div class="guide-card">
+                <div class="guide-header">
+                    <div class="guide-title">📋 숨트 트레이닝 가이드</div>
+                </div>
+                
+                <div class="important-notice">
+                    <span class="important-icon">💡</span>
+                    <span class="important-text">호흡할 때는 의식적으로 힘을 주어 깊게 호흡하세요!</span>
+                </div>
+                
+                <div class="guide-step">숨트 기구의 다이얼을 돌려 저항 강도를 설정해주세요</div>
+                <div class="guide-step">설정한 저항 강도를 아래 화면에 똑같이 입력하세요</div>
+                <div class="guide-step">복식호흡으로 코가 아닌 입으로만 호흡하세요</div>
+            </div>
+
+            <!-- 저항 설정 -->
+            <div class="resistance-card">
+                <div class="resistance-header">
+                    <div class="resistance-title">🎯 저항 강도 설정</div>
+                </div>
+                
+                <div class="resistance-controls">
+                    <div class="resistance-control">
+                        <div class="resistance-label">들숨 (Inhale)</div>
+                        <div class="resistance-selector">
+                            <button class="resistance-btn" onclick="adjustResistance('inhale', -1)">−</button>
+                            <div class="resistance-value" id="inhaleLevel">1</div>
+                            <button class="resistance-btn" onclick="adjustResistance('inhale', 1)">+</button>
+                        </div>
+                        <div class="resistance-dots" id="inhaleScale">
+                            <div class="dot active"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
+
+                    <div class="resistance-control">
+                        <div class="resistance-label">날숨 (Exhale)</div>
+                        <div class="resistance-selector">
+                            <button class="resistance-btn" onclick="adjustResistance('exhale', -1)">−</button>
+                            <div class="resistance-value" id="exhaleLevel">1</div>
+                            <button class="resistance-btn" onclick="adjustResistance('exhale', 1)">+</button>
+                        </div>
+                        <div class="resistance-dots" id="exhaleScale">
+                            <div class="dot active"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                            <div class="dot"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="resistance-tip">
+                    💡 처음이시면 1단계 추천 • 적당히 힘든 강도가 최적이에요!
+                </div>
+            </div>
+
+            <!-- 트레이닝 시작 -->
+            <div class="start-training-section">
+                <button class="start-button" onclick="startExercise()">
+                    <span>🚀</span>
+                    <span>트레이닝 시작</span>
+                </button>
             </div>
         </div>
     </div>
