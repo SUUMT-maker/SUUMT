@@ -227,11 +227,90 @@ function hideBottomNav() {
     if (nav) nav.style.display = 'none';
 }
 
+// 📒 Records 관련 함수들
+async function fetchExerciseSessions() {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('exercise_sessions')
+            .select('*')
+            .order('exercise_date', { ascending: true });
+
+        if (error) {
+            console.error('❌ Error fetching sessions:', error);
+            return [];
+        }
+        console.log('📒 Exercise sessions fetched:', data);
+        return data || [];
+    } catch (error) {
+        console.error('❌ Error fetching sessions:', error);
+        return [];
+    }
+}
+
+function transformSessionToRecord(session) {
+    return {
+        date: session.exercise_date,
+        sets: session.completed_sets,
+        duration: session.exercise_time,
+        avg_resistance: Math.round((session.inhale_resistance + session.exhale_resistance) / 2),
+        ai_summary: session.is_aborted ? "운동을 중단하셨네요. 다음에는 완주해보세요!" : "운동 완료! 꾸준히 해봅시다."
+    };
+}
+
+function renderCalendar(sessions) {
+    const calendarContainer = document.querySelector('.records-calendar');
+    const records = sessions.map(transformSessionToRecord);
+    const days = [...new Set(records.map(r => r.date))];
+
+    let html = '<table class="calendar"><tr>';
+    for (let d = 1; d <= 30; d++) {
+        const dayStr = d.toString().padStart(2, '0');
+        const fullDate = `2025-08-${dayStr}`; // FIXME: month dynamic
+        const hasRecord = days.includes(fullDate);
+        html += `<td class="${hasRecord ? 'has-record' : ''}" data-day="${fullDate}">${d}</td>`;
+        if (d % 7 === 0) html += '</tr><tr>';
+    }
+    html += '</tr></table>';
+    calendarContainer.innerHTML = html;
+
+    calendarContainer.querySelectorAll('td').forEach(td => {
+        td.addEventListener('click', () => {
+            const day = td.getAttribute('data-day');
+            const selected = records.filter(r => r.date === day && r.sets > 0);
+            renderRecordSummary(selected[0]);
+        });
+    });
+}
+
+function renderRecordSummary(record) {
+    if (!record) {
+        document.getElementById('selectedDate').innerText = '-';
+        document.getElementById('recordSummaryList').innerHTML = '<li>운동 기록 없음</li>';
+        document.getElementById('aiAdviceSummary').innerText = '-';
+        return;
+    }
+
+    document.getElementById('selectedDate').innerText = record.date;
+    document.getElementById('recordSummaryList').innerHTML = `
+        <li>운동 세트 수: ${record.sets}</li>
+        <li>총 운동 시간: ${record.duration}</li>
+        <li>평균 저항 강도: ${record.avg_resistance}</li>
+    `;
+    document.getElementById('aiAdviceSummary').innerText = record.ai_summary;
+}
+
+async function onRecordsTabClick() {
+    showBottomNav();
+    const sessions = await fetchExerciseSessions();
+    renderCalendar(sessions);
+}
+
 // 전역 함수로 노출
 window.showBottomNav = showBottomNav;
 window.hideBottomNav = hideBottomNav;
 window.switchTab = switchTab;
 window.selectWorkoutMode = selectWorkoutMode;
+window.onRecordsTabClick = onRecordsTabClick;
 
 // 화면 전환 함수
 function showScreen(screenId) {
@@ -280,6 +359,11 @@ function switchTab(tabName) {
         btn.classList.remove('active');
     });
     document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    
+    // Records 탭 클릭 시 데이터 로드
+    if (tabName === 'records') {
+        onRecordsTabClick();
+    }
 }
 
 // 운동 모드 선택 함수
