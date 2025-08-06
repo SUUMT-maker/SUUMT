@@ -15,6 +15,7 @@ interface ExerciseData {
   completedBreaths: number;
   exerciseTime: string;
   isAborted: boolean;
+  sessionId?: string;
 }
 
 interface RequestBody {
@@ -62,35 +63,65 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    // 요청 본문 파싱
-    const body: RequestBody = await req.json();
-    const { exerciseData, sessionId } = body;
+    const { exerciseData } = await req.json();
+    console.log('📊 운동 데이터:', exerciseData);
 
-    console.log('📊 받은 운동 데이터:', exerciseData);
-    console.log('🆔 세션 ID:', sessionId);
-
-    // 환경 변수에서 Gemini API 키 가져오기
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiApiKey) {
-      throw new Error('GEMINI_API_KEY 환경 변수가 설정되지 않았습니다.');
-    }
+    if (!geminiApiKey) throw new Error('API 키가 설정되지 않았습니다.');
 
-    // 운동 데이터 분석을 위한 프롬프트 생성
-    const prompt = generatePrompt(exerciseData);
-    console.log('🤖 Gemini 프롬프트:', prompt);
-
-    // Gemini API 호출
-    const geminiResponse = await callGeminiAPI(geminiApiKey, prompt);
-    console.log('📦 Gemini 응답:', geminiResponse);
-
-    // 응답 파싱 및 구조화
+    // 1️⃣ 세션별 조언 생성
+    const sessionPrompt = generateSessionPrompt(exerciseData);
+    const geminiResponse = await callGeminiAPI(geminiApiKey, sessionPrompt);
     const aiAdvice = parseResponse(geminiResponse, exerciseData);
 
-    // 성공 응답
+    // 2️⃣ Supabase 저장
+    const supabaseUrl = Deno.env.get('SUPABASE_URL');
+    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const { createClient } = await import("npm:@supabase/supabase-js@2.39.8");
+    const supabase = createClient(supabaseUrl!, supabaseKey!);
+
+    const { data: inserted, error } = await supabase
+      .from('ai_advice')
+      .insert([{
+        session_id: exerciseData.sessionId || null,
+        intensity_advice: aiAdvice.intensityAdvice,
+        comprehensive_advice: aiAdvice.comprehensiveAdvice,
+        gemini_raw_response: geminiResponse
+      }])
+      .select('id, session_id, created_at');
+
+    if (error) console.error('❌ ai_advice insert error:', error);
+
+    // 3️⃣ 하루 요약(summary) 생성
+    const today = new Date().toISOString().split('T')[0];
+    const { data: dailyAdvices } = await supabase
+      .from('ai_advice')
+      .select('comprehensive_advice')
+      .eq('session_id', exerciseData.sessionId)
+      .gte('created_at', `${today}T00:00:00`)
+      .lte('created_at', `${today}T23:59:59`);
+
+    if (dailyAdvices && dailyAdvices.length > 1) {
+      const summaryPrompt = generateDailySummaryPrompt(dailyAdvices);
+      const summaryResponse = await callGeminiAPI(geminiApiKey, summaryPrompt);
+      const summaryText = parseSummary(summaryResponse);
+
+      if (summaryText) {
+        // 하루 대표 세션(첫 번째 insert)에 summary 업데이트
+        const latestId = inserted?.[0]?.id;
+        if (latestId) {
+          await supabase
+            .from('ai_advice')
+            .update({ summary: summaryText })
+            .eq('id', latestId);
+          console.log('✅ Daily summary updated:', summaryText);
+        }
+      }
+    }
+
     return new Response(JSON.stringify({
       success: true,
       advice: aiAdvice,
-      sessionId: sessionId,
       timestamp: new Date().toISOString(),
     }), {
       status: 200,
@@ -101,19 +132,13 @@ Deno.serve(async (req: Request) => {
     });
 
   } catch (error) {
-    console.error('❌ Edge Function 오류:', error);
-
-    // 오류 시 기본 조언 반환
-    const defaultAdvice = getDefaultAdvice(null);
-
+    console.error('❌ Edge Function Error:', error);
     return new Response(JSON.stringify({
       success: false,
       error: error.message,
-      advice: defaultAdvice,
-      sessionId: 'unknown',
-      timestamp: new Date().toISOString(),
+      advice: getDefaultAdvice(null),
     }), {
-      status: 200, // 클라이언트에서 처리할 수 있도록 200 반환
+      status: 500,
       headers: {
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*',
@@ -122,8 +147,11 @@ Deno.serve(async (req: Request) => {
   }
 });
 
-// 🚀 The Breather 트레이닝 원칙 기반 프롬프트 생성
-function generatePrompt(exerciseData: ExerciseData): string {
+// ------------------------
+// Prompt Generators
+// ------------------------
+
+function generateSessionPrompt(exerciseData: ExerciseData): string {
   const { resistanceSettings, userFeedback, completedSets, completedBreaths, exerciseTime, isAborted } = exerciseData;
 
   return `
@@ -155,6 +183,19 @@ function generatePrompt(exerciseData: ExerciseData): string {
 `;
 }
 
+function generateDailySummaryPrompt(dailyAdvices: Array<{comprehensive_advice: string}>): string {
+  const list = dailyAdvices.map((a, i) => `${i+1}. ${a.comprehensive_advice}`).join('\n');
+  return `
+오늘 하루 호흡 트레이닝 AI 조언들:
+
+${list}
+
+이 조언들을 하루 요약으로 1~2문장으로 통합해 주세요.
+톤: 친근하고 동기부여.
+출력: 하루 요약 1문장
+`;
+}
+
 // 🎯 최적화된 Gemini API 호출 함수
 async function callGeminiAPI(apiKey: string, prompt: string): Promise<GeminiResponse> {
   const response = await fetch(
@@ -166,12 +207,11 @@ async function callGeminiAPI(apiKey: string, prompt: string): Promise<GeminiResp
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
           temperature: 0.7,
-          maxOutputTokens: 256, // 비용 절감
+          maxOutputTokens: 256,
         },
       }),
     },
   );
-
   if (!response.ok) throw new Error(`API 오류: ${response.status}`);
   return await response.json();
 }
@@ -213,6 +253,10 @@ function parseResponse(geminiResponse: GeminiResponse, exerciseData: ExerciseDat
     console.error('응답 파싱 오류:', error);
     return getDefaultAdvice(exerciseData);
   }
+}
+
+function parseSummary(geminiResponse: GeminiResponse): string | null {
+  return geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
 }
 
 // 🔄 The Breather 원칙 기반 기본 조언 함수
