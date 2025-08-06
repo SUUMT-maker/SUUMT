@@ -233,7 +233,7 @@ async function fetchAiAdviceForDate(date) {
     if (!client) return null;
 
     try {
-        // Step 1: Get all session IDs for the selected date
+        // Step 1: Fetch session IDs for the date
         const { data: sessions, error: sessionError } = await client
             .from('exercise_sessions')
             .select('id')
@@ -246,10 +246,10 @@ async function fetchAiAdviceForDate(date) {
 
         const sessionIds = sessions.map(s => s.id);
 
-        // Step 2: Get the latest AI advice for those sessions
+        // Step 2: Fetch AI advice with summary first
         const { data: advices, error: adviceError } = await client
             .from('ai_advice')
-            .select('comprehensive_advice, session_id, created_at')
+            .select('summary, comprehensive_advice, session_id')
             .in('session_id', sessionIds)
             .order('created_at', { ascending: false })
             .limit(1);
@@ -259,8 +259,12 @@ async function fetchAiAdviceForDate(date) {
             return null;
         }
 
-        console.log('✅ AI advice fetched for', date, ':', advices[0].comprehensive_advice);
-        return advices[0].comprehensive_advice;
+        const advice = advices[0];
+        const result = advice.summary || advice.comprehensive_advice || null;
+        
+        console.log('✅ AI advice fetched for', date, ':', result);
+        return result;
+
     } catch (err) {
         console.error('❌ Error fetching AI advice:', err);
         return null;
