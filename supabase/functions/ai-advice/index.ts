@@ -118,78 +118,38 @@ Deno.serve(async (req: Request) => {
   }
 });
 
+// 🚀 최적화된 프롬프트 생성 함수
 function generatePrompt(exerciseData: ExerciseData): string {
   const { resistanceSettings, userFeedback, completedSets, completedBreaths, exerciseTime, isAborted } = exerciseData;
 
-  // 피드백 텍스트 생성 (Google Apps Script 로직과 동일)
-  let feedbackText = '피드백 없음';
-  if (userFeedback) {
-    if (userFeedback === 'easy') {
-      feedbackText = isAborted ? '중단했지만 편했음' : '너무 편했음';
-    } else if (userFeedback === 'perfect') {
-      feedbackText = isAborted ? '중단했지만 적당했음' : '딱 좋았음';
-    } else if (userFeedback === 'hard') {
-      feedbackText = isAborted ? '힘들어서 중단함' : '너무 힘들었음';
-    }
-  }
-
-  // Google Apps Script와 동일한 프롬프트 사용
-  return `당신은 숨트레이너 앱의 전문 AI 호흡 코치입니다. 사용자의 개별 트레이닝 결과와 피드백을 바탕으로 두 가지 조언을 해주세요.
-
-### 🏋️‍♂️ 숨트(SUUMT) 호흡운동기구 정보:
-- 들숨과 날숨을 동시에 트레이닝할 수 있는 세계 유일한 호흡운동기구
-- 저항 조절 가능 (들숨 1-6단계, 날숨 1-5단계)
-- 반드시 기구를 통한 입 호흡만 허용 (코 호흡 절대 금지)
-- 숨트 프로토콜: 들숨 3초 → 멈춤 1초 → 날숨 3초 → 멈춤 1초
-- 권장 세션: 2세트 × 10회, 세트간 2분 휴식
-
-### 📊 오늘의 트레이닝 결과:
-- 저항 설정: 들숨(Inhale) ${resistanceSettings.inhale}단계, 날숨(Exhale) ${resistanceSettings.exhale}단계
-- 완료 세트: ${completedSets}/2세트
-- 완료 호흡 횟수: ${completedBreaths}/20회
-- 소요 시간: ${exerciseTime}
-- 완주 여부: ${isAborted ? '중간 중단' : '완주 성공'}
-- 사용자 피드백: ${feedbackText}
-
-### 💬 조언 요청:
-다음 두 섹션으로 나누어 응답해주세요:
-
-1. **저항 강도 분석** (100-150자):
-   - 사용자 피드백과 완주/중단 상황을 종합한 구체적인 강도 조절 방향
-   - 중단한 경우: 안전을 우선한 강도 하향 조정이나 격려
-   - 완주한 경우: 피드백에 따른 점진적 발전 방안
-   - 친근하고 이해하기 쉬운 표현
-
-2. **종합 트레이닝 조언** (100-150자):
-   - 중단/완주 여부를 고려한 전체적인 트레이닝 성과 분석
-   - 중단한 경우: 도전한 것 자체를 격려하고 다음 목표 제시
-   - 완주한 경우: 성취 칭찬과 개인 기록 발전상황 언급
-   - 동기부여와 지속적인 트레이닝 격려
-
-⚠️ 절대 금지사항:
-- "코로 호흡", "코 호흡", "비강 호흡" 등 코 관련 표현 절대 금지
-- 숨트는 반드시 입으로만 호흡하는 기구임을 항상 기억
-
-⚠️ 중요한 피드백 로직:
-- "너무 편했음" → 저항 1단계 상향 조언
-- "딱 좋았음" → 현재 강도 유지 조언 (매우 중요!)
-- "너무 힘들었음" → 저항 1단계 하향 조언
-
-📝 가독성 개선:
-- 줄바꿈을 활용해서 단락 구분
-- 이모지로 각 섹션 구분
-
-🚨 중요: 반드시 아래 형식을 정확히 따라주세요!
-응답 형식 (정확히 이 태그를 사용):
-###INTENSITY### 강도분석내용 ###INTENSITY###
-###COMPREHENSIVE### 종합조언내용 ###COMPREHENSIVE###`;
+  return `
+사용자 오늘 세션 요약 (JSON):
+{
+  "inhale": ${resistanceSettings.inhale},
+  "exhale": ${resistanceSettings.exhale},
+  "sets": ${completedSets},
+  "breaths": ${completedBreaths},
+  "duration": "${exerciseTime}",
+  "aborted": ${isAborted},
+  "feedback": "${userFeedback || 'none'}"
 }
 
-async function callGeminiAPI(apiKey: string, prompt: string): Promise<GeminiResponse> {
-  // Google Apps Script와 동일한 Gemini API 엔드포인트 사용
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`;
+출력:
+###INTENSITY### 강도조절 한 문장 ###INTENSITY###
+###COMPREHENSIVE### 종합격려 한 문장 ###COMPREHENSIVE###
 
-  const response = await fetch(url, {
+규칙:
+- 한국어 출력
+- 각 문장 최대 100자
+- 친근하고 간결하게
+- 코 호흡 관련 표현 금지
+- 피드백 기반 강도 조절: easy→상향, perfect→유지, hard→하향
+`;
+}
+
+// 🎯 최적화된 Gemini API 호출 함수
+async function callGeminiAPI(apiKey: string, prompt: string): Promise<GeminiResponse> {
+  const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -200,9 +160,7 @@ async function callGeminiAPI(apiKey: string, prompt: string): Promise<GeminiResp
       }],
       generationConfig: {
         temperature: 0.7,
-        topK: 40,
-        topP: 0.8,
-        maxOutputTokens: 1024,
+        maxOutputTokens: 256, // 🎯 토큰 사용량 75% 감소
         candidateCount: 1
       },
       safetySettings: [
