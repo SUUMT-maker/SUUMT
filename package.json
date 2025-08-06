@@ -1,5 +1,7 @@
 {
+  "type": "module",
   "dependencies": {
-    "@supabase/mcp-server-supabase": "^0.4.5"
+    "@supabase/mcp-server-supabase": "^0.4.5",
+    "@supabase/supabase-js": "^2.39.8"
   }
 }
