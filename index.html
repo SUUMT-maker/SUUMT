@@ -127,15 +127,15 @@
     <link rel="stylesheet" href="css/screens.css?v=1.0.2">
     <link rel="stylesheet" href="css/mobile.css?v=1.0.2">
     
-    <!-- Supabase SDK CDN -->
+    <!-- Load Supabase SDK (v2.x) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.8/dist/umd/supabase.min.js"></script>
     <script>
-        // Prevent multiple initializations
-        if (!window.supabase) {
+        // Initialize Supabase Client once and store as supabaseClient
+        if (!window.supabaseClient) {
             const supabaseUrl = 'https://rfqbzibewzvqopqgovbc.supabase.co';
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmcWJ6aWJld3p2cW9wcWdvdmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNzIwNTMsImV4cCI6MjA2OTk0ODA1M30.nAXbnAFe4jM7F56QN4b42NhwNJG_iuSXOVM5zC72Bs4';
-            window.supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
-            console.log('✅ Supabase initialized globally:', window.supabase);
+            window.supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
+            console.log('✅ Supabase client initialized:', window.supabaseClient);
         }
     </script>
     
