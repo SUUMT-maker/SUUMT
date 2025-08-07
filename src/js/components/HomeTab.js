@@ -314,9 +314,41 @@ class HomeTab {
     handleTrainingStart(resistanceData) {
         console.log('🏃‍♂️ 훈련 시작:', resistanceData);
         
-        // TODO: 실제 훈련 화면으로 이동
-        // 여기서 선택된 저항값을 사용하여 훈련 세션을 시작
-        alert(`훈련을 시작합니다!\n흡기 저항: ${resistanceData.inhale}\n호기 저항: ${resistanceData.exhale}`);
+        // SuumTrainingStartScreen 표시
+        if (window.suumTrainingStartScreen) {
+            const sessionConfig = {
+                inhaleResistance: resistanceData.inhale,
+                exhaleResistance: resistanceData.exhale,
+                dailyGoal: 2, // 기본 목표 세션 수
+                completedToday: 0 // 초기값, 실제로는 로드됨
+            };
+            
+            window.suumTrainingStartScreen.init(
+                sessionConfig,
+                (finalConfig) => {
+                    this.handleSessionStart(finalConfig);
+                },
+                () => {
+                    // 돌아가기 시 SuumTrainingSetup 다시 표시
+                    if (window.suumTrainingSetup) {
+                        window.suumTrainingSetup.show();
+                    }
+                }
+            );
+            window.suumTrainingStartScreen.show();
+        } else {
+            alert('훈련 시작 화면을 불러올 수 없습니다.');
+        }
+    }
+
+    /**
+     * 세션 시작 처리
+     */
+    handleSessionStart(sessionConfig) {
+        console.log('🏃‍♂️ 세션 시작:', sessionConfig);
+        
+        // TODO: 카운트다운 화면으로 이동
+        alert(`세션을 시작합니다!\n흡기 저항: ${sessionConfig.inhaleResistance}\n호기 저항: ${sessionConfig.exhaleResistance}\n목표: ${sessionConfig.dailyGoal}회 중 ${sessionConfig.completedToday}회 완료`);
     }
 
     /**
