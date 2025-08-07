@@ -1,3 +1,47 @@
+// 🔐 카카오 로그인 관련 함수들
+
+// 1️⃣ 카카오 로그인 함수
+async function loginWithKakao() {
+  const { data, error } = await window.supabaseClient.auth.signInWithOAuth({
+    provider: 'kakao',
+    options: { redirectTo: window.location.origin }
+  });
+  if (error) console.error('❌ Kakao login failed:', error);
+}
+
+// 2️⃣ 버튼 클릭 이벤트
+document.addEventListener('DOMContentLoaded', function() {
+  const loginBtn = document.getElementById('loginKakaoBtn');
+  if (loginBtn) {
+    loginBtn.onclick = loginWithKakao;
+  }
+});
+
+// 3️⃣ 로그인 상태 감지
+window.supabaseClient.auth.onAuthStateChange((event, session) => {
+  if (event === 'SIGNED_IN' && session?.user) {
+    console.log('✅ Kakao user signed in:', session.user);
+    console.log('👤 User ID:', session.user.id);
+    window.currentUserId = session.user.id;
+
+    // 화면 전환
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('homeScreen').style.display = 'block';
+  }
+});
+
+// 4️⃣ 페이지 새로고침 시 세션 확인
+(async function checkSession() {
+  const { data: { session } } = await window.supabaseClient.auth.getSession();
+  if (session?.user) {
+    console.log('✅ Session found:', session.user);
+    console.log('👤 User ID:', session.user.id);
+    window.currentUserId = session.user.id;
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('homeScreen').style.display = 'block';
+  }
+})();
+
 // 🏠 메인 앱 관련 함수들
 
 // Supabase 설정 (Google Apps Script 대체)

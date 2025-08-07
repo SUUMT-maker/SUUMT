@@ -1650,3 +1650,60 @@
     margin-top: 1.5rem;
     text-align: center;
 }
+
+/* 로그인 화면 스타일 */
+.login-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(135deg, #CFEFFF 0%, #B8E8FF 50%, #A1E1FF 100%);
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 3000;
+}
+
+.login-container h2 {
+  color: #1E1E1E;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+  font-size: 24px;
+  margin: 20px 0;
+  text-align: center;
+}
+
+.app-logo {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 20px;
+}
+
+.kakao-login-btn {
+  background-color: #FEE500;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 20px;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  color: #000;
+  transition: all 0.3s ease;
+}
+
+.kakao-login-btn:hover {
+  background-color: #FDD835;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(254, 229, 0, 0.3);
+}
+
+.kakao-icon {
+  width: 20px;
+  height: 20px;
+}

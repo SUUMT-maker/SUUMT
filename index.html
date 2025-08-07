@@ -149,7 +149,18 @@
 
 </head>
 <body>
-  <!-- 🎬 2단계 온보딩 스플래시 화면 -->
+  <!-- 로그인 화면 -->
+  <div id="loginScreen" class="login-container">
+    <img src="images/suumt-logo.png" class="app-logo" alt="SUUMT Logo"/>
+    <h2>숨트레이너 시작하기</h2>
+    <button id="loginKakaoBtn" class="kakao-login-btn">
+      <img src="images/suumt-logo.png" class="kakao-icon"/> 카카오로 로그인
+    </button>
+  </div>
+
+  <!-- 홈 화면 (기존 앱의 첫 화면 컨테이너) -->
+  <div id="homeScreen" style="display:none;">
+    <!-- 🎬 2단계 온보딩 스플래시 화면 -->
 <div id="introScreen" style="position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: linear-gradient(135deg, #CFEFFF 0%, #B8E8FF 50%, #A1E1FF 100%); display: flex; justify-content: center; align-items: center; z-index: 2000; opacity: 1; transition: opacity 0.8s ease-out; overflow: hidden;">
     
     <!-- 전체 배경 블러 효과들 -->
@@ -828,8 +839,9 @@
             </div>
         </div>
     </div>
+  </div>
 
-    <!-- 🚀 하단 네비게이션 바 -->
+  <!-- 🚀 하단 네비게이션 바 -->
     <nav id="bottomNavigation" class="bottom-nav">
         <button class="nav-btn active" data-tab="home" onclick="switchTab('home')">
             <div class="nav-icon">
