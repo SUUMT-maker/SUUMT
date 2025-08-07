@@ -712,7 +712,7 @@ async function saveExerciseToDatabase(exerciseData) {
         console.log('💾 Supabase 데이터베이스에 운동 데이터 저장 시작:', exerciseData);
         
         const sessionData = {
-            user_id: 'temp_user_001', // 임시 사용자 ID
+            user_id: window.currentUserId, // 로그인된 사용자 ID
             exercise_date: new Date().toISOString().split('T')[0],
             exercise_time: exerciseData.exerciseTime || '0:00',
             completed_sets: exerciseData.completedSets || 0,
