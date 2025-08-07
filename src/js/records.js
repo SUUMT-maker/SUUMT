@@ -1,268 +1,635 @@
-// 기록 탭 관련 기능
+/**
+ * 기록 탭 관련 기능
+ * 설계자의 확정안에 따른 완전 구현
+ */
 
-// 기록 탭 초기화
-async function initRecordsTab() {
-    console.log('📊 기록 탭 초기화 시작...');
-    
-    try {
-        // 주간 요약 데이터 로드
-        await loadWeeklySummary();
-        
-        // 달력 렌더링
-        await renderCalendar();
-        
-        // 세션 카드 렌더링
-        await renderSessionCards();
-        
-    } catch (error) {
-        console.error('❌ 기록 탭 초기화 실패:', error);
+class RecordsTab {
+    constructor() {
+        this.currentUserId = null;
+        this.supabaseClient = null;
+        this.currentDate = new Date();
+        this.selectedDate = null;
+        this.sessionsByDate = {};
+        this.isInitialized = false;
     }
-    
-    console.log('✅ 기록 탭 초기화 완료');
-}
 
-// 주간 요약 데이터 로드
-async function loadWeeklySummary() {
-    if (!window.currentUserId) return;
-    
-    try {
-        // 이번 주 시작일과 종료일 계산 (KST 기준)
-        const now = new Date();
-        const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
-        const weekStart = new Date(kstNow);
-        weekStart.setDate(kstNow.getDate() - kstNow.getDay()); // 일요일
-        weekStart.setHours(0, 0, 0, 0);
-        
-        const weekEnd = new Date(weekStart);
-        weekEnd.setDate(weekStart.getDate() + 6); // 토요일
-        weekEnd.setHours(23, 59, 59, 999);
-        
-        // UTC로 변환
-        const utcWeekStart = new Date(weekStart.getTime() - 9 * 60 * 60 * 1000);
-        const utcWeekEnd = new Date(weekEnd.getTime() - 9 * 60 * 60 * 1000);
-        
-        const { data: sessions, error } = await window.supabaseClient
-            .from('exercise_sessions')
-            .select('*')
-            .eq('user_id', window.currentUserId)
-            .gte('created_at', utcWeekStart.toISOString())
-            .lte('created_at', utcWeekEnd.toISOString());
-        
-        if (error) throw error;
-        
-        // 요약 데이터 계산
-        const activeDays = new Set();
-        let totalTime = 0;
-        let totalEffort = 0;
-        let effortCount = 0;
-        
-        sessions?.forEach(session => {
-            const sessionDate = toKSTDateString(session.created_at);
-            activeDays.add(sessionDate);
+    /**
+     * RecordsTab 초기화
+     * @param {string} userId - 현재 로그인된 사용자 ID
+     * @param {object} supabaseClient - Supabase 클라이언트 인스턴스
+     */
+    async init(userId, supabaseClient) {
+        try {
+            console.log('📊 RecordsTab 초기화 시작...');
             
-            totalTime += parseInt(session.exercise_time) || 0;
+            this.currentUserId = userId;
+            this.supabaseClient = supabaseClient;
             
-            if (session.user_feedback) {
-                totalEffort += getEffortScore(session.user_feedback);
-                effortCount++;
-            }
-        });
-        
-        // UI 업데이트
-        document.getElementById('weeklyActiveDays').textContent = activeDays.size;
-        document.getElementById('weeklyTotalTime').textContent = formatTime(totalTime);
-        document.getElementById('weeklyAvgEffort').textContent = 
-            effortCount > 0 ? getEffortText(Math.round(totalEffort / effortCount)) : '-';
-        
-    } catch (error) {
-        console.error('❌ 주간 요약 로드 실패:', error);
-    }
-}
-
-// 달력 렌더링
-async function renderCalendar() {
-    if (!window.currentUserId) return;
-    
-    try {
-        const { data: sessions, error } = await window.supabaseClient
-            .from('exercise_sessions')
-            .select('created_at')
-            .eq('user_id', window.currentUserId);
-        
-        if (error) throw error;
-        
-        // KST 기준으로 날짜별 세션 그룹화
-        const sessionsByDate = {};
-        sessions?.forEach(session => {
-            const dateKey = toKSTDateString(session.created_at);
-            if (!sessionsByDate[dateKey]) {
-                sessionsByDate[dateKey] = [];
-            }
-            sessionsByDate[dateKey].push(session);
-        });
-        
-        // 달력 HTML 생성
-        const calendarContainer = document.querySelector('.records-calendar');
-        const now = new Date();
-        const currentYear = now.getFullYear();
-        const currentMonth = now.getMonth() + 1;
-        
-        let html = '<table class="calendar"><tr>';
-        for (let d = 1; d <= 30; d++) {
-            const dayStr = d.toString().padStart(2, '0');
-            const fullDate = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${dayStr}`;
-            const hasRecord = sessionsByDate[fullDate]?.length > 0;
+            // 로딩 상태 표시
+            this.showLoading();
             
-            html += `<td class="${hasRecord ? 'has-record' : ''}" data-day="${fullDate}">${d}</td>`;
-            if (d % 7 === 0) html += '</tr><tr>';
+            // 모든 세션 데이터 로드
+            await this.loadAllSessions();
+            
+            // 달력 렌더링
+            this.renderCalendar();
+            
+            // 오늘 날짜 선택 (기본값)
+            const today = this.toKSTDateString(new Date().toISOString());
+            await this.selectDate(today);
+            
+            // 이벤트 리스너 등록
+            this.initEventListeners();
+            
+            // 로딩 상태 숨김
+            this.hideLoading();
+            
+            this.isInitialized = true;
+            console.log('✅ RecordsTab 초기화 완료');
+            
+        } catch (error) {
+            console.error('❌ RecordsTab 초기화 실패:', error);
+            this.showError();
         }
-        html += '</tr></table>';
-        calendarContainer.innerHTML = html;
-        
-        // 달력 클릭 이벤트
-        calendarContainer.querySelectorAll('td').forEach(td => {
-            td.addEventListener('click', async () => {
-                const day = td.getAttribute('data-day');
-                await loadSessionsForDate(day);
-            });
-        });
-        
-    } catch (error) {
-        console.error('❌ 달력 렌더링 실패:', error);
     }
-}
 
-// 세션 카드 렌더링
-async function renderSessionCards() {
-    // 기본적으로 오늘 날짜의 세션 표시
-    const today = toKSTDateString(new Date().toISOString());
-    await loadSessionsForDate(today);
-}
-
-// 특정 날짜의 세션 로드
-async function loadSessionsForDate(date) {
-    if (!window.currentUserId) return;
-    
-    try {
-        // KST 기준 날짜를 UTC 기준으로 변환
-        const kstStartOfDay = new Date(`${date}T00:00:00+09:00`);
-        const kstEndOfDay = new Date(`${date}T23:59:59+09:00`);
+    /**
+     * 로딩 상태 표시
+     */
+    showLoading() {
+        const recordsContainer = document.querySelector('.records-container');
+        if (!recordsContainer) return;
         
-        const utcStartOfDay = new Date(kstStartOfDay.getTime() - 9 * 60 * 60 * 1000);
-        const utcEndOfDay = new Date(kstEndOfDay.getTime() - 9 * 60 * 60 * 1000);
-        
-        const { data: sessions, error } = await window.supabaseClient
-            .from('exercise_sessions')
-            .select(`
-                *,
-                ai_advice (
-                    comprehensive_advice
-                )
-            `)
-            .eq('user_id', window.currentUserId)
-            .gte('created_at', utcStartOfDay.toISOString())
-            .lt('created_at', utcEndOfDay.toISOString())
-            .order('created_at', { ascending: false });
-        
-        if (error) throw error;
-        
-        renderSessionCardsHTML(sessions || [], date);
-        
-    } catch (error) {
-        console.error('❌ 세션 로드 실패:', error);
-    }
-}
-
-// 세션 카드 HTML 렌더링
-function renderSessionCardsHTML(sessions, date) {
-    const container = document.getElementById('sessionCardsContainer');
-    
-    if (!sessions.length) {
-        container.innerHTML = `
-            <div class="card" style="text-align: center; color: #666;">
-                <p>${date}에는 운동 기록이 없습니다.</p>
+        recordsContainer.innerHTML = `
+            <div class="records-loading">
+                <span>기록을 불러오는 중...</span>
             </div>
         `;
-        return;
     }
-    
-    let html = '';
-    sessions.forEach(session => {
-        const sessionTime = new Date(session.created_at);
-        const kstTime = new Date(sessionTime.getTime() + 9 * 60 * 60 * 1000);
-        const timeString = kstTime.toLocaleTimeString('ko-KR', { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: true 
-        });
+
+    /**
+     * 로딩 상태 숨김
+     */
+    hideLoading() {
+        this.restoreContent();
+    }
+
+    /**
+     * 에러 상태 표시
+     */
+    showError() {
+        const recordsContainer = document.querySelector('.records-container');
+        if (!recordsContainer) return;
         
-        const avgResistance = session.inhale_resistance && session.exhale_resistance 
-            ? ((session.inhale_resistance + session.exhale_resistance) / 2).toFixed(1)
-            : '-';
+        recordsContainer.innerHTML = `
+            <div class="records-error">
+                <div class="error-icon">⚠️</div>
+                <p>기록을 불러오는 중 오류가 발생했습니다.</p>
+                <button onclick="recordsTab.init(window.currentUserId, window.supabaseClient)" class="retry-btn">다시 시도</button>
+            </div>
+        `;
+    }
+
+    /**
+     * 컨텐츠 복원
+     */
+    restoreContent() {
+        const recordsContainer = document.querySelector('.records-container');
+        if (!recordsContainer) return;
         
-        const aiAdvice = session.ai_advice?.[0]?.comprehensive_advice || 'AI 조언이 없습니다.';
-        
-        html += `
-            <div class="session-card card">
-                <div class="session-header">⏱️ ${timeString} · ${date}</div>
-                <div class="session-body">
-                    <ul>
-                        <li>세트 수: <span class="sets">${session.completed_sets || 0}</span></li>
-                        <li>호흡 수: <span class="breaths">${session.completed_breaths || 0}</span></li>
-                        <li>평균 저항: <span class="resistance">${avgResistance}</span></li>
-                        <li>강도 인식: <span class="effort">${session.user_feedback || '-'}</span></li>
-                    </ul>
-                    <div class="ai-summary">"${aiAdvice.substring(0, 50)}${aiAdvice.length > 50 ? '...' : ''}"</div>
-                    <button class="ai-detail-btn" data-session-id="${session.id}">AI 코칭 전체 보기</button>
+        recordsContainer.innerHTML = `
+            <h2>운동 기록</h2>
+            
+            <!-- 달력 컴포넌트 -->
+            <div class="calendar-component card mb-4">
+                <div class="calendar-header">
+                    <button id="prevMonthBtn" class="calendar-nav-btn">◀</button>
+                    <h3 id="calendarTitle">2024년 1월</h3>
+                    <button id="nextMonthBtn" class="calendar-nav-btn">▶</button>
+                </div>
+                <div class="calendar-body">
+                    <div class="calendar-weekdays">
+                        <div>일</div>
+                        <div>월</div>
+                        <div>화</div>
+                        <div>수</div>
+                        <div>목</div>
+                        <div>금</div>
+                        <div>토</div>
+                    </div>
+                    <div id="calendarDays" class="calendar-days">
+                        <!-- JS로 동적 생성 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- DailySessionSlider 컴포넌트 -->
+            <div id="dailySessionSlider" class="daily-session-slider card mb-4" style="display: none;">
+                <div class="daily-session-header">
+                    <h3 id="selectedDateTitle">선택된 날짜의 운동 세션</h3>
+                </div>
+                <div class="session-slider-container">
+                    <div class="session-slider-wrapper">
+                        <div id="sessionSlider" class="session-slider">
+                            <!-- JS로 동적 생성 -->
+                        </div>
+                    </div>
+                    <div class="slider-indicators">
+                        <!-- JS로 동적 생성 -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI 숨트레이너 요약 카드 -->
+            <div id="aiSummaryCard" class="ai-summary-card card mb-4">
+                <div class="ai-summary-content">
+                    <div class="ai-summary-header">
+                        <div class="ai-summary-icon">🤖</div>
+                        <h3>AI 숨트레이너의 조언</h3>
+                    </div>
+                    <div class="ai-summary-message">
+                        <p id="aiSummaryMessage">날짜를 선택하면 AI 숨트레이너의 조언을 확인할 수 있어요.</p>
+                    </div>
+                    <div class="ai-summary-action">
+                        <button id="aiAnalysisBtn" class="ai-analysis-btn" style="display: none;">
+                            AI 분석 보기 ▶
+                        </button>
+                    </div>
                 </div>
             </div>
         `;
-    });
-    
-    container.innerHTML = html;
-    
-    // AI 상세 버튼 이벤트
-    container.querySelectorAll('.ai-detail-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            const sessionId = btn.getAttribute('data-session-id');
-            showAiDetailModal(sessionId);
+    }
+
+    /**
+     * 이벤트 리스너 초기화
+     */
+    initEventListeners() {
+        // 달력 네비게이션 버튼
+        const prevMonthBtn = document.getElementById('prevMonthBtn');
+        const nextMonthBtn = document.getElementById('nextMonthBtn');
+        
+        if (prevMonthBtn) {
+            prevMonthBtn.addEventListener('click', () => {
+                this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+                this.renderCalendar();
+            });
+        }
+        
+        if (nextMonthBtn) {
+            nextMonthBtn.addEventListener('click', () => {
+                this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+                this.renderCalendar();
+            });
+        }
+
+        // AI 분석 버튼
+        const aiAnalysisBtn = document.getElementById('aiAnalysisBtn');
+        if (aiAnalysisBtn) {
+            aiAnalysisBtn.addEventListener('click', () => {
+                this.showAIAnalysisModal();
+            });
+        }
+    }
+
+    /**
+     * 모든 세션 데이터 로드
+     */
+    async loadAllSessions() {
+        try {
+            const { data: sessions, error } = await this.supabaseClient
+                .from('exercise_sessions')
+                .select('*')
+                .eq('user_id', this.currentUserId)
+                .order('created_at', { ascending: false });
+            
+            if (error) throw error;
+            
+            // KST 기준으로 날짜별 세션 그룹화
+            this.sessionsByDate = {};
+            sessions?.forEach(session => {
+                const dateKey = this.toKSTDateString(session.created_at);
+                if (!this.sessionsByDate[dateKey]) {
+                    this.sessionsByDate[dateKey] = [];
+                }
+                this.sessionsByDate[dateKey].push(session);
+            });
+            
+            console.log('✅ 모든 세션 데이터 로드 완료');
+            
+        } catch (error) {
+            console.error('❌ 세션 데이터 로드 실패:', error);
+            this.sessionsByDate = {};
+        }
+    }
+
+    /**
+     * 달력 렌더링
+     */
+    renderCalendar() {
+        const calendarTitle = document.getElementById('calendarTitle');
+        const calendarDays = document.getElementById('calendarDays');
+        
+        if (!calendarTitle || !calendarDays) return;
+        
+        // 달력 제목 업데이트
+        const year = this.currentDate.getFullYear();
+        const month = this.currentDate.getMonth() + 1;
+        calendarTitle.textContent = `${year}년 ${month}월`;
+        
+        // 달력 날짜 생성
+        const firstDay = new Date(year, month - 1, 1);
+        const lastDay = new Date(year, month, 0);
+        const startDate = new Date(firstDay);
+        startDate.setDate(startDate.getDate() - firstDay.getDay());
+        
+        let html = '';
+        const today = this.toKSTDateString(new Date().toISOString());
+        
+        for (let i = 0; i < 42; i++) {
+            const currentDate = new Date(startDate);
+            currentDate.setDate(startDate.getDate() + i);
+            
+            const dateKey = this.toKSTDateString(currentDate.toISOString());
+            const dayNumber = currentDate.getDate();
+            const isCurrentMonth = currentDate.getMonth() === month - 1;
+            const isToday = dateKey === today;
+            const hasSessions = this.sessionsByDate[dateKey]?.length > 0;
+            
+            let className = 'calendar-day';
+            if (!isCurrentMonth) className += ' other-month';
+            if (isToday) className += ' today';
+            if (hasSessions) className += ' has-sessions';
+            
+            html += `<div class="${className}" data-date="${dateKey}">${dayNumber}</div>`;
+        }
+        
+        calendarDays.innerHTML = html;
+        
+        // 날짜 클릭 이벤트 등록
+        calendarDays.querySelectorAll('.calendar-day').forEach(day => {
+            day.addEventListener('click', async () => {
+                const date = day.getAttribute('data-date');
+                await this.selectDate(date);
+            });
         });
-    });
+    }
+
+    /**
+     * 특정 날짜 선택
+     */
+    async selectDate(date) {
+        this.selectedDate = date;
+        
+        // 달력에서 선택된 날짜 하이라이트
+        this.highlightSelectedDate(date);
+        
+        // 해당 날짜의 세션 로드
+        const sessions = this.sessionsByDate[date] || [];
+        
+        // DailySessionSlider 업데이트
+        this.updateDailySessionSlider(sessions, date);
+        
+        // AI 요약 카드 업데이트
+        await this.updateAISummaryCard(date, sessions);
+    }
+
+    /**
+     * 선택된 날짜 하이라이트
+     */
+    highlightSelectedDate(date) {
+        // 모든 날짜에서 선택 상태 제거
+        document.querySelectorAll('.calendar-day').forEach(day => {
+            day.classList.remove('selected');
+        });
+        
+        // 선택된 날짜에 선택 상태 추가
+        const selectedDay = document.querySelector(`[data-date="${date}"]`);
+        if (selectedDay) {
+            selectedDay.classList.add('selected');
+        }
+    }
+
+    /**
+     * DailySessionSlider 업데이트
+     */
+    updateDailySessionSlider(sessions, date) {
+        const dailySessionSlider = document.getElementById('dailySessionSlider');
+        const selectedDateTitle = document.getElementById('selectedDateTitle');
+        
+        if (!dailySessionSlider || !selectedDateTitle) return;
+        
+        // 날짜 제목 업데이트
+        const formattedDate = this.formatDisplayDate(date);
+        selectedDateTitle.textContent = `${formattedDate}의 운동 세션`;
+        
+        if (sessions.length === 0) {
+            // 세션이 없는 경우
+            dailySessionSlider.style.display = 'none';
+            return;
+        }
+        
+        // 세션이 있는 경우 표시
+        dailySessionSlider.style.display = 'block';
+        
+        // 슬라이더 컨텐츠 생성
+        this.renderSessionSlider(sessions);
+        
+        // 인디케이터 생성
+        this.renderSliderIndicators(sessions.length);
+        
+        // 슬라이더 이벤트 리스너 등록
+        this.initSliderEventListeners();
+    }
+
+    /**
+     * 세션 슬라이더 렌더링
+     */
+    renderSessionSlider(sessions) {
+        const sessionSlider = document.getElementById('sessionSlider');
+        if (!sessionSlider) return;
+        
+        let html = '';
+        
+        sessions.forEach((session, index) => {
+            const sessionTime = this.formatSessionTime(session.created_at);
+            const exerciseTime = session.exercise_time ? this.formatTime(parseInt(session.exercise_time)) : '기록 없음';
+            const sets = session.completed_sets || 0;
+            const breaths = session.completed_breaths || 0;
+            const avgResistance = this.calculateAverageResistance(session.inhale_resistance, session.exhale_resistance);
+            const effortLevel = this.getEffortLevel(session.inhale_resistance, session.exhale_resistance);
+            const feedback = session.user_feedback || '기록 없음';
+            
+            html += `
+                <div class="session-slide ${index === 0 ? 'active' : ''}" data-index="${index}">
+                    <div class="session-slide-header">
+                        <h4>${index + 1}번째 세션</h4>
+                        <span class="session-time">${sessionTime}</span>
+                    </div>
+                    <div class="session-slide-content">
+                        <div class="session-stat-item">
+                            <span class="session-stat-icon">⏱️</span>
+                            <span class="session-stat-label">운동 시간</span>
+                            <span class="session-stat-value">${exerciseTime}</span>
+                        </div>
+                        <div class="session-stat-item">
+                            <span class="session-stat-icon">🔄</span>
+                            <span class="session-stat-label">세트 수</span>
+                            <span class="session-stat-value">${sets}세트</span>
+                        </div>
+                        <div class="session-stat-item">
+                            <span class="session-stat-icon">🫁</span>
+                            <span class="session-stat-label">호흡 수</span>
+                            <span class="session-stat-value">${breaths}회</span>
+                        </div>
+                        <div class="session-stat-item">
+                            <span class="session-stat-icon">💪</span>
+                            <span class="session-stat-label">평균 저항</span>
+                            <span class="session-stat-value">${avgResistance}</span>
+                        </div>
+                        <div class="session-stat-item">
+                            <span class="session-stat-icon">${this.getEffortIcon(effortLevel)}</span>
+                            <span class="session-stat-label">강도 레벨</span>
+                            <span class="session-stat-value">${this.getEffortText(effortLevel)}</span>
+                        </div>
+                        <div class="session-stat-item">
+                            <span class="session-stat-icon">😊</span>
+                            <span class="session-stat-label">내 느낌</span>
+                            <span class="session-stat-value">${feedback}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        sessionSlider.innerHTML = html;
+    }
+
+    /**
+     * 슬라이더 인디케이터 렌더링
+     */
+    renderSliderIndicators(sessionCount) {
+        const indicatorsContainer = document.querySelector('.slider-indicators');
+        if (!indicatorsContainer) return;
+        
+        let html = '';
+        
+        for (let i = 0; i < sessionCount; i++) {
+            html += `<div class="slider-indicator ${i === 0 ? 'active' : ''}" data-index="${i}"></div>`;
+        }
+        
+        indicatorsContainer.innerHTML = html;
+    }
+
+    /**
+     * 슬라이더 이벤트 리스너 초기화
+     */
+    initSliderEventListeners() {
+        const indicators = document.querySelectorAll('.slider-indicator');
+        
+        indicators.forEach(indicator => {
+            indicator.addEventListener('click', () => {
+                const index = parseInt(indicator.dataset.index);
+                this.showSlide(index);
+            });
+        });
+    }
+
+    /**
+     * 특정 슬라이드 표시
+     */
+    showSlide(index) {
+        const slides = document.querySelectorAll('.session-slide');
+        const indicators = document.querySelectorAll('.slider-indicator');
+        
+        // 모든 슬라이드와 인디케이터 비활성화
+        slides.forEach(slide => slide.classList.remove('active'));
+        indicators.forEach(indicator => indicator.classList.remove('active'));
+        
+        // 선택된 슬라이드와 인디케이터 활성화
+        if (slides[index]) slides[index].classList.add('active');
+        if (indicators[index]) indicators[index].classList.add('active');
+    }
+
+    /**
+     * AI 요약 카드 업데이트
+     */
+    async updateAISummaryCard(date, sessions) {
+        const aiSummaryCard = document.getElementById('aiSummaryCard');
+        const aiSummaryMessage = document.getElementById('aiSummaryMessage');
+        const aiAnalysisBtn = document.getElementById('aiAnalysisBtn');
+        
+        if (!aiSummaryCard || !aiSummaryMessage || !aiAnalysisBtn) return;
+        
+        try {
+            // AI 조언 조회 (Supabase VIEW: view_user_ai_advice)
+            const { data: aiAdvice, error } = await this.supabaseClient
+                .from('view_user_ai_advice')
+                .select('*')
+                .eq('user_id', this.currentUserId)
+                .eq('advice_date', date)
+                .single();
+            
+            if (error && error.code !== 'PGRST116') { // PGRST116는 데이터 없음
+                throw error;
+            }
+            
+            if (aiAdvice && aiAdvice.summary) {
+                // AI 조언이 있는 경우
+                aiSummaryMessage.textContent = aiAdvice.summary;
+                aiAnalysisBtn.style.display = 'inline-block';
+                aiSummaryCard.classList.add('has-advice');
+            } else {
+                // AI 조언이 없는 경우
+                if (sessions.length > 0) {
+                    aiSummaryMessage.textContent = '아직 충분한 데이터가 없어요!';
+                } else {
+                    aiSummaryMessage.textContent = '이 날짜에는 운동 기록이 없어요.';
+                }
+                aiAnalysisBtn.style.display = 'none';
+                aiSummaryCard.classList.remove('has-advice');
+            }
+            
+        } catch (error) {
+            console.error('❌ AI 조언 로드 실패:', error);
+            aiSummaryMessage.textContent = 'AI 조언을 불러오는 중 오류가 발생했습니다.';
+            aiAnalysisBtn.style.display = 'none';
+        }
+    }
+
+    /**
+     * AI 분석 모달 표시
+     */
+    showAIAnalysisModal() {
+        console.log('🤖 AI 분석 모달 표시:', this.selectedDate);
+        // TODO: 실제 AI 분석 모달 구현
+        alert('AI 분석 기능이 준비 중입니다...');
+    }
+
+    /**
+     * 유틸리티 함수들
+     */
+
+    /**
+     * UTC를 KST 날짜 문자열로 변환
+     */
+    toKSTDateString(utcString) {
+        const date = new Date(utcString);
+        const kstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
+        return kstDate.toISOString().split('T')[0];
+    }
+
+    /**
+     * 시간 포맷팅 (초 → 분:초)
+     */
+    formatTime(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = seconds % 60;
+        return `${minutes}분 ${remainingSeconds}초`;
+    }
+
+    /**
+     * 세션 시간 포맷팅
+     */
+    formatSessionTime(utcTimeString) {
+        try {
+            const utcDate = new Date(utcTimeString);
+            const kstDate = new Date(utcDate.getTime() + 9 * 60 * 60 * 1000);
+            
+            const hours = kstDate.getHours();
+            const minutes = kstDate.getMinutes();
+            
+            return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        } catch (error) {
+            console.error('세션 시간 포맷팅 오류:', error);
+            return '시간 정보 없음';
+        }
+    }
+
+    /**
+     * 표시용 날짜 포맷팅
+     */
+    formatDisplayDate(dateString) {
+        try {
+            const date = new Date(dateString);
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            return `${month}월 ${day}일`;
+        } catch (error) {
+            console.error('날짜 포맷팅 오류:', error);
+            return dateString;
+        }
+    }
+
+    /**
+     * 평균 저항 강도 계산
+     */
+    calculateAverageResistance(inhaleResistance, exhaleResistance) {
+        if (!inhaleResistance || !exhaleResistance) {
+            return '기록 없음';
+        }
+        
+        const avg = (inhaleResistance + exhaleResistance) / 2;
+        return `${avg.toFixed(1)}`;
+    }
+
+    /**
+     * 강도 레벨 계산
+     */
+    getEffortLevel(inhaleResistance, exhaleResistance) {
+        if (!inhaleResistance || !exhaleResistance) {
+            return 'unknown';
+        }
+        
+        const avg = (inhaleResistance + exhaleResistance) / 2;
+        
+        if (avg <= 2) {
+            return 'light';
+        } else if (avg <= 4) {
+            return 'balanced';
+        } else {
+            return 'challenging';
+        }
+    }
+
+    /**
+     * 강도 아이콘 반환
+     */
+    getEffortIcon(effortLevel) {
+        const iconMap = {
+            'light': '💨',
+            'balanced': '💪',
+            'challenging': '🔥',
+            'unknown': '❓'
+        };
+        return iconMap[effortLevel] || '❓';
+    }
+
+    /**
+     * 강도 텍스트 반환
+     */
+    getEffortText(effortLevel) {
+        const textMap = {
+            'light': '쉬움 (Light)',
+            'balanced': '적정 (Balanced)',
+            'challenging': '힘듦 (Challenging)',
+            'unknown': '기록 없음'
+        };
+        return textMap[effortLevel] || '기록 없음';
+    }
 }
 
-// AI 상세 모달 표시 (향후 구현)
-function showAiDetailModal(sessionId) {
-    console.log('🤖 AI 상세 모달 표시:', sessionId);
-    alert('AI 상세 조언 기능이 준비 중입니다...');
-}
+// 전역 인스턴스 생성
+const recordsTab = new RecordsTab();
 
-// 강도 점수 계산
-function getEffortScore(feedback) {
-    const effortMap = {
-        '너무 쉬워요': 1,
-        '적당해요': 3,
-        '조금 어려워요': 4,
-        '너무 어려워요': 5
-    };
-    return effortMap[feedback] || 3;
-}
-
-// 강도 텍스트 변환
-function getEffortText(score) {
-    const effortTexts = {
-        1: '너무 쉬워요',
-        2: '쉬워요',
-        3: '적당해요',
-        4: '조금 어려워요',
-        5: '너무 어려워요'
-    };
-    return effortTexts[score] || '적당해요';
-}
+// 전역으로 노출
+window.recordsTab = recordsTab;
 
 // 기록 탭 활성화 시 호출
 function onRecordsTabActivate() {
     console.log('📊 기록 탭 활성화');
-    initRecordsTab();
+    if (window.currentUserId && window.supabaseClient) {
+        recordsTab.init(window.currentUserId, window.supabaseClient);
+    }
 }
 
 // 이벤트 리스너 등록
