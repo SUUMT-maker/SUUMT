@@ -44,6 +44,15 @@ window.supabaseClient.auth.onAuthStateChange((event, session) => {
 
 // 🏠 메인 앱 관련 함수들
 
+// 🕐 시간대 변환 유틸리티 함수
+function toKSTDateString(utcDateStr) {
+    if (!utcDateStr) return new Date().toISOString().split('T')[0];
+    
+    const utcDate = new Date(utcDateStr);
+    const kstDate = new Date(utcDate.getTime() + 9 * 60 * 60 * 1000);
+    return kstDate.toISOString().split('T')[0]; // 'YYYY-MM-DD'
+}
+
 // Supabase 설정 (Google Apps Script 대체)
 const SUPABASE_URL = 'https://rfqbzibewzvqopqgovbc.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmcWJ6aWJld3p2cW9wcWdvdmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNzIwNTMsImV4cCI6MjA2OTk0ODA1M30.nAXbnAFe4jM7F56QN4b42NhwNJG_iuSXOVM5zC72Bs4';
@@ -357,15 +366,7 @@ function renderCalendar(sessions) {
     // UTC → KST 시간대 보정하여 날짜별로 세션 그룹화
     const sessionsByDate = {};
     sessions.forEach(session => {
-        let sessionDate;
-        if (session.created_at) {
-            // UTC → KST 변환 (UTC + 9시간)
-            const createdAtUTC = new Date(session.created_at);
-            const createdAtKST = new Date(createdAtUTC.getTime() + 9 * 60 * 60 * 1000);
-            sessionDate = createdAtKST.toISOString().split('T')[0]; // YYYY-MM-DD
-        } else {
-            sessionDate = new Date().toISOString().split('T')[0];
-        }
+        const sessionDate = toKSTDateString(session.created_at);
         
         if (!sessionsByDate[sessionDate]) {
             sessionsByDate[sessionDate] = [];
@@ -421,15 +422,7 @@ async function renderRecordSummary(session) {
     }
 
     // UTC → KST 시간대 보정하여 날짜 포맷팅
-    let date;
-    if (session.created_at) {
-        // UTC → KST 변환 (UTC + 9시간)
-        const createdAtUTC = new Date(session.created_at);
-        const createdAtKST = new Date(createdAtUTC.getTime() + 9 * 60 * 60 * 1000);
-        date = createdAtKST.toISOString().split('T')[0]; // YYYY-MM-DD
-    } else {
-        date = new Date().toISOString().split('T')[0];
-    }
+    const date = toKSTDateString(session.created_at);
     dateEl.innerText = date;
 
     // 실제 데이터베이스 컬럼명에 맞춰 렌더링
@@ -589,8 +582,15 @@ async function fetchRecordSummaryForDate(date) {
     }
 
     try {
-        const startOfDay = `${date}T00:00:00Z`;
-        const endOfDay = `${date}T23:59:59Z`;
+        // KST 기준 날짜를 UTC 기준으로 변환하여 조회
+        const kstStartOfDay = new Date(`${date}T00:00:00+09:00`);
+        const kstEndOfDay = new Date(`${date}T23:59:59+09:00`);
+        
+        // UTC로 변환
+        const utcStartOfDay = new Date(kstStartOfDay.getTime() - 9 * 60 * 60 * 1000);
+        const utcEndOfDay = new Date(kstEndOfDay.getTime() - 9 * 60 * 60 * 1000);
+        
+        console.log(`🕐 KST ${date} → UTC ${utcStartOfDay.toISOString()} ~ ${utcEndOfDay.toISOString()}`);
         
         const { data: sessions, error } = await window.supabaseClient
             .from('exercise_sessions')
@@ -604,8 +604,8 @@ async function fetchRecordSummaryForDate(date) {
                 created_at
             `)
             .eq('user_id', window.currentUserId)
-            .gte('created_at', startOfDay)
-            .lt('created_at', endOfDay)
+            .gte('created_at', utcStartOfDay.toISOString())
+            .lt('created_at', utcEndOfDay.toISOString())
             .order('created_at', { ascending: false });
 
         if (error) {
