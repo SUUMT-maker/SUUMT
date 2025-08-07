@@ -1064,31 +1064,251 @@ function updateHomeUI(summary) {
 async function initHomeTab() {
     console.log('🏠 홈 탭 초기화 시작...');
     
-    // GreetingCard 로드
-    await loadGreetingCard();
+    // 로딩 상태 표시
+    showHomeLoading();
     
-    // AI 메시지 업데이트
-    updateAiMessage();
+    try {
+        // 사용자 데이터 확인
+        if (!window.currentUserId) {
+            console.warn('⚠️ 로그인된 사용자가 없습니다.');
+            hideHomeLoading();
+            return;
+        }
+        
+        // 모든 컴포넌트 데이터 로드
+        await Promise.all([
+            loadGreetingCard(),
+            loadAISummaryCard(),
+            loadWeeklyTrendCard()
+        ]);
+        
+        // AI 메시지 업데이트
+        updateAiMessage();
+        
+        // NoSessionCard 초기화
+        initNoSessionCard();
+        
+        // 로딩 상태 숨김
+        hideHomeLoading();
+        
+        console.log('✅ 홈 탭 초기화 완료');
+        
+    } catch (error) {
+        console.error('❌ 홈 탭 초기화 실패:', error);
+        hideHomeLoading();
+        showHomeError();
+    }
+}
+
+// HomeTab 로딩 상태 표시
+function showHomeLoading() {
+    const homeTabContent = document.getElementById('homeTabContent');
+    if (!homeTabContent) return;
     
-    // 오늘의 운동 요약 가져오기
-    const summary = await fetchTodaySummary();
+    homeTabContent.innerHTML = `
+        <div class="home-loading">
+            <span>Loading...</span>
+        </div>
+    `;
+}
+
+// HomeTab 로딩 상태 숨김
+function hideHomeLoading() {
+    const homeTabContent = document.getElementById('homeTabContent');
+    if (!homeTabContent) return;
     
-    // UI 업데이트
-    updateHomeUI(summary);
+    // 원래 컨텐츠 복원
+    restoreHomeTabContent();
+}
+
+// HomeTab 에러 상태 표시
+function showHomeError() {
+    const homeTabContent = document.getElementById('homeTabContent');
+    if (!homeTabContent) return;
     
-    // 5. DailySessionSlider 로드 (TodaySummaryCard 대신)
-    await loadDailySessionSlider();
+    homeTabContent.innerHTML = `
+        <div class="home-error">
+            <div class="error-icon">⚠️</div>
+            <p>데이터를 불러오는 중 오류가 발생했습니다.</p>
+            <button onclick="initHomeTab()" class="retry-btn">다시 시도</button>
+        </div>
+    `;
+}
+
+// HomeTab 컨텐츠 복원
+function restoreHomeTabContent() {
+    const homeTabContent = document.getElementById('homeTabContent');
+    if (!homeTabContent) return;
     
-    // 6. NoSessionCard 초기화
-    initNoSessionCard();
-    
-    // 7. AISummaryCard 로드
-    await loadAISummaryCard();
-    
-    // 8. WeeklyTrendCard 로드
-    await loadWeeklyTrendCard();
-    
-    console.log('✅ 홈 탭 초기화 완료');
+    // 원래 HTML 구조로 복원
+    homeTabContent.innerHTML = `
+        <!-- GreetingCard 컴포넌트 -->
+        <div class="greeting-card card mb-4">
+            <div class="greeting-content">
+                <div class="greeting-header">
+                    <h2 id="greetingTitle">안녕하세요! 👋</h2>
+                </div>
+                <div class="greeting-message">
+                    <p id="greetingMessage">오늘도 건강한 호흡을 만들어보세요</p>
+                </div>
+                <div class="greeting-goal">
+                    <p id="greetingGoal">목표: 2회 중 0회 완료</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- GoalProgressCard 컴포넌트 -->
+        <div class="goal-progress-card card mb-4">
+            <div class="goal-progress-content">
+                <div class="goal-progress-header">
+                    <h3>오늘의 목표</h3>
+                </div>
+                <div class="goal-progress-bar">
+                    <div class="progress-blocks">
+                        <!-- JS로 동적 생성 -->
+                    </div>
+                </div>
+                <div class="goal-progress-text">
+                    <p id="goalProgressText">2회 중 0회 완료했어요</p>
+                </div>
+                <div class="goal-progress-feedback">
+                    <p id="goalProgressFeedback">첫 번째 운동을 시작해보세요! 🚀</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TodaySummaryCard 컴포넌트 (조건부 렌더링) -->
+        <div id="todaySummaryCard" class="today-summary-card card mb-4" style="display: none;">
+            <div class="today-summary-content">
+                <div class="today-summary-header">
+                    <h3>오늘의 운동 요약</h3>
+                </div>
+                <div class="today-summary-body">
+                    <div class="summary-item">
+                        <span class="summary-icon">⏱️</span>
+                        <span class="summary-label">운동 시간</span>
+                        <span class="summary-value" id="todayExerciseTime">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-icon">🔄</span>
+                        <span class="summary-label">세트 수</span>
+                        <span class="summary-value" id="todaySets">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-icon">🫁</span>
+                        <span class="summary-label">호흡 수</span>
+                        <span class="summary-value" id="todayBreaths">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-icon">💪</span>
+                        <span class="summary-label">평균 저항</span>
+                        <span class="summary-value" id="todayResistance">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span class="summary-icon">😊</span>
+                        <span class="summary-label">내 느낌</span>
+                        <span class="summary-value" id="todayFeedback">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DailySessionSlider 컴포넌트 (조건부 렌더링) -->
+        <div id="dailySessionSlider" class="daily-session-slider card mb-4" style="display: none;">
+            <div class="daily-session-header">
+                <h3>오늘의 운동 세션</h3>
+            </div>
+            <div class="session-slider-container">
+                <div class="session-slider-wrapper">
+                    <div id="sessionSlider" class="session-slider">
+                        <!-- JS로 동적 생성 -->
+                    </div>
+                </div>
+                <div class="slider-indicators">
+                    <!-- JS로 동적 생성 -->
+                </div>
+            </div>
+        </div>
+
+        <!-- NoSessionCard 컴포넌트 (조건부 렌더링) -->
+        <div id="noSessionCard" class="no-session-card card mb-4" style="display: none;">
+            <div class="no-session-content">
+                <div class="no-session-icon">🫁</div>
+                <div class="no-session-header">
+                    <h3>오늘은 아직 호흡 운동을 안 하셨어요</h3>
+                </div>
+                <div class="no-session-message">
+                    <p>📈 꾸준함이 건강한 폐를 만듭니다!</p>
+                </div>
+                <div class="no-session-action">
+                    <button id="startTrainingBtn" class="primary-btn">
+                        지금 바로 시작하기
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- AISummaryCard 컴포넌트 -->
+        <div id="aiSummaryCard" class="ai-summary-card card mb-4">
+            <div class="ai-summary-content">
+                <div class="ai-summary-header">
+                    <div class="ai-summary-icon" id="aiSummaryIcon">🤖</div>
+                    <h3>AI 숨트레이너의 한마디</h3>
+                </div>
+                <div class="ai-summary-message">
+                    <p id="aiSummaryMessage">아직 AI 숨트레이너의 조언이 없어요. 오늘도 숨을 쉬며 시작해볼까요?</p>
+                </div>
+                <div class="ai-summary-date">
+                    <p id="aiSummaryDate">분석 날짜: -</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- WeeklyTrendCard 컴포넌트 -->
+        <div id="weeklyTrendCard" class="weekly-trend-card card mb-4">
+            <div class="weekly-trend-content">
+                <div class="weekly-trend-header">
+                    <h3>이번 주 숨트 레포트</h3>
+                    <p id="weeklyDateRange" class="weekly-date-range">날짜 범위 로딩 중...</p>
+                </div>
+                
+                <!-- 세션이 1개 이하일 경우 표시할 메시지 -->
+                <div id="weeklyInsufficientData" class="weekly-insufficient-data" style="display: none;">
+                    <div class="insufficient-icon">📊</div>
+                    <p>이번 주 기록이 아직 부족해요. 매일 꾸준히 한 번씩 도전해보세요!</p>
+                </div>
+                
+                <!-- 충분한 데이터가 있을 경우 표시할 내용 -->
+                <div id="weeklyTrendData" class="weekly-trend-data" style="display: none;">
+                    <!-- 미니 막대 그래프 -->
+                    <div class="weekly-chart-container">
+                        <canvas id="weeklyChart" class="weekly-chart"></canvas>
+                    </div>
+                    
+                    <!-- 요약 통계 -->
+                    <div class="weekly-stats">
+                        <div class="weekly-stat-item">
+                            <span class="weekly-stat-label">총 세션 수</span>
+                            <span class="weekly-stat-value" id="weeklyTotalSessions">-</span>
+                        </div>
+                        <div class="weekly-stat-item">
+                            <span class="weekly-stat-label">총 호흡 수</span>
+                            <span class="weekly-stat-value" id="weeklyTotalBreaths">-</span>
+                        </div>
+                        <div class="weekly-stat-item">
+                            <span class="weekly-stat-label">평균 저항 강도</span>
+                            <span class="weekly-stat-value" id="weeklyAvgResistance">-</span>
+                        </div>
+                    </div>
+                    
+                    <!-- AI 코멘트 -->
+                    <div class="weekly-ai-comment">
+                        <p id="weeklyAIComment">AI 코멘트 로딩 중...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 // 운동 시작 버튼 이벤트
