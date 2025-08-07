@@ -1,5 +1,90 @@
 // 홈 탭 관련 기능
 
+// GreetingCard 컴포넌트 관리
+async function loadGreetingCard() {
+    if (!window.currentUserId) return;
+    
+    try {
+        // 1. 사용자 닉네임 가져오기
+        const { data: { user }, error: userError } = await window.supabaseClient.auth.getUser();
+        if (userError) throw userError;
+        
+        const nickname = user?.user_metadata?.nickname || '사용자';
+        
+        // 2. 어제와 오늘 세션 수 조회
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = toKSTDateString(yesterday.toISOString());
+        
+        const todayStr = toKSTDateString(new Date().toISOString());
+        
+        // KST 기준 날짜를 UTC 기준으로 변환
+        const yesterdayStart = new Date(`${yesterdayStr}T00:00:00+09:00`);
+        const yesterdayEnd = new Date(`${yesterdayStr}T23:59:59+09:00`);
+        const todayStart = new Date(`${todayStr}T00:00:00+09:00`);
+        const todayEnd = new Date(`${todayStr}T23:59:59+09:00`);
+        
+        const utcYesterdayStart = new Date(yesterdayStart.getTime() - 9 * 60 * 60 * 1000);
+        const utcYesterdayEnd = new Date(yesterdayEnd.getTime() - 9 * 60 * 60 * 1000);
+        const utcTodayStart = new Date(todayStart.getTime() - 9 * 60 * 60 * 1000);
+        const utcTodayEnd = new Date(todayEnd.getTime() - 9 * 60 * 60 * 1000);
+        
+        // 어제 세션 수 조회
+        const { data: yesterdaySessions, error: yesterdayError } = await window.supabaseClient
+            .from('exercise_sessions')
+            .select('id')
+            .eq('user_id', window.currentUserId)
+            .gte('created_at', utcYesterdayStart.toISOString())
+            .lt('created_at', utcYesterdayEnd.toISOString());
+        
+        if (yesterdayError) throw yesterdayError;
+        
+        // 오늘 세션 수 조회
+        const { data: todaySessions, error: todayError } = await window.supabaseClient
+            .from('exercise_sessions')
+            .select('id')
+            .eq('user_id', window.currentUserId)
+            .gte('created_at', utcTodayStart.toISOString())
+            .lt('created_at', utcTodayEnd.toISOString());
+        
+        if (todayError) throw todayError;
+        
+        const yesterdayCount = yesterdaySessions?.length || 0;
+        const todayCount = todaySessions?.length || 0;
+        
+        // 3. GreetingCard UI 업데이트
+        updateGreetingCard(nickname, yesterdayCount, todayCount);
+        
+    } catch (error) {
+        console.error('❌ GreetingCard 로드 실패:', error);
+        // 기본값으로 설정
+        updateGreetingCard('사용자', 0, 0);
+    }
+}
+
+// GreetingCard UI 업데이트
+function updateGreetingCard(nickname, yesterdayCount, todayCount) {
+    const greetingTitle = document.getElementById('greetingTitle');
+    const greetingMessage = document.getElementById('greetingMessage');
+    const greetingGoal = document.getElementById('greetingGoal');
+    
+    if (!greetingTitle || !greetingMessage || !greetingGoal) return;
+    
+    // 인삿말 설정
+    greetingTitle.textContent = `안녕하세요, ${nickname}님! 👋`;
+    
+    // 메시지 설정 (어제 운동 여부에 따라)
+    if (yesterdayCount >= 1) {
+        greetingMessage.textContent = '어제도 운동을 이어갔어요. 오늘도 파이팅! 💪';
+    } else {
+        greetingMessage.textContent = '다시 시작해볼까요? 오늘은 특별히 좋은 하루가 될 거예요! 🌟';
+    }
+    
+    // 목표 설정 (오늘 세션 수 기반)
+    const targetSessions = 2; // 목표 세션 수
+    greetingGoal.textContent = `목표: ${targetSessions}회 중 ${todayCount}회 완료`;
+}
+
 // AI 메시지 관리
 const aiMessages = {
     // 기본 메시지들
@@ -170,6 +255,9 @@ function updateHomeUI(summary) {
 // 홈 탭 초기화
 async function initHomeTab() {
     console.log('🏠 홈 탭 초기화 시작...');
+    
+    // GreetingCard 로드
+    await loadGreetingCard();
     
     // AI 메시지 업데이트
     updateAiMessage();

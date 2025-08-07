@@ -176,20 +176,39 @@ body {
     margin: 0 auto;
 }
 
-.welcome-section {
+/* GreetingCard 컴포넌트 */
+.greeting-card {
     text-align: center;
     margin-bottom: 2rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
 }
 
-.welcome-section h2 {
+.greeting-content {
+    padding: 0.5rem;
+}
+
+.greeting-header h2 {
     font-size: 1.8rem;
-    color: #333;
     margin-bottom: 0.5rem;
+    font-weight: bold;
 }
 
-.welcome-section p {
-    color: #666;
-    font-size: 1rem;
+.greeting-message p {
+    font-size: 1.1rem;
+    margin-bottom: 1rem;
+    opacity: 0.9;
+    line-height: 1.5;
+}
+
+.greeting-goal p {
+    font-size: 0.9rem;
+    opacity: 0.8;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    display: inline-block;
 }
 
 /* AI 메시지 섹션 */
@@ -559,6 +578,20 @@ body {
     .card {
         padding: 1rem;
         margin-bottom: 1rem;
+    }
+    
+    /* GreetingCard 모바일 최적화 */
+    .greeting-header h2 {
+        font-size: 1.5rem;
+    }
+    
+    .greeting-message p {
+        font-size: 1rem;
+    }
+    
+    .greeting-goal p {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
     }
     
     .calendar td {
