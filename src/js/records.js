@@ -30,8 +30,8 @@ class RecordsTab {
             
             // 모든 세션 데이터 로드
             await this.loadAllSessions();
-            
-            // 달력 렌더링
+        
+        // 달력 렌더링
             this.renderCalendar();
             
             // 오늘 날짜 선택 (기본값)
@@ -46,8 +46,8 @@ class RecordsTab {
             
             this.isInitialized = true;
             console.log('✅ RecordsTab 초기화 완료');
-            
-        } catch (error) {
+        
+    } catch (error) {
             console.error('❌ RecordsTab 초기화 실패:', error);
             this.showError();
         }
@@ -197,16 +197,16 @@ class RecordsTab {
     async loadAllSessions() {
         try {
             const { data: sessions, error } = await this.supabaseClient
-                .from('exercise_sessions')
+            .from('exercise_sessions')
                 .select('*')
                 .eq('user_id', this.currentUserId)
                 .order('created_at', { ascending: false });
-            
-            if (error) throw error;
-            
-            // KST 기준으로 날짜별 세션 그룹화
+        
+        if (error) throw error;
+        
+        // KST 기준으로 날짜별 세션 그룹화
             this.sessionsByDate = {};
-            sessions?.forEach(session => {
+        sessions?.forEach(session => {
                 const dateKey = this.toKSTDateString(session.created_at);
                 if (!this.sessionsByDate[dateKey]) {
                     this.sessionsByDate[dateKey] = [];
@@ -325,9 +325,9 @@ class RecordsTab {
         if (sessions.length === 0) {
             // 세션이 없는 경우
             dailySessionSlider.style.display = 'none';
-            return;
-        }
-        
+        return;
+    }
+    
         // 세션이 있는 경우 표시
         dailySessionSlider.style.display = 'block';
         
@@ -358,8 +358,8 @@ class RecordsTab {
             const avgResistance = this.calculateAverageResistance(session.inhale_resistance, session.exhale_resistance);
             const effortLevel = this.getEffortLevel(session.inhale_resistance, session.exhale_resistance);
             const feedback = session.user_feedback || '기록 없음';
-            
-            html += `
+        
+        html += `
                 <div class="session-slide ${index === 0 ? 'active' : ''}" data-index="${index}">
                     <div class="session-slide-header">
                         <h4>${index + 1}번째 세션</h4>
@@ -397,10 +397,10 @@ class RecordsTab {
                             <span class="session-stat-value">${feedback}</span>
                         </div>
                     </div>
-                </div>
-            `;
-        });
-        
+            </div>
+        `;
+    });
+    
         sessionSlider.innerHTML = html;
     }
 

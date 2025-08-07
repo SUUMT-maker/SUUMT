@@ -296,8 +296,27 @@ class HomeTab {
      */
     navigateToTraining() {
         console.log('🔄 훈련 화면으로 이동');
-        // TODO: 실제 화면 이동 로직 구현
-        alert('훈련 화면이 준비 중입니다...');
+        
+        // SuumTrainingSetup 초기화 및 표시
+        if (window.suumTrainingSetup) {
+            window.suumTrainingSetup.init((resistanceData) => {
+                this.handleTrainingStart(resistanceData);
+            });
+            window.suumTrainingSetup.show();
+        } else {
+            alert('훈련 설정 화면을 불러올 수 없습니다.');
+        }
+    }
+
+    /**
+     * 훈련 시작 처리
+     */
+    handleTrainingStart(resistanceData) {
+        console.log('🏃‍♂️ 훈련 시작:', resistanceData);
+        
+        // TODO: 실제 훈련 화면으로 이동
+        // 여기서 선택된 저항값을 사용하여 훈련 세션을 시작
+        alert(`훈련을 시작합니다!\n흡기 저항: ${resistanceData.inhale}\n호기 저항: ${resistanceData.exhale}`);
     }
 
     /**
