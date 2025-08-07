@@ -353,8 +353,18 @@ function transformSessionToRecord(session) {
 
 function renderCalendar(sessions) {
     const calendarContainer = document.querySelector('.records-calendar');
-    const records = sessions.map(transformSessionToRecord);
-    const days = [...new Set(records.map(r => r.date))];
+    
+    // 날짜별로 세션 그룹화
+    const sessionsByDate = {};
+    sessions.forEach(session => {
+        const date = session.created_at ? session.created_at.split('T')[0] : new Date().toISOString().split('T')[0];
+        if (!sessionsByDate[date]) {
+            sessionsByDate[date] = [];
+        }
+        sessionsByDate[date].push(session);
+    });
+    
+    const days = Object.keys(sessionsByDate);
 
     let html = '<table class="calendar"><tr>';
     for (let d = 1; d <= 30; d++) {
@@ -370,34 +380,50 @@ function renderCalendar(sessions) {
     calendarContainer.querySelectorAll('td').forEach(td => {
         td.addEventListener('click', async () => {
             const day = td.getAttribute('data-day');
-            const selected = records.filter(r => r.date === day && r.sets > 0);
-            await renderRecordSummary(selected[0]);
+            const daySessions = sessionsByDate[day] || [];
+            const selectedSession = daySessions.find(s => s.completed_sets > 0) || daySessions[0];
+            await renderRecordSummary(selectedSession);
         });
     });
 }
 
-async function renderRecordSummary(record) {
+async function renderRecordSummary(session) {
     const dateEl = document.getElementById('selectedDate');
     const summaryEl = document.getElementById('recordSummaryList');
     const adviceEl = document.getElementById('aiAdviceSummary');
 
-    if (!record) {
+    // null 체크 및 session 객체 검증
+    if (!session) {
         dateEl.innerText = '-';
         summaryEl.innerHTML = '<li>운동 기록 없음</li>';
         adviceEl.innerText = '운동 기록이 없어 AI 조언을 제공할 수 없습니다.';
         return;
     }
 
-    dateEl.innerText = record.date;
+    // 날짜 포맷팅
+    const date = session.created_at ? session.created_at.split('T')[0] : new Date().toISOString().split('T')[0];
+    dateEl.innerText = date;
+
+    // 실제 데이터베이스 컬럼명에 맞춰 렌더링
+    const exerciseTime = session.exercise_time || '없음';
+    const completedSets = session.completed_sets || 0;
+    const avgResistance = session.inhale_resistance && session.exhale_resistance 
+        ? Math.round((session.inhale_resistance + session.exhale_resistance) / 2) 
+        : '없음';
+    const userFeedback = session.user_feedback || '없음';
+    const completedBreaths = session.completed_breaths || 0;
+
     summaryEl.innerHTML = `
-        <li>운동 세트 수: ${record.sets}</li>
-        <li>총 운동 시간: ${record.duration}</li>
-        <li>평균 저항 강도: ${record.avg_resistance}</li>
+        <li>운동 시간: ${exerciseTime}</li>
+        <li>완료 세트: ${completedSets}세트</li>
+        <li>완료 호흡: ${completedBreaths}회</li>
+        <li>평균 저항: ${avgResistance}</li>
+        <li>운동 후기: ${userFeedback}</li>
     `;
 
     // Fetch latest AI advice for the selected date
-    console.log('🔍 Fetching AI advice for date:', record.date);
-    const advice = await fetchAiAdviceForDate(record.date);
+    console.log('🔍 Fetching AI advice for date:', date);
+    const advice = await fetchAiAdviceForDate(date);
     adviceEl.innerText = advice || '운동 기록이 없어 AI 조언을 제공할 수 없습니다.';
 }
 
