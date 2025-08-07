@@ -58,11 +58,15 @@ async function loadGreetingCard() {
         // 4. GoalProgressCard UI 업데이트
         updateGoalProgressCard(todayCount);
         
+        // 5. TodaySummaryCard 로드
+        await loadTodaySummaryCard();
+        
     } catch (error) {
         console.error('❌ GreetingCard 로드 실패:', error);
         // 기본값으로 설정
         updateGreetingCard('사용자', 0, 0);
         updateGoalProgressCard(0);
+        updateTodaySummaryCard(null);
     }
 }
 
@@ -147,6 +151,110 @@ function updateProgressFeedback(todayCount, targetSessions) {
     }
     
     progressFeedback.textContent = feedbackMessage;
+}
+
+// TodaySummaryCard 컴포넌트 관리
+async function loadTodaySummaryCard() {
+    if (!window.currentUserId) return;
+    
+    try {
+        // 오늘 날짜 기준으로 가장 최근 세션 조회
+        const todayStr = toKSTDateString(new Date().toISOString());
+        
+        // KST 기준 날짜를 UTC 기준으로 변환
+        const todayStart = new Date(`${todayStr}T00:00:00+09:00`);
+        const todayEnd = new Date(`${todayStr}T23:59:59+09:00`);
+        
+        const utcTodayStart = new Date(todayStart.getTime() - 9 * 60 * 60 * 1000);
+        const utcTodayEnd = new Date(todayEnd.getTime() - 9 * 60 * 60 * 1000);
+        
+        const { data: sessions, error } = await window.supabaseClient
+            .from('exercise_sessions')
+            .select(`
+                exercise_time,
+                completed_sets,
+                completed_breaths,
+                inhale_resistance,
+                exhale_resistance,
+                user_feedback,
+                created_at
+            `)
+            .eq('user_id', window.currentUserId)
+            .gte('created_at', utcTodayStart.toISOString())
+            .lt('created_at', utcTodayEnd.toISOString())
+            .order('created_at', { ascending: false })
+            .limit(1);
+        
+        if (error) throw error;
+        
+        if (sessions && sessions.length > 0) {
+            updateTodaySummaryCard(sessions[0]);
+        } else {
+            // 오늘 운동 기록이 없는 경우
+            updateTodaySummaryCard(null);
+        }
+        
+    } catch (error) {
+        console.error('❌ TodaySummaryCard 로드 실패:', error);
+        updateTodaySummaryCard(null);
+    }
+}
+
+// TodaySummaryCard UI 업데이트
+function updateTodaySummaryCard(session) {
+    const exerciseTimeEl = document.getElementById('todayExerciseTime');
+    const setsEl = document.getElementById('todaySets');
+    const breathsEl = document.getElementById('todayBreaths');
+    const resistanceEl = document.getElementById('todayResistance');
+    const feedbackEl = document.getElementById('todayFeedback');
+    
+    if (!session) {
+        // 운동 기록이 없는 경우
+        exerciseTimeEl.textContent = '아직 없어요';
+        setsEl.textContent = '아직 없어요';
+        breathsEl.textContent = '아직 없어요';
+        resistanceEl.textContent = '아직 없어요';
+        feedbackEl.textContent = '아직 없어요';
+        return;
+    }
+    
+    // 운동 시간 포맷팅
+    const exerciseTime = session.exercise_time ? formatTime(parseInt(session.exercise_time)) : '기록 없음';
+    exerciseTimeEl.textContent = exerciseTime;
+    
+    // 세트 수
+    const sets = session.completed_sets || 0;
+    setsEl.textContent = `${sets}세트`;
+    
+    // 호흡 수
+    const breaths = session.completed_breaths || 0;
+    breathsEl.textContent = `${breaths}회`;
+    
+    // 평균 저항 강도
+    const avgResistance = calculateAverageResistance(session.inhale_resistance, session.exhale_resistance);
+    resistanceEl.textContent = avgResistance;
+    
+    // 내 느낌
+    const feedback = session.user_feedback || '기록 없음';
+    feedbackEl.textContent = feedback;
+}
+
+// 평균 저항 강도 계산 및 텍스트 변환
+function calculateAverageResistance(inhaleResistance, exhaleResistance) {
+    if (!inhaleResistance || !exhaleResistance) {
+        return '기록 없음';
+    }
+    
+    const avg = (inhaleResistance + exhaleResistance) / 2;
+    
+    // 저항 강도별 텍스트 변환 (토스 라이팅 원칙)
+    if (avg <= 2) {
+        return '쉬움';
+    } else if (avg <= 4) {
+        return '적정';
+    } else {
+        return '힘듦';
+    }
 }
 
 // AI 메시지 관리
