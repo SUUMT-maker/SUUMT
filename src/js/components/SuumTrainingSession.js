@@ -255,14 +255,41 @@ class SuumTrainingSession {
     }
 
     /**
-     * 휴식 시간 시작
+     * 휴식 시간 시작 (SuumRestBetweenSets 컴포넌트 사용)
      */
     startRest() {
         this.isResting = true;
-        this.updateDisplay();
-        this.startRestTimer();
         
-        console.log('😴 휴식 시간 시작');
+        // 현재 세션 화면 숨김
+        this.hide();
+        
+        // SuumRestBetweenSets 컴포넌트 초기화 및 시작
+        window.suumRestBetweenSets.init(
+            this.currentSet - 1, // 완료된 세트 번호
+            // 다음 세트 시작 콜백
+            (restData) => {
+                console.log('✅ 휴식 완료 - 다음 세트 시작', restData);
+                this.endRest();
+            },
+            // 세션 종료 콜백
+            (restData) => {
+                console.log('❌ 휴식 중 세션 종료', restData);
+                this.abort();
+            },
+            // 진행 상황 업데이트 콜백
+            (progress) => {
+                if (this.onProgressCallback) {
+                    this.onProgressCallback({
+                        ...this.getProgress(),
+                        restProgress: progress
+                    });
+                }
+            }
+        );
+        
+        window.suumRestBetweenSets.start();
+        
+        console.log('😴 세트 간 휴식 시작 (별도 컴포넌트)');
     }
 
     /**
@@ -289,23 +316,28 @@ class SuumTrainingSession {
     }
 
     /**
-     * 휴식 종료
+     * 휴식 종료 (SuumRestBetweenSets에서 호출)
      */
     endRest() {
         this.isResting = false;
+        
+        // 세션 화면 다시 표시
+        this.isVisible = true;
+        this.updateVisibility();
+        
+        // 다음 세트 호흡 시작
         this.startBreathingCycle();
         
         console.log('🏃‍♂️ 휴식 종료, 다음 세트 시작');
     }
 
     /**
-     * 다음 세트 즉시 시작
+     * 다음 세트 즉시 시작 (더 이상 사용하지 않음 - SuumRestBetweenSets에서 처리)
      */
     startNextSetNow() {
-        if (this.isResting) {
-            this.clearTimers();
-            this.endRest();
-        }
+        // 이 메서드는 더 이상 사용하지 않음
+        // SuumRestBetweenSets 컴포넌트에서 직접 endRest() 호출
+        console.warn('startNextSetNow() is deprecated. Use SuumRestBetweenSets component.');
     }
 
     /**
