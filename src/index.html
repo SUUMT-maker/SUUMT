@@ -96,8 +96,8 @@
                     </div>
                 </div>
 
-                <!-- TodaySummaryCard 컴포넌트 -->
-                <div class="today-summary-card card">
+                <!-- TodaySummaryCard 컴포넌트 (조건부 렌더링) -->
+                <div id="todaySummaryCard" class="today-summary-card card" style="display: none;">
                     <div class="today-summary-content">
                         <div class="today-summary-header">
                             <h3>오늘의 운동 요약</h3>
@@ -128,6 +128,24 @@
                                 <span class="summary-label">내 느낌</span>
                                 <span class="summary-value" id="todayFeedback">-</span>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NoSessionCard 컴포넌트 (조건부 렌더링) -->
+                <div id="noSessionCard" class="no-session-card card" style="display: none;">
+                    <div class="no-session-content">
+                        <div class="no-session-icon">🫁</div>
+                        <div class="no-session-header">
+                            <h3>오늘은 아직 호흡 운동을 안 하셨어요</h3>
+                        </div>
+                        <div class="no-session-message">
+                            <p>📈 꾸준함이 건강한 폐를 만듭니다!</p>
+                        </div>
+                        <div class="no-session-action">
+                            <button id="startTrainingBtn" class="primary-btn">
+                                지금 바로 시작하기
+                            </button>
                         </div>
                     </div>
                 </div>

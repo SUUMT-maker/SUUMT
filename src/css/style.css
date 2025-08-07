@@ -327,6 +327,60 @@ body {
     min-width: 3rem;
 }
 
+/* NoSessionCard 컴포넌트 */
+.no-session-card {
+    margin-bottom: 2rem;
+}
+
+.no-session-content {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.no-session-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    opacity: 0.7;
+}
+
+.no-session-header h3 {
+    font-size: 1.3rem;
+    color: #333;
+    margin-bottom: 1rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.no-session-message p {
+    font-size: 1rem;
+    color: #666;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.no-session-action {
+    margin-top: 1rem;
+}
+
+.no-session-action .primary-btn {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    min-width: 200px;
+}
+
+.no-session-action .primary-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
 /* AI 메시지 섹션 */
 .ai-message-section {
     margin-bottom: 2rem;

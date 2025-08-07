@@ -202,21 +202,25 @@ async function loadTodaySummaryCard() {
 
 // TodaySummaryCard UI 업데이트
 function updateTodaySummaryCard(session) {
+    const todaySummaryCard = document.getElementById('todaySummaryCard');
+    const noSessionCard = document.getElementById('noSessionCard');
+    
+    if (!session) {
+        // 운동 기록이 없는 경우 - NoSessionCard 표시
+        if (todaySummaryCard) todaySummaryCard.style.display = 'none';
+        if (noSessionCard) noSessionCard.style.display = 'block';
+        return;
+    }
+    
+    // 운동 기록이 있는 경우 - TodaySummaryCard 표시
+    if (todaySummaryCard) todaySummaryCard.style.display = 'block';
+    if (noSessionCard) noSessionCard.style.display = 'none';
+    
     const exerciseTimeEl = document.getElementById('todayExerciseTime');
     const setsEl = document.getElementById('todaySets');
     const breathsEl = document.getElementById('todayBreaths');
     const resistanceEl = document.getElementById('todayResistance');
     const feedbackEl = document.getElementById('todayFeedback');
-    
-    if (!session) {
-        // 운동 기록이 없는 경우
-        exerciseTimeEl.textContent = '아직 없어요';
-        setsEl.textContent = '아직 없어요';
-        breathsEl.textContent = '아직 없어요';
-        resistanceEl.textContent = '아직 없어요';
-        feedbackEl.textContent = '아직 없어요';
-        return;
-    }
     
     // 운동 시간 포맷팅
     const exerciseTime = session.exercise_time ? formatTime(parseInt(session.exercise_time)) : '기록 없음';
@@ -255,6 +259,24 @@ function calculateAverageResistance(inhaleResistance, exhaleResistance) {
     } else {
         return '힘듦';
     }
+}
+
+// NoSessionCard 관련 함수
+function initNoSessionCard() {
+    const startTrainingBtn = document.getElementById('startTrainingBtn');
+    if (startTrainingBtn) {
+        startTrainingBtn.addEventListener('click', () => {
+            console.log('🏃‍♂️ 훈련 화면으로 이동');
+            navigateTo('training');
+        });
+    }
+}
+
+// 화면 이동 함수
+function navigateTo(screen) {
+    console.log(`🔄 화면 이동: ${screen}`);
+    // TODO: 실제 화면 이동 로직 구현
+    alert('훈련 화면이 준비 중입니다...');
 }
 
 // AI 메시지 관리
@@ -439,6 +461,12 @@ async function initHomeTab() {
     
     // UI 업데이트
     updateHomeUI(summary);
+    
+    // 5. TodaySummaryCard 로드
+    await loadTodaySummaryCard();
+    
+    // 6. NoSessionCard 초기화
+    initNoSessionCard();
     
     console.log('✅ 홈 탭 초기화 완료');
 }
