@@ -204,16 +204,19 @@ async function loadTodaySummaryCard() {
 function updateTodaySummaryCard(session) {
     const todaySummaryCard = document.getElementById('todaySummaryCard');
     const noSessionCard = document.getElementById('noSessionCard');
+    const dailySessionSlider = document.getElementById('dailySessionSlider');
     
     if (!session) {
         // 운동 기록이 없는 경우 - NoSessionCard 표시
         if (todaySummaryCard) todaySummaryCard.style.display = 'none';
+        if (dailySessionSlider) dailySessionSlider.style.display = 'none';
         if (noSessionCard) noSessionCard.style.display = 'block';
         return;
     }
     
     // 운동 기록이 있는 경우 - TodaySummaryCard 표시
     if (todaySummaryCard) todaySummaryCard.style.display = 'block';
+    if (dailySessionSlider) dailySessionSlider.style.display = 'none';
     if (noSessionCard) noSessionCard.style.display = 'none';
     
     const exerciseTimeEl = document.getElementById('todayExerciseTime');
@@ -241,6 +244,261 @@ function updateTodaySummaryCard(session) {
     // 내 느낌
     const feedback = session.user_feedback || '기록 없음';
     feedbackEl.textContent = feedback;
+}
+
+// DailySessionSlider 컴포넌트 관리
+async function loadDailySessionSlider() {
+    if (!window.currentUserId) return;
+    
+    try {
+        // 오늘 날짜 기준으로 모든 세션 조회
+        const todayStr = toKSTDateString(new Date().toISOString());
+        
+        // KST 기준 날짜를 UTC 기준으로 변환
+        const todayStart = new Date(`${todayStr}T00:00:00+09:00`);
+        const todayEnd = new Date(`${todayStr}T23:59:59+09:00`);
+        
+        const utcTodayStart = new Date(todayStart.getTime() - 9 * 60 * 60 * 1000);
+        const utcTodayEnd = new Date(todayEnd.getTime() - 9 * 60 * 60 * 1000);
+        
+        const { data: sessions, error } = await window.supabaseClient
+            .from('exercise_sessions')
+            .select(`
+                id,
+                exercise_time,
+                completed_sets,
+                completed_breaths,
+                inhale_resistance,
+                exhale_resistance,
+                effort_level,
+                user_feedback,
+                created_at
+            `)
+            .eq('user_id', window.currentUserId)
+            .gte('created_at', utcTodayStart.toISOString())
+            .lt('created_at', utcTodayEnd.toISOString())
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        
+        if (sessions && sessions.length > 0) {
+            updateDailySessionSlider(sessions);
+        } else {
+            // 오늘 운동 기록이 없는 경우
+            updateDailySessionSlider(null);
+        }
+        
+    } catch (error) {
+        console.error('❌ DailySessionSlider 로드 실패:', error);
+        updateDailySessionSlider(null);
+    }
+}
+
+// DailySessionSlider UI 업데이트
+function updateDailySessionSlider(sessions) {
+    const todaySummaryCard = document.getElementById('todaySummaryCard');
+    const noSessionCard = document.getElementById('noSessionCard');
+    const dailySessionSlider = document.getElementById('dailySessionSlider');
+    
+    if (!sessions || sessions.length === 0) {
+        // 운동 기록이 없는 경우 - NoSessionCard 표시
+        if (todaySummaryCard) todaySummaryCard.style.display = 'none';
+        if (dailySessionSlider) dailySessionSlider.style.display = 'none';
+        if (noSessionCard) noSessionCard.style.display = 'block';
+        return;
+    }
+    
+    if (sessions.length === 1) {
+        // 세션이 1개인 경우 - TodaySummaryCard 표시
+        if (todaySummaryCard) todaySummaryCard.style.display = 'block';
+        if (dailySessionSlider) dailySessionSlider.style.display = 'none';
+        if (noSessionCard) noSessionCard.style.display = 'none';
+        
+        // TodaySummaryCard 업데이트
+        updateTodaySummaryCard(sessions[0]);
+        return;
+    }
+    
+    // 세션이 2개 이상인 경우 - DailySessionSlider 표시
+    if (todaySummaryCard) todaySummaryCard.style.display = 'none';
+    if (dailySessionSlider) dailySessionSlider.style.display = 'block';
+    if (noSessionCard) noSessionCard.style.display = 'none';
+    
+    // 슬라이더 렌더링
+    renderSessionSlider(sessions);
+}
+
+// 세션 슬라이더 렌더링
+function renderSessionSlider(sessions) {
+    const sessionSlider = document.getElementById('sessionSlider');
+    const sliderIndicators = document.querySelector('.slider-indicators');
+    
+    if (!sessionSlider || !sliderIndicators) return;
+    
+    // 세션 카드 HTML 생성
+    let sessionCardsHTML = '';
+    let indicatorsHTML = '';
+    
+    sessions.forEach((session, index) => {
+        sessionCardsHTML += generateSessionCardHTML(session, index);
+        indicatorsHTML += `<div class="slider-indicator ${index === 0 ? 'active' : ''}" data-index="${index}"></div>`;
+    });
+    
+    sessionSlider.innerHTML = sessionCardsHTML;
+    sliderIndicators.innerHTML = indicatorsHTML;
+    
+    // 인디케이터 이벤트 리스너 추가
+    initSliderIndicators();
+}
+
+// 세션 카드 HTML 생성
+function generateSessionCardHTML(session, index) {
+    // 세션 시작 시간 (KST 변환)
+    const sessionTime = formatSessionTime(session.created_at);
+    
+    // 운동 시간 포맷팅
+    const exerciseTime = session.exercise_time ? formatExerciseTime(session.exercise_time) : '기록 없음';
+    
+    // 세트 수
+    const sets = session.completed_sets || 0;
+    
+    // 호흡 수
+    const breaths = session.completed_breaths || 0;
+    
+    // 평균 저항 강도
+    const avgResistance = calculateAverageResistance(session.inhale_resistance, session.exhale_resistance);
+    
+    // effort_level UX 문장 변환
+    const effortText = convertEffortLevelToUX(session.effort_level);
+    
+    // 사용자 피드백
+    const feedback = session.user_feedback || '기록 없음';
+    
+    return `
+        <div class="session-card" data-index="${index}">
+            <div class="session-time">
+                <span class="session-time-icon">🕒</span>
+                <span>${sessionTime}</span>
+            </div>
+            <div class="session-details">
+                <div class="session-detail-item">
+                    <div class="session-detail-label">
+                        <span class="session-detail-icon">⏱️</span>
+                        <span>운동 시간</span>
+                    </div>
+                    <div class="session-detail-value">${exerciseTime}</div>
+                </div>
+                <div class="session-detail-item">
+                    <div class="session-detail-label">
+                        <span class="session-detail-icon">🔄</span>
+                        <span>세트 수</span>
+                    </div>
+                    <div class="session-detail-value">${sets}세트</div>
+                </div>
+                <div class="session-detail-item">
+                    <div class="session-detail-label">
+                        <span class="session-detail-icon">🫁</span>
+                        <span>호흡 수</span>
+                    </div>
+                    <div class="session-detail-value">${breaths}회</div>
+                </div>
+                <div class="session-detail-item">
+                    <div class="session-detail-label">
+                        <span class="session-detail-icon">💪</span>
+                        <span>저항 강도</span>
+                    </div>
+                    <div class="session-detail-value">${avgResistance}</div>
+                </div>
+            </div>
+            <div class="session-effort">
+                <div class="session-effort-label">운동 강도</div>
+                <div class="session-effort-text">${effortText}</div>
+            </div>
+            <div class="session-feedback">
+                <div class="session-feedback-label">내 느낌</div>
+                <div class="session-feedback-text">${feedback}</div>
+            </div>
+        </div>
+    `;
+}
+
+// 세션 시간 포맷팅 (UTC → KST)
+function formatSessionTime(utcTimeString) {
+    try {
+        const utcDate = new Date(utcTimeString);
+        const kstDate = new Date(utcDate.getTime() + 9 * 60 * 60 * 1000);
+        
+        const hours = kstDate.getHours();
+        const minutes = kstDate.getMinutes();
+        const ampm = hours >= 12 ? '오후' : '오전';
+        const displayHours = hours % 12 || 12;
+        const displayMinutes = minutes.toString().padStart(2, '0');
+        
+        return `${ampm} ${displayHours}:${displayMinutes}`;
+    } catch (error) {
+        console.error('시간 포맷팅 오류:', error);
+        return '시간 정보 없음';
+    }
+}
+
+// 운동 시간 포맷팅
+function formatExerciseTime(timeString) {
+    try {
+        const totalSeconds = parseInt(timeString);
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        
+        if (minutes === 0) {
+            return `${seconds}초`;
+        } else if (seconds === 0) {
+            return `${minutes}분`;
+        } else {
+            return `${minutes}분 ${seconds}초`;
+        }
+    } catch (error) {
+        console.error('운동 시간 포맷팅 오류:', error);
+        return '기록 없음';
+    }
+}
+
+// effort_level을 UX 문장으로 변환
+function convertEffortLevelToUX(effortLevel) {
+    switch (effortLevel) {
+        case 'easy':
+            return '너무 쉬웠어요';
+        case 'medium':
+            return '적당히 힘들고 딱 좋아요';
+        case 'hard':
+            return '오늘은 꽤 힘들었어요';
+        default:
+            return '적당한 강도였어요';
+    }
+}
+
+// 슬라이더 인디케이터 초기화
+function initSliderIndicators() {
+    const indicators = document.querySelectorAll('.slider-indicator');
+    const sliderWrapper = document.querySelector('.session-slider-wrapper');
+    
+    indicators.forEach((indicator, index) => {
+        indicator.addEventListener('click', () => {
+            // 모든 인디케이터 비활성화
+            indicators.forEach(ind => ind.classList.remove('active'));
+            
+            // 클릭된 인디케이터 활성화
+            indicator.classList.add('active');
+            
+            // 해당 카드로 스크롤
+            const targetCard = document.querySelector(`.session-card[data-index="${index}"]`);
+            if (targetCard && sliderWrapper) {
+                targetCard.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'nearest',
+                    inline: 'start'
+                });
+            }
+        });
+    });
 }
 
 // 평균 저항 강도 계산 및 텍스트 변환
@@ -462,8 +720,8 @@ async function initHomeTab() {
     // UI 업데이트
     updateHomeUI(summary);
     
-    // 5. TodaySummaryCard 로드
-    await loadTodaySummaryCard();
+    // 5. DailySessionSlider 로드 (TodaySummaryCard 대신)
+    await loadDailySessionSlider();
     
     // 6. NoSessionCard 초기화
     initNoSessionCard();

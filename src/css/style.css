@@ -381,6 +381,176 @@ body {
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
+/* DailySessionSlider 컴포넌트 */
+.daily-session-slider {
+    margin-bottom: 2rem;
+}
+
+.daily-session-header {
+    padding: 1.5rem 1.5rem 1rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.daily-session-header h3 {
+    font-size: 1.3rem;
+    color: #333;
+    font-weight: 600;
+    margin: 0;
+}
+
+.session-slider-container {
+    padding: 1rem 0;
+}
+
+.session-slider-wrapper {
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Firefox */
+    -ms-overflow-style: none; /* IE and Edge */
+}
+
+.session-slider-wrapper::-webkit-scrollbar {
+    display: none; /* Chrome, Safari, Opera */
+}
+
+.session-slider {
+    display: flex;
+    gap: 1rem;
+    padding: 0 1.5rem;
+    min-width: max-content;
+}
+
+.session-card {
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #f0f0f0;
+    min-width: 280px;
+    max-width: 320px;
+    flex-shrink: 0;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.session-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+}
+
+.session-time {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    color: #667eea;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.session-time-icon {
+    font-size: 1.2rem;
+}
+
+.session-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.session-detail-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.session-detail-item:last-child {
+    border-bottom: none;
+}
+
+.session-detail-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.session-detail-icon {
+    font-size: 1rem;
+}
+
+.session-detail-value {
+    color: #333;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.session-effort {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border-left: 4px solid #667eea;
+}
+
+.session-effort-label {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+}
+
+.session-effort-text {
+    font-size: 0.9rem;
+    color: #333;
+    font-weight: 500;
+    line-height: 1.4;
+}
+
+.session-feedback {
+    margin-top: 1rem;
+    padding: 0.75rem;
+    background: #fff5f5;
+    border-radius: 8px;
+    border-left: 4px solid #ff6b6b;
+}
+
+.session-feedback-label {
+    font-size: 0.8rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+}
+
+.session-feedback-text {
+    font-size: 0.9rem;
+    color: #333;
+    line-height: 1.4;
+    font-style: italic;
+}
+
+.slider-indicators {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0 1.5rem;
+}
+
+.slider-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ddd;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.slider-indicator.active {
+    background: #667eea;
+}
+
 /* AI 메시지 섹션 */
 .ai-message-section {
     margin-bottom: 2rem;
@@ -825,6 +995,95 @@ body {
     
     .ai-summary {
         padding: 0.75rem;
+        font-size: 0.85rem;
+    }
+    
+    /* DailySessionSlider 모바일 반응형 */
+    .daily-session-header {
+        padding: 1rem 1rem 0.75rem;
+    }
+    
+    .daily-session-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .session-slider-container {
+        padding: 0.75rem 0;
+    }
+    
+    .session-slider {
+        padding: 0 1rem;
+        gap: 0.75rem;
+    }
+    
+    .session-card {
+        min-width: 260px;
+        max-width: 300px;
+        padding: 1.25rem;
+    }
+    
+    .session-time {
+        font-size: 0.9rem;
+        margin-bottom: 0.75rem;
+    }
+    
+    .session-time-icon {
+        font-size: 1rem;
+    }
+    
+    .session-details {
+        gap: 0.5rem;
+    }
+    
+    .session-detail-item {
+        padding: 0.4rem 0;
+    }
+    
+    .session-detail-label {
         font-size: 0.8rem;
+    }
+    
+    .session-detail-icon {
+        font-size: 0.9rem;
+    }
+    
+    .session-detail-value {
+        font-size: 0.8rem;
+    }
+    
+    .session-effort {
+        margin-top: 0.75rem;
+        padding: 0.6rem;
+    }
+    
+    .session-effort-label {
+        font-size: 0.75rem;
+    }
+    
+    .session-effort-text {
+        font-size: 0.8rem;
+    }
+    
+    .session-feedback {
+        margin-top: 0.75rem;
+        padding: 0.6rem;
+    }
+    
+    .session-feedback-label {
+        font-size: 0.75rem;
+    }
+    
+    .session-feedback-text {
+        font-size: 0.8rem;
+    }
+    
+    .slider-indicators {
+        margin-top: 0.75rem;
+        padding: 0 1rem;
+    }
+    
+    .slider-indicator {
+        width: 6px;
+        height: 6px;
     }
 }
