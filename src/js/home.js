@@ -55,10 +55,14 @@ async function loadGreetingCard() {
         // 3. GreetingCard UI 업데이트
         updateGreetingCard(nickname, yesterdayCount, todayCount);
         
+        // 4. GoalProgressCard UI 업데이트
+        updateGoalProgressCard(todayCount);
+        
     } catch (error) {
         console.error('❌ GreetingCard 로드 실패:', error);
         // 기본값으로 설정
         updateGreetingCard('사용자', 0, 0);
+        updateGoalProgressCard(0);
     }
 }
 
@@ -83,6 +87,66 @@ function updateGreetingCard(nickname, yesterdayCount, todayCount) {
     // 목표 설정 (오늘 세션 수 기반)
     const targetSessions = 2; // 목표 세션 수
     greetingGoal.textContent = `목표: ${targetSessions}회 중 ${todayCount}회 완료`;
+}
+
+// GoalProgressCard 컴포넌트 관리
+function updateGoalProgressCard(todayCount) {
+    const targetSessions = 2; // 목표 세션 수
+    const totalBlocks = 10; // 총 블록 수
+    const blocksPerSession = totalBlocks / targetSessions; // 세션당 블록 수
+    
+    // 진행 바 블록 생성
+    renderProgressBlocks(todayCount, totalBlocks, blocksPerSession);
+    
+    // 진행률 텍스트 업데이트
+    updateProgressText(todayCount, targetSessions);
+    
+    // 감성 피드백 업데이트
+    updateProgressFeedback(todayCount, targetSessions);
+}
+
+// 진행 바 블록 렌더링
+function renderProgressBlocks(todayCount, totalBlocks, blocksPerSession) {
+    const progressBlocksContainer = document.querySelector('.progress-blocks');
+    if (!progressBlocksContainer) return;
+    
+    let html = '';
+    const filledBlocks = Math.floor(todayCount * blocksPerSession);
+    
+    for (let i = 0; i < totalBlocks; i++) {
+        const isFilled = i < filledBlocks;
+        html += `<div class="progress-block ${isFilled ? 'filled' : 'empty'}"></div>`;
+    }
+    
+    progressBlocksContainer.innerHTML = html;
+}
+
+// 진행률 텍스트 업데이트
+function updateProgressText(todayCount, targetSessions) {
+    const progressText = document.getElementById('goalProgressText');
+    if (!progressText) return;
+    
+    progressText.textContent = `${targetSessions}회 중 ${todayCount}회 완료했어요`;
+}
+
+// 감성 피드백 업데이트
+function updateProgressFeedback(todayCount, targetSessions) {
+    const progressFeedback = document.getElementById('goalProgressFeedback');
+    if (!progressFeedback) return;
+    
+    let feedbackMessage = '';
+    
+    if (todayCount === 0) {
+        feedbackMessage = '첫 번째 운동을 시작해보세요! 🚀';
+    } else if (todayCount === 1) {
+        feedbackMessage = '한 번 더 하면 목표 달성이에요! 💪';
+    } else if (todayCount >= targetSessions) {
+        feedbackMessage = '오늘 목표를 완벽하게 달성했어요! 🎉';
+    } else {
+        feedbackMessage = '꾸준히 잘 하고 있어요! 🌟';
+    }
+    
+    progressFeedback.textContent = feedbackMessage;
 }
 
 // AI 메시지 관리
