@@ -354,23 +354,43 @@ function transformSessionToRecord(session) {
 function renderCalendar(sessions) {
     const calendarContainer = document.querySelector('.records-calendar');
     
-    // 날짜별로 세션 그룹화
+    // UTC → KST 시간대 보정하여 날짜별로 세션 그룹화
     const sessionsByDate = {};
     sessions.forEach(session => {
-        const date = session.created_at ? session.created_at.split('T')[0] : new Date().toISOString().split('T')[0];
-        if (!sessionsByDate[date]) {
-            sessionsByDate[date] = [];
+        let sessionDate;
+        if (session.created_at) {
+            // UTC → KST 변환 (UTC + 9시간)
+            const createdAtUTC = new Date(session.created_at);
+            const createdAtKST = new Date(createdAtUTC.getTime() + 9 * 60 * 60 * 1000);
+            sessionDate = createdAtKST.toISOString().split('T')[0]; // YYYY-MM-DD
+        } else {
+            sessionDate = new Date().toISOString().split('T')[0];
         }
-        sessionsByDate[date].push(session);
+        
+        if (!sessionsByDate[sessionDate]) {
+            sessionsByDate[sessionDate] = [];
+        }
+        sessionsByDate[sessionDate].push(session);
     });
     
     const days = Object.keys(sessionsByDate);
+    console.log('📅 KST 기준 운동 기록 날짜들:', days);
+
+    // 현재 날짜 기준으로 년월 계산
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1; // 0-based to 1-based
 
     let html = '<table class="calendar"><tr>';
     for (let d = 1; d <= 30; d++) {
         const dayStr = d.toString().padStart(2, '0');
-        const fullDate = `2025-08-${dayStr}`; // FIXME: month dynamic
+        const fullDate = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${dayStr}`;
         const hasRecord = days.includes(fullDate);
+        
+        if (hasRecord) {
+            console.log(`✅ ${fullDate}에 운동 기록 있음`);
+        }
+        
         html += `<td class="${hasRecord ? 'has-record' : ''}" data-day="${fullDate}">${d}</td>`;
         if (d % 7 === 0) html += '</tr><tr>';
     }
@@ -400,8 +420,16 @@ async function renderRecordSummary(session) {
         return;
     }
 
-    // 날짜 포맷팅
-    const date = session.created_at ? session.created_at.split('T')[0] : new Date().toISOString().split('T')[0];
+    // UTC → KST 시간대 보정하여 날짜 포맷팅
+    let date;
+    if (session.created_at) {
+        // UTC → KST 변환 (UTC + 9시간)
+        const createdAtUTC = new Date(session.created_at);
+        const createdAtKST = new Date(createdAtUTC.getTime() + 9 * 60 * 60 * 1000);
+        date = createdAtKST.toISOString().split('T')[0]; // YYYY-MM-DD
+    } else {
+        date = new Date().toISOString().split('T')[0];
+    }
     dateEl.innerText = date;
 
     // 실제 데이터베이스 컬럼명에 맞춰 렌더링
@@ -489,16 +517,23 @@ async function fetchAiAdviceForDate(date) {
     }
 
     try {
-        // 해당 날짜의 세션들 먼저 찾기 
-        const startOfDay = `${date}T00:00:00Z`;
-        const endOfDay = `${date}T23:59:59Z`;
+        // KST 기준 날짜를 UTC 기준으로 변환하여 조회
+        // KST = UTC + 9시간이므로, KST 기준 하루를 UTC 기준으로 변환
+        const kstStartOfDay = new Date(`${date}T00:00:00+09:00`);
+        const kstEndOfDay = new Date(`${date}T23:59:59+09:00`);
+        
+        // UTC로 변환
+        const utcStartOfDay = new Date(kstStartOfDay.getTime() - 9 * 60 * 60 * 1000);
+        const utcEndOfDay = new Date(kstEndOfDay.getTime() - 9 * 60 * 60 * 1000);
+        
+        console.log(`🕐 KST ${date} → UTC ${utcStartOfDay.toISOString()} ~ ${utcEndOfDay.toISOString()}`);
         
         const { data: sessions, error: sessionError } = await window.supabaseClient
             .from('exercise_sessions')
             .select('id')
             .eq('user_id', window.currentUserId)
-            .gte('created_at', startOfDay)
-            .lt('created_at', endOfDay);
+            .gte('created_at', utcStartOfDay.toISOString())
+            .lt('created_at', utcEndOfDay.toISOString());
 
         if (sessionError) {
             console.error('❌ 세션 조회 실패:', sessionError);
