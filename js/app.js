@@ -414,6 +414,172 @@ async function onRecordsTabClick() {
     renderCalendar(sessions); // existing function
 }
 
+// 📊 기록탭 개선: 올바른 데이터 조회 함수들
+async function fetchUserExerciseRecords() {
+    console.log('🔍 사용자 운동 기록 조회 시작...');
+    
+    if (!window.currentUserId) {
+        console.warn('⚠️ 로그인 사용자 ID가 없습니다.');
+        return [];
+    }
+
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('exercise_sessions')
+            .select(`
+                id,
+                started_at,
+                completed_at,
+                exercise_duration,
+                completed_sets,
+                completed_breaths,
+                inhale_resistance,
+                exhale_resistance,
+                user_feedback,
+                is_aborted
+            `)
+            .eq('user_id', window.currentUserId)
+            .not('completed_at', 'is', null)
+            .order('started_at', { ascending: false });
+
+        if (error) {
+            console.error('❌ 운동 기록 조회 실패:', error);
+            return [];
+        }
+
+        console.log(`✅ ${data?.length || 0}개의 운동 기록 조회 완료`);
+        return data || [];
+
+    } catch (err) {
+        console.error('❌ 운동 기록 조회 중 오류:', err);
+        return [];
+    }
+}
+
+async function fetchAiAdviceForDate(date) {
+    console.log(`🤖 ${date} 날짜의 AI 조언 조회 시작...`);
+    
+    if (!window.currentUserId || !date) {
+        console.warn('⚠️ 사용자 ID 또는 날짜가 없습니다.');
+        return null;
+    }
+
+    try {
+        // 해당 날짜의 세션들 먼저 찾기 
+        const startOfDay = `${date}T00:00:00Z`;
+        const endOfDay = `${date}T23:59:59Z`;
+        
+        const { data: sessions, error: sessionError } = await window.supabaseClient
+            .from('exercise_sessions')
+            .select('id, ai_advice')
+            .eq('user_id', window.currentUserId)
+            .gte('started_at', startOfDay)
+            .lt('started_at', endOfDay)
+            .not('completed_at', 'is', null);
+
+        if (sessionError) {
+            console.error('❌ 세션 조회 실패:', sessionError);
+            return null;
+        }
+
+        if (!sessions?.length) {
+            console.log(`ℹ️ ${date} 날짜에 운동 기록이 없습니다.`);
+            return null;
+        }
+
+        // AI 조언이 있는 세션 찾기 (ai_advice 컬럼 직접 사용)
+        const sessionWithAdvice = sessions.find(s => s.ai_advice);
+        
+        if (sessionWithAdvice?.ai_advice) {
+            const advice = sessionWithAdvice.ai_advice;
+            // JSON 객체에서 텍스트 추출
+            const adviceText = advice.comprehensive_advice || 
+                              advice.intensity_analysis || 
+                              advice.summary || 
+                              '운동을 완료하셨습니다!';
+            
+            console.log(`✅ ${date} 날짜의 AI 조언 조회 완료`);
+            return adviceText;
+        } else {
+            console.log(`ℹ️ ${date} 날짜에 AI 조언이 없습니다.`);
+            return null;
+        }
+
+    } catch (err) {
+        console.error('❌ AI 조언 조회 중 오류:', err);
+        return null;
+    }
+}
+
+async function fetchRecordSummaryForDate(date) {
+    console.log(`📋 ${date} 날짜의 운동 요약 조회 시작...`);
+    
+    if (!window.currentUserId || !date) {
+        console.warn('⚠️ 사용자 ID 또는 날짜가 없습니다.');
+        return null;
+    }
+
+    try {
+        const startOfDay = `${date}T00:00:00Z`;
+        const endOfDay = `${date}T23:59:59Z`;
+        
+        const { data: sessions, error } = await window.supabaseClient
+            .from('exercise_sessions')
+            .select(`
+                completed_sets,
+                completed_breaths,
+                exercise_duration,
+                inhale_resistance,
+                exhale_resistance,
+                user_feedback,
+                started_at,
+                completed_at
+            `)
+            .eq('user_id', window.currentUserId)
+            .gte('started_at', startOfDay)
+            .lt('started_at', endOfDay)
+            .not('completed_at', 'is', null)
+            .order('started_at', { ascending: false });
+
+        if (error) {
+            console.error('❌ 운동 요약 조회 실패:', error);
+            return null;
+        }
+
+        if (!sessions?.length) {
+            console.log(`ℹ️ ${date} 날짜에 운동 기록이 없습니다.`);
+            return null;
+        }
+
+        // 해당 날짜의 모든 세션을 합계
+        const summary = sessions.reduce((acc, session) => {
+            acc.totalSets += session.completed_sets || 0;
+            acc.totalBreaths += session.completed_breaths || 0;
+            acc.totalDuration += session.exercise_duration || 0;
+            acc.sessionCount += 1;
+            acc.inhaleResistance = session.inhale_resistance || 0; // 마지막 값 사용
+            acc.exhaleResistance = session.exhale_resistance || 0; // 마지막 값 사용
+            acc.feedback = session.user_feedback || acc.feedback;
+            return acc;
+        }, {
+            totalSets: 0,
+            totalBreaths: 0,
+            totalDuration: 0,
+            sessionCount: 0,
+            inhaleResistance: 0,
+            exhaleResistance: 0,
+            feedback: null
+        });
+
+        console.log(`✅ ${date} 날짜의 운동 요약 조회 완료: ${summary.sessionCount}개 세션`);
+        return summary;
+
+    } catch (err) {
+        console.error('❌ 운동 요약 조회 중 오류:', err);
+        return null;
+    }
+}
+
 // 전역 함수로 노출
 window.showBottomNav = showBottomNav;
 window.hideBottomNav = hideBottomNav;
@@ -422,6 +588,8 @@ window.selectWorkoutMode = selectWorkoutMode;
 window.onRecordsTabClick = onRecordsTabClick;
 window.fetchAiAdviceForDate = fetchAiAdviceForDate;
 window.renderRecordSummary = renderRecordSummary;
+window.fetchUserExerciseRecords = fetchUserExerciseRecords;
+window.fetchRecordSummaryForDate = fetchRecordSummaryForDate;
 
 // 화면 전환 함수
 function showScreen(screenId) {
