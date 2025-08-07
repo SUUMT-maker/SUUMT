@@ -132,11 +132,9 @@ class SuumTrainingSession {
             this.isPaused = false;
             this.clearTimers();
             
-            if (this.onAbortCallback) {
-                this.onAbortCallback(this.getSessionData());
-            }
+            // Effort Level Survey 표시 (중단된 세션)
+            this.showEffortLevelSurvey(true); // 중단된 세션
             
-            this.hide();
             console.log('❌ 세션 중단');
         });
     }
@@ -350,12 +348,50 @@ class SuumTrainingSession {
         // 완료 메시지 표시
         this.showCompletionMessage();
         
-        // 완료 콜백 호출
-        if (this.onCompleteCallback) {
-            this.onCompleteCallback(this.getSessionData());
-        }
+        // Effort Level Survey 표시
+        this.showEffortLevelSurvey(false); // 정상 완료
         
         console.log('🎉 세션 완료!');
+    }
+
+    /**
+     * Effort Level Survey 표시
+     * @param {boolean} wasAborted - 세션이 중단되었는지 여부
+     */
+    showEffortLevelSurvey(wasAborted) {
+        // 세션 ID 생성 (간단한 UUID 형태)
+        const sessionId = `session-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+        
+        // Effort Level Survey 초기화 및 표시
+        window.effortLevelSurvey.init(
+            sessionId,
+            wasAborted,
+            (result) => {
+                console.log('📊 Effort Level Survey 결과:', result);
+                
+                // 적절한 콜백 호출
+                if (wasAborted) {
+                    if (this.onAbortCallback) {
+                        this.onAbortCallback({
+                            ...this.getSessionData(),
+                            effortLevel: result.effortLevel
+                        });
+                    }
+                } else {
+                    if (this.onCompleteCallback) {
+                        this.onCompleteCallback({
+                            ...this.getSessionData(),
+                            effortLevel: result.effortLevel
+                        });
+                    }
+                }
+                
+                // 세션 화면 숨김
+                this.hide();
+            }
+        );
+        
+        window.effortLevelSurvey.show();
     }
 
     /**

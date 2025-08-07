@@ -33,9 +33,9 @@ const QUIZZES = [
     },
     {
         id: 4,
-        question: "호흡 시 들숨은 어디로 하는 게 좋을까요?",
-        options: ["입", "코", "가슴"],
-        answer: "코"
+        question: "숨을 들이마실 때 주로 사용하는 근육은?",
+        options: ["횡격막", "삼두박근", "이두박근"],
+        answer: "횡격막"
     },
     {
         id: 5,
