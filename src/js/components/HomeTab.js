@@ -342,13 +342,179 @@ class HomeTab {
     }
 
     /**
-     * 세션 시작 처리
+     * 세션 시작 처리 - 전체 플로우 연결
      */
     handleSessionStart(sessionConfig) {
         console.log('🏃‍♂️ 세션 시작:', sessionConfig);
         
-        // TODO: 카운트다운 화면으로 이동
-        alert(`세션을 시작합니다!\n흡기 저항: ${sessionConfig.inhaleResistance}\n호기 저항: ${sessionConfig.exhaleResistance}\n목표: ${sessionConfig.dailyGoal}회 중 ${sessionConfig.completedToday}회 완료`);
+        // 현재 화면들 숨김
+        if (window.suumTrainingSetup) {
+            window.suumTrainingSetup.hide();
+        }
+        if (window.suumTrainingStartScreen) {
+            window.suumTrainingStartScreen.hide();
+        }
+        
+        // 카운트다운 오버레이 초기화 및 시작
+        if (window.suumCountdownOverlay) {
+            window.suumCountdownOverlay.init(
+                // 카운트다운 완료 콜백
+                () => {
+                    console.log('✅ 카운트다운 완료 - 실제 세션 시작');
+                    this.startTrainingSession(sessionConfig);
+                },
+                // 카운트다운 취소 콜백
+                () => {
+                    console.log('❌ 카운트다운 취소 - 홈으로 복귀');
+                    this.returnToHome();
+                }
+            );
+            
+            window.suumCountdownOverlay.show();
+        } else {
+            console.error('❌ SuumCountdownOverlay가 로드되지 않았습니다.');
+            this.startTrainingSession(sessionConfig);
+        }
+    }
+
+    /**
+     * 실제 훈련 세션 시작
+     */
+    startTrainingSession(sessionConfig) {
+        console.log('🏋️‍♂️ 실제 훈련 세션 시작:', sessionConfig);
+        
+        if (window.suumTrainingSession) {
+            window.suumTrainingSession.init(
+                sessionConfig,
+                // 세션 완료 콜백
+                (sessionData) => {
+                    console.log('✅ 훈련 세션 완료:', sessionData);
+                    this.handleSessionComplete(sessionData);
+                },
+                // 세션 중단 콜백
+                (sessionData) => {
+                    console.log('❌ 훈련 세션 중단:', sessionData);
+                    this.handleSessionAbort(sessionData);
+                },
+                // 진행 상황 업데이트 콜백
+                (progress) => {
+                    console.log('📊 세션 진행 상황:', progress);
+                }
+            );
+            
+            window.suumTrainingSession.start();
+        } else {
+            console.error('❌ SuumTrainingSession이 로드되지 않았습니다.');
+            this.returnToHome();
+        }
+    }
+
+    /**
+     * 세션 완료 처리
+     */
+    async handleSessionComplete(sessionData) {
+        console.log('🎉 세션 완료 처리:', sessionData);
+        
+        try {
+            // 세션 데이터 저장 (Supabase)
+            await this.saveSessionToSupabase(sessionData);
+            
+            // 홈 화면 데이터 갱신
+            await this.loadTodaySessions();
+            this.updateProgressUI();
+            
+            // 홈으로 복귀
+            this.returnToHome();
+            
+            console.log('✅ 세션 완료 처리 성공');
+        } catch (error) {
+            console.error('❌ 세션 완료 처리 오류:', error);
+            this.returnToHome();
+        }
+    }
+
+    /**
+     * 세션 중단 처리
+     */
+    async handleSessionAbort(sessionData) {
+        console.log('⚠️ 세션 중단 처리:', sessionData);
+        
+        try {
+            // 중단된 세션도 기록 (부분 완료 상태로)
+            await this.saveSessionToSupabase({
+                ...sessionData,
+                isAborted: true
+            });
+            
+            // 홈 화면 데이터 갱신
+            await this.loadTodaySessions();
+            this.updateProgressUI();
+            
+            // 홈으로 복귀
+            this.returnToHome();
+            
+            console.log('✅ 세션 중단 처리 완료');
+        } catch (error) {
+            console.error('❌ 세션 중단 처리 오류:', error);
+            this.returnToHome();
+        }
+    }
+
+    /**
+     * 세션 데이터 Supabase 저장
+     */
+    async saveSessionToSupabase(sessionData) {
+        if (!window.supabaseClient) {
+            console.warn('⚠️ Supabase 클라이언트 없음 - 로컬 저장 스킵');
+            return;
+        }
+        
+        const user = await window.supabaseAuth.getUser();
+        if (!user) {
+            console.warn('⚠️ 로그인되지 않은 사용자 - 저장 스킵');
+            return;
+        }
+        
+        const sessionRecord = {
+            user_id: user.id,
+            inhale_resistance: sessionData.inhaleResistance,
+            exhale_resistance: sessionData.exhaleResistance,
+            completed_sets: sessionData.completedSets,
+            completed_breaths: sessionData.completedBreaths,
+            total_duration: sessionData.totalDuration,
+            is_aborted: sessionData.isAborted || false,
+            effort_level: sessionData.effortLevel || null,
+            created_at: new Date().toISOString()
+        };
+        
+        const { error } = await window.supabaseClient
+            .from('exercise_sessions')
+            .insert([sessionRecord]);
+            
+        if (error) {
+            console.error('❌ Supabase 저장 오류:', error);
+            throw error;
+        }
+        
+        console.log('✅ 세션 데이터 저장 완료');
+    }
+
+    /**
+     * 홈 화면으로 복귀
+     */
+    returnToHome() {
+        // 모든 모달/오버레이 숨김
+        if (window.suumTrainingSetup) window.suumTrainingSetup.hide();
+        if (window.suumTrainingStartScreen) window.suumTrainingStartScreen.hide();
+        if (window.suumCountdownOverlay) window.suumCountdownOverlay.hide();
+        if (window.suumTrainingSession) window.suumTrainingSession.hide();
+        if (window.suumRestBetweenSets) window.suumRestBetweenSets.hide();
+        if (window.effortLevelSurvey) window.effortLevelSurvey.hide();
+        
+        // 홈탭 표시
+        this.showTab('home');
+        
+        console.log('🏠 홈 화면으로 복귀');
     }
 
     /**
@@ -1373,3 +1539,35 @@ const homeTab = new HomeTab();
 
 // 전역으로 노출
 window.homeTab = homeTab;
+
+// 개발용 통합 테스트 함수
+window.testFullTrainingFlow = () => {
+    console.log('🧪 전체 훈련 플로우 테스트 시작');
+    
+    // 테스트용 저항 데이터
+    const testConfig = {
+        inhaleResistance: 3,
+        exhaleResistance: 4,
+        dailyGoal: 2,
+        completedToday: 0
+    };
+    
+    console.log('🔄 테스트 설정:', testConfig);
+    
+    // 바로 세션 시작 테스트
+    homeTab.handleSessionStart(testConfig);
+};
+
+window.testQuickSession = () => {
+    console.log('🧪 빠른 세션 테스트 (카운트다운 스킵)');
+    
+    const testConfig = {
+        inhaleResistance: 2,
+        exhaleResistance: 3,
+        dailyGoal: 2,
+        completedToday: 0
+    };
+    
+    // 카운트다운 없이 바로 세션 시작
+    homeTab.startTrainingSession(testConfig);
+};
