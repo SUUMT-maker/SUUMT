@@ -7,6 +7,162 @@
     box-sizing: border-box;
 }
 
+/* SuumCountdownOverlay 스타일 */
+.suum-countdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+}
+
+.countdown-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(2px);
+}
+
+.countdown-content {
+    text-align: center;
+    color: white;
+    max-width: 90%;
+}
+
+.countdown-number {
+    font-size: 8rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    opacity: 0;
+    animation: fadeInOut 1s ease-in-out;
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.countdown-number.start-message {
+    font-size: 6rem;
+    color: #4ade80;
+    animation: startMessagePulse 1s ease-in-out;
+}
+
+.countdown-text {
+    font-size: 1.5rem;
+    margin-bottom: 3rem;
+    opacity: 0.9;
+    font-weight: 300;
+}
+
+.countdown-cancel-btn {
+    position: absolute;
+    bottom: 2rem;
+    right: 2rem;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    backdrop-filter: blur(10px);
+}
+
+.countdown-cancel-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
+}
+
+.countdown-cancel-btn:active {
+    transform: translateY(0);
+}
+
+/* 애니메이션 */
+@keyframes fadeInOut {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.1);
+    }
+    100% {
+        opacity: 0;
+        transform: scale(1);
+    }
+}
+
+@keyframes startMessagePulse {
+    0% {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.fade-in {
+    animation: fadeInOut 1s ease-in-out;
+}
+
+/* 모바일 반응형 */
+@media (max-width: 768px) {
+    .countdown-number {
+        font-size: 6rem;
+    }
+    
+    .countdown-number.start-message {
+        font-size: 4rem;
+    }
+    
+    .countdown-text {
+        font-size: 1.2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .countdown-cancel-btn {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        padding: 0.6rem 1.2rem;
+        font-size: 0.9rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .countdown-number {
+        font-size: 4rem;
+    }
+    
+    .countdown-number.start-message {
+        font-size: 3rem;
+    }
+    
+    .countdown-text {
+        font-size: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .countdown-cancel-btn {
+        bottom: 1rem;
+        right: 1rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.8rem;
+    }
+}
+
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

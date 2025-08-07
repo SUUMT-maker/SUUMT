@@ -219,13 +219,27 @@ class SuumTrainingStartScreen {
      * 시작 버튼 클릭 처리
      */
     handleStart() {
-        console.log('🏃‍♂️ 훈련 세션 시작');
+        console.log('🏃‍♂️ 훈련 세션 시작 준비');
         
-        if (this.onStartCallback) {
-            this.onStartCallback(this.sessionConfig);
-        }
+        // 카운트다운 오버레이 초기화 및 표시
+        window.suumCountdownOverlay.init(
+            // 카운트다운 완료 시 콜백
+            () => {
+                console.log('✅ 카운트다운 완료 - 세션 시작');
+                if (this.onStartCallback) {
+                    this.onStartCallback(this.sessionConfig);
+                }
+                this.hide();
+            },
+            // 카운트다운 취소 시 콜백
+            () => {
+                console.log('❌ 카운트다운 취소');
+                // 취소 시 아무것도 하지 않음 (화면 유지)
+            }
+        );
         
-        this.hide();
+        // 카운트다운 시작
+        window.suumCountdownOverlay.show();
     }
 
     /**
