@@ -226,10 +226,7 @@ class SuumTrainingStartScreen {
             // 카운트다운 완료 시 콜백
             () => {
                 console.log('✅ 카운트다운 완료 - 세션 시작');
-                if (this.onStartCallback) {
-                    this.onStartCallback(this.sessionConfig);
-                }
-                this.hide();
+                this.startTrainingSession();
             },
             // 카운트다운 취소 시 콜백
             () => {
@@ -240,6 +237,41 @@ class SuumTrainingStartScreen {
         
         // 카운트다운 시작
         window.suumCountdownOverlay.show();
+    }
+
+    /**
+     * 실제 훈련 세션 시작
+     */
+    startTrainingSession() {
+        console.log('🏋️‍♂️ 실제 훈련 세션 시작', this.sessionConfig);
+        
+        // 훈련 세션 초기화 및 시작
+        window.suumTrainingSession.init(
+            this.sessionConfig,
+            // 세션 완료 콜백
+            (sessionData) => {
+                console.log('✅ 훈련 세션 완료', sessionData);
+                if (this.onStartCallback) {
+                    this.onStartCallback(sessionData);
+                }
+            },
+            // 세션 중단 콜백
+            (sessionData) => {
+                console.log('❌ 훈련 세션 중단', sessionData);
+                // 중단 시 시작 화면으로 돌아가기
+                this.show();
+            },
+            // 진행 상황 업데이트 콜백
+            (progress) => {
+                console.log('📊 진행 상황 업데이트', progress);
+            }
+        );
+        
+        // 현재 화면 숨김
+        this.hide();
+        
+        // 세션 시작
+        window.suumTrainingSession.start();
     }
 
     /**
