@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUUMT - 호흡 트레이너</title>
+    <meta name="description" content="AI 기반 호흡 트레이너로 건강한 호흡을 만들어보세요">
+    <meta name="theme-color" content="#667eea">
+    
+    <!-- PWA 설정 -->
+    <link rel="manifest" href="../public/manifest.json">
+    <link rel="apple-touch-icon" href="../public/assets/icon-192x192.png">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Supabase -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <!-- 로딩 화면 -->
+    <div id="loadingScreen" class="loading-screen">
+        <div class="loading-content">
+            <div class="loading-logo">SUUMT</div>
+            <div class="loading-spinner"></div>
+        </div>
+    </div>
+
+    <!-- 로그인 화면 -->
+    <div id="loginScreen" class="screen hidden">
+        <div class="login-container">
+            <div class="login-logo">
+                <h1>SUUMT</h1>
+                <p>AI 기반 호흡 트레이너</p>
+            </div>
+            <button id="loginKakaoBtn" class="kakao-login-btn">
+                <span class="kakao-icon">카카오</span>
+                카카오로 시작하기
+            </button>
+        </div>
+    </div>
+
+    <!-- 메인 앱 화면 -->
+    <div id="appScreen" class="screen hidden">
+        <!-- 상단 탭바 -->
+        <nav class="tab-bar">
+            <button class="tab-btn active" data-tab="home">
+                <span class="tab-icon">🏠</span>
+                <span class="tab-label">홈</span>
+            </button>
+            <button class="tab-btn" data-tab="records">
+                <span class="tab-icon">📊</span>
+                <span class="tab-label">기록</span>
+            </button>
+            <button class="tab-btn" data-tab="settings">
+                <span class="tab-icon">⚙️</span>
+                <span class="tab-label">설정</span>
+            </button>
+        </nav>
+
+        <!-- 홈 탭 -->
+        <div id="homeTab" class="tab-content active">
+            <div class="home-container">
+                <div class="welcome-section">
+                    <h2>안녕하세요! 👋</h2>
+                    <p>오늘도 건강한 호흡을 만들어보세요</p>
+                </div>
+                
+                <div class="ai-message-section">
+                    <div class="ai-message-card">
+                        <div class="ai-avatar">🤖</div>
+                        <div class="ai-content">
+                            <h3>AI 트레이너</h3>
+                            <p id="aiMessage">오늘의 호흡 운동을 시작해보세요!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-section">
+                    <h3>오늘의 요약</h3>
+                    <div class="summary-grid">
+                        <div class="summary-card">
+                            <div class="summary-icon">🎯</div>
+                            <div class="summary-content">
+                                <h4>목표 달성률</h4>
+                                <p id="goalProgress">0%</p>
+                            </div>
+                        </div>
+                        <div class="summary-card">
+                            <div class="summary-icon">⏱️</div>
+                            <div class="summary-content">
+                                <h4>운동 시간</h4>
+                                <p id="exerciseTime">0분</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="action-section">
+                    <button id="startExerciseBtn" class="primary-btn">
+                        🏃‍♂️ 운동 시작하기
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 기록 탭 -->
+        <div id="recordsTab" class="tab-content">
+            <div class="records-container">
+                <h2>운동 기록</h2>
+                <div class="records-content">
+                    <p>기록 기능이 준비 중입니다...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 설정 탭 -->
+        <div id="settingsTab" class="tab-content">
+            <div class="settings-container">
+                <h2>설정</h2>
+                <div class="settings-content">
+                    <button id="logoutBtn" class="secondary-btn">로그아웃</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/home.js"></script>
+    <script src="js/records.js"></script>
+    <script src="js/app.js"></script>
+
+    <!-- Service Worker 등록 -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('../public/service-worker.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
+</body>
+</html>
