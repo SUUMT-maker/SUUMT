@@ -501,6 +501,97 @@ function initSliderIndicators() {
     });
 }
 
+// AISummaryCard 컴포넌트 관리
+async function loadAISummaryCard() {
+    if (!window.currentUserId) return;
+    
+    try {
+        // 가장 최근 AI 조언 조회
+        const { data: aiAdvice, error } = await window.supabaseClient
+            .from('ai_advice')
+            .select(`
+                summary,
+                advice_type,
+                created_at
+            `)
+            .eq('user_id', window.currentUserId)
+            .order('created_at', { ascending: false })
+            .limit(1);
+        
+        if (error) throw error;
+        
+        if (aiAdvice && aiAdvice.length > 0) {
+            updateAISummaryCard(aiAdvice[0]);
+        } else {
+            // AI 조언이 없는 경우
+            updateAISummaryCard(null);
+        }
+        
+    } catch (error) {
+        console.error('❌ AISummaryCard 로드 실패:', error);
+        updateAISummaryCard(null);
+    }
+}
+
+// AISummaryCard UI 업데이트
+function updateAISummaryCard(aiAdvice) {
+    const aiSummaryCard = document.getElementById('aiSummaryCard');
+    const aiSummaryIcon = document.getElementById('aiSummaryIcon');
+    const aiSummaryMessage = document.getElementById('aiSummaryMessage');
+    const aiSummaryDate = document.getElementById('aiSummaryDate');
+    
+    if (!aiSummaryCard || !aiSummaryIcon || !aiSummaryMessage || !aiSummaryDate) return;
+    
+    if (!aiAdvice) {
+        // AI 조언이 없는 경우 - 기본 상태
+        aiSummaryCard.className = 'ai-summary-card card';
+        aiSummaryIcon.textContent = '🤖';
+        aiSummaryMessage.textContent = '아직 AI 숨트레이너의 조언이 없어요. 오늘도 숨을 쉬며 시작해볼까요?';
+        aiSummaryDate.textContent = '분석 날짜: -';
+        return;
+    }
+    
+    // AI 조언이 있는 경우 - 데이터 업데이트
+    const adviceType = aiAdvice.advice_type || 'encourage';
+    const summary = aiAdvice.summary || 'AI 숨트레이너의 조언을 확인해보세요.';
+    const createdAt = aiAdvice.created_at;
+    
+    // 카드 스타일 업데이트
+    aiSummaryCard.className = `ai-summary-card card ${adviceType}`;
+    
+    // 아이콘 업데이트
+    const iconMap = {
+        'encourage': '👍',
+        'caution': '⚠️',
+        'motivate': '🔥'
+    };
+    aiSummaryIcon.textContent = iconMap[adviceType] || '🤖';
+    
+    // 메시지 업데이트
+    aiSummaryMessage.textContent = summary;
+    
+    // 날짜 업데이트 (UTC → KST)
+    const analysisDate = formatAnalysisDate(createdAt);
+    aiSummaryDate.textContent = `분석 날짜: ${analysisDate}`;
+}
+
+// 분석 날짜 포맷팅 (UTC → KST)
+function formatAnalysisDate(utcTimeString) {
+    try {
+        const utcDate = new Date(utcTimeString);
+        const kstDate = new Date(utcDate.getTime() + 9 * 60 * 60 * 1000);
+        
+        const year = kstDate.getFullYear();
+        const month = kstDate.getMonth() + 1;
+        const day = kstDate.getDate();
+        
+        return `${year}년 ${month}월 ${day}일`;
+    } catch (error) {
+        console.error('날짜 포맷팅 오류:', error);
+        return '날짜 정보 없음';
+    }
+}
+
 // 평균 저항 강도 계산 및 텍스트 변환
 function calculateAverageResistance(inhaleResistance, exhaleResistance) {
     if (!inhaleResistance || !exhaleResistance) {
@@ -725,6 +816,9 @@ async function initHomeTab() {
     
     // 6. NoSessionCard 초기화
     initNoSessionCard();
+    
+    // 7. AISummaryCard 로드
+    await loadAISummaryCard();
     
     console.log('✅ 홈 탭 초기화 완료');
 }
