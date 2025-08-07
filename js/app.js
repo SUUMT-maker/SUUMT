@@ -343,7 +343,7 @@ async function fetchExerciseSessions() {
 
 function transformSessionToRecord(session) {
     return {
-        date: session.exercise_date,
+        date: session.created_at ? session.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
         sets: session.completed_sets,
         duration: session.exercise_time,
         avg_resistance: Math.round((session.inhale_resistance + session.exhale_resistance) / 2),
@@ -428,9 +428,8 @@ async function fetchUserExerciseRecords() {
             .from('exercise_sessions')
             .select(`
                 id,
-                started_at,
-                completed_at,
-                exercise_duration,
+                created_at,
+                exercise_time,
                 completed_sets,
                 completed_breaths,
                 inhale_resistance,
@@ -439,8 +438,7 @@ async function fetchUserExerciseRecords() {
                 is_aborted
             `)
             .eq('user_id', window.currentUserId)
-            .not('completed_at', 'is', null)
-            .order('started_at', { ascending: false });
+            .order('created_at', { ascending: false });
 
         if (error) {
             console.error('❌ 운동 기록 조회 실패:', error);
@@ -471,11 +469,10 @@ async function fetchAiAdviceForDate(date) {
         
         const { data: sessions, error: sessionError } = await window.supabaseClient
             .from('exercise_sessions')
-            .select('id, ai_advice')
+            .select('id')
             .eq('user_id', window.currentUserId)
-            .gte('started_at', startOfDay)
-            .lt('started_at', endOfDay)
-            .not('completed_at', 'is', null);
+            .gte('created_at', startOfDay)
+            .lt('created_at', endOfDay);
 
         if (sessionError) {
             console.error('❌ 세션 조회 실패:', sessionError);
@@ -487,14 +484,25 @@ async function fetchAiAdviceForDate(date) {
             return null;
         }
 
-        // AI 조언이 있는 세션 찾기 (ai_advice 컬럼 직접 사용)
-        const sessionWithAdvice = sessions.find(s => s.ai_advice);
-        
-        if (sessionWithAdvice?.ai_advice) {
-            const advice = sessionWithAdvice.ai_advice;
-            // JSON 객체에서 텍스트 추출
+        const sessionIds = sessions.map(s => s.id);
+
+        // ai_advice 테이블에서 조언 조회
+        const { data: advices, error: adviceError } = await window.supabaseClient
+            .from('ai_advice')
+            .select('comprehensive_advice, intensity_advice, summary')
+            .in('session_id', sessionIds)
+            .order('created_at', { ascending: false })
+            .limit(1);
+
+        if (adviceError) {
+            console.error('❌ AI 조언 조회 실패:', adviceError);
+            return null;
+        }
+
+        if (advices && advices.length > 0) {
+            const advice = advices[0];
             const adviceText = advice.comprehensive_advice || 
-                              advice.intensity_analysis || 
+                              advice.intensity_advice || 
                               advice.summary || 
                               '운동을 완료하셨습니다!';
             
@@ -528,18 +536,16 @@ async function fetchRecordSummaryForDate(date) {
             .select(`
                 completed_sets,
                 completed_breaths,
-                exercise_duration,
+                exercise_time,
                 inhale_resistance,
                 exhale_resistance,
                 user_feedback,
-                started_at,
-                completed_at
+                created_at
             `)
             .eq('user_id', window.currentUserId)
-            .gte('started_at', startOfDay)
-            .lt('started_at', endOfDay)
-            .not('completed_at', 'is', null)
-            .order('started_at', { ascending: false });
+            .gte('created_at', startOfDay)
+            .lt('created_at', endOfDay)
+            .order('created_at', { ascending: false });
 
         if (error) {
             console.error('❌ 운동 요약 조회 실패:', error);
