@@ -580,16 +580,238 @@ async function fetchRecordSummaryForDate(date) {
     }
 }
 
+// 📅 기록탭 달력 관련 변수들
+let currentCalendarYear = new Date().getFullYear();
+let currentCalendarMonth = new Date().getMonth();
+let selectedDate = null;
+let userExerciseRecords = [];
+
+// 📅 달력 렌더링 함수
+async function renderCalendar() {
+    console.log(`🗓️ 달력 렌더링 시작: ${currentCalendarYear}년 ${currentCalendarMonth + 1}월`);
+    
+    // 로딩 표시
+    const loadingEl = document.getElementById('calendarLoading');
+    if (loadingEl) {
+        loadingEl.style.display = 'block';
+    }
+    
+    // 달력 제목 업데이트
+    const titleEl = document.getElementById('calendarTitle');
+    if (titleEl) {
+        const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', 
+                           '7월', '8월', '9월', '10월', '11월', '12월'];
+        titleEl.textContent = `${currentCalendarYear}년 ${monthNames[currentCalendarMonth]}`;
+    }
+    
+    // 사용자 운동 기록 조회
+    userExerciseRecords = await fetchUserExerciseRecords();
+    
+    // 날짜별로 기록 그룹화
+    const recordsByDate = {};
+    userExerciseRecords.forEach(record => {
+        const recordDate = new Date(record.started_at);
+        const dateStr = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}-${String(recordDate.getDate()).padStart(2, '0')}`;
+        
+        if (!recordsByDate[dateStr]) {
+            recordsByDate[dateStr] = [];
+        }
+        recordsByDate[dateStr].push(record);
+    });
+    
+    // 달력 바디 렌더링
+    const calendarBody = document.getElementById('calendarBody');
+    if (!calendarBody) {
+        console.error('❌ calendarBody 엘리먼트를 찾을 수 없습니다.');
+        return;
+    }
+    
+    // 현재 월의 첫 날과 마지막 날
+    const firstDay = new Date(currentCalendarYear, currentCalendarMonth, 1);
+    const lastDay = new Date(currentCalendarYear, currentCalendarMonth + 1, 0);
+    const today = new Date();
+    
+    let html = '';
+    let currentWeek = '';
+    
+    // 첫 번째 주 - 빈 칸 채우기
+    for (let i = 0; i < firstDay.getDay(); i++) {
+        currentWeek += '<td class="empty"></td>';
+    }
+    
+    // 날짜 채우기
+    for (let day = 1; day <= lastDay.getDate(); day++) {
+        const dateStr = `${currentCalendarYear}-${String(currentCalendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const hasRecord = recordsByDate[dateStr] && recordsByDate[dateStr].length > 0;
+        const isToday = day === today.getDate() && 
+                       currentCalendarMonth === today.getMonth() && 
+                       currentCalendarYear === today.getFullYear();
+        const isSelected = selectedDate === dateStr;
+        
+        let classes = [];
+        if (isToday) classes.push('today');
+        if (hasRecord) classes.push('has-record');
+        if (isSelected) classes.push('selected');
+        
+        currentWeek += `<td class="${classes.join(' ')}" data-date="${dateStr}" onclick="onDateClick('${dateStr}')">${day}</td>`;
+        
+        // 한 주가 완성되면 행 추가
+        if ((firstDay.getDay() + day - 1) % 7 === 6) {
+            html += `<tr>${currentWeek}</tr>`;
+            currentWeek = '';
+        }
+    }
+    
+    // 마지막 주 완성
+    if (currentWeek) {
+        const remainingCells = 7 - ((firstDay.getDay() + lastDay.getDate() - 1) % 7 + 1);
+        for (let i = 0; i < remainingCells; i++) {
+            currentWeek += '<td class="empty"></td>';
+        }
+        html += `<tr>${currentWeek}</tr>`;
+    }
+    
+    calendarBody.innerHTML = html;
+    
+    // 로딩 숨김
+    if (loadingEl) {
+        loadingEl.style.display = 'none';
+    }
+    
+    console.log(`✅ 달력 렌더링 완료: ${Object.keys(recordsByDate).length}개 날짜에 기록 있음`);
+}
+
+// 📅 날짜 클릭 이벤트 처리
+async function onDateClick(dateStr) {
+    console.log(`📅 날짜 클릭: ${dateStr}`);
+    
+    // 이전 선택된 날짜 해제
+    const prevSelected = document.querySelector('.calendar-table td.selected');
+    if (prevSelected) {
+        prevSelected.classList.remove('selected');
+    }
+    
+    // 새 날짜 선택
+    const newSelected = document.querySelector(`[data-date="${dateStr}"]`);
+    if (newSelected) {
+        newSelected.classList.add('selected');
+    }
+    
+    selectedDate = dateStr;
+    
+    // 선택된 날짜 표시 업데이트
+    const selectedDateEl = document.getElementById('selectedDate');
+    if (selectedDateEl) {
+        const [year, month, day] = dateStr.split('-');
+        selectedDateEl.textContent = `${year}년 ${month}월 ${day}일`;
+    }
+    
+    // 해당 날짜의 운동 요약 표시
+    await renderDateSummary(dateStr);
+}
+
+// 📅 선택된 날짜의 운동 요약 및 AI 조언 렌더링
+async function renderDateSummary(dateStr) {
+    console.log(`📋 날짜 요약 렌더링: ${dateStr}`);
+    
+    // 운동 요약 조회
+    const summary = await fetchRecordSummaryForDate(dateStr);
+    const summaryListEl = document.getElementById('recordSummaryList');
+    
+    if (summaryListEl) {
+        if (!summary) {
+            summaryListEl.innerHTML = '<li>이 날짜에 운동 기록이 없습니다.</li>';
+        } else {
+            const durationMinutes = Math.floor((summary.totalDuration || 0) / 60);
+            const durationSeconds = (summary.totalDuration || 0) % 60;
+            const durationText = durationMinutes > 0 ? 
+                `${durationMinutes}분 ${durationSeconds}초` : 
+                `${durationSeconds}초`;
+            
+            summaryListEl.innerHTML = `
+                <li>운동 세션 수: ${summary.sessionCount}회</li>
+                <li>완료 세트 수: ${summary.totalSets}세트</li>
+                <li>총 호흡 횟수: ${summary.totalBreaths}회</li>
+                <li>총 운동 시간: ${durationText}</li>
+                <li>저항 강도: 흡기 ${summary.inhaleResistance} / 호기 ${summary.exhaleResistance}</li>
+                ${summary.feedback ? `<li>운동 후기: ${summary.feedback === 'easy' ? '😌 너무 편함' : summary.feedback === 'perfect' ? '💪 딱 좋음' : '😤 너무 힘듦'}</li>` : ''}
+            `;
+        }
+    }
+    
+    // AI 조언 조회
+    const advice = await fetchAiAdviceForDate(dateStr);
+    const adviceEl = document.getElementById('aiAdviceSummary');
+    
+    if (adviceEl) {
+        if (!advice) {
+            adviceEl.textContent = '이 날짜에 AI 조언이 없습니다.';
+        } else {
+            adviceEl.textContent = advice;
+        }
+    }
+}
+
+// 📅 달력 네비게이션 함수들
+function navigateCalendar(direction) {
+    if (direction === 'prev') {
+        if (currentCalendarMonth === 0) {
+            currentCalendarMonth = 11;
+            currentCalendarYear--;
+        } else {
+            currentCalendarMonth--;
+        }
+    } else if (direction === 'next') {
+        if (currentCalendarMonth === 11) {
+            currentCalendarMonth = 0;
+            currentCalendarYear++;
+        } else {
+            currentCalendarMonth++;
+        }
+    }
+    
+    renderCalendar();
+}
+
+// 📅 기록 탭 초기화 함수 (기존 함수 개선)
+async function initRecordsTab() {
+    console.log('📒 기록 탭 초기화 시작...');
+    
+    showBottomNav();
+    
+    // 달력 네비게이션 버튼 이벤트 추가
+    const prevBtn = document.getElementById('prevMonthBtn');
+    const nextBtn = document.getElementById('nextMonthBtn');
+    
+    if (prevBtn && !prevBtn.hasAttribute('data-event-added')) {
+        prevBtn.addEventListener('click', () => navigateCalendar('prev'));
+        prevBtn.setAttribute('data-event-added', 'true');
+    }
+    
+    if (nextBtn && !nextBtn.hasAttribute('data-event-added')) {
+        nextBtn.addEventListener('click', () => navigateCalendar('next'));
+        nextBtn.setAttribute('data-event-added', 'true');
+    }
+    
+    // 달력 렌더링
+    await renderCalendar();
+    
+    console.log('✅ 기록 탭 초기화 완료');
+}
+
 // 전역 함수로 노출
 window.showBottomNav = showBottomNav;
 window.hideBottomNav = hideBottomNav;
 window.switchTab = switchTab;
 window.selectWorkoutMode = selectWorkoutMode;
-window.onRecordsTabClick = onRecordsTabClick;
+window.onRecordsTabClick = initRecordsTab; // 기존 함수를 새 함수로 교체
 window.fetchAiAdviceForDate = fetchAiAdviceForDate;
 window.renderRecordSummary = renderRecordSummary;
 window.fetchUserExerciseRecords = fetchUserExerciseRecords;
 window.fetchRecordSummaryForDate = fetchRecordSummaryForDate;
+window.renderCalendar = renderCalendar;
+window.onDateClick = onDateClick;
+window.navigateCalendar = navigateCalendar;
 
 // 화면 전환 함수
 function showScreen(screenId) {

@@ -819,7 +819,30 @@
 
             <!-- Calendar -->
             <div class="records-calendar card">
-                <p style="text-align:center;">[달력 자리 - 추후 Supabase 연동]</p>
+                <div class="calendar-header">
+                    <button class="calendar-nav-btn" id="prevMonthBtn">‹</button>
+                    <h3 class="calendar-title" id="calendarTitle">2025년 1월</h3>
+                    <button class="calendar-nav-btn" id="nextMonthBtn">›</button>
+                </div>
+                <table class="calendar-table">
+                    <thead>
+                        <tr>
+                            <th>일</th>
+                            <th>월</th>
+                            <th>화</th>
+                            <th>수</th>
+                            <th>목</th>
+                            <th>금</th>
+                            <th>토</th>
+                        </tr>
+                    </thead>
+                    <tbody id="calendarBody">
+                        <!-- 달력 날짜들이 JavaScript로 동적 생성됨 -->
+                    </tbody>
+                </table>
+                <div class="calendar-loading" id="calendarLoading" style="display: none;">
+                    📊 운동 기록을 불러오는 중...
+                </div>
             </div>
 
             <!-- Selected Day Summary -->

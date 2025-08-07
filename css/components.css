@@ -50,6 +50,139 @@
     50% { opacity: 1; transform: scale(1.3); }
 }
 
+/* 📅 기록탭 달력 스타일 */
+.records-calendar {
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.calendar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 0 10px;
+}
+
+.calendar-title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.calendar-nav-btn {
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.calendar-nav-btn:hover {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+    transform: translateY(-1px);
+}
+
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+.calendar-table th {
+    padding: 12px 4px;
+    text-align: center;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    background: #f9fafb;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.calendar-table td {
+    padding: 8px 4px;
+    text-align: center;
+    vertical-align: top;
+    height: 44px;
+    border: 1px solid #f3f4f6;
+    cursor: pointer;
+    position: relative;
+    font-size: 14px;
+    font-weight: 500;
+    color: #374151;
+    transition: all 0.2s ease;
+}
+
+.calendar-table td:hover {
+    background: #f0f9ff;
+    border-color: #93c5fd;
+}
+
+.calendar-table td.empty {
+    color: #d1d5db;
+    cursor: default;
+}
+
+.calendar-table td.empty:hover {
+    background: transparent;
+    border-color: #f3f4f6;
+}
+
+.calendar-table td.today {
+    background: #ddd6fe;
+    color: #6366f1;
+    font-weight: 600;
+    border-color: #a855f7;
+}
+
+.calendar-table td.has-record {
+    background: #dcfce7;
+    color: #16a34a;
+    font-weight: 600;
+    border-color: #22c55e;
+    position: relative;
+}
+
+.calendar-table td.has-record::after {
+    content: '💪';
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 10px;
+    opacity: 0.8;
+}
+
+.calendar-table td.selected {
+    background: #667eea;
+    color: white;
+    font-weight: 600;
+    border-color: #4f46e5;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.calendar-table td.has-record.selected {
+    background: #059669;
+    border-color: #047857;
+}
+
+.calendar-loading {
+    text-align: center;
+    padding: 20px;
+    color: #6b7280;
+    font-size: 14px;
+}
+
 /* 배지 시스템 애니메이션 */
 @keyframes shimmer {
     0%, 100% { transform: rotate(0deg) scale(1); }
