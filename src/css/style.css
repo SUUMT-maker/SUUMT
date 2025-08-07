@@ -1208,4 +1208,177 @@ body {
     .ai-summary-date p {
         font-size: 0.8rem;
     }
+    
+    /* WeeklyTrendCard 모바일 반응형 */
+    .weekly-trend-card {
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .weekly-trend-header h3 {
+        font-size: 1.1rem;
+    }
+    
+    .weekly-date-range {
+        font-size: 0.8rem;
+    }
+    
+    .weekly-insufficient-data {
+        padding: 1.5rem 0.75rem;
+    }
+    
+    .insufficient-icon {
+        font-size: 2.5rem;
+    }
+    
+    .weekly-insufficient-data p {
+        font-size: 0.9rem;
+    }
+    
+    .weekly-chart-container {
+        height: 100px;
+        padding: 0.25rem;
+    }
+    
+    .weekly-stats {
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+    }
+    
+    .weekly-stat-item {
+        padding: 0.75rem 0.5rem;
+    }
+    
+    .weekly-stat-label {
+        font-size: 0.75rem;
+    }
+    
+    .weekly-stat-value {
+        font-size: 1rem;
+    }
+    
+    .weekly-ai-comment {
+        padding: 0.75rem;
+    }
+    
+    .weekly-ai-comment p {
+        font-size: 0.8rem;
+    }
+}
+
+/* WeeklyTrendCard 컴포넌트 */
+.weekly-trend-card {
+    margin-bottom: 2rem;
+    background: white;
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+}
+
+.weekly-trend-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.weekly-trend-header {
+    text-align: center;
+}
+
+.weekly-trend-header h3 {
+    font-size: 1.3rem;
+    color: #333;
+    font-weight: 700;
+    margin: 0 0 0.5rem 0;
+}
+
+.weekly-date-range {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0;
+    font-weight: 500;
+}
+
+.weekly-insufficient-data {
+    text-align: center;
+    padding: 2rem 1rem;
+}
+
+.insufficient-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.7;
+}
+
+.weekly-insufficient-data p {
+    font-size: 1rem;
+    color: #666;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.weekly-trend-data {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.weekly-chart-container {
+    height: 120px;
+    width: 100%;
+    margin-top: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 0.5rem;
+}
+
+.weekly-chart {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+.weekly-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.weekly-stat-item {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.weekly-stat-label {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: 500;
+}
+
+.weekly-stat-value {
+    font-size: 1.1rem;
+    color: #333;
+    font-weight: 700;
+}
+
+.weekly-ai-comment {
+    text-align: center;
+    padding: 1rem;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border-radius: 8px;
+    margin-top: 0.5rem;
+}
+
+.weekly-ai-comment p {
+    font-size: 0.9rem;
+    line-height: 1.5;
+    margin: 0;
+    font-style: italic;
+    font-weight: 500;
 }

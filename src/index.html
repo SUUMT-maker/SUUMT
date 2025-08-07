@@ -16,6 +16,9 @@
     
     <!-- Supabase -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <!-- 로딩 화면 -->
@@ -217,6 +220,51 @@
                     <button id="startExerciseBtn" class="primary-btn">
                         🏃‍♂️ 운동 시작하기
                     </button>
+                </div>
+
+                <!-- WeeklyTrendCard 컴포넌트 -->
+                <div id="weeklyTrendCard" class="weekly-trend-card card">
+                    <div class="weekly-trend-content">
+                        <div class="weekly-trend-header">
+                            <h3>이번 주 숨트 레포트</h3>
+                            <p id="weeklyDateRange" class="weekly-date-range">날짜 범위 로딩 중...</p>
+                        </div>
+                        
+                        <!-- 세션이 1개 이하일 경우 표시할 메시지 -->
+                        <div id="weeklyInsufficientData" class="weekly-insufficient-data" style="display: none;">
+                            <div class="insufficient-icon">📊</div>
+                            <p>이번 주 기록이 아직 부족해요. 매일 꾸준히 한 번씩 도전해보세요!</p>
+                        </div>
+                        
+                        <!-- 충분한 데이터가 있을 경우 표시할 내용 -->
+                        <div id="weeklyTrendData" class="weekly-trend-data" style="display: none;">
+                            <!-- 미니 막대 그래프 -->
+                            <div class="weekly-chart-container">
+                                <canvas id="weeklyChart" class="weekly-chart"></canvas>
+                            </div>
+                            
+                            <!-- 요약 통계 -->
+                            <div class="weekly-stats">
+                                <div class="weekly-stat-item">
+                                    <span class="weekly-stat-label">총 세션 수</span>
+                                    <span class="weekly-stat-value" id="weeklyTotalSessions">-</span>
+                                </div>
+                                <div class="weekly-stat-item">
+                                    <span class="weekly-stat-label">총 호흡 수</span>
+                                    <span class="weekly-stat-value" id="weeklyTotalBreaths">-</span>
+                                </div>
+                                <div class="weekly-stat-item">
+                                    <span class="weekly-stat-label">평균 저항 강도</span>
+                                    <span class="weekly-stat-value" id="weeklyAvgResistance">-</span>
+                                </div>
+                            </div>
+                            
+                            <!-- AI 코멘트 -->
+                            <div class="weekly-ai-comment">
+                                <p id="weeklyAIComment">AI 코멘트 로딩 중...</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

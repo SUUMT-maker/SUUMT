@@ -592,6 +592,271 @@ function formatAnalysisDate(utcTimeString) {
     }
 }
 
+// WeeklyTrendCard 컴포넌트 관리
+async function loadWeeklyTrendCard() {
+    if (!window.currentUserId) return;
+    
+    try {
+        // 최근 7일 데이터 조회
+        const endDate = new Date();
+        const startDate = new Date();
+        startDate.setDate(startDate.getDate() - 6); // 7일 전부터
+        
+        // KST 기준 날짜를 UTC 기준으로 변환
+        const kstEndDate = toKSTDateString(endDate.toISOString());
+        const kstStartDate = toKSTDateString(startDate.toISOString());
+        
+        const utcStartDate = new Date(`${kstStartDate}T00:00:00+09:00`);
+        const utcEndDate = new Date(`${kstEndDate}T23:59:59+09:00`);
+        
+        const utcStart = new Date(utcStartDate.getTime() - 9 * 60 * 60 * 1000);
+        const utcEnd = new Date(utcEndDate.getTime() - 9 * 60 * 60 * 1000);
+        
+        const { data: sessions, error } = await window.supabaseClient
+            .from('exercise_sessions')
+            .select(`
+                completed_breaths,
+                completed_sets,
+                inhale_resistance,
+                exhale_resistance,
+                created_at
+            `)
+            .eq('user_id', window.currentUserId)
+            .gte('created_at', utcStart.toISOString())
+            .lt('created_at', utcEnd.toISOString());
+        
+        if (error) throw error;
+        
+        updateWeeklyTrendCard(sessions, kstStartDate, kstEndDate);
+        
+    } catch (error) {
+        console.error('❌ WeeklyTrendCard 로드 실패:', error);
+        updateWeeklyTrendCard([], '', '');
+    }
+}
+
+// WeeklyTrendCard UI 업데이트
+function updateWeeklyTrendCard(sessions, startDate, endDate) {
+    const weeklyTrendCard = document.getElementById('weeklyTrendCard');
+    const weeklyDateRange = document.getElementById('weeklyDateRange');
+    const weeklyInsufficientData = document.getElementById('weeklyInsufficientData');
+    const weeklyTrendData = document.getElementById('weeklyTrendData');
+    
+    if (!weeklyTrendCard || !weeklyDateRange || !weeklyInsufficientData || !weeklyTrendData) return;
+    
+    // 날짜 범위 업데이트
+    const dateRangeText = formatWeeklyDateRange(startDate, endDate);
+    weeklyDateRange.textContent = dateRangeText;
+    
+    // 세션이 1개 이하인 경우
+    if (!sessions || sessions.length <= 1) {
+        weeklyInsufficientData.style.display = 'block';
+        weeklyTrendData.style.display = 'none';
+        return;
+    }
+    
+    // 충분한 데이터가 있는 경우
+    weeklyInsufficientData.style.display = 'none';
+    weeklyTrendData.style.display = 'block';
+    
+    // 주간 데이터 처리
+    const weeklyData = processWeeklyData(sessions, startDate);
+    
+    // 차트 생성
+    createWeeklyChart(weeklyData);
+    
+    // 통계 업데이트
+    updateWeeklyStats(sessions);
+    
+    // AI 코멘트 업데이트
+    updateWeeklyAIComment(sessions.length);
+}
+
+// 주간 날짜 범위 포맷팅
+function formatWeeklyDateRange(startDate, endDate) {
+    try {
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        
+        const startMonth = start.getMonth() + 1;
+        const startDay = start.getDate();
+        const endMonth = end.getMonth() + 1;
+        const endDay = end.getDate();
+        
+        return `${startMonth}월 ${startDay}일 ~ ${endMonth}월 ${endDay}일 기준`;
+    } catch (error) {
+        console.error('날짜 범위 포맷팅 오류:', error);
+        return '최근 7일 기준';
+    }
+}
+
+// 주간 데이터 처리
+function processWeeklyData(sessions, startDate) {
+    const weeklyData = [];
+    const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+    
+    // 7일간 데이터 초기화
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(startDate);
+        date.setDate(date.getDate() + i);
+        
+        weeklyData.push({
+            date: toKSTDateString(date.toISOString()),
+            weekday: weekdays[date.getDay()],
+            breaths: 0,
+            sessions: 0
+        });
+    }
+    
+    // 세션 데이터 매핑
+    sessions.forEach(session => {
+        const sessionDate = toKSTDateString(session.created_at);
+        const dayIndex = weeklyData.findIndex(day => day.date === sessionDate);
+        
+        if (dayIndex !== -1) {
+            weeklyData[dayIndex].breaths += session.completed_breaths || 0;
+            weeklyData[dayIndex].sessions += 1;
+        }
+    });
+    
+    return weeklyData;
+}
+
+// 주간 차트 생성
+function createWeeklyChart(weeklyData) {
+    const ctx = document.getElementById('weeklyChart');
+    if (!ctx) return;
+    
+    // 기존 차트 제거
+    if (window.weeklyChart) {
+        window.weeklyChart.destroy();
+    }
+    
+    const labels = weeklyData.map(day => day.weekday);
+    const data = weeklyData.map(day => day.breaths);
+    
+    window.weeklyChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: '호흡 수',
+                data: data,
+                backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                borderColor: 'rgba(102, 126, 234, 1)',
+                borderWidth: 1,
+                borderRadius: 4,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(102, 126, 234, 1)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return `호흡 수: ${context.parsed.y}회`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#666',
+                        font: {
+                            size: 12
+                        }
+                    }
+                },
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.1)'
+                    },
+                    ticks: {
+                        color: '#666',
+                        font: {
+                            size: 10
+                        },
+                        callback: function(value) {
+                            return value + '회';
+                        }
+                    }
+                }
+            }
+        }
+    });
+}
+
+// 주간 통계 업데이트
+function updateWeeklyStats(sessions) {
+    const totalSessions = sessions.length;
+    const totalBreaths = sessions.reduce((sum, session) => sum + (session.completed_breaths || 0), 0);
+    
+    // 평균 저항 강도 계산
+    const validResistanceSessions = sessions.filter(session => 
+        session.inhale_resistance && session.exhale_resistance
+    );
+    
+    let avgResistance = '기록 없음';
+    if (validResistanceSessions.length > 0) {
+        const totalResistance = validResistanceSessions.reduce((sum, session) => {
+            return sum + ((session.inhale_resistance + session.exhale_resistance) / 2);
+        }, 0);
+        const avg = totalResistance / validResistanceSessions.length;
+        
+        if (avg <= 2) {
+            avgResistance = '쉬움';
+        } else if (avg <= 4) {
+            avgResistance = '적정';
+        } else {
+            avgResistance = '힘듦';
+        }
+    }
+    
+    // UI 업데이트
+    const totalSessionsEl = document.getElementById('weeklyTotalSessions');
+    const totalBreathsEl = document.getElementById('weeklyTotalBreaths');
+    const avgResistanceEl = document.getElementById('weeklyAvgResistance');
+    
+    if (totalSessionsEl) totalSessionsEl.textContent = totalSessions;
+    if (totalBreathsEl) totalBreathsEl.textContent = totalBreaths;
+    if (avgResistanceEl) avgResistanceEl.textContent = avgResistance;
+}
+
+// 주간 AI 코멘트 업데이트
+function updateWeeklyAIComment(sessionCount) {
+    const aiCommentEl = document.getElementById('weeklyAIComment');
+    if (!aiCommentEl) return;
+    
+    let comment = '';
+    
+    if (sessionCount >= 5) {
+        comment = '이번 주 정말 열심히 하셨어요!';
+    } else if (sessionCount <= 2) {
+        comment = '이번 주는 몸을 쉬었군요. 다시 시작해봐요!';
+    } else {
+        comment = '꾸준히 잘하고 있어요. 다음 주도 기대돼요!';
+    }
+    
+    aiCommentEl.textContent = comment;
+}
+
 // 평균 저항 강도 계산 및 텍스트 변환
 function calculateAverageResistance(inhaleResistance, exhaleResistance) {
     if (!inhaleResistance || !exhaleResistance) {
@@ -819,6 +1084,9 @@ async function initHomeTab() {
     
     // 7. AISummaryCard 로드
     await loadAISummaryCard();
+    
+    // 8. WeeklyTrendCard 로드
+    await loadWeeklyTrendCard();
     
     console.log('✅ 홈 탭 초기화 완료');
 }
