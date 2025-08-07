@@ -11,31 +11,47 @@ const REST_CONSTANTS = {
     TIMER_INTERVAL: 1000      // 1초 간격 업데이트 (ms)
 };
 
-// 호흡 퀴즈 데이터 (랜덤 표시용)
-const BREATHING_QUIZZES = [
+// 퀴즈 데이터 구조 (완전 교체)
+const QUIZZES = [
     {
-        tip: "💡 호흡 꿀팁: 코로 숨을 들이마시고 입으로 내쉬면 더 효과적이에요!",
-        icon: "🌬️"
+        id: 1,
+        question: "보통 사람은 1분에 몇 번 숨을 쉴까요?",
+        options: ["8~12회", "15~20회", "30~40회"],
+        answer: "8~12회"
     },
     {
-        tip: "💡 집중 포인트: 배가 부풀어 오르는 것을 느끼며 복식호흡을 해보세요!",
-        icon: "🫁"
+        id: 2,
+        question: "호흡 운동 시 어떤 자세가 가장 좋을까요?",
+        options: ["누워서", "앉아서 허리를 곧게 펴고", "서서 양손을 올리고"],
+        answer: "앉아서 허리를 곧게 펴고"
     },
     {
-        tip: "💡 휴식 팁: 어깨를 뒤로 젖히고 가슴을 펴면 호흡이 더 편해져요!",
-        icon: "🧘‍♀️"
+        id: 3,
+        question: "복식 호흡은 어디가 움직일 때 올바른가요?",
+        options: ["어깨", "가슴", "배"],
+        answer: "배"
     },
     {
-        tip: "💡 호흡 리듬: 들이마실 때는 천천히, 내쉴 때는 힘차게!",
-        icon: "⚡"
+        id: 4,
+        question: "호흡 시 들숨은 어디로 하는 게 좋을까요?",
+        options: ["입", "코", "가슴"],
+        answer: "코"
     },
     {
-        tip: "💡 마음가짐: 지금 이 순간에 집중하며 몸의 변화를 느껴보세요!",
-        icon: "🎯"
+        id: 5,
+        question: "숨을 참는 시간이 중요한 이유는?",
+        options: [
+            "산소를 오래 유지하기 위해",
+            "운동 효과를 줄이기 위해",
+            "지루하지 않게 하기 위해"
+        ],
+        answer: "산소를 오래 유지하기 위해"
     },
     {
-        tip: "💡 자세 체크: 등을 곧게 펴고 턱을 살짝 당겨보세요!",
-        icon: "📐"
+        id: 6,
+        question: "호흡 리듬에서 가장 중요한 것은?",
+        options: ["속도", "리듬감과 지속성", "숨을 멈추는 시간"],
+        answer: "리듬감과 지속성"
     }
 ];
 
@@ -65,6 +81,8 @@ class SuumRestBetweenSets {
         this.quizShown = false;
         this.quizAnswered = false;
         this.currentQuiz = null;
+        this.selectedAnswer = null;
+        this.isCorrect = null;
         
         // 콜백 함수들
         this.onNextSetCallback = null;
@@ -194,16 +212,52 @@ class SuumRestBetweenSets {
         this.quizShown = true;
         this.currentQuiz = this.getRandomQuiz();
         this.updateQuizDisplay();
+        this.initQuizEventListeners();
         
-        console.log('💡 호흡 퀴즈 표시:', this.currentQuiz.tip);
+        console.log('💡 호흡 퀴즈 표시:', this.currentQuiz.question);
     }
 
     /**
      * 랜덤 퀴즈 선택
      */
     getRandomQuiz() {
-        const randomIndex = Math.floor(Math.random() * BREATHING_QUIZZES.length);
-        return BREATHING_QUIZZES[randomIndex];
+        const randomIndex = Math.floor(Math.random() * QUIZZES.length);
+        return QUIZZES[randomIndex];
+    }
+
+    /**
+     * 퀴즈 답안 선택 처리
+     */
+    selectAnswer(selectedOption) {
+        if (this.quizAnswered) return; // 이미 답변한 경우 무시
+        
+        this.selectedAnswer = selectedOption;
+        this.isCorrect = selectedOption === this.currentQuiz.answer;
+        this.quizAnswered = true;
+        
+        console.log(`🧠 퀴즈 답변: "${selectedOption}" - ${this.isCorrect ? '정답!' : '오답'}`, {
+            question: this.currentQuiz.question,
+            correctAnswer: this.currentQuiz.answer,
+            userAnswer: selectedOption,
+            isCorrect: this.isCorrect
+        });
+        
+        this.updateQuizDisplay();
+    }
+
+    /**
+     * 퀴즈 이벤트 리스너 초기화
+     */
+    initQuizEventListeners() {
+        // 각 선택지 버튼에 이벤트 리스너 추가
+        this.currentQuiz.options.forEach((option, index) => {
+            const buttonEl = document.getElementById(`quizOption${index}`);
+            if (buttonEl) {
+                buttonEl.addEventListener('click', () => {
+                    this.selectAnswer(option);
+                });
+            }
+        });
     }
 
     /**
@@ -236,6 +290,8 @@ class SuumRestBetweenSets {
         this.quizShown = false;
         this.quizAnswered = false;
         this.currentQuiz = null;
+        this.selectedAnswer = null;
+        this.isCorrect = null;
     }
 
     /**
@@ -253,6 +309,8 @@ class SuumRestBetweenSets {
             quizShown: this.quizShown,
             quizAnswered: this.quizAnswered,
             currentQuiz: this.currentQuiz,
+            selectedAnswer: this.selectedAnswer,
+            isCorrect: this.isCorrect,
             remainingTime: this.remainingTime,
             isCompleted: this.remainingTime <= 0
         };
@@ -307,9 +365,11 @@ class SuumRestBetweenSets {
                     <!-- 퀴즈 영역 (초기에는 숨겨짐) -->
                     <div class="rest-quiz-section" id="restQuizSection" style="display: none;">
                         <div class="quiz-card">
-                            <div class="quiz-icon" id="quizIcon">💡</div>
-                            <div class="quiz-content" id="quizContent">
-                                호흡 꿀팁이 곧 표시됩니다...
+                            <div class="quiz-question" id="quizQuestion">
+                                퀴즈가 곧 표시됩니다...
+                            </div>
+                            <div class="quiz-options" id="quizOptions">
+                                <!-- 선택지 버튼들이 동적으로 생성됩니다 -->
                             </div>
                         </div>
                     </div>
@@ -414,16 +474,45 @@ class SuumRestBetweenSets {
      */
     updateQuizDisplay() {
         const quizSection = document.getElementById('restQuizSection');
-        const quizIcon = document.getElementById('quizIcon');
-        const quizContent = document.getElementById('quizContent');
+        const quizQuestion = document.getElementById('quizQuestion');
+        const quizOptions = document.getElementById('quizOptions');
         
         if (quizSection) {
             quizSection.style.display = this.quizShown ? 'block' : 'none';
         }
         
         if (this.quizShown && this.currentQuiz) {
-            if (quizIcon) quizIcon.textContent = this.currentQuiz.icon;
-            if (quizContent) quizContent.textContent = this.currentQuiz.tip;
+            // 질문 표시
+            if (quizQuestion) {
+                quizQuestion.textContent = this.currentQuiz.question;
+            }
+            
+            // 선택지 버튼들 생성
+            if (quizOptions) {
+                quizOptions.innerHTML = '';
+                
+                this.currentQuiz.options.forEach((option, index) => {
+                    const button = document.createElement('button');
+                    button.id = `quizOption${index}`;
+                    button.className = 'quiz-option-btn';
+                    button.textContent = option;
+                    
+                    // 답변 후 상태 표시
+                    if (this.quizAnswered) {
+                        button.disabled = true;
+                        
+                        if (option === this.currentQuiz.answer) {
+                            button.classList.add('correct-answer');
+                        } else if (option === this.selectedAnswer) {
+                            button.classList.add('wrong-answer');
+                        } else {
+                            button.classList.add('disabled-option');
+                        }
+                    }
+                    
+                    quizOptions.appendChild(button);
+                });
+            }
         }
     }
 
