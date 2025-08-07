@@ -857,8 +857,29 @@
 
             <!-- AI Advice Summary -->
             <div class="records-ai-advice card">
-                <h3>AI 조언 요약</h3>
-                <p id="aiAdviceSummary">운동 기록이 쌓이면 AI가 조언을 제공합니다.</p>
+                <div class="ai-advice-header">
+                    <div class="ai-advice-title">
+                        <span class="ai-advice-icon">🤖</span>
+                        <h3>AI 숨트레이너 조언</h3>
+                    </div>
+                    <div class="ai-advice-badge" id="aiAdviceBadge" style="display: none;">
+                        새로운 조언
+                    </div>
+                </div>
+                <div class="ai-advice-content">
+                    <div class="ai-advice-loading" id="aiAdviceLoading" style="display: none;">
+                        <div class="loading-spinner"></div>
+                        <span>AI가 조언을 분석하는 중...</span>
+                    </div>
+                    <div class="ai-advice-text" id="aiAdviceSummary">
+                        날짜를 선택하면 AI 숨트레이너의 개인화된 조언을 확인할 수 있습니다.
+                    </div>
+                    <div class="ai-advice-empty" id="aiAdviceEmpty" style="display: none;">
+                        <div class="empty-state-icon">💭</div>
+                        <p>선택한 날짜에 AI 조언이 없습니다.</p>
+                        <small>운동 완료 후 AI가 분석한 조언을 여기서 확인하세요.</small>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

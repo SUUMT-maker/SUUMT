@@ -739,15 +739,63 @@ async function renderDateSummary(dateStr) {
         }
     }
     
+    // AI 조언 UI 요소들
+    const adviceTextEl = document.getElementById('aiAdviceSummary');
+    const adviceEmptyEl = document.getElementById('aiAdviceEmpty');
+    const adviceLoadingEl = document.getElementById('aiAdviceLoading');
+    const adviceBadgeEl = document.getElementById('aiAdviceBadge');
+    
+    // 로딩 표시
+    if (adviceLoadingEl) {
+        adviceLoadingEl.style.display = 'flex';
+    }
+    if (adviceTextEl) {
+        adviceTextEl.style.display = 'none';
+    }
+    if (adviceEmptyEl) {
+        adviceEmptyEl.style.display = 'none';
+    }
+    if (adviceBadgeEl) {
+        adviceBadgeEl.style.display = 'none';
+    }
+    
     // AI 조언 조회
     const advice = await fetchAiAdviceForDate(dateStr);
-    const adviceEl = document.getElementById('aiAdviceSummary');
     
-    if (adviceEl) {
-        if (!advice) {
-            adviceEl.textContent = '이 날짜에 AI 조언이 없습니다.';
-        } else {
-            adviceEl.textContent = advice;
+    // 로딩 숨김
+    if (adviceLoadingEl) {
+        adviceLoadingEl.style.display = 'none';
+    }
+    
+    if (!advice) {
+        // 조언이 없는 경우
+        if (adviceEmptyEl) {
+            adviceEmptyEl.style.display = 'block';
+        }
+    } else {
+        // 조언이 있는 경우
+        if (adviceTextEl) {
+            adviceTextEl.textContent = advice;
+            adviceTextEl.style.display = 'block';
+            
+            // 긴 텍스트인 경우 스크롤 가능하도록
+            if (advice.length > 200) {
+                adviceTextEl.classList.add('long-advice');
+            } else {
+                adviceTextEl.classList.remove('long-advice');
+            }
+        }
+        
+        // 새로운 조언 배지 표시
+        if (adviceBadgeEl) {
+            adviceBadgeEl.style.display = 'block';
+            
+            // 3초 후 배지 숨김
+            setTimeout(() => {
+                if (adviceBadgeEl) {
+                    adviceBadgeEl.style.display = 'none';
+                }
+            }, 3000);
         }
     }
 }
@@ -799,6 +847,142 @@ async function initRecordsTab() {
     console.log('✅ 기록 탭 초기화 완료');
 }
 
+// 🧪 기록탭 기능 테스트 함수
+async function testRecordsTabFunctionality() {
+    console.log('🧪 기록탭 기능 테스트 시작...');
+    
+    const testResults = {
+        userLogin: false,
+        dataFetch: false,
+        calendarRender: false,
+        dateSelection: false,
+        aiAdvice: false,
+        errors: []
+    };
+    
+    try {
+        // 1. 사용자 로그인 상태 확인
+        if (window.currentUserId) {
+            testResults.userLogin = true;
+            console.log('✅ 사용자 로그인 확인:', window.currentUserId);
+        } else {
+            testResults.errors.push('사용자가 로그인되지 않음');
+            console.warn('⚠️ 사용자가 로그인되지 않음');
+        }
+        
+        // 2. 데이터 조회 테스트
+        const records = await fetchUserExerciseRecords();
+        if (records && Array.isArray(records)) {
+            testResults.dataFetch = true;
+            console.log(`✅ 운동 기록 조회 성공: ${records.length}개`);
+        } else {
+            testResults.errors.push('운동 기록 조회 실패');
+        }
+        
+        // 3. 달력 렌더링 테스트
+        const calendarBody = document.getElementById('calendarBody');
+        if (calendarBody) {
+            testResults.calendarRender = true;
+            console.log('✅ 달력 UI 요소 확인');
+        } else {
+            testResults.errors.push('달력 UI 요소 없음');
+        }
+        
+        // 4. 날짜 선택 기능 테스트
+        if (records.length > 0) {
+            const firstRecord = records[0];
+            const recordDate = new Date(firstRecord.started_at);
+            const dateStr = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}-${String(recordDate.getDate()).padStart(2, '0')}`;
+            
+            const summary = await fetchRecordSummaryForDate(dateStr);
+            if (summary) {
+                testResults.dateSelection = true;
+                console.log(`✅ 날짜별 요약 조회 성공: ${dateStr}`);
+                
+                // 5. AI 조언 테스트
+                const advice = await fetchAiAdviceForDate(dateStr);
+                if (advice) {
+                    testResults.aiAdvice = true;
+                    console.log(`✅ AI 조언 조회 성공: ${advice.substring(0, 50)}...`);
+                } else {
+                    console.log(`ℹ️ ${dateStr} 날짜에 AI 조언 없음`);
+                }
+            }
+        }
+        
+    } catch (error) {
+        testResults.errors.push(`테스트 중 오류: ${error.message}`);
+        console.error('❌ 테스트 중 오류:', error);
+    }
+    
+    // 테스트 결과 요약
+    const passedTests = Object.values(testResults).filter(v => v === true).length;
+    const totalTests = 5;
+    
+    console.log(`🧪 테스트 결과: ${passedTests}/${totalTests} 통과`);
+    console.log('📋 세부 결과:', testResults);
+    
+    if (testResults.errors.length > 0) {
+        console.warn('⚠️ 발견된 문제:', testResults.errors);
+    }
+    
+    return testResults;
+}
+
+// 🔧 기록탭 트러블슈팅 도우미
+function troubleshootRecordsTab() {
+    console.log('🔧 기록탭 트러블슈팅 시작...');
+    
+    const checks = {
+        elements: {},
+        functions: {},
+        data: {}
+    };
+    
+    // UI 요소 확인
+    const requiredElements = [
+        'calendarBody', 'calendarTitle', 'prevMonthBtn', 'nextMonthBtn',
+        'selectedDate', 'recordSummaryList', 'aiAdviceSummary',
+        'aiAdviceLoading', 'aiAdviceEmpty', 'aiAdviceBadge'
+    ];
+    
+    requiredElements.forEach(id => {
+        const element = document.getElementById(id);
+        checks.elements[id] = !!element;
+        if (!element) {
+            console.warn(`⚠️ 요소 누락: #${id}`);
+        }
+    });
+    
+    // 함수 확인
+    const requiredFunctions = [
+        'fetchUserExerciseRecords', 'fetchAiAdviceForDate', 'fetchRecordSummaryForDate',
+        'renderCalendar', 'onDateClick', 'navigateCalendar', 'initRecordsTab'
+    ];
+    
+    requiredFunctions.forEach(funcName => {
+        const func = window[funcName];
+        checks.functions[funcName] = typeof func === 'function';
+        if (typeof func !== 'function') {
+            console.warn(`⚠️ 함수 누락: ${funcName}`);
+        }
+    });
+    
+    // 데이터 확인
+    checks.data.supabaseClient = !!window.supabaseClient;
+    checks.data.currentUserId = !!window.currentUserId;
+    
+    if (!window.supabaseClient) {
+        console.warn('⚠️ Supabase 클라이언트가 초기화되지 않음');
+    }
+    if (!window.currentUserId) {
+        console.warn('⚠️ 현재 사용자 ID가 설정되지 않음');
+    }
+    
+    console.log('🔧 트러블슈팅 결과:', checks);
+    return checks;
+}
+
 // 전역 함수로 노출
 window.showBottomNav = showBottomNav;
 window.hideBottomNav = hideBottomNav;
@@ -812,6 +996,8 @@ window.fetchRecordSummaryForDate = fetchRecordSummaryForDate;
 window.renderCalendar = renderCalendar;
 window.onDateClick = onDateClick;
 window.navigateCalendar = navigateCalendar;
+window.testRecordsTabFunctionality = testRecordsTabFunctionality;
+window.troubleshootRecordsTab = troubleshootRecordsTab;
 
 // 화면 전환 함수
 function showScreen(screenId) {
