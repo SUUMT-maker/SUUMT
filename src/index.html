@@ -108,8 +108,31 @@
         <div id="recordsTab" class="tab-content">
             <div class="records-container">
                 <h2>운동 기록</h2>
-                <div class="records-content">
-                    <p>기록 기능이 준비 중입니다...</p>
+                
+                <!-- 상단 요약 카드 -->
+                <div class="record-summary-overview card">
+                    <h3>이번 주의 당신</h3>
+                    <ul>
+                        <li>운동한 날: <span id="weeklyActiveDays">-</span> / 7일</li>
+                        <li>총 운동 시간: <span id="weeklyTotalTime">-</span></li>
+                        <li>평균 자각 강도: <span id="weeklyAvgEffort">-</span></li>
+                    </ul>
+                </div>
+
+                <!-- 달력 섹션 -->
+                <div class="calendar-section">
+                    <h3>운동 달력</h3>
+                    <div class="records-calendar">
+                        <!-- 달력은 JS로 동적 생성 -->
+                    </div>
+                </div>
+
+                <!-- 세션 카드 컨테이너 -->
+                <div class="sessions-section">
+                    <h3>세션 기록</h3>
+                    <div id="sessionCardsContainer" class="session-cards-container">
+                        <!-- JS로 세션 카드 동적 생성 -->
+                    </div>
                 </div>
             </div>
         </div>
