@@ -2,6 +2,7 @@
 
 const CACHE_NAME = 'suumt-v2-cache-v1';
 const urlsToCache = [
+  '/',
   '/index.html',
   '/src/css/style.css',
   '/src/js/app.js',
@@ -10,8 +11,7 @@ const urlsToCache = [
   '/src/js/home.js',
   '/src/js/records.js',
   '/src/js/utils.js',
-  '/public/manifest.json',
-  'https://unpkg.com/@supabase/supabase-js@2'
+  '/public/manifest.json'
 ];
 
 // Service Worker 설치
