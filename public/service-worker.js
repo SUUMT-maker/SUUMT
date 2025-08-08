@@ -2,7 +2,7 @@
 
 const CACHE_NAME = 'suumt-v2-cache-v1';
 const urlsToCache = [
-  '/src/index.html',
+  '/index.html',
   '/src/css/style.css',
   '/src/js/app.js',
   '/src/js/auth.js',

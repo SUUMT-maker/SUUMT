@@ -8,11 +8,11 @@
     <meta name="theme-color" content="#667eea">
     
     <!-- PWA 설정 -->
-    <link rel="manifest" href="/public/manifest.json">
-    <link rel="apple-touch-icon" href="/public/assets/icon-192x192.png">
+    <link rel="manifest" href="../public/manifest.json">
+    <link rel="apple-touch-icon" href="../public/assets/icon-192x192.png">
     
     <!-- CSS -->
-    <link rel="stylesheet" href="/src/css/style.css">
+    <link rel="stylesheet" href="css/style.css">
     
     <!-- Supabase -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
@@ -286,27 +286,27 @@
     </div>
 
     <!-- JavaScript -->
-    <script src="/src/js/supabase.js"></script>
-    <script src="/src/js/auth.js"></script>
-    <script src="/src/js/utils.js"></script>
-    <script src="/src/js/components/HomeTab.js"></script>
-    <script src="/src/js/components/SuumTrainingSetup.js"></script>
-    <script src="/src/js/components/SuumTrainingStartScreen.js"></script>
-    <script src="/src/js/components/SuumCountdownOverlay.js"></script>
-    <script src="/src/js/components/SuumRestBetweenSets.js"></script>
-    <script src="/src/js/components/SuumTrainingSession.js"></script>
-    <script src="/src/js/components/EffortLevelSurvey.js"></script>
-    <script src="/src/js/home.js"></script>
-    <script src="/src/js/records.js"></script>
-    <script src="/src/js/app.js"></script>
-    <script src="/src/js/integration-check.js"></script>
-    <script src="/src/js/test-flow.js"></script>
+    <script src="js/supabase.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/utils.js"></script>
+    <script src="js/components/HomeTab.js"></script>
+    <script src="js/components/SuumTrainingSetup.js"></script>
+    <script src="js/components/SuumTrainingStartScreen.js"></script>
+    <script src="js/components/SuumCountdownOverlay.js"></script>
+    <script src="js/components/SuumRestBetweenSets.js"></script>
+    <script src="js/components/SuumTrainingSession.js"></script>
+    <script src="js/components/EffortLevelSurvey.js"></script>
+    <script src="js/home.js"></script>
+    <script src="js/records.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/integration-check.js"></script>
+    <script src="js/test-flow.js"></script>
 
     <!-- Service Worker 등록 -->
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/public/service-worker.js')
+                navigator.serviceWorker.register('../public/service-worker.js')
                     .then(registration => {
                         console.log('SW registered: ', registration);
                     })

@@ -1,0 +1,29 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- 배경 원 -->
+  <circle cx="256" cy="256" r="240" fill="url(#grad1)" stroke="#ffffff" stroke-width="8"/>
+  
+  <!-- 호흡 심볼 (폐 모양) -->
+  <g transform="translate(256, 256)">
+    <!-- 왼쪽 폐 -->
+    <ellipse cx="-60" cy="0" rx="40" ry="80" fill="#ffffff" opacity="0.9"/>
+    <ellipse cx="-60" cy="0" rx="25" ry="60" fill="url(#grad1)" opacity="0.7"/>
+    
+    <!-- 오른쪽 폐 -->
+    <ellipse cx="60" cy="0" rx="40" ry="80" fill="#ffffff" opacity="0.9"/>
+    <ellipse cx="60" cy="0" rx="25" ry="60" fill="url(#grad1)" opacity="0.7"/>
+    
+    <!-- 기관 -->
+    <rect x="-15" y="-100" width="30" height="40" fill="#ffffff" opacity="0.8"/>
+    <rect x="-10" y="-100" width="20" height="40" fill="url(#grad1)" opacity="0.6"/>
+  </g>
+  
+  <!-- SUUMT 텍스트 -->
+  <text x="256" y="420" font-family="Arial, sans-serif" font-size="48" font-weight="bold" text-anchor="middle" fill="#ffffff">SUUMT</text>
+</svg>
