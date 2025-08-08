@@ -82,7 +82,7 @@ const SOCIAL_PROOF_REVIEWS = [
         avatar: "김"
     },
     {
-        text: "운동 후 호흡이 훨씬 편해졌습니다. 꾸준히 하니까 확실히 달라져요!",
+        text: "운동 후 호흡이 훨씬 편해졌어요. 꾸준히 하니까 확실히 달라져요!",
         author: "박영희",
         rating: "⭐⭐⭐⭐⭐",
         avatar: "박"

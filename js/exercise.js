@@ -66,7 +66,7 @@ function breathingCycle() {
         }, 3000);
 
     } else if (breathingPhase === 'hold') {
-        circleText.textContent = '잠시 멈추세요';
+        circleText.textContent = '잠시 멈춰보세요';
         circle.className = 'breathing-circle hold';
         
         breathingTimer = setTimeout(() => {
@@ -84,7 +84,7 @@ function breathingCycle() {
         }, 3000);
 
     } else if (breathingPhase === 'exhale-hold') {
-        circleText.textContent = '잠시 멈추세요';
+        circleText.textContent = '잠시 멈춰보세요';
         circle.className = 'breathing-circle exhale-hold';
         
         breathingTimer = setTimeout(() => {

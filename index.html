@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>숨트레이너</title> <!-- v1.0.4 -->
+    <title>숨트 - 호흡 운동 가이드</title> <!-- v1.0.4 -->
     
     <!-- 버전 정보 업데이트 -->
     <meta name="version" content="1.0.4">
@@ -104,9 +104,9 @@
     <meta name="version" content="1.0.2">
     
     <!-- PWA 메타 태그 -->
-    <meta name="description" content="숨트 호흡운동기구 전용 가이드 앱">
-    <meta name="keywords" content="숨트, 호흡운동기구, 호흡근육트레이닝, 폐활량, 호흡근육강화">
-    <meta name="author" content="숨트레이너">
+    <meta name="description" content="숨트와 함께 건강한 호흡 운동을 시작해보세요">
+    <meta name="keywords" content="숨트, 호흡운동, 호흡근육강화, 폐활량, 건강한호흡">
+    <meta name="author" content="숨트">
     <meta name="theme-color" content="#667eea">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -155,7 +155,7 @@
   <!-- 로그인 화면 -->
   <div id="loginScreen" class="login-container">
     <img src="images/suumt-logo.png" class="app-logo" alt="SUUMT Logo"/>
-    <h2>숨트레이너 시작하기</h2>
+    <h2>숨트와 함께 시작해볼까요?</h2>
     <button id="loginKakaoBtn" class="kakao-login-btn">
       <img src="images/suumt-logo.png" class="kakao-icon"/> 카카오로 로그인
     </button>
@@ -188,7 +188,7 @@
                     <!-- 텍스트 영역 -->
                     <div style="flex-direction: column; justify-content: flex-start; align-items: center; gap: 16px; display: flex;">
                         <div style="width: 320px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #1E1E1E; font-size: 28px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; line-height: 32px; word-wrap: break-word;">건강한 호흡, 더 나은 삶</div>
-                        <div style="width: 280px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #626262; font-size: 14px; font-family: 'Space Grotesk', sans-serif; font-weight: 400; line-height: 20px; word-wrap: break-word;">AI가 분석하는 개인 맞춤 호흡 강화!<br>당신만의 스마트 호흡 트레이닝 </div>
+                        <div style="width: 280px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #626262; font-size: 14px; font-family: 'Space Grotesk', sans-serif; font-weight: 400; line-height: 20px; word-wrap: break-word;">AI가 분석해서 맞춤 운동을 제안해드려요<br>나만의 호흡 운동을 시작해보세요</div>
                     </div>
                     
                     <!-- 페이지 인디케이터 -->
@@ -233,7 +233,7 @@
                     <!-- 텍스트 영역 -->
                     <div style="flex-direction: column; justify-content: flex-start; align-items: center; gap: 16px; display: flex;">
                         <div style="width: 320px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #1E1E1E; font-size: 26px; font-family: 'Space Grotesk', sans-serif; font-weight: 700; line-height: 30px; word-wrap: break-word;">숨트와 함께 시작하세요</div>
-                        <div style="width: 280px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #626262; font-size: 14px; font-family: 'Space Grotesk', sans-serif; font-weight: 400; line-height: 20px; word-wrap: break-word;">AI 숨트레이너와 함께<br>나만의 호흡운동을 시작해보세요</div>
+                        <div style="width: 280px; text-align: center; justify-content: center; display: flex; flex-direction: column; color: #626262; font-size: 14px; font-family: 'Space Grotesk', sans-serif; font-weight: 400; line-height: 20px; word-wrap: break-word;">AI가 도와주는<br>나만의 호흡 운동을 시작해보세요</div>
                     </div>
                     
                     <!-- 페이지 인디케이터 -->
@@ -266,8 +266,8 @@
     <!-- 🎯 커스텀 확인 모달 -->
     <div id="confirmModal" class="modal-overlay">
         <div class="modal">
-            <h3>트레이닝 중단</h3>
-            <p>정말 숨트레이닝을 중단하시겠습니까?</p>
+            <h3>운동 중단</h3>
+            <p>정말 운동을 중단할까요?</p>
             <div class="modal-buttons">
                 <button class="modal-btn modal-btn-cancel" onclick="hideModal()">취소</button>
                 <button class="modal-btn modal-btn-confirm" onclick="confirmStop()">중단</button>
@@ -281,7 +281,7 @@
             <div class="badge-popup-icon" id="badgePopupIcon">🏆</div>
             <h3>배지 획득!</h3>
             <div class="badge-name" id="badgePopupName">첫 걸음</div>
-            <p id="badgePopupDescription">첫 번째 호흡 트레이닝을 완료하셨습니다!</p>
+            <p id="badgePopupDescription">첫 번째 호흡 운동을 완료했어요!</p>
             <button class="badge-popup-close" onclick="closeBadgePopup()">확인</button>
         </div>
     </div>
@@ -302,7 +302,7 @@
                             <!-- 🔥 새로운 기능: 메인화면 실시간 현황 -->
                             <div class="live-users-badge" id="mainLiveUsers">
                                 <div class="live-indicator"></div>
-                                <span id="mainLiveUsersText">오늘 247명 트레이닝 중</span>
+                                <span id="mainLiveUsersText">오늘 247명 운동 중</span>
                             </div>
                         </div>
                     </div>
@@ -317,7 +317,7 @@
                             <span class="section-icon">📊</span>
                             <span>오늘의 기록</span>
                         </h2>
-                        <div class="section-subtitle">오늘 하루 나의 호흡 트레이닝 현황</div>
+                        <div class="section-subtitle">오늘 하루 나의 호흡 운동 현황</div>
                     </div>
                 </div>
 
@@ -357,7 +357,7 @@
 
                     <div class="stat-card">
                         <div class="stat-card-header">
-                            <div class="stat-card-title">총 트레이닝</div>
+                            <div class="stat-card-title">총 운동</div>
                             <div class="stat-card-icon">🏆</div>
                         </div>
                         <div class="stat-card-value">
@@ -376,7 +376,7 @@
                             <span class="section-icon">📈</span>
                             <span>주간 활동</span>
                         </h2>
-                        <div class="section-subtitle" id="chartSubtitle">이번 주 트레이닝 성과를 한눈에</div>
+                        <div class="section-subtitle" id="chartSubtitle">이번 주 운동 성과를 한눈에</div>
                     </div>
                 </div>
 
@@ -417,7 +417,7 @@
         <div id="exerciseScreen" class="screen">
             <div class="container">
                 <div id="countdownSection">
-                    <h2>트레이닝을 시작할게요</h2>
+                    <h2>운동을 시작할게요</h2>
                     <div class="countdown" id="countdown">3</div>
                 </div>
 
@@ -454,7 +454,7 @@
                 <div id="restSection" style="display: none;">
                     <h2>휴식 시간</h2>
                     <div class="countdown" id="restCountdown">2:00</div>
-                    <p>다음 세트까지 호흡을 정리하세요</p>
+                    <p>다음 세트까지 호흡을 정리해보세요</p>
                     <div class="progress-numbers" id="restProgressText">1세트 완료</div>
                     
                     <div class="control-buttons" id="restControlButtons" style="display: none;">
@@ -470,7 +470,7 @@
                     
                     <div class="quiz-offer-card">
                         <div class="quiz-offer-title">간단한 퀴즈 풀까요?</div>
-                        <div class="quiz-offer-subtitle" id="quizOfferSubtitle">2문제만! 특별 혜택도 받으세요</div>
+                        <div class="quiz-offer-subtitle" id="quizOfferSubtitle">2문제만! 특별 혜택도 받아보세요</div>
                         
                         <div class="quiz-offer-buttons">
                             <button class="quiz-offer-primary" onclick="startQuiz()" id="quizOfferButton">
@@ -513,7 +513,7 @@
                     
                     <div class="quiz-reward-card">
                         <div class="quiz-reward-title">🎉 퀴즈 완료!</div>
-                        <div class="quiz-reward-subtitle" id="quizRewardSubtitle">2문제 모두 정답! 특별 혜택을 받으세요</div>
+                        <div class="quiz-reward-subtitle" id="quizRewardSubtitle">2문제 모두 정답! 특별 혜택을 받아보세요</div>
                         
                         <div class="quiz-product-showcase">
                             <div class="quiz-product-image">
@@ -547,14 +547,14 @@
         <div id="feedbackScreen" class="screen">
             <div class="container">
                 <div class="celebration">🤖</div>
-                <h2 id="feedbackTitle">지금 호흡하는 느낌이 어떠세요?</h2>
-                <p class="subtitle" id="feedbackDescription">방금 완료한 트레이닝의 강도는 어떠셨나요?</p>
+                <h2 id="feedbackTitle">지금 호흡하는 느낌이 어때요?</h2>
+                <p class="subtitle" id="feedbackDescription">방금 완료한 운동의 강도는 어땠나요?</p>
                 
                 <div class="feedback-options">
                     <button class="feedback-option easy" onclick="selectFeedback('easy')">
                         <div class="feedback-emoji">😌</div>
                         <div class="feedback-text">너무 편해요</div>
-                        <div class="feedback-desc">더 강한 강도로 도전할 수 있어요</div>
+                        <div class="feedback-desc">더 강한 강도로 도전해볼까요?</div>
                     </button>
                     
                     <button class="feedback-option perfect" onclick="selectFeedback('perfect')">
@@ -566,7 +566,7 @@
                     <button class="feedback-option hard" onclick="selectFeedback('hard')">
                         <div class="feedback-emoji">😤</div>
                         <div class="feedback-text">너무 힘들어요</div>
-                        <div class="feedback-desc">강도를 낮춰서 안전하게 운동하고 싶어요</div>
+                        <div class="feedback-desc">강도를 낮춰서 안전하게 운동해보세요</div>
                     </button>
                 </div>
             </div>
@@ -577,7 +577,7 @@
             <div class="container">
                 <div class="result-header">
                     <div class="celebration">🎉</div>
-                    <h2>트레이닝 완료!</h2>
+                    <h2>운동 완료!</h2>
                 </div>
                 
                 <div class="result-stats-grid">
@@ -607,7 +607,7 @@
                     
                     <div class="result-stat-card">
                         <div class="result-stat-header">
-                            <span class="result-stat-title">총 호흡횟수</span>
+                            <span class="result-stat-title">총 호흡 횟수</span>
                             <span class="result-stat-icon">🫁</span>
                         </div>
                         <div class="result-stat-value" id="totalBreathsResult">0회</div>
@@ -665,13 +665,13 @@
                     </div>
 
                     <div class="result-section">
-                        <h4>🏆 AI 숨트레이너 종합평가</h4>
-                        <p id="comprehensiveAdvice">AI 숨트레이너가 당신의 트레이닝을 분석하고 있습니다...</p>
+                        <h4>🏆 AI 종합평가</h4>
+                        <p id="comprehensiveAdvice">AI가 당신의 운동을 분석하고 있어요...</p>
                     </div>
                 </div>
 
                 <div class="control-buttons">
-                    <button class="btn btn-success" onclick="startExercise()">다시 트레이닝하기</button>
+                    <button class="btn btn-success" onclick="startExercise()">다시 운동하기</button>
                     <button class="btn" onclick="goToMain()">메인으로</button>
                 </div>
             </div>
@@ -680,8 +680,8 @@
         <!-- 💪 운동모드 선택 화면 -->
         <div id="workoutModeScreen" class="screen">
             <div class="workout-mode-header">
-                <h2>💪 운동모드 선택</h2>
-                <p>오늘은 어떤 호흡 운동을 하시겠어요?</p>
+                <h2>💪 운동 모드 선택</h2>
+                <p>오늘은 어떤 호흡 운동을 할까요?</p>
             </div>
             
             <div class="workout-modes-container">
@@ -695,7 +695,7 @@
                     </div>
                     <div class="mode-content">
                         <h3>웜업</h3>
-                        <p>가벼운 호흡으로 몸을 깨우고 하루를 준비하세요.</p>
+                        <p>가벼운 호흡으로 몸을 깨우고 하루를 준비해보세요.</p>
                         <div class="mode-pattern">2 - 2 - 2 호흡</div>
                     </div>
                     <div class="mode-status">곧 출시</div>
@@ -711,7 +711,7 @@
                     </div>
                     <div class="mode-content">
                         <h3>숨트레이닝</h3>
-                        <p>호흡근육을 강화하고 폐활량을 늘려보세요.</p>
+                        <p>호흡근을 강화하고 폐활량을 늘려보세요.</p>
                         <div class="mode-pattern">4 - 4 - 4 호흡</div>
                     </div>
                     <div class="mode-status">선택 가능</div>
@@ -727,7 +727,7 @@
                     </div>
                     <div class="mode-content">
                         <h3>잠들기전</h3>
-                        <p>긴장을 풀고 편안한 수면을 위한 호흡법입니다.</p>
+                        <p>긴장을 풀고 편안한 수면을 위한 호흡법이에요.</p>
                         <div class="mode-pattern">4 - 7 - 8 호흡</div>
                     </div>
                     <div class="mode-status">곧 출시</div>
@@ -738,24 +738,24 @@
         <!-- 🫁 숨트레이닝 모드 화면 -->
         <div id="breathTrainingScreen" class="screen">
             <div class="section-header">
-                <h2 class="section-title"><span class="section-icon">🫁</span> 숨트레이닝 모드</h2>
-                <p class="section-subtitle">호흡 가이드, 저항 설정, 트레이닝 시작</p>
+                <h2 class="section-title"><span class="section-icon">🫁</span> 숨트 운동 모드</h2>
+                <p class="section-subtitle">호흡 가이드, 저항 설정, 운동 시작</p>
             </div>
             
             <!-- 가이드 카드 -->
             <div class="guide-card">
                 <div class="guide-header">
-                    <div class="guide-title">📋 숨트 트레이닝 가이드</div>
+                    <div class="guide-title">📋 숨트 운동 가이드</div>
                 </div>
                 
                 <div class="important-notice">
                     <span class="important-icon">💡</span>
-                    <span class="important-text">호흡할 때는 의식적으로 힘을 주어 깊게 호흡하세요!</span>
+                    <span class="important-text">호흡할 때는 의식적으로 힘을 주어 깊게 호흡해보세요!</span>
                 </div>
                 
-                <div class="guide-step">숨트 기구의 다이얼을 돌려 저항 강도를 설정해주세요</div>
-                <div class="guide-step">설정한 저항 강도를 아래 화면에 똑같이 입력하세요</div>
-                <div class="guide-step">복식호흡으로 코가 아닌 입으로만 호흡하세요</div>
+                <div class="guide-step">숨트 기구의 다이얼을 돌려 저항 강도를 설정해보세요</div>
+                <div class="guide-step">설정한 저항 강도를 아래 화면에 똑같이 입력해보세요</div>
+                <div class="guide-step">복식호흡으로 코가 아닌 입으로만 호흡해보세요</div>
             </div>
 
             <!-- 저항 설정 -->
@@ -800,7 +800,7 @@
                 </div>
 
                 <div class="resistance-tip">
-                    💡 처음이시면 1단계 추천 • 적당히 힘든 강도가 최적이에요!
+                    💡 처음이시면 1단계 추천 • 적당히 힘든 강도가 최적이에요
                 </div>
             </div>
 
@@ -808,7 +808,7 @@
             <div class="start-training-section">
                 <button class="start-button" onclick="startExercise()">
                     <span>🚀</span>
-                    <span>트레이닝 시작</span>
+                    <span>운동 시작</span>
                 </button>
             </div>
         </div>
@@ -817,7 +817,7 @@
         <div id="recordsScreen" class="screen">
             <div class="section-header">
                 <h2 class="section-title"><span class="section-icon">📒</span> 운동 기록</h2>
-                <p class="section-subtitle">운동한 날과 AI 조언 요약을 확인하세요</p>
+                <p class="section-subtitle">운동한 날과 AI 조언 요약을 확인해보세요</p>
             </div>
 
             <!-- Calendar -->
@@ -844,7 +844,7 @@
                     </tbody>
                 </table>
                 <div class="calendar-loading" id="calendarLoading" style="display: none;">
-                    📊 운동 기록을 불러오는 중...
+                    📊 운동 기록을 불러오는 중이에요...
                 </div>
             </div>
 
@@ -863,7 +863,7 @@
                 <div class="ai-advice-header">
                     <div class="ai-advice-title">
                         <span class="ai-advice-icon">🤖</span>
-                        <h3>AI 숨트레이너 조언</h3>
+                        <h3>AI 조언</h3>
                     </div>
                     <div class="ai-advice-badge" id="aiAdviceBadge" style="display: none;">
                         새로운 조언
@@ -872,15 +872,15 @@
                 <div class="ai-advice-content">
                     <div class="ai-advice-loading" id="aiAdviceLoading" style="display: none;">
                         <div class="loading-spinner"></div>
-                        <span>AI가 조언을 분석하는 중...</span>
+                        <span>AI가 조언을 분석하는 중이에요...</span>
                     </div>
                     <div class="ai-advice-text" id="aiAdviceSummary">
-                        날짜를 선택하면 AI 숨트레이너의 개인화된 조언을 확인할 수 있습니다.
+                        날짜를 선택하면 AI의 개인화된 조언을 확인할 수 있어요.
                     </div>
                     <div class="ai-advice-empty" id="aiAdviceEmpty" style="display: none;">
                         <div class="empty-state-icon">💭</div>
-                        <p>선택한 날짜에 AI 조언이 없습니다.</p>
-                        <small>운동 완료 후 AI가 분석한 조언을 여기서 확인하세요.</small>
+                        <p>선택한 날짜에 AI 조언이 없어요.</p>
+                        <small>운동 완료 후 AI가 분석한 조언을 여기서 확인해보세요.</small>
                     </div>
                 </div>
             </div>
