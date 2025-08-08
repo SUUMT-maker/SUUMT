@@ -59,12 +59,17 @@ self.addEventListener('activate', event => {
         return self.clients.claim(); // 🔧 즉시 제어권 획득
       })
       .then(() => {
-        // 🔄 모든 클라이언트에 새로고침 신호
+        // 🔄 모든 클라이언트에 버전 업데이트 신호 전송
         return self.clients.matchAll();
       })
       .then(clients => {
         clients.forEach(client => {
-          client.postMessage({ type: 'CACHE_UPDATED', version: VERSION });
+          // 🔍 버전 변경 감지 - 클라이언트의 현재 버전과 비교
+          client.postMessage({ 
+            type: 'CACHE_UPDATED', 
+            version: VERSION,
+            timestamp: Date.now()
+          });
         });
       })
   );
@@ -125,7 +130,10 @@ self.addEventListener('fetch', event => {
 // 🔔 메시지 처리
 self.addEventListener('message', event => {
   if (event.data && event.data.type === 'GET_VERSION') {
-    event.ports[0].postMessage({ version: VERSION });
+    event.ports[0].postMessage({ 
+      version: VERSION,
+      timestamp: Date.now()
+    });
   }
 });
 

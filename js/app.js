@@ -1907,6 +1907,10 @@ function initAutoUpdateSystem() {
   if ('serviceWorker' in navigator) {
     console.log('🔄 Auto-update system initializing...');
     
+    // 현재 앱 버전 가져오기
+    const currentVersion = document.querySelector('meta[name="version"]')?.content || '1.0.4';
+    console.log(`📱 Current app version: ${currentVersion}`);
+    
     navigator.serviceWorker.register('/sw.js')
       .then(registration => {
         console.log('✅ SW: Registered successfully');
@@ -1923,22 +1927,50 @@ function initAutoUpdateSystem() {
         // 📡 SW 메시지 수신
         navigator.serviceWorker.addEventListener('message', event => {
           if (event.data.type === 'CACHE_UPDATED') {
-            console.log(`✨ New version available: ${event.data.version}`);
-            // 🔄 부드러운 새로고침 (사용자가 활성 상태일 때만)
-            if (!document.hidden) {
-              setTimeout(() => {
-                console.log('🔄 Auto-reloading for new version...');
-                window.location.reload();
-              }, 1000);
+            const newVersion = event.data.version;
+            console.log(`✨ New version detected: ${newVersion} (current: ${currentVersion})`);
+            
+            // 🔍 버전 비교 - 버전이 변경된 경우에만 새로고침
+            if (newVersion !== currentVersion) {
+              console.log(`🔄 Version changed from ${currentVersion} to ${newVersion}, auto-reloading...`);
+              // 🔄 부드러운 새로고침 (사용자가 활성 상태일 때만)
+              if (!document.hidden) {
+                setTimeout(() => {
+                  console.log('🔄 Auto-reloading for version update...');
+                  window.location.reload();
+                }, 1000);
+              }
+            } else {
+              console.log('ℹ️ Same version detected, skipping reload');
             }
           }
         });
         
-        // 🔄 컨트롤러 변경 감지 (백업)
+        // 🔄 컨트롤러 변경 감지 (백업) - 버전 확인 후 처리
         navigator.serviceWorker.addEventListener('controllerchange', () => {
-          console.log('🔄 SW: Controller changed, reloading...');
-          if (!document.hidden) {
-            window.location.reload();
+          console.log('🔄 SW: Controller changed, checking version...');
+          
+          // Service Worker에서 버전 정보 요청
+          if (navigator.serviceWorker.controller) {
+            const messageChannel = new MessageChannel();
+            messageChannel.port1.onmessage = event => {
+              const swVersion = event.data.version;
+              console.log(`📱 SW version: ${swVersion}, App version: ${currentVersion}`);
+              
+              if (swVersion !== currentVersion) {
+                console.log('🔄 Version mismatch detected, reloading...');
+                if (!document.hidden) {
+                  window.location.reload();
+                }
+              } else {
+                console.log('ℹ️ Version match, no reload needed');
+              }
+            };
+            
+            navigator.serviceWorker.controller.postMessage(
+              { type: 'GET_VERSION' }, 
+              [messageChannel.port2]
+            );
           }
         });
       })
