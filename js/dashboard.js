@@ -1,16 +1,16 @@
-// 📊 기록탭 개인화 대시보드 통합 코드
+// 📊 기록탭 완전 통합 대시보드 (사용자 디자인 기반)
 
-// 🎨 개인화 대시보드 HTML 구조 (기존 기록탭 상단에 추가)
-const DASHBOARD_HTML = `
-<!-- 📊 개인화 대시보드 섹션 (기록탭 상단에 추가) -->
-<div class="personal-dashboard-section" style="margin-bottom: 24px;">
+// 🎨 완전히 새로운 기록탭 HTML 구조
+const INTEGRATED_RECORDS_HTML = `
+<!-- 📊 나의 호흡 분석 대시보드 -->
+<div class="integrated-records-screen">
     <!-- 대시보드 헤더 -->
     <div class="section-header">
         <h2 class="section-title">
             <span class="section-icon">📊</span>
             <span>나의 호흡 분석</span>
         </h2>
-        <div class="section-subtitle">개인화된 트레이닝 인사이트</div>
+        <div class="section-subtitle">개인화된 트레이닝 인사이트와 상세 기록</div>
     </div>
 
     <!-- 주요 지표 카드 그리드 -->
@@ -60,46 +60,75 @@ const DASHBOARD_HTML = `
         </div>
     </div>
 
-    <!-- 주간 호흡수 트렌드 차트 -->
-    <div class="dashboard-chart-container" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px; overflow: visible;">
+    <!-- 내 호흡 기록 차트 -->
+    <div class="breathing-chart-container" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 style="font-size: 18px; font-weight: 600; color: #1E1E1E; margin: 0;">호흡 트렌드</h3>
-            <select id="dashboardTimeRange" style="padding: 8px 12px; border: 1px solid #E7E7E7; border-radius: 8px; font-size: 14px;">
+            <h3 style="font-size: 18px; font-weight: 600; color: #1E1E1E; margin: 0;">내 호흡 기록</h3>
+            <select id="chartTimeRange" style="padding: 8px 12px; border: 1px solid #E7E7E7; border-radius: 8px; font-size: 14px;">
                 <option value="weekly">최근 7일</option>
                 <option value="monthly">최근 30일</option>
             </select>
         </div>
         
-        <div id="dashboardChart" style="height: 200px; width: 100%;">
+        <!-- X축, Y축 설명 추가 -->
+        <div style="margin-bottom: 12px;">
+            <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">
+                📈 <strong>Y축:</strong> 완료한 호흡 횟수 &nbsp;&nbsp; 📅 <strong>X축:</strong> 날짜
+            </div>
+        </div>
+        
+        <div id="breathingChart" style="height: 200px; width: 100%;">
             <!-- 차트가 여기에 렌더링됩니다 -->
         </div>
     </div>
 
-    <!-- 저항 단계 진행도 -->
-    <div class="dashboard-resistance-container" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px;">
-        <h3 style="font-size: 18px; font-weight: 600; color: #1E1E1E; margin-bottom: 16px;">저항 단계 진행도</h3>
-        <div id="dashboardResistanceChart" style="height: 180px; width: 100%;">
-            <!-- 저항 차트가 여기에 렌더링됩니다 -->
+    <!-- 달력 섹션 -->
+    <div class="calendar-section" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px;">
+        <div class="calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="font-size: 18px; font-weight: 600; color: #1E1E1E; margin: 0;">나의 기록</h3>
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <button id="prevMonthBtn" style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #6b7280; cursor: pointer; transition: all 0.2s ease;">‹</button>
+                <span id="calendarTitle" style="font-size: 16px; font-weight: 600; color: #1f2937; min-width: 120px; text-align: center;">2025년 8월</span>
+                <button id="nextMonthBtn" style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #6b7280; cursor: pointer; transition: all 0.2s ease;">›</button>
+            </div>
         </div>
+        
+        <table class="calendar-table" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+            <thead>
+                <tr>
+                    <th style="padding: 12px 4px; text-align: center; font-size: 12px; font-weight: 600; color: #6b7280; background: #f9fafb; border-bottom: 1px solid #e5e7eb;">일</th>
+                    <th style="padding: 12px 4px; text-align: center; font-size: 12px; font-weight: 600; color: #6b7280; background: #f9fafb; border-bottom: 1px solid #e5e7eb;">월</th>
+                    <th style="padding: 12px 4px; text-align: center; font-size: 12px; font-weight: 600; color: #6b7280; background: #f9fafb; border-bottom: 1px solid #e5e7eb;">화</th>
+                    <th style="padding: 12px 4px; text-align: center; font-size: 12px; font-weight: 600; color: #6b7280; background: #f9fafb; border-bottom: 1px solid #e5e7eb;">수</th>
+                    <th style="padding: 12px 4px; text-align: center; font-size: 12px; font-weight: 600; color: #6b7280; background: #f9fafb; border-bottom: 1px solid #e5e7eb;">목</th>
+                    <th style="padding: 12px 4px; text-align: center; font-size: 12px; font-weight: 600; color: #6b7280; background: #f9fafb; border-bottom: 1px solid #e5e7eb;">금</th>
+                    <th style="padding: 12px 4px; text-align: center; font-size: 12px; font-weight: 600; color: #6b7280; background: #f9fafb; border-bottom: 1px solid #e5e7eb;">토</th>
+                </tr>
+            </thead>
+            <tbody id="calendarBody">
+                <!-- 달력 날짜들이 JavaScript로 동적 생성됨 -->
+            </tbody>
+        </table>
     </div>
 
-    <!-- 피드백 분석 -->
-    <div class="dashboard-feedback-container" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px;">
-        <h3 style="font-size: 18px; font-weight: 600; color: #1E1E1E; margin-bottom: 16px;">사용자 피드백 분석</h3>
-        <div id="dashboardFeedbackChart" style="height: 150px; width: 100%;">
-            <!-- 피드백 차트가 여기에 렌더링됩니다 -->
-        </div>
+    <!-- 선택된 날짜의 기록들 (숨겨져 있다가 표시) -->
+    <div id="selectedDateRecords" style="margin: 0 20px 24px; display: none;">
+        <!-- 해당 날짜의 운동 기록 카드들이 여기에 생성됩니다 -->
     </div>
 </div>
 `;
 
-// 📊 개인화 대시보드 클래스
-class PersonalDashboard {
+// 📊 통합 기록 대시보드 클래스
+class IntegratedRecordsDashboard {
     constructor() {
         this.userId = null;
         this.supabaseClient = null;
-        this.data = [];
+        this.exerciseData = [];
+        this.aiAdviceData = [];
         this.timeRange = 'weekly';
+        this.currentCalendarYear = new Date().getFullYear();
+        this.currentCalendarMonth = new Date().getMonth();
+        this.selectedDate = null;
     }
 
     // 🔧 초기화
@@ -112,12 +141,12 @@ class PersonalDashboard {
             return false;
         }
 
-        console.log('📊 개인화 대시보드 초기화:', this.userId);
+        console.log('📊 통합 기록 대시보드 초기화:', this.userId);
         return true;
     }
 
     // 🗂️ 사용자 운동 데이터 조회
-    async fetchUserData() {
+    async fetchExerciseData() {
         try {
             const { data, error } = await this.supabaseClient
                 .from('exercise_sessions')
@@ -126,23 +155,47 @@ class PersonalDashboard {
                 .order('created_at', { ascending: false });
 
             if (error) {
-                console.error('❌ 데이터 조회 실패:', error);
+                console.error('❌ 운동 데이터 조회 실패:', error);
                 return [];
             }
 
             console.log(`✅ ${data?.length || 0}개의 운동 기록 조회 완료`);
-            this.data = data || [];
-            return this.data;
+            this.exerciseData = data || [];
+            return this.exerciseData;
 
         } catch (err) {
-            console.error('❌ 데이터 조회 중 오류:', err);
+            console.error('❌ 운동 데이터 조회 중 오류:', err);
+            return [];
+        }
+    }
+
+    // 🤖 AI 조언 데이터 조회 (view_user_ai_advice 테이블 사용)
+    async fetchAIAdviceData() {
+        try {
+            const { data, error } = await this.supabaseClient
+                .from('view_user_ai_advice')
+                .select('*')
+                .eq('user_id', this.userId)
+                .order('created_at', { ascending: false });
+
+            if (error) {
+                console.error('❌ AI 조언 데이터 조회 실패:', error);
+                return [];
+            }
+
+            console.log(`✅ ${data?.length || 0}개의 AI 조언 조회 완료`);
+            this.aiAdviceData = data || [];
+            return this.aiAdviceData;
+
+        } catch (err) {
+            console.error('❌ AI 조언 데이터 조회 중 오류:', err);
             return [];
         }
     }
 
     // 📊 주요 통계 계산
     calculateStats() {
-        if (!this.data.length) {
+        if (!this.exerciseData.length) {
             return {
                 totalBreaths: 0,
                 avgBreaths: 0,
@@ -178,7 +231,7 @@ class PersonalDashboard {
         const daysBack = this.timeRange === 'weekly' ? 7 : 30;
         const cutoffDate = new Date(now.getTime() - daysBack * 24 * 60 * 60 * 1000);
         
-        return this.data.filter(item => {
+        return this.exerciseData.filter(item => {
             const itemDate = new Date(item.created_at);
             return itemDate >= cutoffDate;
         }).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
@@ -193,10 +246,9 @@ class PersonalDashboard {
         filtered.forEach(item => {
             const date = new Date(item.created_at).toISOString().split('T')[0];
             if (!dailyData[date]) {
-                dailyData[date] = { breaths: 0, resistance: 0, count: 0 };
+                dailyData[date] = { breaths: 0, count: 0 };
             }
             dailyData[date].breaths += item.completed_breaths || 0;
-            dailyData[date].resistance += ((item.inhale_resistance || 0) + (item.exhale_resistance || 0)) / 2;
             dailyData[date].count += 1;
         });
 
@@ -204,29 +256,10 @@ class PersonalDashboard {
         const chartData = Object.entries(dailyData).map(([date, data]) => ({
             date: new Date(date).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }),
             호흡수: data.breaths,
-            목표: 20,
-            평균저항: Math.round(data.resistance / data.count * 10) / 10
+            목표: 20
         }));
 
         return chartData;
-    }
-
-    // 💭 피드백 분포 데이터
-    prepareFeedbackData() {
-        const filtered = this.getFilteredData();
-        const feedbackCount = filtered.reduce((acc, item) => {
-            const feedback = item.user_feedback;
-            if (feedback) {
-                acc[feedback] = (acc[feedback] || 0) + 1;
-            }
-            return acc;
-        }, {});
-
-        return Object.entries(feedbackCount).map(([feedback, count]) => ({
-            name: feedback === 'easy' ? '쉬움' : feedback === 'perfect' ? '완벽' : '어려움',
-            value: count,
-            color: feedback === 'easy' ? '#60A5FA' : feedback === 'perfect' ? '#22C55E' : '#F59E0B'
-        }));
     }
 
     // 🎨 UI 업데이트
@@ -240,23 +273,19 @@ class PersonalDashboard {
         document.getElementById('dashboardAvgResistance').textContent = stats.avgResistance;
 
         // 차트 렌더링
-        this.renderCharts();
+        this.renderBreathingChart();
+        
+        // 달력 렌더링
+        this.renderCalendar();
     }
 
-    // 📊 간단한 SVG 차트 렌더링
-    renderCharts() {
-        this.renderTrendChart();
-        this.renderResistanceChart();
-        this.renderFeedbackChart();
-    }
-
-    // 📈 트렌드 차트 렌더링 (간단한 SVG)
-    renderTrendChart() {
+    // 📈 내 호흡 기록 차트 렌더링 (X축, Y축 설명 포함)
+    renderBreathingChart() {
         const chartData = this.prepareChartData();
-        const container = document.getElementById('dashboardChart');
+        const container = document.getElementById('breathingChart');
         
         if (!container || !chartData.length) {
-            container.innerHTML = '<div style="text-align: center; color: #666; padding: 60px 0;">데이터가 없습니다</div>';
+            container.innerHTML = '<div style="text-align: center; color: #666; padding: 80px 0;">데이터가 없습니다</div>';
             return;
         }
 
@@ -266,10 +295,12 @@ class PersonalDashboard {
         
         let svg = `<svg width="${width}" height="${height}" style="margin: 20px;">`;
         
-        // 배경 그리드
+        // Y축 라벨
         for (let i = 0; i <= 4; i++) {
             const y = (height - 40) * i / 4 + 20;
+            const value = Math.round((maxBreaths * (4 - i)) / 4);
             svg += `<line x1="40" y1="${y}" x2="${width - 20}" y2="${y}" stroke="#f0f0f0" stroke-width="1"/>`;
+            svg += `<text x="35" y="${y + 4}" text-anchor="end" font-size="11" fill="#9CA3AF">${value}</text>`;
         }
         
         // 데이터 포인트와 선
@@ -284,254 +315,252 @@ class PersonalDashboard {
             else path += ` L ${x} ${y}`;
             
             // 데이터 포인트
-            svg += `<circle cx="${x}" cy="${y}" r="4" fill="#3B82F6"/>`;
+            svg += `<circle cx="${x}" cy="${y}" r="5" fill="#3B82F6" stroke="white" stroke-width="2"/>`;
             
             // 날짜 라벨
-            svg += `<text x="${x}" y="${height - 5}" text-anchor="middle" font-size="12" fill="#666">${d.date}</text>`;
+            svg += `<text x="${x}" y="${height - 5}" text-anchor="middle" font-size="11" fill="#6B7280">${d.date}</text>`;
         });
         
         // 트렌드 라인
-        svg += `<path d="${path}" stroke="#3B82F6" stroke-width="2" fill="none"/>`;
+        svg += `<path d="${path}" stroke="#3B82F6" stroke-width="3" fill="none"/>`;
         
         // 목표 라인
         const targetY = height - 40 - (20 / maxBreaths) * (height - 60);
-        svg += `<line x1="40" y1="${targetY}" x2="${width - 20}" y2="${targetY}" stroke="#F59E0B" stroke-width="2" stroke-dasharray="5,5"/>`;
+        svg += `<line x1="40" y1="${targetY}" x2="${width - 20}" y2="${targetY}" stroke="#22C55E" stroke-width="2" stroke-dasharray="5,5"/>`;
+        
+        // 범례
+        svg += `<text x="${width - 100}" y="35" font-size="11" fill="#3B82F6">● 실제 호흡수</text>`;
+        svg += `<text x="${width - 100}" y="50" font-size="11" fill="#22C55E">--- 목표 (20회)</text>`;
         
         svg += '</svg>';
         container.innerHTML = svg;
     }
 
-    // 💪 저항 차트 렌더링 (적응형 데이터 표시)
-    renderResistanceChart() {
-        const rawChartData = this.prepareChartData();
-        const container = document.getElementById('dashboardResistanceChart');
+    // 📅 달력 렌더링
+    renderCalendar() {
+        // 달력 제목 업데이트
+        const titleEl = document.getElementById('calendarTitle');
+        if (titleEl) {
+            const monthNames = ['1월', '2월', '3월', '4월', '5월', '6월', 
+                               '7월', '8월', '9월', '10월', '11월', '12월'];
+            titleEl.textContent = `${this.currentCalendarYear}년 ${monthNames[this.currentCalendarMonth]}`;
+        }
         
-        if (!container || !rawChartData.length) {
-            container.innerHTML = '<div style="text-align: center; color: #666; padding: 60px 0;">데이터가 없습니다</div>';
+        // 운동한 날짜들 추출
+        const exerciseDates = new Set();
+        this.exerciseData.forEach(record => {
+            const recordDate = new Date(record.created_at);
+            const dateStr = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}-${String(recordDate.getDate()).padStart(2, '0')}`;
+            exerciseDates.add(dateStr);
+        });
+        
+        // 달력 바디 렌더링
+        const calendarBody = document.getElementById('calendarBody');
+        if (!calendarBody) return;
+        
+        const firstDay = new Date(this.currentCalendarYear, this.currentCalendarMonth, 1);
+        const lastDay = new Date(this.currentCalendarYear, this.currentCalendarMonth + 1, 0);
+        const today = new Date();
+        
+        let html = '';
+        let currentWeek = '';
+        
+        // 첫 번째 주 - 빈 칸 채우기
+        for (let i = 0; i < firstDay.getDay(); i++) {
+            currentWeek += '<td class="empty" style="padding: 8px; color: #d1d5db;"></td>';
+        }
+        
+        // 날짜 채우기
+        for (let day = 1; day <= lastDay.getDate(); day++) {
+            const dateStr = `${this.currentCalendarYear}-${String(this.currentCalendarMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const hasRecord = exerciseDates.has(dateStr);
+            const isToday = day === today.getDate() && 
+                           this.currentCalendarMonth === today.getMonth() && 
+                           this.currentCalendarYear === today.getFullYear();
+            const isSelected = this.selectedDate === dateStr;
+            
+            let classes = ['calendar-day'];
+            let styles = ['padding: 8px', 'text-align: center', 'cursor: pointer', 'transition: all 0.2s ease', 'border-radius: 8px'];
+            
+            if (isToday) {
+                classes.push('today');
+                styles.push('background: #ddd6fe', 'color: #6366f1', 'font-weight: 600');
+            }
+            if (hasRecord) {
+                classes.push('has-record');
+                styles.push('background: #3B82F6', 'color: white', 'font-weight: 600'); // 파란색으로 표시
+            }
+            if (isSelected) {
+                classes.push('selected');
+                styles.push('background: #1D4ED8', 'color: white', 'transform: scale(1.05)');
+            }
+            
+            currentWeek += `<td class="${classes.join(' ')}" style="${styles.join('; ')}" data-date="${dateStr}" onclick="window.integratedDashboard.onDateClick('${dateStr}')">${day}</td>`;
+            
+            // 한 주가 완성되면 행 추가
+            if ((firstDay.getDay() + day - 1) % 7 === 6) {
+                html += `<tr>${currentWeek}</tr>`;
+                currentWeek = '';
+            }
+        }
+        
+        // 마지막 주 완성
+        if (currentWeek) {
+            const remainingCells = 7 - ((firstDay.getDay() + lastDay.getDate() - 1) % 7 + 1);
+            for (let i = 0; i < remainingCells; i++) {
+                currentWeek += '<td class="empty" style="padding: 8px; color: #d1d5db;"></td>';
+            }
+            html += `<tr>${currentWeek}</tr>`;
+        }
+        
+        calendarBody.innerHTML = html;
+    }
+
+    // 📅 날짜 클릭 이벤트 처리
+    async onDateClick(dateStr) {
+        console.log(`📅 날짜 클릭: ${dateStr}`);
+        
+        // 이전 선택된 날짜 해제
+        const prevSelected = document.querySelector('.calendar-day.selected');
+        if (prevSelected) {
+            prevSelected.classList.remove('selected');
+            prevSelected.style.background = prevSelected.classList.contains('has-record') ? '#3B82F6' : 
+                                           prevSelected.classList.contains('today') ? '#ddd6fe' : '';
+            prevSelected.style.transform = '';
+        }
+        
+        // 새 날짜 선택
+        const newSelected = document.querySelector(`[data-date="${dateStr}"]`);
+        if (newSelected) {
+            newSelected.classList.add('selected');
+            newSelected.style.background = '#1D4ED8';
+            newSelected.style.color = 'white';
+            newSelected.style.transform = 'scale(1.05)';
+        }
+        
+        this.selectedDate = dateStr;
+        
+        // 해당 날짜의 운동 기록 표시
+        await this.renderSelectedDateRecords(dateStr);
+    }
+
+    // 📋 선택된 날짜의 운동 기록 렌더링
+    async renderSelectedDateRecords(dateStr) {
+        const container = document.getElementById('selectedDateRecords');
+        if (!container) return;
+        
+        // 해당 날짜의 운동 기록들 필터링
+        const dateRecords = this.exerciseData.filter(record => {
+            const recordDate = new Date(record.created_at);
+            const recordDateStr = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}-${String(recordDate.getDate()).padStart(2, '0')}`;
+            return recordDateStr === dateStr;
+        });
+        
+        if (dateRecords.length === 0) {
+            container.style.display = 'none';
             return;
         }
-
-        // 🎯 적응형 데이터 처리: 데이터 양에 따라 표시 방식 조정
-        const chartData = this.optimizeChartData(rawChartData);
-        const width = container.clientWidth;
-        const height = 140;
         
-        // 📱 반응형 차트: 데이터가 많으면 스크롤 가능하게
-        const isScrollable = chartData.length > 10;
-        const minBarWidth = 40; // 최소 막대 너비
-        const barSpacing = 10;
-        const calculatedWidth = isScrollable ? 
-            Math.max(width, chartData.length * (minBarWidth + barSpacing) + 80) : width;
-        const barWidth = Math.max(minBarWidth, (calculatedWidth - 80) / chartData.length - barSpacing);
+        container.style.display = 'block';
         
-        // 스크롤 컨테이너 생성
-        let chartHTML = '';
-        if (isScrollable) {
-            chartHTML += `
-                <div style="overflow-x: auto; padding-bottom: 10px;">
-                    <div style="min-width: ${calculatedWidth}px;">
-            `;
-        }
+        let html = '';
         
-        let svg = `<svg width="${calculatedWidth}" height="${height}">`;
-        
-        // 🌈 진행도에 따른 색상 그라데이션
-        const maxResistance = Math.max(...chartData.map(d => d.평균저항));
-        
-        chartData.forEach((d, i) => {
-            const x = 40 + i * (barWidth + barSpacing);
-            const barHeight = (d.평균저항 / 5) * (height - 60);
-            const y = height - 40 - barHeight;
+        // 각 운동 기록에 대해 카드 생성
+        for (let i = 0; i < dateRecords.length; i++) {
+            const record = dateRecords[i];
             
-            // 📈 진행도에 따른 동적 색상
-            const progressRatio = maxResistance > 0 ? (d.평균저항 / maxResistance) : 0;
-            const color = this.getProgressColor(progressRatio);
+            // 해당 세션의 AI 조언 찾기
+            const aiAdvice = this.aiAdviceData.find(advice => advice.session_id === record.id);
             
-            // 저항 막대 (향상된 스타일)
-            svg += `<rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="${color}" rx="3"/>`;
+            const [year, month, day] = dateStr.split('-');
+            const displayDate = `${year}년 ${month}월 ${day}일`;
+            const sessionNumber = dateRecords.length > 1 ? ` (${i + 1}번째 트레이닝)` : '';
             
-            // 📊 막대 위에 값 표시 (공간이 충분할 때만)
-            if (barWidth > 25 && d.평균저항 > 0) {
-                svg += `<text x="${x + barWidth/2}" y="${y - 8}" text-anchor="middle" font-size="11" font-weight="600" fill="#374151">${d.평균저항}</text>`;
-            }
-            
-            // 📅 날짜 라벨 (적응형 폰트 크기)
-            const fontSize = barWidth > 35 ? 11 : 9;
-            const labelText = this.formatDateLabel(d.date, chartData.length);
-            svg += `<text x="${x + barWidth/2}" y="${height - 8}" text-anchor="middle" font-size="${fontSize}" fill="#6B7280">${labelText}</text>`;
-            
-            // 🏆 최고 기록 표시
-            if (d.평균저항 === maxResistance && maxResistance >= 4) {
-                svg += `<text x="${x + barWidth/2}" y="${y - 25}" text-anchor="middle" font-size="16">👑</text>`;
-            }
-        });
-        
-        // 📏 Y축 가이드라인
-        for (let i = 1; i <= 5; i++) {
-            const y = height - 40 - (i / 5) * (height - 60);
-            svg += `<line x1="35" y1="${y}" x2="${calculatedWidth - 20}" y2="${y}" stroke="#F3F4F6" stroke-width="1"/>`;
-            svg += `<text x="30" y="${y + 4}" text-anchor="end" font-size="10" fill="#9CA3AF">${i}</text>`;
-        }
-        
-        svg += '</svg>';
-        
-        if (isScrollable) {
-            chartHTML += svg + '</div></div>';
-            
-            // 📱 스크롤 힌트 추가
-            chartHTML += `
-                <div style="text-align: center; margin-top: 8px;">
-                    <span style="font-size: 12px; color: #9CA3AF;">← 좌우로 스크롤하여 더 많은 데이터 확인 →</span>
+            html += `
+                <div class="date-record-card" style="background: #E3F2FD; border-radius: 12px; padding: 16px; margin-bottom: 12px; border-left: 4px solid #3B82F6;">
+                    <h4 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1E1E1E;">
+                        ${displayDate}${sessionNumber}
+                    </h4>
+                    
+                    <!-- AI 조언 -->
+                    <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+                        <div style="font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">🤖 AI 숨트레이너 조언</div>
+                        <div style="font-size: 13px; color: #6B7280; line-height: 1.5;">
+                            ${aiAdvice?.comprehensive_advice || '이 세션에 대한 AI 조언이 없습니다.'}
+                        </div>
+                    </div>
+                    
+                    <!-- 운동 상세 정보 -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                        <div style="background: white; padding: 12px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">완료 세트</div>
+                            <div style="font-size: 18px; font-weight: 600; color: #3B82F6;">${record.completed_sets || 0}세트</div>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">완료 호흡</div>
+                            <div style="font-size: 18px; font-weight: 600; color: #22C55E;">${record.completed_breaths || 0}회</div>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">평균 저항</div>
+                            <div style="font-size: 18px; font-weight: 600; color: #F59E0B;">${Math.round(((record.inhale_resistance || 0) + (record.exhale_resistance || 0)) / 2 * 10) / 10}단계</div>
+                        </div>
+                        <div style="background: white; padding: 12px; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">사용자 피드백</div>
+                            <div style="font-size: 14px; font-weight: 600; color: #6366F1;">
+                                ${record.user_feedback === 'easy' ? '😌 쉬움' : 
+                                  record.user_feedback === 'perfect' ? '💪 완벽' : 
+                                  record.user_feedback === 'hard' ? '😤 어려움' : 
+                                  '미기록'}
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
-        } else {
-            chartHTML = svg;
         }
         
-        container.innerHTML = chartHTML;
+        container.innerHTML = html;
     }
 
-    // 🎯 데이터 최적화: 너무 많은 데이터 포인트 처리
-    optimizeChartData(rawData) {
-        if (rawData.length <= 15) {
-            return rawData; // 15개 이하면 모두 표시
-        }
-        
-        if (this.timeRange === 'weekly') {
-            return rawData.slice(-7); // 주간은 최근 7일만
-        }
-        
-        // 30일 이상의 데이터가 있는 경우 주간 평균으로 집계
-        return this.aggregateByWeek(rawData);
-    }
-
-    // 📊 주간 집계 함수
-    aggregateByWeek(dailyData) {
-        const weeks = {};
-        
-        dailyData.forEach(d => {
-            const date = new Date(d.date);
-            const weekStart = new Date(date);
-            weekStart.setDate(date.getDate() - date.getDay());
-            const weekKey = weekStart.toISOString().split('T')[0];
-            
-            if (!weeks[weekKey]) {
-                weeks[weekKey] = { 
-                    resistance: [], 
-                    breaths: [], 
-                    date: weekStart 
-                };
+    // 📅 달력 네비게이션
+    navigateCalendar(direction) {
+        if (direction === 'prev') {
+            if (this.currentCalendarMonth === 0) {
+                this.currentCalendarMonth = 11;
+                this.currentCalendarYear--;
+            } else {
+                this.currentCalendarMonth--;
             }
-            
-            weeks[weekKey].resistance.push(d.평균저항);
-            weeks[weekKey].breaths.push(d.호흡수);
-        });
-        
-        return Object.entries(weeks).map(([weekKey, data]) => ({
-            date: `${data.date.getMonth() + 1}/${data.date.getDate()}주`,
-            평균저항: Math.round(data.resistance.reduce((a, b) => a + b, 0) / data.resistance.length * 10) / 10,
-            호흡수: Math.round(data.breaths.reduce((a, b) => a + b, 0) / data.breaths.length),
-            목표: 20
-        })).slice(-8); // 최근 8주
-    }
-
-    // 🌈 진행도 색상 계산
-    getProgressColor(progressRatio) {
-        if (progressRatio < 0.3) return '#3B82F6'; // 초급 - 파란색
-        if (progressRatio < 0.6) return '#22C55E'; // 중급 - 녹색  
-        if (progressRatio < 0.8) return '#F59E0B'; // 고급 - 노란색
-        return '#EF4444'; // 전문가 - 빨간색
-    }
-
-    // 📅 날짜 라벨 포맷팅 (데이터 양에 따라 조정)
-    formatDateLabel(dateStr, dataCount) {
-        if (dataCount > 20) {
-            // 데이터가 많으면 간단하게
-            return dateStr.split('/')[1] || dateStr;
+        } else if (direction === 'next') {
+            if (this.currentCalendarMonth === 11) {
+                this.currentCalendarMonth = 0;
+                this.currentCalendarYear++;
+            } else {
+                this.currentCalendarMonth++;
+            }
         }
-        return dateStr;
-    }
-
-    // 💭 피드백 차트 렌더링 (도넛 차트)
-    renderFeedbackChart() {
-        const feedbackData = this.prepareFeedbackData();
-        const container = document.getElementById('dashboardFeedbackChart');
         
-        if (!container || !feedbackData.length) {
-            container.innerHTML = '<div style="text-align: center; color: #666; padding: 40px 0;">피드백 데이터가 없습니다</div>';
-            return;
-        }
-
-        const total = feedbackData.reduce((sum, d) => sum + d.value, 0);
-        const centerX = 75;
-        const centerY = 75;
-        const radius = 50;
-        
-        let svg = `<svg width="150" height="150">`;
-        let startAngle = 0;
-        
-        feedbackData.forEach(d => {
-            const angle = (d.value / total) * 2 * Math.PI;
-            const endAngle = startAngle + angle;
-            
-            const x1 = centerX + radius * Math.cos(startAngle);
-            const y1 = centerY + radius * Math.sin(startAngle);
-            const x2 = centerX + radius * Math.cos(endAngle);
-            const y2 = centerY + radius * Math.sin(endAngle);
-            
-            const largeArcFlag = angle > Math.PI ? 1 : 0;
-            
-            const pathData = [
-                `M ${centerX} ${centerY}`,
-                `L ${x1} ${y1}`,
-                `A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}`,
-                'Z'
-            ].join(' ');
-            
-            svg += `<path d="${pathData}" fill="${d.color}"/>`;
-            startAngle = endAngle;
-        });
-        
-        svg += '</svg>';
-        
-        // 범례 추가
-        let legend = '<div style="margin-left: 160px; margin-top: -150px;">';
-        feedbackData.forEach(d => {
-            const percent = Math.round((d.value / total) * 100);
-            legend += `
-                <div style="display: flex; align-items: center; margin-bottom: 8px;">
-                    <div style="width: 12px; height: 12px; background: ${d.color}; border-radius: 2px; margin-right: 8px;"></div>
-                    <span style="font-size: 14px; color: #666;">${d.name} ${percent}%</span>
-                </div>
-            `;
-        });
-        legend += '</div>';
-        
-        container.innerHTML = svg + legend;
+        this.selectedDate = null; // 선택 초기화
+        document.getElementById('selectedDateRecords').style.display = 'none';
+        this.renderCalendar();
     }
 }
 
-// 🔧 기존 기록탭 초기화 함수 확장
-async function initRecordsTabWithDashboard() {
-    console.log('📊 대시보드 통합 기록탭 초기화 시작...');
+// 🚀 통합 기록 대시보드 초기화 함수
+async function initIntegratedRecordsDashboard() {
+    console.log('📊 통합 기록 대시보드 초기화 시작...');
     
-    // 1. 대시보드 HTML 추가
+    // 1. 기존 기록탭 내용 완전 교체
     const recordsScreen = document.getElementById('recordsScreen');
     if (!recordsScreen) {
         console.error('❌ recordsScreen을 찾을 수 없습니다.');
         return;
     }
 
-    // 기존 섹션 헤더 다음에 대시보드 추가
-    const existingHeader = recordsScreen.querySelector('.section-header');
-    if (existingHeader) {
-        existingHeader.insertAdjacentHTML('afterend', DASHBOARD_HTML);
-    } else {
-        recordsScreen.insertAdjacentHTML('afterbegin', DASHBOARD_HTML);
-    }
+    // 기존 내용 완전 교체
+    recordsScreen.innerHTML = INTEGRATED_RECORDS_HTML;
 
-    // 2. 개인화 대시보드 초기화
-    const dashboard = new PersonalDashboard();
+    // 2. 통합 대시보드 초기화
+    const dashboard = new IntegratedRecordsDashboard();
     const initialized = await dashboard.init();
     
     if (!initialized) {
@@ -539,73 +568,58 @@ async function initRecordsTabWithDashboard() {
         return;
     }
 
-    // 3. 데이터 로드 및 렌더링
-    await dashboard.fetchUserData();
+    // 3. 데이터 로드
+    await dashboard.fetchExerciseData();
+    await dashboard.fetchAIAdviceData();
+    
+    // 4. UI 업데이트
     dashboard.updateUI();
 
-    // 4. 시간 범위 변경 이벤트
-    const timeRangeSelect = document.getElementById('dashboardTimeRange');
+    // 5. 이벤트 리스너 설정
+    const timeRangeSelect = document.getElementById('chartTimeRange');
     if (timeRangeSelect) {
-        timeRangeSelect.addEventListener('change', async (e) => {
-            const target = e.target;
-            dashboard.timeRange = target.value;
+        timeRangeSelect.addEventListener('change', (e) => {
+            dashboard.timeRange = e.target.value;
             dashboard.updateUI();
         });
     }
 
-    // 5. 기존 달력 기능 초기화
-    await initOriginalRecordsTab();
-    
-    console.log('✅ 대시보드 통합 기록탭 초기화 완료');
-}
-
-// 🔧 기존 기록탭 초기화 (이름 변경)
-async function initOriginalRecordsTab() {
-    // 기존 initRecordsTab 함수 내용
-    showBottomNav();
-    
     const prevBtn = document.getElementById('prevMonthBtn');
     const nextBtn = document.getElementById('nextMonthBtn');
     
-    if (prevBtn && !prevBtn.hasAttribute('data-event-added')) {
-        prevBtn.addEventListener('click', () => navigateCalendar('prev'));
-        prevBtn.setAttribute('data-event-added', 'true');
+    if (prevBtn) {
+        prevBtn.addEventListener('click', () => dashboard.navigateCalendar('prev'));
     }
     
-    if (nextBtn && !nextBtn.hasAttribute('data-event-added')) {
-        nextBtn.addEventListener('click', () => navigateCalendar('next'));
-        nextBtn.setAttribute('data-event-added', 'true');
+    if (nextBtn) {
+        nextBtn.addEventListener('click', () => dashboard.navigateCalendar('next'));
     }
+
+    // 6. 전역 접근 가능하도록 설정
+    window.integratedDashboard = dashboard;
     
-    await renderCalendar();
+    console.log('✅ 통합 기록 대시보드 초기화 완료');
 }
 
-// 🎨 대시보드용 추가 CSS
-const DASHBOARD_CSS = `
+// 🎨 추가 CSS
+const INTEGRATED_CSS = `
 <style>
-.dashboard-stat-card {
-    transition: all 0.3s ease;
-    border-left: 4px solid #3B82F6;
+.calendar-day:hover {
+    background: #E3F2FD !important;
+    transform: scale(1.05) !important;
 }
 
-.dashboard-stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+.has-record:hover {
+    background: #1D4ED8 !important;
 }
 
-.dashboard-chart-container:hover {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
+.date-record-card {
+    animation: slideIn 0.3s ease-out;
 }
 
-.dashboard-resistance-container:hover {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
-}
-
-.dashboard-feedback-container:hover {
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    transform: translateY(-1px);
+@keyframes slideIn {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
 }
 
 @media (max-width: 480px) {
@@ -614,21 +628,24 @@ const DASHBOARD_CSS = `
         padding: 0 16px !important;
     }
     
-    .dashboard-chart-container,
-    .dashboard-resistance-container,
-    .dashboard-feedback-container {
+    .breathing-chart-container,
+    .calendar-section {
         margin: 0 16px 24px !important;
         padding: 16px !important;
+    }
+    
+    #selectedDateRecords {
+        margin: 0 16px 24px !important;
     }
 }
 </style>
 `;
 
-// 🚀 CSS 추가
-document.head.insertAdjacentHTML('beforeend', DASHBOARD_CSS);
+// CSS 추가
+document.head.insertAdjacentHTML('beforeend', INTEGRATED_CSS);
 
-// 🔧 전역 함수 등록 (기존 함수 대체)
-window.initRecordsTab = initRecordsTabWithDashboard;
-window.onRecordsTabClick = initRecordsTabWithDashboard;
+// 🔧 전역 함수 등록 (기존 함수들 완전 교체)
+window.initRecordsTab = initIntegratedRecordsDashboard;
+window.onRecordsTabClick = initIntegratedRecordsDashboard;
 
-console.log('📊 개인화 대시보드 통합 모듈 로드 완료');
+console.log('📊 통합 기록 대시보드 모듈 로드 완료');
