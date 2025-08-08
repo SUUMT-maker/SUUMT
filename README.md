@@ -51,4 +51,4 @@ supabase-mcp-config/
 
 ## 📄 라이선스
 
-MIT License 
+MIT License # Deployment trigger Fri Aug  8 18:21:52 KST 2025
