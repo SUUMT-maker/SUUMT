@@ -46,7 +46,7 @@
         },
         {
           "key": "X-Version",
-          "value": "1.0.2"
+          "value": "1.0.4"
         }
       ]
     },
@@ -55,7 +55,7 @@
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
+          "value": "public, max-age=0, must-revalidate"
         },
         {
           "key": "Service-Worker-Allowed",
@@ -63,7 +63,7 @@
         },
         {
           "key": "X-Version",
-          "value": "1.0.2"
+          "value": "1.0.4"
         }
       ]
     },
@@ -71,12 +71,12 @@
       "source": "/manifest.json",
       "headers": [
         {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate"
+          "key": "Cache-Control", 
+          "value": "public, max-age=0, must-revalidate"
         },
         {
           "key": "X-Version",
-          "value": "1.0.2"
+          "value": "1.0.4"
         }
       ]
     },

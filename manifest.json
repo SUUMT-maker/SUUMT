@@ -1,9 +1,9 @@
 {
   "name": "숨트레이너 - AI 폐활량 운동",
   "short_name": "숨트레이너",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "AI와 함께하는 스마트 호흡운동 트레이닝 앱",
-  "start_url": "/?v=1.0.3",
+  "start_url": "/?v=1.0.4",
   "display": "standalone",
   "background_color": "#F9FAFC",
   "theme_color": "#667eea",
@@ -64,7 +64,7 @@
       "name": "트레이닝 시작",
       "short_name": "트레이닝",
       "description": "바로 호흡 트레이닝 시작하기",
-      "url": "/?action=start-training&v=1.0.3",
+      "url": "/?action=start-training&v=1.0.4",
       "icons": [
         {
           "src": "/icons/icon-192x192.png",

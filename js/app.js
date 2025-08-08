@@ -1902,16 +1902,55 @@ window.onload = function() {
     initializeOnboardingSwipe();
 };
 
-// Service Worker 등록
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', function() {
-        navigator.serviceWorker.register('/sw.js')
-            .then(function(registration) {
-                console.log('✅ ServiceWorker 등록 성공:', registration.scope);
-                registration.update();
-            })
-            .catch(function(error) {
-                console.log('❌ ServiceWorker 등록 실패:', error);
-            });
-    });
+// 🔄 자동 업데이트 시스템 초기화
+function initAutoUpdateSystem() {
+  if ('serviceWorker' in navigator) {
+    console.log('🔄 Auto-update system initializing...');
+    
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('✅ SW: Registered successfully');
+        
+        // 🔄 즉시 업데이트 확인
+        registration.update();
+        
+        // ⏰ 주기적 업데이트 확인 (5분마다)
+        setInterval(() => {
+          console.log('🔄 Checking for updates...');
+          registration.update();
+        }, 5 * 60 * 1000);
+        
+        // 📡 SW 메시지 수신
+        navigator.serviceWorker.addEventListener('message', event => {
+          if (event.data.type === 'CACHE_UPDATED') {
+            console.log(`✨ New version available: ${event.data.version}`);
+            // 🔄 부드러운 새로고침 (사용자가 활성 상태일 때만)
+            if (!document.hidden) {
+              setTimeout(() => {
+                console.log('🔄 Auto-reloading for new version...');
+                window.location.reload();
+              }, 1000);
+            }
+          }
+        });
+        
+        // 🔄 컨트롤러 변경 감지 (백업)
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          console.log('🔄 SW: Controller changed, reloading...');
+          if (!document.hidden) {
+            window.location.reload();
+          }
+        });
+      })
+      .catch(error => {
+        console.error('❌ SW: Registration failed', error);
+      });
+  }
+}
+
+// 🚀 DOM 로드 시 자동 업데이트 시스템 시작
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAutoUpdateSystem);
+} else {
+  initAutoUpdateSystem();
 }
