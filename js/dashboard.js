@@ -70,12 +70,7 @@ const INTEGRATED_RECORDS_HTML = `
             </select>
         </div>
         
-        <!-- X축, Y축 설명 추가 -->
-        <div style="margin-bottom: 12px;">
-            <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">
-                📈 <strong>Y축:</strong> 완료한 호흡 횟수 &nbsp;&nbsp; 📅 <strong>X축:</strong> 날짜
-            </div>
-        </div>
+
         
         <div id="breathingChart" style="height: 200px; width: 100%;">
             <!-- 차트가 여기에 렌더링됩니다 -->
@@ -145,7 +140,21 @@ class IntegratedRecordsDashboard {
         return true;
     }
 
-    // 🗂️ 사용자 운동 데이터 조회
+    // 🕐 UTC를 KST로 변환하는 유틸리티 함수
+    utcToKst(utcDateString) {
+        const utcDate = new Date(utcDateString);
+        const kstDate = new Date(utcDate.getTime() + 9 * 60 * 60 * 1000); // UTC + 9시간
+        return kstDate;
+    }
+
+    // 🗓️ KST 기준 날짜 문자열 생성
+    getKstDateString(utcDateString) {
+        const kstDate = this.utcToKst(utcDateString);
+        const year = kstDate.getFullYear();
+        const month = String(kstDate.getMonth() + 1).padStart(2, '0');
+        const day = String(kstDate.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
     async fetchExerciseData() {
         try {
             const { data, error } = await this.supabaseClient
@@ -237,19 +246,19 @@ class IntegratedRecordsDashboard {
         }).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     }
 
-    // 📈 차트 데이터 준비
+    // 📈 차트 데이터 준비 (KST 기준)
     prepareChartData() {
         const filtered = this.getFilteredData();
         
-        // 일별로 그룹화
+        // 일별로 그룹화 (KST 기준)
         const dailyData = {};
         filtered.forEach(item => {
-            const date = new Date(item.created_at).toISOString().split('T')[0];
-            if (!dailyData[date]) {
-                dailyData[date] = { breaths: 0, count: 0 };
+            const kstDateStr = this.getKstDateString(item.created_at);
+            if (!dailyData[kstDateStr]) {
+                dailyData[kstDateStr] = { breaths: 0, count: 0 };
             }
-            dailyData[date].breaths += item.completed_breaths || 0;
-            dailyData[date].count += 1;
+            dailyData[kstDateStr].breaths += item.completed_breaths || 0;
+            dailyData[kstDateStr].count += 1;
         });
 
         // 차트용 데이터 변환
@@ -346,12 +355,11 @@ class IntegratedRecordsDashboard {
             titleEl.textContent = `${this.currentCalendarYear}년 ${monthNames[this.currentCalendarMonth]}`;
         }
         
-        // 운동한 날짜들 추출
+        // 운동한 날짜들 추출 (KST 기준으로 변환)
         const exerciseDates = new Set();
         this.exerciseData.forEach(record => {
-            const recordDate = new Date(record.created_at);
-            const dateStr = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}-${String(recordDate.getDate()).padStart(2, '0')}`;
-            exerciseDates.add(dateStr);
+            const kstDateStr = this.getKstDateString(record.created_at);
+            exerciseDates.add(kstDateStr);
         });
         
         // 달력 바디 렌더링
@@ -449,12 +457,11 @@ class IntegratedRecordsDashboard {
         const container = document.getElementById('selectedDateRecords');
         if (!container) return;
         
-        // 해당 날짜의 운동 기록들 필터링
+        // 해당 날짜의 운동 기록들 필터링 (KST 기준)
         const dateRecords = this.exerciseData.filter(record => {
-            const recordDate = new Date(record.created_at);
-            const recordDateStr = `${recordDate.getFullYear()}-${String(recordDate.getMonth() + 1).padStart(2, '0')}-${String(recordDate.getDate()).padStart(2, '0')}`;
-            return recordDateStr === dateStr;
-        });
+            const kstDateStr = this.getKstDateString(record.created_at);
+            return kstDateStr === dateStr;
+        }).sort((a, b) => new Date(a.created_at) - new Date(b.created_at)); // 시간 순 정렬 (오래된 것부터)
         
         if (dateRecords.length === 0) {
             container.style.display = 'none';
@@ -476,10 +483,19 @@ class IntegratedRecordsDashboard {
             const displayDate = `${year}년 ${month}월 ${day}일`;
             const sessionNumber = dateRecords.length > 1 ? ` (${i + 1}번째 트레이닝)` : '';
             
+            // KST 기준 시간 표시
+            const kstDate = this.utcToKst(record.created_at);
+            const timeStr = kstDate.toLocaleTimeString('ko-KR', { 
+                hour: '2-digit', 
+                minute: '2-digit',
+                hour12: false 
+            });
+            
             html += `
                 <div class="date-record-card" style="background: #E3F2FD; border-radius: 12px; padding: 16px; margin-bottom: 12px; border-left: 4px solid #3B82F6;">
                     <h4 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1E1E1E;">
-                        ${displayDate}${sessionNumber}
+                        ${displayDate}${sessionNumber} 
+                        <span style="font-size: 12px; color: #6B7280; font-weight: 400;">${timeStr} 운동</span>
                     </h4>
                     
                     <!-- AI 조언 -->
