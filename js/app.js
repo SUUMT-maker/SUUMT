@@ -2,9 +2,13 @@
 
 // 1️⃣ 카카오 로그인 함수
 async function loginWithKakao() {
+  // 개발 환경에서는 로컬 서버로 리다이렉트
+  const isDevelopment = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+  const redirectUrl = isDevelopment ? 'http://localhost:8080' : window.location.origin;
+  
   const { data, error } = await window.supabaseClient.auth.signInWithOAuth({
     provider: 'kakao',
-    options: { redirectTo: window.location.origin }
+    options: { redirectTo: redirectUrl }
   });
   if (error) console.error('❌ Kakao login failed:', error);
 }
