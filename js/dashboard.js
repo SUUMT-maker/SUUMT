@@ -63,7 +63,7 @@ const DASHBOARD_HTML = `
     <!-- 주간 호흡수 트렌드 차트 -->
     <div class="dashboard-chart-container" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px; overflow: visible;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 style="font-size: 18px; font-weight: 600; color: #1E1E1E; margin: 0;">주간 호흡 트렌드</h3>
+            <h3 style="font-size: 18px; font-weight: 600; color: #1E1E1E; margin: 0;">호흡 트렌드</h3>
             <select id="dashboardTimeRange" style="padding: 8px 12px; border: 1px solid #E7E7E7; border-radius: 8px; font-size: 14px;">
                 <option value="weekly">최근 7일</option>
                 <option value="monthly">최근 30일</option>
