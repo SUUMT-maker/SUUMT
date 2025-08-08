@@ -1,0 +1,43 @@
+{
+  "chatgpt": {
+    "enabled": true,
+    "autoSync": true,
+    "includeFiles": true,
+    "contextWindow": 8192,
+    "model": "gpt-4"
+  },
+  "project": {
+    "name": "breath-trainer-main",
+    "type": "web",
+    "framework": "vanilla-js",
+    "description": "숨트레이너 - 호흡 운동 웹 애플리케이션"
+  },
+  "editor": {
+    "autoSave": true,
+    "formatOnSave": true,
+    "tabSize": 2,
+    "insertSpaces": true,
+    "wordWrap": "on"
+  },
+  "files": {
+    "include": [
+      "*.html",
+      "*.js",
+      "*.css",
+      "*.json",
+      "*.md"
+    ],
+    "exclude": [
+      "node_modules/**",
+      ".git/**",
+      "*.log",
+      ".DS_Store"
+    ]
+  },
+  "ai": {
+    "codeCompletion": true,
+    "inlineSuggestions": true,
+    "chatHistory": true,
+    "contextAware": true
+  }
+}
