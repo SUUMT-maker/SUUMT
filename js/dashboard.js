@@ -301,41 +301,155 @@ class PersonalDashboard {
         container.innerHTML = svg;
     }
 
-    // 💪 저항 차트 렌더링
+    // 💪 저항 차트 렌더링 (적응형 데이터 표시)
     renderResistanceChart() {
-        const chartData = this.prepareChartData();
+        const rawChartData = this.prepareChartData();
         const container = document.getElementById('dashboardResistanceChart');
         
-        if (!container || !chartData.length) {
+        if (!container || !rawChartData.length) {
             container.innerHTML = '<div style="text-align: center; color: #666; padding: 60px 0;">데이터가 없습니다</div>';
             return;
         }
 
+        // 🎯 적응형 데이터 처리: 데이터 양에 따라 표시 방식 조정
+        const chartData = this.optimizeChartData(rawChartData);
         const width = container.clientWidth;
         const height = 140;
-        const barWidth = (width - 80) / chartData.length - 10;
         
-        let svg = `<svg width="${width}" height="${height}">`;
+        // 📱 반응형 차트: 데이터가 많으면 스크롤 가능하게
+        const isScrollable = chartData.length > 10;
+        const minBarWidth = 40; // 최소 막대 너비
+        const barSpacing = 10;
+        const calculatedWidth = isScrollable ? 
+            Math.max(width, chartData.length * (minBarWidth + barSpacing) + 80) : width;
+        const barWidth = Math.max(minBarWidth, (calculatedWidth - 80) / chartData.length - barSpacing);
+        
+        // 스크롤 컨테이너 생성
+        let chartHTML = '';
+        if (isScrollable) {
+            chartHTML += `
+                <div style="overflow-x: auto; padding-bottom: 10px;">
+                    <div style="min-width: ${calculatedWidth}px;">
+            `;
+        }
+        
+        let svg = `<svg width="${calculatedWidth}" height="${height}">`;
+        
+        // 🌈 진행도에 따른 색상 그라데이션
+        const maxResistance = Math.max(...chartData.map(d => d.평균저항));
         
         chartData.forEach((d, i) => {
-            const x = 40 + i * (barWidth + 10);
+            const x = 40 + i * (barWidth + barSpacing);
             const barHeight = (d.평균저항 / 5) * (height - 60);
             const y = height - 40 - barHeight;
             
-            // 저항 막대
-            svg += `<rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="#22C55E" rx="2"/>`;
+            // 📈 진행도에 따른 동적 색상
+            const progressRatio = maxResistance > 0 ? (d.평균저항 / maxResistance) : 0;
+            const color = this.getProgressColor(progressRatio);
             
-            // 날짜 라벨
-            svg += `<text x="${x + barWidth/2}" y="${height - 5}" text-anchor="middle" font-size="10" fill="#666">${d.date}</text>`;
+            // 저항 막대 (향상된 스타일)
+            svg += `<rect x="${x}" y="${y}" width="${barWidth}" height="${barHeight}" fill="${color}" rx="3"/>`;
             
-            // 값 라벨
-            if (d.평균저항 > 0) {
-                svg += `<text x="${x + barWidth/2}" y="${y - 5}" text-anchor="middle" font-size="10" fill="#666">${d.평균저항}</text>`;
+            // 📊 막대 위에 값 표시 (공간이 충분할 때만)
+            if (barWidth > 25 && d.평균저항 > 0) {
+                svg += `<text x="${x + barWidth/2}" y="${y - 8}" text-anchor="middle" font-size="11" font-weight="600" fill="#374151">${d.평균저항}</text>`;
+            }
+            
+            // 📅 날짜 라벨 (적응형 폰트 크기)
+            const fontSize = barWidth > 35 ? 11 : 9;
+            const labelText = this.formatDateLabel(d.date, chartData.length);
+            svg += `<text x="${x + barWidth/2}" y="${height - 8}" text-anchor="middle" font-size="${fontSize}" fill="#6B7280">${labelText}</text>`;
+            
+            // 🏆 최고 기록 표시
+            if (d.평균저항 === maxResistance && maxResistance >= 4) {
+                svg += `<text x="${x + barWidth/2}" y="${y - 25}" text-anchor="middle" font-size="16">👑</text>`;
             }
         });
         
+        // 📏 Y축 가이드라인
+        for (let i = 1; i <= 5; i++) {
+            const y = height - 40 - (i / 5) * (height - 60);
+            svg += `<line x1="35" y1="${y}" x2="${calculatedWidth - 20}" y2="${y}" stroke="#F3F4F6" stroke-width="1"/>`;
+            svg += `<text x="30" y="${y + 4}" text-anchor="end" font-size="10" fill="#9CA3AF">${i}</text>`;
+        }
+        
         svg += '</svg>';
-        container.innerHTML = svg;
+        
+        if (isScrollable) {
+            chartHTML += svg + '</div></div>';
+            
+            // 📱 스크롤 힌트 추가
+            chartHTML += `
+                <div style="text-align: center; margin-top: 8px;">
+                    <span style="font-size: 12px; color: #9CA3AF;">← 좌우로 스크롤하여 더 많은 데이터 확인 →</span>
+                </div>
+            `;
+        } else {
+            chartHTML = svg;
+        }
+        
+        container.innerHTML = chartHTML;
+    }
+
+    // 🎯 데이터 최적화: 너무 많은 데이터 포인트 처리
+    optimizeChartData(rawData) {
+        if (rawData.length <= 15) {
+            return rawData; // 15개 이하면 모두 표시
+        }
+        
+        if (this.timeRange === 'weekly') {
+            return rawData.slice(-7); // 주간은 최근 7일만
+        }
+        
+        // 30일 이상의 데이터가 있는 경우 주간 평균으로 집계
+        return this.aggregateByWeek(rawData);
+    }
+
+    // 📊 주간 집계 함수
+    aggregateByWeek(dailyData) {
+        const weeks = {};
+        
+        dailyData.forEach(d => {
+            const date = new Date(d.date);
+            const weekStart = new Date(date);
+            weekStart.setDate(date.getDate() - date.getDay());
+            const weekKey = weekStart.toISOString().split('T')[0];
+            
+            if (!weeks[weekKey]) {
+                weeks[weekKey] = { 
+                    resistance: [], 
+                    breaths: [], 
+                    date: weekStart 
+                };
+            }
+            
+            weeks[weekKey].resistance.push(d.평균저항);
+            weeks[weekKey].breaths.push(d.호흡수);
+        });
+        
+        return Object.entries(weeks).map(([weekKey, data]) => ({
+            date: `${data.date.getMonth() + 1}/${data.date.getDate()}주`,
+            평균저항: Math.round(data.resistance.reduce((a, b) => a + b, 0) / data.resistance.length * 10) / 10,
+            호흡수: Math.round(data.breaths.reduce((a, b) => a + b, 0) / data.breaths.length),
+            목표: 20
+        })).slice(-8); // 최근 8주
+    }
+
+    // 🌈 진행도 색상 계산
+    getProgressColor(progressRatio) {
+        if (progressRatio < 0.3) return '#3B82F6'; // 초급 - 파란색
+        if (progressRatio < 0.6) return '#22C55E'; // 중급 - 녹색  
+        if (progressRatio < 0.8) return '#F59E0B'; // 고급 - 노란색
+        return '#EF4444'; // 전문가 - 빨간색
+    }
+
+    // 📅 날짜 라벨 포맷팅 (데이터 양에 따라 조정)
+    formatDateLabel(dateStr, dataCount) {
+        if (dataCount > 20) {
+            // 데이터가 많으면 간단하게
+            return dateStr.split('/')[1] || dateStr;
+        }
+        return dateStr;
     }
 
     // 💭 피드백 차트 렌더링 (도넛 차트)
