@@ -2023,6 +2023,105 @@
     color: rgba(255, 255, 255, 0.9);
 }
 
+/* ================================
+   Home Header – Integrated Polish
+   ================================ */
+
+/* 1) 아바타/인사 블록: '상단 맞춤' 정렬 */
+.user-profile-container,
+.user-profile-row {
+  display: flex;
+  align-items: flex-start !important;   /* 상단 기준 정렬 */
+  gap: 12px;
+}
+
+/* 아바타 원형: 내려와 보이지 않도록 정렬/크기 고정 */
+.profile-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
+  margin-top: 0 !important;
+  padding: 0;
+}
+
+/* 텍스트 스택 */
+.greeting-text,
+.user-greeting-container {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* 인사 두 줄 간격 최소화 */
+.greeting-text .user-greeting,
+.user-greeting-container .user-greeting {
+  margin: 0 0 2px 0 !important;
+  line-height: 1.2 !important;
+}
+
+.greeting-text .ai-coaching-message,
+.user-greeting-container .ai-coaching-message {
+  margin: 0 !important;
+  line-height: 1.35 !important;
+}
+
+/* (미세 조정) 폰트 메트릭 차이 보정 */
+.user-profile-container .profile-avatar,
+.user-profile-row .profile-avatar {
+  transform: translateY(-1px);
+}
+
+/* 2) 상단 헤더 톤 다운 + 노치 여백 + 라운드/그림자 */
+.main-header{
+  background: linear-gradient(120deg, #6f86e6 0%, #79b0e9 100%) !important; /* 채도 낮춘 톤 */
+  position: relative;
+  padding-top: calc(env(safe-area-inset-top) + 18px) !important;  /* 노치 여백 */
+  padding-bottom: 16px !important;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+/* 채도 완화용 얇은 오버레이 */
+.main-header::after{
+  content:"";
+  position:absolute; inset:0;
+  background: rgba(255,255,255,0.10);
+  pointer-events:none;
+  border-bottom-left-radius: 16px;
+  border-bottom-right-radius: 16px;
+}
+
+/* 3) 배지(라이브 칩) – 가독성 유지하면서 과도한 강도 완화 */
+.user-proof-badge{
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+  background: rgba(255,255,255,0.16) !important;
+  border: 1px solid rgba(255,255,255,0.22) !important;
+  padding: 6px 12px !important;
+  border-radius: 20px !important;
+  margin-left: auto; /* 텍스트 오른쪽 정렬 유지 */
+  white-space: nowrap;
+}
+.user-proof-badge .proof-indicator{
+  width:7px; height:7px;
+  box-shadow:0 0 8px rgba(74,222,128,0.7);
+}
+
+/* 4) 헤더와 아래 '오늘의 목표' 카드 사이 간격 + 카드 분리감 */
+.main-header + .todays-goal-section{
+  margin-top: 14px;                /* 헤더와 여백 */
+  box-shadow: 0 6px 24px rgba(0,0,0,0.06) !important; /* 분리감 */
+}
+
+/* 모바일 최적화 */
+@media (max-width:480px){
+  .user-proof-badge{ font-size:11px; }
+  .profile-avatar{ width:44px; height:44px; }
+}
 /* 📒 Records 화면 스타일 */
 .records-calendar {
     background: white;
