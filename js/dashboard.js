@@ -165,6 +165,8 @@ class IntegratedRecordsDashboard {
         this.lastMotivationUpdate = null;
         this.motivationCache = null;
         this.motivationUpdateInterval = null;
+        this.isMotivationLoading = false; // in-flight 가드
+        this.motivationCooldownMs = 30 * 1000; // 30초 쿨다운
     }
 
     // 🔧 초기화
@@ -369,6 +371,25 @@ class IntegratedRecordsDashboard {
     // 🤖 AI 동기부여 메시지 로드 (CORS 문제 해결)
     async loadMotivationMessage() {
         console.log('🤖 AI 동기부여 메시지 요청 중...');
+
+        // in-flight 가드
+        if (this.isMotivationLoading) {
+            console.log('⏳ 이미 요청 처리 중입니다. 중복 호출 방지.');
+            return;
+        }
+
+        // 30초 쿨다운
+        const nowTs = Date.now();
+        if (this.lastMotivationUpdate && (nowTs - this.lastMotivationUpdate.getTime() < this.motivationCooldownMs)) {
+            const remain = Math.ceil((this.motivationCooldownMs - (nowTs - this.lastMotivationUpdate.getTime())) / 1000);
+            console.log(`⏳ 쿨다운 진행중: ${remain}s 남음 (캐시 표시)`);
+            if (this.motivationCache) {
+                this.showMotivationMessage(this.motivationCache);
+            }
+            return;
+        }
+
+        this.isMotivationLoading = true;
         
         const contentEl = document.getElementById('aiEvaluationContent');
         const badgeEl = document.getElementById('aiEvaluationBadge');
@@ -409,19 +430,23 @@ class IntegratedRecordsDashboard {
                     title: '🤖 AI 트레이너 실시간 분석',
                     message: motivationAdvice.motivationMessage || motivationAdvice.comprehensiveAdvice,
                     level: '실시간 분석 완료',
-                    insight: motivationAdvice.insight || this.generateLocalInsight(analysisData)
+                    insight: motivationAdvice.insight || this.generateLocalInsight(analysisData),
+                    source: motivationAdvice.source || 'ai_gemini',
+                    sessionId: motivationAdvice.sessionId
                 });
                 this.motivationCache = motivationAdvice;
                 this.lastMotivationUpdate = new Date();
             } else {
                 // 폴백 메시지 사용
                 const fallbackMotivation = this.generateFallbackMotivation(analysisData);
-                this.showMotivationMessage(fallbackMotivation);
+                this.showMotivationMessage({ ...fallbackMotivation, source: 'fallback' });
             }
             
         } catch (error) {
             console.error('❌ AI 동기부여 메시지 로드 실패:', error);
             this.showMotivationError();
+        } finally {
+            this.isMotivationLoading = false;
         }
     }
 
@@ -614,18 +639,24 @@ class IntegratedRecordsDashboard {
         };
     }
 
-    // 💬 동기부여 메시지 UI 표시 (+ 평가 버튼)
+    // 💬 동기부여 메시지 UI 표시 (+ 평가 버튼, 출처 배지)
     showMotivationMessage(motivationData) {
         const contentEl = document.getElementById('aiEvaluationContent');
         const badgeEl = document.getElementById('aiEvaluationBadge');
         const actionsEl = document.getElementById('aiMotivationActions');
+        const sourceLabel = motivationData.source === 'ai_gemini' ? 'AI' : '폴백';
         
         if (contentEl) {
             contentEl.innerHTML = `
                 <div style="margin-bottom: 16px;">
-                    <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">
-                        ${motivationData.title || '🤖 AI 숨트레이너'}
-                    </h4>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937; flex:1;">
+                            ${motivationData.title || '🤖 AI 숨트레이너'}
+                        </h4>
+                        <span title="응답 출처" style="background:#EEF2FF; color:#4F46E5; border:1px solid #E5E7EB; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600;">
+                            출처: ${sourceLabel}
+                        </span>
+                    </div>
                     <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #4b5563;">
                         ${(motivationData.message || '계속 화이팅하세요!').replace(/\n/g, '<br>')}
                     </p>
@@ -673,6 +704,30 @@ class IntegratedRecordsDashboard {
         try {
             console.log('💾 동기부여 답변 데이터베이스 저장 시작');
             
+            // 최근 3건과 중복/유사도 검사
+            const { data: recent } = await this.supabaseClient
+                .from('motivation_responses')
+                .select('motivation_message')
+                .eq('user_id', this.userId)
+                .order('created_at', { ascending: false })
+                .limit(3);
+
+            const incoming = (motivationData.motivationMessage || '').trim();
+            let isDuplicate = false;
+            if (incoming && recent && recent.length) {
+                for (const r of recent) {
+                    const prev = (r.motivation_message || '').trim();
+                    const sim = this.computeTextSimilarity(incoming, prev);
+                    if (!prev) continue;
+                    if (incoming === prev || sim >= 0.9) {
+                        isDuplicate = true;
+                        console.log(`⚠️ 최근 응답과 유사(유사도 ${sim.toFixed(2)}), 저장 스킵`);
+                        break;
+                    }
+                }
+            }
+            if (isDuplicate) return null;
+
             const motivationRecord = {
                 user_id: this.userId,
                 session_id: sessionId,
@@ -712,6 +767,25 @@ class IntegratedRecordsDashboard {
             console.error('❌ 동기부여 응답 저장 실패:', error);
             throw error;
         }
+    }
+
+    // 👉 간단한 텍스트 유사도(Jaccard) 계산
+    computeTextSimilarity(a, b) {
+        if (!a || !b) return 0;
+        if (a === b) return 1;
+        const tokenize = (t) => new Set(
+            t
+              .toLowerCase()
+              .replace(/[^가-힣a-z0-9\s]/g, ' ')
+              .split(/\s+/)
+              .filter(Boolean)
+        );
+        const A = tokenize(a);
+        const B = tokenize(b);
+        let inter = 0;
+        for (const w of A) if (B.has(w)) inter++;
+        const union = A.size + B.size - inter;
+        return union === 0 ? 0 : inter / union;
     }
 
     // 🔥 사용자 피드백을 받아 응답 품질 업데이트

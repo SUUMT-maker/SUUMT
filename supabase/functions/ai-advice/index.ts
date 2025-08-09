@@ -283,7 +283,8 @@ async function callGeminiAPI(apiKey: string, prompt: string): Promise<GeminiResp
       body: JSON.stringify({
         contents: [{ parts: [{ text: prompt }] }],
         generationConfig: {
-          temperature: 0.7,
+          temperature: 0.9,
+          topP: 0.9,
           maxOutputTokens: 256,
         },
       }),
