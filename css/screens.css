@@ -48,6 +48,11 @@
 /* h3.user-greeting에 flex가 적용되는 것 상쇄 */
 .main-header .user-greeting { display: block !important; }
 
+/* 퍼센트 중복 완전 제거 (안전망) */
+.percentage-number::after,
+.progress-percentage::after { content: none !important; }
+.percentage-symbol { display: none !important; }
+
 .user-info {
     display: flex;
     align-items: center;
