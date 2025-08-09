@@ -44,12 +44,9 @@
     padding: 20px;
 }
 
-.user-greeting {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 24px;
-}
+.user-greeting { margin-bottom: 24px; }
+/* h3.user-greeting에 flex가 적용되는 것 상쇄 */
+.main-header .user-greeting { display: block !important; }
 
 .user-info {
     display: flex;
