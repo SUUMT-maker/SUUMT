@@ -2300,13 +2300,7 @@
   display: inline-block;
 }
 .todays-goal-section .percentage-number::after {
-  content: '%';
-  margin-left: 2px;
-  font-size: 0.55em;
-  color: #9aa4b2;
-  font-weight: 700;
-  position: relative;
-  top: -0.02em; /* 미세 baseline 보정 */
+  content: none; /* 단위는 .percentage-unit으로만 출력 */
 }
 
 /* 3) 0% 위/아래 정렬 고정: 숫자 위, '달성률' 아래 */
@@ -2338,6 +2332,25 @@
 .todays-goal-section {
   margin-top: 10px;                      /* 안전 여백(헤더가 없을 때도 자연스럽게) */
 }
+
+/* =====  A) TODAY'S GOAL 상단 라인 완전 제거  ===== */
+.todays-goal-section { border-top: none !important; }
+.todays-goal-section::before,
+.todays-goal-section::after { content: none !important; display: none !important; border: 0 !important; background: none !important; }
+
+/* =====  B) 퍼센트 중복 완전 차단 + 정렬 고정  ===== */
+.todays-goal-section .percentage-number::after,
+.todays-goal-section .progress-percentage::after { content: none !important; }
+.todays-goal-section .progress-percentage { display: flex !important; align-items: baseline !important; justify-content: center !important; gap: 2px; }
+.todays-goal-section .percentage-number { font-feature-settings: "tnum"; letter-spacing: -0.3px; line-height: 1; display: inline-block; }
+.todays-goal-section .percentage-unit { font-size: 0.55em; color: #9aa4b2; font-weight: 700; line-height: 1; position: relative; top: -0.02em; }
+
+/* 숫자(위) / 달성률(아래) 세로 스택 고정 (강화) */
+.todays-goal-section .progress-inner { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 6px; }
+
+/* 헤더와 카드 사이 여백 보장 */
+.main-header { margin-bottom: 20px !important; }
+.main-header + .todays-goal-section { margin-top: 12px !important; }
 /* 📒 Records 화면 스타일 */
 .records-calendar {
     background: white;
