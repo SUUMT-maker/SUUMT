@@ -672,15 +672,15 @@ class IntegratedRecordsDashboard {
                 <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
                     <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">이 조언이 도움이 되었나요?</div>
                     <div style="display: flex; gap: 8px; justify-content: center;">
-                        <button onclick="window.integratedDashboard.rateMotivation('${motivationData.sessionId}', 5, '매우 도움됨')" 
+                        <button onclick="window.integratedDashboard.rateMotivation('${motivationData.sessionId}', 5, '매우 도움됨', this)" 
                                 style="padding: 4px 8px; background: #10b981; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">
                             👍 도움됨
                         </button>
-                        <button onclick="window.integratedDashboard.rateMotivation('${motivationData.sessionId}', 3, '보통')" 
+                        <button onclick="window.integratedDashboard.rateMotivation('${motivationData.sessionId}', 3, '보통', this)" 
                                 style="padding: 4px 8px; background: #6b7280; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">
                             😐 보통
                         </button>
-                        <button onclick="window.integratedDashboard.rateMotivation('${motivationData.sessionId}', 1, '별로')" 
+                        <button onclick="window.integratedDashboard.rateMotivation('${motivationData.sessionId}', 1, '별로', this)" 
                                 style="padding: 4px 8px; background: #ef4444; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">
                             👎 별로
                         </button>
@@ -974,21 +974,23 @@ class IntegratedRecordsDashboard {
     }
 
     // 🔥 동기부여 응답 평가
-    async rateMotivation(sessionId, rating, feedback) {
+    async rateMotivation(sessionId, rating, feedback, buttonEl) {
         try {
             console.log(`⭐ 동기부여 응답 평가: ${rating}점`);
             
             await this.updateMotivationQuality(sessionId, rating, feedback);
             
             // 사용자에게 피드백 제공
-            const button = event.target;
-            button.textContent = '✅ 감사합니다!';
-            button.style.background = '#10b981';
+            const button = buttonEl || (typeof event !== 'undefined' ? event.target : null);
+            if (button) {
+                button.textContent = '✅ 감사합니다!';
+                button.style.background = '#10b981';
+            }
             
             // 다른 평가 버튼들 비활성화
             const allButtons = document.querySelectorAll(`[onclick*="${sessionId}"]`);
             allButtons.forEach(btn => {
-                if (btn !== button) {
+                if (!button || btn !== button) {
                     btn.style.opacity = '0.5';
                     btn.style.pointerEvents = 'none';
                 }
