@@ -53,13 +53,13 @@ window.supabaseClient.auth.onAuthStateChange((event, session) => {
 // 🆕 사용자 정보 로드 및 AI 인사말 생성
 async function loadUserInfo(user) {
   try {
-    const displayName = user.user_metadata?.display_name || 
-                        user.user_metadata?.name || 
-                        user.user_metadata?.full_name || 
+    const displayName = user.user_metadata?.display_name ||
+                        user.user_metadata?.name ||
+                        user.user_metadata?.full_name ||
                         '사용자';
 
-    const nameEl = document.getElementById('userName');
-    if (nameEl) nameEl.textContent = `${displayName}님`;
+    const greetEl = document.getElementById('userGreeting');
+    if (greetEl) greetEl.textContent = `안녕하세요, ${displayName}님`;
 
     const coachingMessage = await generateAICoachingGreeting(user.id, displayName);
     const msgEl = document.getElementById('aiCoachingMessage');
@@ -68,9 +68,9 @@ async function loadUserInfo(user) {
     console.log('✅ 사용자 정보 로드 완료:', displayName);
   } catch (error) {
     console.error('❌ 사용자 정보 로드 실패:', error);
-    const nameEl = document.getElementById('userName');
+    const greetEl = document.getElementById('userGreeting');
     const msgEl = document.getElementById('aiCoachingMessage');
-    if (nameEl) nameEl.textContent = '사용자님';
+    if (greetEl) greetEl.textContent = '안녕하세요, 사용자님';
     if (msgEl) msgEl.textContent = '오늘도 깊은 호흡으로 하루를 시작해볼까요?';
   }
 }
@@ -161,27 +161,42 @@ async function updateTodaysGoal() {
     const goalBreaths = 40;
     const progressPercentage = Math.min((todayBreaths / goalBreaths) * 100, 100);
 
-    updateCircularProgress(todayBreaths, goalBreaths, progressPercentage);
-    await loadLatestAIAdvice();
+    updateEnhancedCircularProgress(todayBreaths, goalBreaths, progressPercentage);
+    await loadLatestAIAdvice(true);
     console.log('✅ 오늘의 목표 업데이트 완료:', { todayBreaths, goalBreaths, progressPercentage });
   } catch (error) {
     console.error('❌ 오늘의 목표 업데이트 실패:', error);
   }
 }
 
-// 🆕 원형 프로그레스바 업데이트
-function updateCircularProgress(current, target, percentage) {
-  const progressEl = document.getElementById('todaysGoalProgress');
+// 🆕 개선된 원형 프로그레스바 업데이트
+function updateEnhancedCircularProgress(current, target, percentage) {
+  const progressFill = document.getElementById('progressFill');
   const countEl = document.getElementById('todaysBreathCount');
   const statusEl = document.getElementById('goalStatusText');
-  if (!progressEl || !countEl || !statusEl) return;
-  countEl.textContent = current;
-  const degree = (percentage / 100) * 360;
-  progressEl.style.background = `conic-gradient(#667eea ${degree}deg, #e5e7eb ${degree}deg)`;
+  const particles = document.getElementById('celebrationParticles');
+  if (!progressFill || !countEl || !statusEl) return;
+
+  // 숫자 애니메이션
+  animateNumber(countEl, parseInt(countEl.textContent) || 0, current, 800);
+
+  // 시각적 진행 (CSS 기반 링 채움 효과)
+  // 각도 기반 회전(여기서는 클래스 기반 색상만 제어)
+  progressFill.classList.add('default');
+  progressFill.classList.remove('completed');
+  countEl.classList.remove('completed');
+
   if (current >= target) {
+    progressFill.classList.remove('default');
+    progressFill.classList.add('completed');
+    countEl.classList.add('completed');
     statusEl.textContent = '🎉 목표 달성!';
     statusEl.className = 'goal-status completed';
-    progressEl.style.background = `conic-gradient(#059669 360deg, #059669 360deg)`;
+    if (particles) {
+      particles.classList.add('active');
+      setTimeout(() => particles.classList.remove('active'), 2000);
+    }
+    if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
   } else if (current > 0) {
     statusEl.textContent = `${target - current}회 더 가능해요!`;
     statusEl.className = 'goal-status in-progress';
@@ -191,10 +206,28 @@ function updateCircularProgress(current, target, percentage) {
   }
 }
 
+// 🆕 숫자 애니메이션 함수
+function animateNumber(element, start, end, duration) {
+  const startTime = performance.now();
+  function update(currentTime) {
+    const elapsed = currentTime - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    element.textContent = Math.round(start + (end - start) * eased);
+    if (progress < 1) requestAnimationFrame(update);
+  }
+  requestAnimationFrame(update);
+}
+
 // 🆕 최신 AI 조언 로드
-async function loadLatestAIAdvice() {
+async function loadLatestAIAdvice(forceRefresh = false) {
   try {
     if (!window.currentUserId) return;
+    const latestAdviceElLoading = document.getElementById('latestAIAdvice');
+    if (latestAdviceElLoading) {
+      latestAdviceElLoading.className = 'ai-advice-content loading';
+      latestAdviceElLoading.textContent = 'AI 조언을 불러오는 중...';
+    }
     // 최근 세션의 ai_advice 조회 (사용자 본인 세션에 한해)
     const { data: sessions, error: sErr } = await window.supabaseClient
       .from('exercise_sessions')
@@ -221,23 +254,24 @@ async function loadLatestAIAdvice() {
       .limit(1);
     if (error) throw error;
 
-    const adviceEl = document.getElementById('latestAIAdvice');
-    if (!adviceEl) return;
+    const latestAdviceElResult = document.getElementById('latestAIAdvice');
+    if (!latestAdviceElResult) return;
     if (advices && advices.length > 0) {
       const advice = advices[0].comprehensive_advice || '';
-      const truncated = advice.length > 80 ? advice.substring(0, 80) + '...' : advice;
-      adviceEl.textContent = truncated || '운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!';
-      adviceEl.style.fontStyle = 'normal';
+      const maxLength = window.innerWidth <= 480 ? 60 : 120;
+      const truncated = advice.length > maxLength ? advice.substring(0, maxLength) + '...' : advice;
+      latestAdviceElResult.textContent = truncated || '운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!';
+      latestAdviceElResult.className = 'ai-advice-content has-advice';
     } else {
-      adviceEl.textContent = '운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!';
-      adviceEl.style.fontStyle = 'italic';
+      latestAdviceElResult.textContent = '운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!';
+      latestAdviceElResult.className = 'ai-advice-content loading';
     }
   } catch (error) {
     console.error('❌ AI 조언 로드 실패:', error);
-    const adviceEl = document.getElementById('latestAIAdvice');
-    if (adviceEl) {
-      adviceEl.textContent = '운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!';
-      adviceEl.style.fontStyle = 'italic';
+    const latestAdviceElError = document.getElementById('latestAIAdvice');
+    if (latestAdviceElError) {
+      latestAdviceElError.textContent = '운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!';
+      latestAdviceElError.className = 'ai-advice-content loading';
     }
   }
 }
@@ -1659,6 +1693,17 @@ function handleExerciseResult(result) {
     
     document.getElementById('intensityAdvice').innerHTML = finalIntensityAdvice.replace(/\n/g, '<br>');
     document.getElementById('comprehensiveAdvice').innerHTML = finalComprehensiveAdvice.replace(/\n/g, '<br>');
+
+  // 🆕 홈 화면 즉시 업데이트
+  handleExerciseCompletion();
+}
+
+// 🆕 운동 완료 후 즉시 업데이트
+async function handleExerciseCompletion() {
+  setTimeout(async () => {
+    await updateTodaysGoal();
+    console.log('✅ 운동 완료 후 홈 화면 데이터 즉시 업데이트');
+  }, 1000);
 }
 
 // 🔥 새로운 기능: 스마트 실시간 데이터 생성

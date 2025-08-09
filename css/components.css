@@ -2,7 +2,7 @@
 .ai-coaching-message {
     font-size: 14px;
     color: #6b7280;
-    margin: 8px 0 12px 0;
+    margin: 0;
     line-height: 1.4;
     font-weight: 400;
     opacity: 0.9;
@@ -10,19 +10,89 @@
 
 /* 🎯 오늘의 목표 섹션 */
 .todays-goal-section {
-    margin-bottom: 24px;
-}
-
-.goal-content-container {
     background: white;
     border: 1px solid #E7E7E7;
     border-radius: 24px;
-    margin: 0 20px;
-    padding: 20px;
-    display: flex;
-    gap: 20px;
-    align-items: center;
+    margin: 0 20px 24px;
+    padding: 24px;
+    border-left: 4px solid #667eea;
 }
+
+/* 개선된 사용자 정보 섹션 */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.user-profile-icon { flex-shrink: 0; }
+
+.profile-avatar {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.2);
+}
+
+.profile-avatar svg { filter: brightness(0) invert(1); }
+
+.user-text { flex: 1; }
+
+.main-greeting {
+    font-size: 18px;
+    font-weight: 600;
+    color: #1E1E1E;
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+}
+
+/* 실시간 현황 배지를 독립적으로 배치 */
+.live-status-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.goal-header { margin-bottom: 24px; }
+.goal-title-container { display: flex; align-items: flex-start; gap: 12px; }
+.goal-icon { font-size: 24px; margin-top: 2px; }
+.goal-title { font-size: 20px; font-weight: 600; color: #1E1E1E; margin: 0 0 4px 0; }
+.goal-subtitle { font-size: 13px; color: #666; margin: 0; font-weight: 400; }
+.goal-content { display: flex; flex-direction: column; align-items: center; gap: 24px; }
+
+/* 대형 원형 프로그레스바 */
+.goal-progress-container { position: relative; display: flex; justify-content: center; }
+.large-circular-progress { width: 180px; height: 180px; position: relative; display: flex; align-items: center; justify-content: center; }
+.progress-track { position: absolute; width: 100%; height: 100%; border: 8px solid #f1f3f4; border-radius: 50%; box-sizing: border-box; }
+.progress-fill { position: absolute; width: 100%; height: 100%; border: 8px solid transparent; border-radius: 50%; box-sizing: border-box; transform: rotate(-90deg); transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
+.progress-fill.default { border-top-color: #667eea; border-right-color: #667eea; }
+.progress-fill.completed { border-color: #10b981; animation: completionPulse 1s ease-in-out; }
+.progress-inner { text-align: center; z-index: 2; position: relative; }
+.progress-count { display: flex; align-items: baseline; justify-content: center; gap: 2px; margin-bottom: 4px; }
+.progress-number { font-size: 36px; font-weight: bold; color: #667eea; line-height: 1; transition: color 0.3s ease; }
+.progress-number.completed { color: #10b981; }
+.progress-target { font-size: 16px; color: #6b7280; font-weight: 500; }
+.progress-label { font-size: 14px; color: #6b7280; margin-bottom: 8px; font-weight: 500; }
+.goal-status { font-size: 12px; font-weight: 600; color: #6b7280; padding: 4px 12px; border-radius: 12px; background: #f8fafc; transition: all 0.3s ease; }
+.goal-status.in-progress { color: #d97706; background: #fef3c7; }
+.goal-status.completed { color: #065f46; background: #d1fae5; animation: statusBounce 0.5s ease-out; }
+.celebration-particles { position: absolute; width: 100%; height: 100%; pointer-events: none; opacity: 0; }
+.celebration-particles.active { opacity: 1; animation: particlesBurst 2s ease-out; }
+.celebration-particles::before,
+.celebration-particles::after { content: '✨'; position: absolute; font-size: 20px; animation: particleFloat 2s ease-out; }
+.celebration-particles::before { top: 20%; left: 20%; animation-delay: 0.2s; }
+.celebration-particles::after { top: 30%; right: 20%; animation-delay: 0.5s; }
+
+/* AI 조언 표시 */
+.ai-advice-display { width: 100%; max-width: 320px; }
+.ai-advice-content { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; font-size: 14px; line-height: 1.5; color: #374151; text-align: center; min-height: 60px; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; }
+.ai-advice-content.loading { color: #9ca3af; font-style: italic; }
+.ai-advice-content.has-advice { background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); border-color: #cbd5e1; }
 
 /* 원형 프로그레스바 */
 .goal-progress-section {
@@ -131,30 +201,10 @@
 
 /* 모바일 최적화 */
 @media (max-width: 480px) {
-    .goal-content-container {
-        flex-direction: column;
-        gap: 16px;
-        margin: 0 16px;
-        padding: 16px;
-    }
-    
-    .circular-progress {
-        width: 100px;
-        height: 100px;
-    }
-    
-    .circular-progress::before {
-        width: 75px;
-        height: 75px;
-    }
-    
-    .progress-number {
-        font-size: 20px;
-    }
-    
-    .ai-advice-section {
-        min-height: auto;
-    }
+    .todays-goal-section { margin: 0 16px 24px; padding: 20px; }
+    .large-circular-progress { width: 150px; height: 150px; }
+    .progress-number { font-size: 28px; }
+    .progress-target { font-size: 14px; }
 }
 /* 🎬 애니메이션 키프레임 */
 

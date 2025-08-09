@@ -295,18 +295,27 @@
             <div class="main-header">
                 <div class="user-greeting">
                     <div class="user-info">
-                        <div class="user-avatar">
-                            <img src="./images/suumt-logo.png" alt="숨트 로고" onerror="this.style.display='none'; this.parentNode.innerHTML='🫁';">
-                        </div>
-                        <div class="user-text">
-                            <h4 id="userGreeting">안녕하세요,</h4>
-                            <h3 id="userName">AI 숨트레이너</h3>
-                            <p id="aiCoachingMessage" class="ai-coaching-message">오늘도 깊은 호흡으로 하루를 시작해볼까요?</p>
-                            <!-- 🔥 새로운 기능: 메인화면 실시간 현황 -->
-                            <div class="live-users-badge" id="mainLiveUsers">
-                                <div class="live-indicator"></div>
-                                <span id="mainLiveUsersText">오늘 247명 트레이닝 중</span>
+                        <!-- 새로운 프로필 아이콘 -->
+                        <div class="user-profile-icon">
+                            <div class="profile-avatar">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <circle cx="12" cy="8" r="3" fill="#667eea"/>
+                                    <path d="M12 14c-4 0-7 2-7 4v2h14v-2c0-2-3-4-7-4z" fill="#667eea"/>
+                                </svg>
                             </div>
+                        </div>
+                        
+                        <!-- 개선된 인사말 -->
+                        <div class="user-text">
+                            <h3 id="userGreeting" class="main-greeting">안녕하세요, AI 숨트레이너님</h3>
+                            <p id="aiCoachingMessage" class="ai-coaching-message">오늘도 깊은 호흡으로 하루를 시작해볼까요?</p>
+                        </div>
+                    </div>
+                    <!-- 실시간 현황 배지를 별도로 배치 -->
+                    <div class="live-status-container">
+                        <div class="live-users-badge" id="mainLiveUsers">
+                            <div class="live-indicator"></div>
+                            <span id="mainLiveUsersText">오늘 28,362명 트레이닝 중</span>
                         </div>
                     </div>
                 </div>
@@ -371,37 +380,39 @@
                 </div>
             </div>
 
-            <!-- 🆕 오늘의 목표 섹션 -->
+            <!-- 🆕 개선된 오늘의 목표 섹션 -->
             <div class="todays-goal-section">
-                <div class="section-header">
-                    <div>
-                        <h2 class="section-title">
-                            <span class="section-icon">🎯</span>
-                            <span>오늘의 목표</span>
-                        </h2>
-                        <div class="section-subtitle">호흡 40회를 목표로 꾸준한 성장을 만들어가요</div>
+                <div class="goal-header">
+                    <div class="goal-title-container">
+                        <span class="goal-icon">🎯</span>
+                        <div>
+                            <h2 class="goal-title">오늘의 목표</h2>
+                            <p class="goal-subtitle">호흡 40회를 목표로 꾸준한 성장을 만들어가요</p>
+                        </div>
                     </div>
                 </div>
 
-                <div class="goal-content-container">
-                    <!-- 좌측: 원형 프로그레스바 -->
-                    <div class="goal-progress-section">
-                        <div class="circular-progress" id="todaysGoalProgress">
+                <div class="goal-content">
+                    <!-- 개선된 대형 프로그레스바 -->
+                    <div class="goal-progress-container">
+                        <div class="large-circular-progress" id="todaysGoalProgress">
+                            <div class="progress-track"></div>
+                            <div class="progress-fill" id="progressFill"></div>
                             <div class="progress-inner">
-                                <div class="progress-number" id="todaysBreathCount">0</div>
-                                <div class="progress-target">/ 40</div>
+                                <div class="progress-count">
+                                    <span class="progress-number" id="todaysBreathCount">0</span>
+                                    <span class="progress-target">/ 40</span>
+                                </div>
                                 <div class="progress-label">회</div>
+                                <div class="goal-status" id="goalStatusText">시작해보세요!</div>
                             </div>
+                            <!-- 목표 달성 축하 파티클 -->
+                            <div class="celebration-particles" id="celebrationParticles"></div>
                         </div>
-                        <div class="goal-status" id="goalStatusText">시작해보세요!</div>
                     </div>
 
-                    <!-- 우측: AI 조언 -->
-                    <div class="ai-advice-section">
-                        <div class="ai-advice-header">
-                            <span class="ai-icon">🤖</span>
-                            <span class="ai-title">AI 숨트레이너</span>
-                        </div>
+                    <!-- AI 조언 표시 -->
+                    <div class="ai-advice-display" id="latestAIAdviceContainer">
                         <div class="ai-advice-content" id="latestAIAdvice">
                             운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!
                         </div>
