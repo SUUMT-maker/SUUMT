@@ -738,7 +738,6 @@ class IntegratedRecordsDashboard {
                 avg_resistance: motivationData.analysisData.avgResistance,
                 ai_source: 'gemini',
                 request_type: 'motivation',
-                response_quality: null,
                 created_at: new Date().toISOString(),
                 request_time: motivationData.requestTime
             };
@@ -782,36 +781,7 @@ class IntegratedRecordsDashboard {
         return union === 0 ? 0 : inter / union;
     }
 
-    // 🔥 사용자 피드백을 받아 응답 품질 업데이트
-    async updateMotivationQuality(sessionId, qualityRating, userFeedback = null) {
-        try {
-            console.log(`📈 동기부여 응답 품질 업데이트: ${sessionId} → ${qualityRating}`);
-            
-            const updateData = {
-                response_quality: qualityRating,
-                user_feedback: userFeedback,
-                feedback_time: new Date().toISOString()
-            };
-            
-            const { data, error } = await this.supabaseClient
-                .from('motivation_responses')
-                .update(updateData)
-                .eq('session_id', sessionId)
-                .eq('user_id', this.userId)
-                .select();
-            
-            if (error) {
-                throw error;
-            }
-            
-            console.log('✅ 응답 품질 업데이트 완료:', data[0]);
-            return data[0];
-            
-        } catch (error) {
-            console.error('❌ 응답 품질 업데이트 실패:', error);
-            throw error;
-        }
-    }
+    // 함수 제거됨: updateMotivationQuality (DB 컬럼 삭제로 더 이상 사용하지 않음)
 
     // 🔥 과거 동기부여 응답 조회
     async getMotivationHistory(limit = 10) {
@@ -858,12 +828,8 @@ class IntegratedRecordsDashboard {
             const trends = history.map(h => h.user_trend);
             const trendPattern = this.analyzeTrendPattern(trends);
             
-            const qualityRatings = history
-                .filter(h => h.response_quality !== null)
-                .map(h => h.response_quality);
-            const avgQuality = qualityRatings.length > 0 
-                ? qualityRatings.reduce((sum, rating) => sum + rating, 0) / qualityRatings.length 
-                : null;
+            // 품질 평가 관련 분석 제거 (response_quality 컬럼 삭제)
+            const avgQuality = null;
             
             const daysSinceFirst = history.length > 0 
                 ? Math.ceil((new Date() - new Date(history[history.length - 1].created_at)) / (1000 * 60 * 60 * 24))
@@ -952,9 +918,7 @@ class IntegratedRecordsDashboard {
             insights.push('대부분의 기간 동안 훌륭한 성과를 보이고 계세요! ⭐');
         }
         
-        if (avgQuality && avgQuality >= 4) {
-            insights.push('AI 조언이 도움이 되고 있다니 기뻐요! 🤖');
-        }
+        // 품질 평가 기반 인사이트 제거 (avgQuality는 항상 null)
         
         if (usageFrequency >= 0.5) {
             insights.push('정기적으로 동기부여를 받으시는 모습이 훌륭해요! 📅');
@@ -967,43 +931,7 @@ class IntegratedRecordsDashboard {
         return insights;
     }
 
-    // 🔥 동기부여 응답 평가
-    async rateMotivation(sessionId, rating, feedback, buttonEl) {
-        try {
-            console.log(`⭐ 동기부여 응답 평가: ${rating}점`);
-            
-            await this.updateMotivationQuality(sessionId, rating, feedback);
-            
-            // 사용자에게 피드백 제공
-            const button = buttonEl || (typeof event !== 'undefined' ? event.target : null);
-            if (button) {
-                button.textContent = '✅ 감사합니다!';
-                button.style.background = '#10b981';
-            }
-            
-            // 다른 평가 버튼들 비활성화
-            const allButtons = document.querySelectorAll(`[onclick*="${sessionId}"]`);
-            allButtons.forEach(btn => {
-                if (!button || btn !== button) {
-                    btn.style.opacity = '0.5';
-                    btn.style.pointerEvents = 'none';
-                }
-            });
-            
-            // GA 이벤트
-            if (typeof gtag !== 'undefined') {
-                gtag('event', 'motivation_rated', {
-                    session_id: sessionId,
-                    rating: rating,
-                    feedback: feedback,
-                    user_id: this.userId
-                });
-            }
-            
-        } catch (error) {
-            console.error('❌ 동기부여 평가 실패:', error);
-        }
-    }
+    // 함수 제거됨: rateMotivation (DB 컬럼 삭제로 더 이상 사용하지 않음)
 
     // ❌ 에러 상태 표시
     showMotivationError() {
@@ -1362,15 +1290,7 @@ class IntegratedRecordsDashboard {
                             <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">평균 저항</div>
                             <div style="font-size: 18px; font-weight: 600; color: #F59E0B;">${Math.round(((record.inhale_resistance || 0) + (record.exhale_resistance || 0)) / 2 * 10) / 10}단계</div>
                         </div>
-                        <div style="background: white; padding: 12px; border-radius: 8px; text-align: center;">
-                            <div style="font-size: 12px; color: #6B7280; margin-bottom: 4px;">사용자 피드백</div>
-                            <div style="font-size: 14px; font-weight: 600; color: #6366F1;">
-                                ${record.user_feedback === 'easy' ? '😌 쉬움' : 
-                                  record.user_feedback === 'perfect' ? '💪 완벽' : 
-                                  record.user_feedback === 'hard' ? '😤 어려움' : 
-                                  '미기록'}
-                            </div>
-                        </div>
+                        
                     </div>
                 </div>
             `;
