@@ -401,18 +401,23 @@ class IntegratedRecordsDashboard {
                 return;
             }
             
-            // 🔧 CORS 문제로 인해 일단 폴백 메시지 사용
-            console.log('🔧 Edge Function 대신 폴백 메시지 사용');
-            const motivationData = this.generateFallbackMotivation(analysisData);
-            
-            if (motivationData) {
-                this.showMotivationMessage(motivationData);
-                this.motivationCache = motivationData;
+            // 🔧 운동 결과 화면과 동일한 방식으로 AI 조언 요청
+            const motivationAdvice = await this.getMotivationAdviceFromAI(analysisData);
+
+            if (motivationAdvice) {
+                this.showMotivationMessage({
+                    title: '🤖 AI 트레이너 실시간 분석',
+                    message: motivationAdvice.motivationMessage || motivationAdvice.comprehensiveAdvice,
+                    level: '실시간 분석 완료',
+                    insight: motivationAdvice.insight || this.generateLocalInsight(analysisData)
+                });
+                this.motivationCache = motivationAdvice;
                 this.lastMotivationUpdate = new Date();
+            } else {
+                // 폴백 메시지 사용
+                const fallbackMotivation = this.generateFallbackMotivation(analysisData);
+                this.showMotivationMessage(fallbackMotivation);
             }
-            
-            // 🚀 추후 Edge Function 호출 (백그라운드)
-            this.tryEdgeFunctionCall(analysisData);
             
         } catch (error) {
             console.error('❌ AI 동기부여 메시지 로드 실패:', error);
@@ -420,54 +425,123 @@ class IntegratedRecordsDashboard {
         }
     }
 
-    // 🚀 백그라운드에서 Edge Function 시도 (비동기)
-    async tryEdgeFunctionCall(analysisData) {
+    // 🔧 운동 결과 화면과 동일한 방식으로 AI 조언 요청
+    async getMotivationAdviceFromAI(analysisData) {
         try {
-            console.log('🚀 백그라운드에서 Edge Function 시도...');
+            console.log('🤖 Supabase AI 동기부여 조언 요청 시작');
+            console.log('📊 전달할 분석 데이터:', analysisData);
             
-            // 🔧 개선된 요청 형식
+            // 🔧 운동 결과 화면과 동일한 데이터 구조로 변환
             const requestBody = {
                 exerciseData: {
+                    // 기본 운동 데이터 (Edge Function이 기대하는 형태)
+                    resistanceSettings: {
+                        inhale: analysisData.avgResistance || 1,
+                        exhale: analysisData.avgResistance || 1
+                    },
+                    userFeedback: this.inferFeedbackFromTrend(analysisData.trend),
+                    completedSets: analysisData.totalSets || 0,
+                    completedBreaths: analysisData.totalBreaths || 0,
+                    exerciseTime: this.formatExerciseTime(analysisData.totalSessions),
+                    isAborted: false,
+                    
+                    // 추가 분석 데이터 (동기부여용)
                     totalSessions: analysisData.totalSessions,
                     completionRate: analysisData.completionRate,
-                    avgResistance: analysisData.avgResistance,
                     consecutiveDays: analysisData.consecutiveDays,
                     level: analysisData.level,
-                    trend: analysisData.trend
-                }
+                    trend: analysisData.trend,
+                    recentSessions: analysisData.recentSessions,
+                    lastExercise: analysisData.lastExercise,
+                    
+                    // 동기부여 요청임을 표시
+                    requestType: 'motivation',
+                    analysisType: 'comprehensive_progress'
+                },
+                sessionId: 'motivation_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
             };
             
-            const response = await fetch('https://rfqbzibewzvqopqgovbc.supabase.co/functions/v1/ai-advice', {
+            console.log('🌐 Supabase 요청 데이터:', requestBody);
+            
+            // 🔧 운동 결과 화면과 동일한 URL 구성과 헤더 순서
+            const SUPABASE_URL = 'https://rfqbzibewzvqopqgovbc.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmcWJ6aWJld3p2cW9wcWdvdmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNzIwNTMsImV4cCI6MjA2OTk0ODA1M30.nAXbnAFe4jM7F56QN4b42NhwNJG_iuSXOVM5zC72Bs4';
+            
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-advice`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmcWJ6aWJld3p2cW9wcWdvdmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNzIwNTMsImV4cCI6MjA2OTk0ODA1M30.nAXbnAFe4jM7F56QN4b42NhwNJG_iuSXOVM5zC72Bs4`,
-                    // 🔧 CORS 해결을 위한 헤더 추가
-                    'Accept': 'application/json',
-                    'Cache-Control': 'no-cache'
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify(requestBody)
             });
             
-            if (response.ok) {
-                const result = await response.json();
-                console.log('✅ Edge Function 성공:', result);
-                
-                // 성공하면 UI 업데이트
-                if (result.success && result.advice) {
-                    this.showMotivationMessage({
-                        title: '🤖 AI 트레이너 실시간 분석',
-                        message: result.advice.intensityAdvice || result.advice.comprehensiveAdvice || result.advice,
-                        level: '실시간 분석 완료'
-                    });
-                }
-            } else {
-                console.warn('⚠️ Edge Function 응답 실패:', response.status);
+            if (!response.ok) {
+                throw new Error(`Supabase 연결 오류: ${response.status} - ${response.statusText}`);
             }
             
+            const result = await response.json();
+            console.log('📦 Supabase 응답:', result);
+            
+            if (result.success && result.advice) {
+                return {
+                    motivationMessage: result.advice.comprehensiveAdvice || result.advice.intensityAdvice || result.advice,
+                    intensityAdvice: result.advice.intensityAdvice,
+                    comprehensiveAdvice: result.advice.comprehensiveAdvice,
+                    insight: this.extractInsightFromAdvice(result.advice),
+                    source: 'ai_gemini'
+                };
+            }
+            
+            throw new Error(result.message || 'AI 동기부여 조언 생성 실패');
+            
         } catch (error) {
-            console.warn('⚠️ Edge Function 호출 실패 (폴백 메시지 유지):', error.message);
-            // 에러가 나도 폴백 메시지가 이미 표시되어 있어서 사용자에게는 영향 없음
+            console.error('🚨 Supabase AI 동기부여 요청 오류:', error);
+            console.log('🔄 AI 요청 실패, 로컬 분석 기반 조언 생성');
+            return null; // 폴백 메시지로 처리
+        }
+    }
+
+    // 🔧 트렌드에서 사용자 피드백 추론
+    inferFeedbackFromTrend(trend) {
+        switch(trend) {
+            case 'excellent_progress': return 'perfect';
+            case 'good_progress': return 'perfect';
+            case 'stable': return 'perfect';
+            case 'needs_encouragement': return 'hard';
+            default: return 'perfect';
+        }
+    }
+
+    // 🔧 운동 시간 포맷팅 (세션 수 기반 추정)
+    formatExerciseTime(totalSessions) {
+        const estimatedMinutes = Math.max(1, totalSessions * 5);
+        const minutes = Math.floor(estimatedMinutes);
+        const seconds = Math.floor((estimatedMinutes % 1) * 60);
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+    }
+
+    // 🔧 AI 조언에서 인사이트 추출
+    extractInsightFromAdvice(advice) {
+        if (advice.comprehensiveAdvice && advice.comprehensiveAdvice.includes('도전')) {
+            return '성장하고 계시네요! 다음 단계로 도전해보세요.';
+        } else if (advice.comprehensiveAdvice && advice.comprehensiveAdvice.includes('꾸준')) {
+            return '꾸준함이 가장 큰 힘입니다. 계속 화이팅하세요!';
+        } else {
+            return '매일 조금씩 발전하는 모습이 보여요. 자신감을 가지세요!';
+        }
+    }
+
+    // 🔧 로컬 인사이트 생성
+    generateLocalInsight(analysisData) {
+        if (analysisData.level === 'expert') {
+            return '전문가 수준에 도달했네요! 이제 다른 사람들에게도 영감을 주는 존재예요.';
+        } else if (analysisData.consecutiveDays >= 7) {
+            return '일주일 연속 트레이닝! 습관이 몸에 배기 시작했어요.';
+        } else if (analysisData.completionRate >= 80) {
+            return '높은 완주율을 보이고 계시네요. 의지력이 정말 대단해요!';
+        } else {
+            return '꾸준히 하는 것만으로도 충분히 훌륭해요. 자신을 격려해주세요!';
         }
     }
 
