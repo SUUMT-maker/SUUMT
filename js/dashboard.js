@@ -1,4 +1,4 @@
-// 📊 기록탭 완전 통합 대시보드 (사용자 디자인 기반)
+// 📊 기록탭 완전 통합 대시보드 (사용자 디자인 기반) + AI 동기부여 기능
 
 // 🎨 완전히 새로운 기록탭 HTML 구조
 const INTEGRATED_RECORDS_HTML = `
@@ -11,6 +11,44 @@ const INTEGRATED_RECORDS_HTML = `
             <span>나의 호흡 분석</span>
         </h2>
         <div class="section-subtitle">개인화된 트레이닝 인사이트와 상세 기록</div>
+    </div>
+
+    <!-- ✨ AI 트레이너 종합 평가 (핵심 가치) -->
+    <div class="ai-coach-evaluation" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; margin: 0 20px 24px; padding: 24px; color: white; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);">
+        <!-- 배경 장식 -->
+        <div style="position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); animation: shimmer 6s ease-in-out infinite;"></div>
+        
+        <div style="position: relative; z-index: 1;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                <div style="font-size: 28px;">🧠</div>
+                <div>
+                    <h3 style="margin: 0; font-size: 18px; font-weight: 600;">AI 트레이너 종합 평가</h3>
+                    <p style="margin: 0; font-size: 13px; opacity: 0.9;">당신의 호흡 여정을 분석한 개인화된 조언</p>
+                </div>
+                <div style="margin-left: auto;">
+                    <div id="aiEvaluationBadge" style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; backdrop-filter: blur(10px);">
+                        분석 중...
+                    </div>
+                </div>
+            </div>
+            
+            <div id="aiEvaluationContent" style="background: rgba(255,255,255,0.95); color: #374151; padding: 20px; border-radius: 16px; line-height: 1.6; font-size: 15px; backdrop-filter: blur(10px);">
+                <div style="display: flex; align-items: center; justify-content: center; gap: 12px; color: #6B7280;">
+                    <div style="width: 24px; height: 24px; border: 3px solid #667eea; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <span>AI가 당신의 호흡 데이터를 분석하고 있습니다...</span>
+                </div>
+            </div>
+            
+            <!-- AI 동기부여 액션 버튼들 -->
+            <div id="aiMotivationActions" style="display: none; margin-top: 16px; display: flex; gap: 12px;">
+                <button onclick="window.integratedDashboard.startQuickWorkout()" style="flex: 1; background: rgba(255, 255, 255, 0.2); border: none; border-radius: 12px; padding: 10px 16px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease;">
+                    💪 지금 운동하기
+                </button>
+                <button onclick="window.integratedDashboard.refreshMotivation()" style="flex: 1; background: rgba(255, 255, 255, 0.2); border: none; border-radius: 12px; padding: 10px 16px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease;">
+                    🔄 새로운 조언
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- 주요 지표 카드 그리드 -->
@@ -70,8 +108,6 @@ const INTEGRATED_RECORDS_HTML = `
             </select>
         </div>
         
-
-        
         <div id="breathingChart" style="height: 200px; width: 100%;">
             <!-- 차트가 여기에 렌더링됩니다 -->
         </div>
@@ -113,7 +149,7 @@ const INTEGRATED_RECORDS_HTML = `
 </div>
 `;
 
-// 📊 통합 기록 대시보드 클래스
+// 📊 AI 동기부여 통합 대시보드 클래스 (기존 클래스 확장)
 class IntegratedRecordsDashboard {
     constructor() {
         this.userId = null;
@@ -124,6 +160,11 @@ class IntegratedRecordsDashboard {
         this.currentCalendarYear = new Date().getFullYear();
         this.currentCalendarMonth = new Date().getMonth();
         this.selectedDate = null;
+        
+        // ✨ AI 동기부여 관련 속성 추가
+        this.lastMotivationUpdate = null;
+        this.motivationCache = null;
+        this.motivationUpdateInterval = null;
     }
 
     // 🔧 초기화
@@ -137,7 +178,21 @@ class IntegratedRecordsDashboard {
         }
 
         console.log('📊 통합 기록 대시보드 초기화:', this.userId);
+        
+        // ✨ AI 동기부여 시스템 초기화
+        await this.initMotivationSystem();
+        
         return true;
+    }
+
+    // 🧠 AI 동기부여 시스템 초기화
+    async initMotivationSystem() {
+        console.log('🧠 AI 동기부여 시스템 초기화...');
+        
+        // 정기 업데이트 설정 (5분마다)
+        this.motivationUpdateInterval = setInterval(() => {
+            this.loadMotivationMessage();
+        }, 5 * 60 * 1000);
     }
 
     // 🕐 UTC를 KST로 변환하는 유틸리티 함수
@@ -155,6 +210,7 @@ class IntegratedRecordsDashboard {
         const day = String(kstDate.getDate()).padStart(2, '0');
         return `${year}-${month}-${day}`;
     }
+
     async fetchExerciseData() {
         try {
             const { data, error } = await this.supabaseClient
@@ -199,6 +255,328 @@ class IntegratedRecordsDashboard {
         } catch (err) {
             console.error('❌ AI 조언 데이터 조회 중 오류:', err);
             return [];
+        }
+    }
+
+    // 🔍 누적 운동 데이터 분석
+    analyzeExerciseProgress() {
+        if (!this.exerciseData.length) {
+            return {
+                isEmpty: true,
+                message: "아직 운동 데이터가 없어요. 첫 번째 트레이닝을 시작해보세요!"
+            };
+        }
+
+        const totalSessions = this.exerciseData.length;
+        const completedSessions = this.exerciseData.filter(session => !session.is_aborted).length;
+        const totalBreaths = this.exerciseData.reduce((sum, session) => sum + (session.completed_breaths || 0), 0);
+        const totalSets = this.exerciseData.reduce((sum, session) => sum + (session.completed_sets || 0), 0);
+        
+        // 최근 7일 데이터
+        const recentData = this.getFilteredData();
+        const recentSessions = recentData.length;
+        
+        // 완료율 계산
+        const completionRate = totalSessions > 0 ? Math.round((completedSessions / totalSessions) * 100) : 0;
+        
+        // 평균 저항 강도
+        const avgResistance = this.exerciseData.length > 0 ? 
+            this.exerciseData.reduce((sum, session) => 
+                sum + ((session.inhale_resistance || 0) + (session.exhale_resistance || 0)) / 2, 0
+            ) / this.exerciseData.length : 0;
+        
+        // 연속 운동 일수 계산
+        const consecutiveDays = this.calculateConsecutiveDays();
+        
+        // 최근 트렌드 분석
+        const trend = this.analyzeTrend();
+        
+        // 개인화 레벨 판정
+        const level = this.determineUserLevel(totalSessions, completionRate, avgResistance);
+
+        return {
+            isEmpty: false,
+            totalSessions,
+            completedSessions,
+            totalBreaths,
+            totalSets,
+            recentSessions,
+            completionRate,
+            avgResistance: Math.round(avgResistance * 10) / 10,
+            consecutiveDays,
+            trend,
+            level,
+            lastExercise: this.exerciseData[0]?.created_at ? this.getKstDateString(this.exerciseData[0].created_at) : null
+        };
+    }
+
+    // 📈 트렌드 분석
+    analyzeTrend() {
+        const recent7 = this.exerciseData.slice(0, 7);
+        const previous7 = this.exerciseData.slice(7, 14);
+        
+        if (recent7.length === 0) return 'insufficient_data';
+        if (previous7.length === 0) return 'new_user';
+        
+        const recentAvg = recent7.reduce((sum, s) => sum + s.completed_breaths, 0) / recent7.length;
+        const previousAvg = previous7.reduce((sum, s) => sum + s.completed_breaths, 0) / previous7.length;
+        
+        const improvement = ((recentAvg - previousAvg) / previousAvg) * 100;
+        
+        if (improvement > 20) return 'excellent_progress';
+        if (improvement > 5) return 'good_progress';
+        if (improvement > -5) return 'stable';
+        return 'needs_encouragement';
+    }
+
+    // 🏆 사용자 레벨 판정
+    determineUserLevel(totalSessions, completionRate, avgResistance) {
+        if (totalSessions < 5) return 'beginner';
+        if (totalSessions < 20 || completionRate < 70) return 'intermediate';
+        if (totalSessions < 50 || avgResistance < 3) return 'advanced';
+        return 'expert';
+    }
+
+    // 📅 연속 운동 일수 계산
+    calculateConsecutiveDays() {
+        if (!this.exerciseData.length) return 0;
+        
+        const dates = [...new Set(this.exerciseData.map(session => 
+            this.getKstDateString(session.created_at)
+        ))].sort((a, b) => new Date(b) - new Date(a));
+        
+        let consecutive = 0;
+        let today = new Date();
+        
+        for (let i = 0; i < dates.length; i++) {
+            const dateToCheck = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+            const dateStr = dateToCheck.toISOString().split('T')[0];
+            
+            if (dates.includes(dateStr)) {
+                consecutive++;
+            } else {
+                break;
+            }
+        }
+        
+        return consecutive;
+    }
+
+    // 🤖 AI 동기부여 메시지 로드
+    async loadMotivationMessage() {
+        console.log('🤖 AI 동기부여 메시지 요청 중...');
+        
+        const contentEl = document.getElementById('aiEvaluationContent');
+        const badgeEl = document.getElementById('aiEvaluationBadge');
+        const actionsEl = document.getElementById('aiMotivationActions');
+        
+        if (!contentEl) return;
+        
+        // 로딩 상태 표시
+        contentEl.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; color: #6B7280;">
+                <div style="width: 24px; height: 24px; border: 3px solid #667eea; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <span>AI가 당신의 호흡 데이터를 분석하고 있습니다...</span>
+            </div>
+        `;
+        
+        if (badgeEl) badgeEl.textContent = '분석 중...';
+        if (actionsEl) actionsEl.style.display = 'none';
+        
+        try {
+            // 운동 데이터 분석
+            const analysisData = this.analyzeExerciseProgress();
+            
+            if (analysisData.isEmpty) {
+                this.showMotivationMessage({
+                    type: 'welcome',
+                    title: '🌟 첫 발걸음을 내디뎌 보세요!',
+                    message: '호흡근 강화 여정의 시작입니다.\n매일 조금씩 꾸준히 하는 것이 가장 큰 변화를 만들어요.',
+                    level: '신규 사용자'
+                });
+                return;
+            }
+            
+            // Supabase Edge Function으로 AI 조언 요청
+            const motivationData = await this.requestAIMotivation(analysisData);
+            
+            if (motivationData) {
+                this.showMotivationMessage(motivationData);
+                this.motivationCache = motivationData;
+                this.lastMotivationUpdate = new Date();
+            } else {
+                throw new Error('AI 응답 없음');
+            }
+            
+        } catch (error) {
+            console.error('❌ AI 동기부여 메시지 로드 실패:', error);
+            this.showMotivationError();
+        }
+    }
+
+    // 🌐 Supabase Edge Function AI 동기부여 요청
+    async requestAIMotivation(analysisData) {
+        try {
+            const SUPABASE_URL = 'https://rfqbzibewzvqopqgovbc.supabase.co';
+            const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmcWJ6aWJld3p2cW9wcWdvdmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNzIwNTMsImV4cCI6MjA2OTk0ODA1M30.nAXbnAFe4jM7F56QN4b42NhwNJG_iuSXOVM5zC72Bs4';
+            
+            const requestBody = {
+                type: 'motivation',
+                userData: {
+                    userId: this.userId,
+                    analysisData: analysisData,
+                    exerciseHistory: this.exerciseData.slice(0, 30), // 최근 30개 세션
+                    timestamp: new Date().toISOString()
+                }
+            };
+            
+            console.log('🌐 AI 동기부여 요청:', requestBody);
+            
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-advice`, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(requestBody)
+            });
+            
+            if (!response.ok) {
+                throw new Error(`AI 요청 실패: ${response.status}`);
+            }
+            
+            const result = await response.json();
+            console.log('📦 AI 동기부여 응답:', result);
+            
+            if (result.success && result.motivation) {
+                return result.motivation;
+            }
+            
+            throw new Error(result.message || 'AI 응답 형식 오류');
+            
+        } catch (error) {
+            console.error('🚨 AI 동기부여 요청 오류:', error);
+            
+            // 폴백 동기부여 메시지
+            return this.generateFallbackMotivation(analysisData);
+        }
+    }
+
+    // 🎯 폴백 동기부여 메시지 생성
+    generateFallbackMotivation(analysisData) {
+        const messages = {
+            beginner: {
+                type: 'encouragement',
+                title: '💪 좋은 시작이에요!',
+                message: `${analysisData.totalSessions}번의 트레이닝으로 호흡근이 조금씩 강해지고 있어요.\n꾸준함이 가장 큰 힘이니까 오늘도 화이팅!`,
+                level: '초급자'
+            },
+            intermediate: {
+                type: 'progress',
+                title: '🌟 실력이 늘고 있어요!',
+                message: `완료율 ${analysisData.completionRate}%로 꾸준히 발전하고 계시네요.\n이제 저항 강도를 한 단계 올려볼까요?`,
+                level: '중급자'
+            },
+            advanced: {
+                type: 'challenge',
+                title: '🔥 고수의 경지에요!',
+                message: `${analysisData.totalBreaths}회의 호흡으로 이미 전문가 수준!\n더 높은 목표를 향해 도전해보세요.`,
+                level: '고급자'
+            },
+            expert: {
+                type: 'mastery',
+                title: '👑 호흡 마스터!',
+                message: `${analysisData.consecutiveDays}일 연속 트레이닝! 정말 대단해요.\n이제 다른 사람들에게도 영감을 주는 존재가 되었어요.`,
+                level: '전문가'
+            }
+        };
+        
+        return messages[analysisData.level] || messages.beginner;
+    }
+
+    // 💬 동기부여 메시지 UI 표시
+    showMotivationMessage(motivationData) {
+        const contentEl = document.getElementById('aiEvaluationContent');
+        const badgeEl = document.getElementById('aiEvaluationBadge');
+        const actionsEl = document.getElementById('aiMotivationActions');
+        
+        if (contentEl) {
+            contentEl.innerHTML = `
+                <div style="margin-bottom: 16px;">
+                    <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">
+                        ${motivationData.title || '🤖 AI 숨트레이너'}
+                    </h4>
+                    <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #4b5563;">
+                        ${(motivationData.message || '계속 화이팅하세요!').replace(/\n/g, '<br>')}
+                    </p>
+                </div>
+                ${motivationData.insight ? `
+                <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; margin-top: 12px;">
+                    <div style="font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #6b7280;">💡 인사이트</div>
+                    <div style="font-size: 13px; color: #4b5563;">${motivationData.insight}</div>
+                </div>
+                ` : ''}
+            `;
+        }
+        
+        if (badgeEl) {
+            badgeEl.textContent = motivationData.level || '분석 완료';
+        }
+        
+        if (actionsEl) {
+            actionsEl.style.display = 'flex';
+        }
+    }
+
+    // ❌ 에러 상태 표시
+    showMotivationError() {
+        const contentEl = document.getElementById('aiEvaluationContent');
+        const badgeEl = document.getElementById('aiEvaluationBadge');
+        const actionsEl = document.getElementById('aiMotivationActions');
+        
+        if (contentEl) {
+            contentEl.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: #6b7280;">
+                    <div style="margin-bottom: 8px; font-size: 24px;">🤗</div>
+                    <div style="font-size: 14px;">지금은 분석이 어려우니 꾸준히 운동하며 데이터를 쌓아가요!</div>
+                </div>
+            `;
+        }
+        
+        if (badgeEl) badgeEl.textContent = '분석 대기';
+        if (actionsEl) actionsEl.style.display = 'none';
+    }
+
+    // 🔄 동기부여 메시지 새로고침
+    async refreshMotivation() {
+        console.log('🔄 동기부여 메시지 새로고침');
+        this.motivationCache = null;
+        await this.loadMotivationMessage();
+        
+        // GA 이벤트
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'motivation_refresh', {
+                user_id: this.userId,
+                timestamp: new Date().toISOString()
+            });
+        }
+    }
+
+    // 💪 빠른 운동 시작
+    startQuickWorkout() {
+        console.log('💪 빠른 운동 시작');
+        
+        // 운동모드 화면으로 이동
+        if (typeof window.switchTab === 'function') {
+            window.switchTab('workout');
+        }
+        
+        // GA 이벤트
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'quick_workout_start', {
+                source: 'motivation_dashboard',
+                user_id: this.userId
+            });
         }
     }
 
@@ -286,6 +664,9 @@ class IntegratedRecordsDashboard {
         
         // 달력 렌더링
         this.renderCalendar();
+        
+        // ✨ AI 동기부여 메시지 로드
+        this.loadMotivationMessage();
     }
 
     // 📈 내 호흡 기록 차트 렌더링 (X축, Y축 설명 포함)
@@ -559,11 +940,18 @@ class IntegratedRecordsDashboard {
         document.getElementById('selectedDateRecords').style.display = 'none';
         this.renderCalendar();
     }
+
+    // 🧹 정리 (컴포넌트 언마운트 시)
+    destroy() {
+        if (this.motivationUpdateInterval) {
+            clearInterval(this.motivationUpdateInterval);
+        }
+    }
 }
 
 // 🚀 통합 기록 대시보드 초기화 함수
 async function initIntegratedRecordsDashboard() {
-    console.log('📊 통합 기록 대시보드 초기화 시작...');
+    console.log('📊 AI 동기부여 통합 대시보드 초기화 시작...');
     
     // 1. 기존 기록탭 내용 완전 교체
     const recordsScreen = document.getElementById('recordsScreen');
@@ -614,12 +1002,30 @@ async function initIntegratedRecordsDashboard() {
     // 6. 전역 접근 가능하도록 설정
     window.integratedDashboard = dashboard;
     
-    console.log('✅ 통합 기록 대시보드 초기화 완료');
+    console.log('✅ AI 동기부여 통합 대시보드 초기화 완료');
+    
+    // 7. GA 이벤트
+    if (typeof gtag !== 'undefined') {
+        gtag('event', 'motivation_dashboard_initialized', {
+            user_id: dashboard.userId,
+            timestamp: new Date().toISOString()
+        });
+    }
 }
 
 // 🎨 추가 CSS
 const INTEGRATED_CSS = `
 <style>
+@keyframes shimmer {
+    0%, 100% { transform: rotate(0deg) scale(1); }
+    50% { transform: rotate(180deg) scale(1.1); }
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
 .calendar-day:hover {
     background: #E3F2FD !important;
     transform: scale(1.05) !important;
@@ -638,6 +1044,11 @@ const INTEGRATED_CSS = `
     to { transform: translateY(0); opacity: 1; }
 }
 
+.motivation-action-btn:hover {
+    background: rgba(255, 255, 255, 0.3) !important;
+    transform: translateY(-2px);
+}
+
 @media (max-width: 480px) {
     .dashboard-stats-grid {
         gap: 12px !important;
@@ -645,13 +1056,22 @@ const INTEGRATED_CSS = `
     }
     
     .breathing-chart-container,
-    .calendar-section {
+    .calendar-section,
+    .ai-coach-evaluation {
         margin: 0 16px 24px !important;
         padding: 16px !important;
     }
     
     #selectedDateRecords {
         margin: 0 16px 24px !important;
+    }
+    
+    .ai-coach-evaluation {
+        padding: 20px !important;
+    }
+    
+    #aiMotivationActions {
+        flex-direction: column !important;
     }
 }
 </style>
@@ -664,4 +1084,4 @@ document.head.insertAdjacentHTML('beforeend', INTEGRATED_CSS);
 window.initRecordsTab = initIntegratedRecordsDashboard;
 window.onRecordsTabClick = initIntegratedRecordsDashboard;
 
-console.log('📊 통합 기록 대시보드 모듈 로드 완료');
+console.log('🧠 AI 동기부여 통합 대시보드 모듈 로드 완료');
