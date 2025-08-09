@@ -169,27 +169,27 @@ async function updateTodaysGoal() {
   }
 }
 
-// 🆕 개선된 원형 프로그레스바 업데이트
+// 🆕 개선된 원형 프로그레스바 업데이트 (퍼센트 표시)
 function updateEnhancedCircularProgress(current, target, percentage) {
   const progressFill = document.getElementById('progressFill');
-  const countEl = document.getElementById('todaysBreathCount');
+  const percentageEl = document.getElementById('todaysPercentage');
   const statusEl = document.getElementById('goalStatusText');
   const particles = document.getElementById('celebrationParticles');
-  if (!progressFill || !countEl || !statusEl) return;
+  if (!progressFill || !percentageEl || !statusEl) return;
 
-  // 숫자 애니메이션
-  animateNumber(countEl, parseInt(countEl.textContent) || 0, current, 800);
+  // 퍼센트 숫자 애니메이션
+  const displayPercentage = Math.round((current / target) * 100);
+  animateNumber(percentageEl, parseInt(percentageEl.textContent) || 0, displayPercentage, 800);
 
-  // 시각적 진행 (CSS 기반 링 채움 효과)
-  // 각도 기반 회전(여기서는 클래스 기반 색상만 제어)
+  // 링 채움(시각적)
   progressFill.classList.add('default');
   progressFill.classList.remove('completed');
-  countEl.classList.remove('completed');
+  percentageEl.classList.remove('completed');
 
   if (current >= target) {
     progressFill.classList.remove('default');
     progressFill.classList.add('completed');
-    countEl.classList.add('completed');
+    percentageEl.classList.add('completed');
     statusEl.textContent = '🎉 목표 달성!';
     statusEl.className = 'goal-status completed';
     if (particles) {
@@ -1634,37 +1634,51 @@ async function saveAIAdviceToDatabase(sessionId, adviceData) {
             return null;
         }
 
-        console.log('🤖 AI 조언 데이터베이스 저장 시작');
+        console.log('🤖 AI 조언 Supabase 클라이언트로 직접 저장 시작');
         
         const advice = {
             session_id: sessionId,
             intensity_advice: adviceData.intensityAdvice || '',
             comprehensive_advice: adviceData.comprehensiveAdvice || '',
-            summary: null, // 추후 구현
-            gemini_raw_response: adviceData // 전체 응답 저장
+            summary: null,
+            gemini_raw_response: adviceData
         };
 
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/ai_advice`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                'apikey': SUPABASE_ANON_KEY,
-                'Prefer': 'return=representation'
-            },
-            body: JSON.stringify(advice)
-        });
+        const { data, error } = await window.supabaseClient
+            .from('ai_advice')
+            .insert(advice)
+            .select();
 
-        if (!response.ok) {
-            throw new Error(`AI 조언 저장 실패: ${response.status}`);
+        if (error) {
+            console.error('❌ Supabase 클라이언트 저장 실패:', error);
+            try {
+                localStorage.setItem('latestAIAdvice', JSON.stringify({
+                    advice: adviceData.comprehensiveAdvice || adviceData.intensityAdvice,
+                    timestamp: new Date().toISOString(),
+                    sessionId
+                }));
+                console.log('📱 로컬스토리지에 AI 조언 저장 완료 (RLS 우회)');
+            } catch (e) {
+                console.warn('⚠️ 로컬 백업 저장 실패:', e);
+            }
+            return { id: 'local_' + Date.now(), local: true };
         }
 
-        const savedAdvice = await response.json();
-        console.log('✅ AI 조언 저장 완료:', savedAdvice[0]);
-        return savedAdvice[0];
+        console.log('✅ AI 조언 Supabase 저장 완료:', data?.[0]);
+        return data?.[0] || null;
         
     } catch (error) {
         console.error('❌ AI 조언 저장 실패 (기존 기능에는 영향 없음):', error);
+        try {
+            localStorage.setItem('latestAIAdvice', JSON.stringify({
+                advice: adviceData?.comprehensiveAdvice || adviceData?.intensityAdvice,
+                timestamp: new Date().toISOString(),
+                sessionId
+            }));
+            console.log('📱 로컬스토리지 백업 저장 완료');
+        } catch (localError) {
+            console.error('❌ 로컬스토리지 저장도 실패:', localError);
+        }
         return null;
     }
 }
