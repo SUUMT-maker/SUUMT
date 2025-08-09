@@ -203,6 +203,10 @@
 .goal-subtitle { font-size: 13px; color: #666; margin: 0; font-weight: 400; }
 .goal-content { display: flex; flex-direction: column; align-items: center; gap: 24px; }
 
+/* 두 줄 인사문 간격 줄이기 (스코프 한정) */
+.user-greeting-container .user-greeting { margin-bottom: 4px; }
+.user-greeting-container .ai-coaching-message { margin-top: 0; line-height: 1.4; }
+
 /* 대형 원형 프로그레스바 */
 .goal-progress-container { position: relative; display: flex; justify-content: center; }
 .large-circular-progress { width: 180px; height: 180px; position: relative; display: flex; align-items: center; justify-content: center; }
