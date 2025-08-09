@@ -2287,6 +2287,57 @@
 .main-header + .todays-goal-section {
   margin-top: 22px !important; /* 기존 14px → 22px */
 }
+
+/* ====== TODAY'S GOAL – % + alignment ====== */
+/* 1) 남아있는 %는 전부 숨김(안전망) */
+.todays-goal-section .percentage-symbol { display: none !important; }
+
+/* 2) 숫자 옆 %는 CSS로 한 번만 출력 */
+.todays-goal-section .percentage-number {
+  font-feature-settings: "tnum";
+  letter-spacing: -0.3px;
+  line-height: 1;
+  display: inline-block;
+}
+.todays-goal-section .percentage-number::after {
+  content: '%';
+  margin-left: 2px;
+  font-size: 0.55em;
+  color: #9aa4b2;
+  font-weight: 700;
+  position: relative;
+  top: -0.02em; /* 미세 baseline 보정 */
+}
+
+/* 3) 0% 위/아래 정렬 고정: 숫자 위, '달성률' 아래 */
+.todays-goal-section .progress-inner {
+  position: absolute; inset: 16px;
+  background: #fff; border-radius: 50%;
+  display: flex !important;
+  flex-direction: column !important;   /* ← 세로 스택 */
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 6px;                             /* 숫자와 라벨 간격 */
+}
+.todays-goal-section .progress-percentage {
+  display: block;                       /* 숫자 단독 줄 */
+  text-align: center;
+}
+.todays-goal-section .progress-label {
+  margin: 0; line-height: 1;            /* '달성률'이 숫자 아래 고정 */
+}
+
+/* 4) 하단 지표칩: 숫자 집중(아이콘 제거 후 중앙 정렬 유지) */
+.todays-goal-section .stat-icon { display: none !important; }
+.todays-goal-section .stat-chip { justify-content: center; }
+
+/* ====== Header spacing (헤더↔카드 간 여백 확실히) ====== */
+.main-header { 
+  margin-bottom: 18px !important;       /* 노치 패딩과 별개로 분리감 */
+}
+.todays-goal-section {
+  margin-top: 10px;                      /* 안전 여백(헤더가 없을 때도 자연스럽게) */
+}
 /* 📒 Records 화면 스타일 */
 .records-calendar {
     background: white;
