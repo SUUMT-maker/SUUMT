@@ -2246,3 +2246,47 @@ if (document.readyState === 'loading') {
 } else {
   initAutoUpdateSystem();
 }
+
+// 🧩 모던 UI 동기화 유틸 (기존 함수/ID 유지, 새로운 표시 요소만 동기화)
+function syncModernElements() {
+  try {
+    const legacyTotalBreaths = document.getElementById('totalBreaths');
+    const modernBreaths = document.getElementById('completedBreathsToday');
+    if (legacyTotalBreaths && modernBreaths) {
+      modernBreaths.textContent = legacyTotalBreaths.textContent;
+    }
+
+    const legacyAvgSets = document.getElementById('averageSets');
+    const modernSets = document.getElementById('completedSetsToday');
+    if (legacyAvgSets && modernSets) {
+      modernSets.textContent = legacyAvgSets.textContent;
+    }
+
+    const percentEl = document.getElementById('todaysPercentage');
+    if (percentEl && !String(percentEl.textContent).endsWith('%')) {
+      const num = parseInt(percentEl.textContent, 10);
+      if (!Number.isNaN(num)) percentEl.textContent = `${num}%`;
+    }
+  } catch (e) {
+    console.warn('syncModernElements 실패:', e);
+  }
+}
+
+// 기존 함수 호출 후 모던 요소 동기화 (원본 보존)
+if (typeof updateTodaysGoal === 'function') {
+  const __originalUpdateTodaysGoal = updateTodaysGoal;
+  updateTodaysGoal = async function() {
+    const r = await __originalUpdateTodaysGoal.apply(this, arguments);
+    syncModernElements();
+    return r;
+  };
+}
+
+if (typeof displayUserStats === 'function') {
+  const __originalDisplayUserStats = displayUserStats;
+  displayUserStats = function() {
+    const r = __originalDisplayUserStats.apply(this, arguments);
+    syncModernElements();
+    return r;
+  };
+}

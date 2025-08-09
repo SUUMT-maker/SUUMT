@@ -1,3 +1,63 @@
+/* 🎨 모던 홈화면 스타일 */
+.modern-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 24px 40px; position: relative; overflow: hidden; }
+.modern-header::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.15) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.12) 0%, transparent 50%); opacity: 0.5; }
+.modern-header .user-section { position: relative; z-index: 2; }
+.modern-header .user-greeting { display: flex; align-items: center; justify-content: space-between; }
+.modern-header .user-info { display: flex; align-items: center; gap: 12px; }
+.modern-header .user-avatar { width: 44px; height: 44px; background: rgba(255, 255, 255, 0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.3); }
+.modern-header .user-text h3 { font-size: 18px; font-weight: 600; color: white; margin: 0 0 2px 0; }
+.modern-header .user-text p { font-size: 14px; color: rgba(255, 255, 255, 0.8); margin: 0; }
+.live-indicator { background: rgba(255, 255, 255, 0.2); color: white; padding: 6px 12px; border-radius: 20px; font-size: 12px; font-weight: 600; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); display: flex; align-items: center; gap: 6px; }
+.live-dot { width: 6px; height: 6px; background: #4ade80; border-radius: 50%; animation: modernPulse 2s infinite; }
+@keyframes modernPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.6; transform: scale(1.1); } }
+
+.modern-main-content { padding: 32px 24px 120px; }
+.modern-today-goal { background: white; border-radius: 24px; padding: 32px 24px; margin-bottom: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); border: 1px solid rgba(0, 0, 0, 0.04); text-align: center; position: relative; overflow: hidden; }
+.modern-today-goal::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; background: linear-gradient(90deg, #667eea, #4ade80); }
+.goal-header { margin-bottom: 24px; }
+.goal-label { font-size: 14px; color: #6b7280; margin-bottom: 4px; font-weight: 500; letter-spacing: 0.5px; text-transform: uppercase; }
+.goal-title { font-size: 20px; font-weight: 700; color: #1f2937; margin: 0; }
+.modern-progress-circle { width: 140px; height: 140px; margin: 0 auto 24px; position: relative; }
+.progress-ring { width: 140px; height: 140px; transform: rotate(-90deg); }
+.progress-ring circle { fill: none; stroke-width: 8; }
+.progress-background { stroke: #f3f4f6; }
+.progress-bar { stroke: url(#modernGradient); stroke-linecap: round; stroke-dasharray: 377; stroke-dashoffset: 377; transition: stroke-dashoffset 1.5s cubic-bezier(0.4, 0, 0.2, 1); }
+.progress-text { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+.progress-percentage { font-size: 32px; font-weight: 800; color: #667eea; line-height: 1; margin-bottom: 4px; }
+.progress-label { font-size: 12px; color: #6b7280; font-weight: 500; }
+.goal-details { display: flex; justify-content: space-between; align-items: center; background: #f8fafc; border-radius: 16px; padding: 16px 20px; }
+.goal-stat { text-align: center; }
+.goal-stat-number { font-size: 18px; font-weight: 700; color: #1f2937; margin-bottom: 2px; }
+.goal-stat-label { font-size: 12px; color: #6b7280; font-weight: 500; }
+
+.modern-quick-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px; }
+.modern-stat-card { background: white; border-radius: 20px; padding: 20px; box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06); border: 1px solid rgba(0, 0, 0, 0.04); transition: all 0.3s ease; }
+.modern-stat-card:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12); }
+.stat-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.stat-title { font-size: 14px; color: #6b7280; font-weight: 500; }
+.stat-icon { width: 24px; height: 24px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; }
+.stat-icon.breath { background: linear-gradient(135deg, #fef3c7, #f59e0b); }
+.stat-icon.streak { background: linear-gradient(135deg, #fee2e2, #ef4444); }
+.stat-value { font-size: 24px; font-weight: 800; color: #1f2937; line-height: 1; }
+
+.modern-ai-advice { background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%); border-radius: 20px; padding: 24px; border: 1px solid #bae6fd; position: relative; overflow: hidden; margin-bottom: 24px; }
+.ai-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.ai-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, #3b82f6, #1e40af); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 18px; }
+.ai-info h4 { font-size: 16px; font-weight: 600; color: #1e40af; margin: 0 0 2px 0; }
+.ai-info p { font-size: 12px; color: #64748b; margin: 0; }
+.ai-message { font-size: 14px; line-height: 1.6; color: #1e293b; }
+
+.modern-action-button { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 20px; padding: 16px 32px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3); display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; }
+.modern-action-button:hover { transform: translateY(-2px); box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4); }
+
+@media (max-width: 480px) {
+  .modern-header { padding: 50px 20px 32px; }
+  .modern-main-content { padding: 24px 20px 100px; }
+  .modern-progress-circle { width: 120px; height: 120px; }
+  .progress-ring { width: 120px; height: 120px; }
+  .progress-percentage { font-size: 28px; }
+  .modern-today-goal { padding: 24px 20px; }
+}
 /* 홈 화면 AI 코칭 인사말 */
 .main-header { padding: 24px 20px 20px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-bottom: 1px solid rgba(255,255,255,0.15); box-shadow: 0 6px 24px rgba(102, 126, 234, 0.18); }
 .main-header .user-greeting { color: #ffffff; }
@@ -62,6 +122,31 @@
     display: flex;
     justify-content: center;
     margin-bottom: 20px;
+}
+
+/* 메인 실시간 배지 모던 스타일 */
+.live-users-badge {
+    background: linear-gradient(135deg, rgba(79,172,254,0.9) 0%, rgba(0,242,254,0.9) 100%);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 6px 18px rgba(79, 172, 254, 0.35);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    animation: liveGlow 3s ease-in-out infinite;
+}
+
+.live-indicator {
+    width: 6px;
+    height: 6px;
+    background: #4ade80;
+    border-radius: 50%;
+    animation: livePulse 2s ease-in-out infinite;
 }
 
 .goal-header { margin-bottom: 24px; }
