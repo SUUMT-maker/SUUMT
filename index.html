@@ -299,8 +299,9 @@
                             <img src="./images/suumt-logo.png" alt="숨트 로고" onerror="this.style.display='none'; this.parentNode.innerHTML='🫁';">
                         </div>
                         <div class="user-text">
-                            <h4>안녕하세요,</h4>
+                            <h4 id="userGreeting">안녕하세요,</h4>
                             <h3 id="userName">AI 숨트레이너</h3>
+                            <p id="aiCoachingMessage" class="ai-coaching-message">오늘도 깊은 호흡으로 하루를 시작해볼까요?</p>
                             <!-- 🔥 새로운 기능: 메인화면 실시간 현황 -->
                             <div class="live-users-badge" id="mainLiveUsers">
                                 <div class="live-indicator"></div>
@@ -365,6 +366,44 @@
                         <div class="stat-card-value">
                             <div class="stat-number" id="totalExercises">0</div>
                             <div class="stat-unit">회</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🆕 오늘의 목표 섹션 -->
+            <div class="todays-goal-section">
+                <div class="section-header">
+                    <div>
+                        <h2 class="section-title">
+                            <span class="section-icon">🎯</span>
+                            <span>오늘의 목표</span>
+                        </h2>
+                        <div class="section-subtitle">호흡 40회를 목표로 꾸준한 성장을 만들어가요</div>
+                    </div>
+                </div>
+
+                <div class="goal-content-container">
+                    <!-- 좌측: 원형 프로그레스바 -->
+                    <div class="goal-progress-section">
+                        <div class="circular-progress" id="todaysGoalProgress">
+                            <div class="progress-inner">
+                                <div class="progress-number" id="todaysBreathCount">0</div>
+                                <div class="progress-target">/ 40</div>
+                                <div class="progress-label">회</div>
+                            </div>
+                        </div>
+                        <div class="goal-status" id="goalStatusText">시작해보세요!</div>
+                    </div>
+
+                    <!-- 우측: AI 조언 -->
+                    <div class="ai-advice-section">
+                        <div class="ai-advice-header">
+                            <span class="ai-icon">🤖</span>
+                            <span class="ai-title">AI 숨트레이너</span>
+                        </div>
+                        <div class="ai-advice-content" id="latestAIAdvice">
+                            운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!
                         </div>
                     </div>
                 </div>

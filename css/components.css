@@ -1,3 +1,161 @@
+/* 홈 화면 AI 코칭 인사말 */
+.ai-coaching-message {
+    font-size: 14px;
+    color: #6b7280;
+    margin: 8px 0 12px 0;
+    line-height: 1.4;
+    font-weight: 400;
+    opacity: 0.9;
+}
+
+/* 🎯 오늘의 목표 섹션 */
+.todays-goal-section {
+    margin-bottom: 24px;
+}
+
+.goal-content-container {
+    background: white;
+    border: 1px solid #E7E7E7;
+    border-radius: 24px;
+    margin: 0 20px;
+    padding: 20px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+/* 원형 프로그레스바 */
+.goal-progress-section {
+    flex-shrink: 0;
+    text-align: center;
+}
+
+.circular-progress {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    background: conic-gradient(#667eea 0deg, #e5e7eb 0deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.5s ease;
+}
+
+.circular-progress::before {
+    content: '';
+    position: absolute;
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: white;
+}
+
+.progress-inner {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+}
+
+.progress-number {
+    font-size: 24px;
+    font-weight: bold;
+    color: #667eea;
+    line-height: 1;
+}
+
+.progress-target {
+    font-size: 14px;
+    color: #6b7280;
+    line-height: 1;
+}
+
+.progress-label {
+    font-size: 12px;
+    color: #6b7280;
+    margin-top: 2px;
+}
+
+.goal-status {
+    margin-top: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+}
+
+.goal-status.completed {
+    color: #059669;
+}
+
+.goal-status.in-progress {
+    color: #d97706;
+}
+
+/* AI 조언 섹션 */
+.ai-advice-section {
+    flex: 1;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+}
+
+.ai-advice-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+.ai-icon {
+    font-size: 18px;
+}
+
+.ai-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+
+.ai-advice-content {
+    flex: 1;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #4b5563;
+    display: flex;
+    align-items: center;
+}
+
+/* 모바일 최적화 */
+@media (max-width: 480px) {
+    .goal-content-container {
+        flex-direction: column;
+        gap: 16px;
+        margin: 0 16px;
+        padding: 16px;
+    }
+    
+    .circular-progress {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .circular-progress::before {
+        width: 75px;
+        height: 75px;
+    }
+    
+    .progress-number {
+        font-size: 20px;
+    }
+    
+    .ai-advice-section {
+        min-height: auto;
+    }
+}
 /* 🎬 애니메이션 키프레임 */
 
 /* 스플래시 화면 애니메이션 */

@@ -17,30 +17,230 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 });
 
-// 3️⃣ 로그인 상태 감지
+// 3️⃣ 로그인 상태 감지 (사용자 정보/인사말 로드 포함)
 window.supabaseClient.auth.onAuthStateChange((event, session) => {
   if (event === 'SIGNED_IN' && session?.user) {
     console.log('✅ Kakao user signed in:', session.user);
     console.log('👤 User ID:', session.user.id);
     window.currentUserId = session.user.id;
+    window.currentUserSession = session;
 
     // 화면 전환
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('homeScreen').style.display = 'block';
+    
+    // 사용자 정보 및 AI 인사말 로드
+    loadUserInfo(session.user);
   }
 });
 
-// 4️⃣ 페이지 새로고침 시 세션 확인
+// 4️⃣ 페이지 새로고침 시 세션 확인 (사용자 정보 로드 포함)
 (async function checkSession() {
   const { data: { session } } = await window.supabaseClient.auth.getSession();
   if (session?.user) {
     console.log('✅ Session found:', session.user);
     console.log('👤 User ID:', session.user.id);
     window.currentUserId = session.user.id;
+    window.currentUserSession = session;
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('homeScreen').style.display = 'block';
+    
+    // 사용자 정보 로드
+    loadUserInfo(session.user);
   }
 })();
+
+// 🆕 사용자 정보 로드 및 AI 인사말 생성
+async function loadUserInfo(user) {
+  try {
+    const displayName = user.user_metadata?.display_name || 
+                        user.user_metadata?.name || 
+                        user.user_metadata?.full_name || 
+                        '사용자';
+
+    const nameEl = document.getElementById('userName');
+    if (nameEl) nameEl.textContent = `${displayName}님`;
+
+    const coachingMessage = await generateAICoachingGreeting(user.id, displayName);
+    const msgEl = document.getElementById('aiCoachingMessage');
+    if (msgEl) msgEl.textContent = coachingMessage;
+
+    console.log('✅ 사용자 정보 로드 완료:', displayName);
+  } catch (error) {
+    console.error('❌ 사용자 정보 로드 실패:', error);
+    const nameEl = document.getElementById('userName');
+    const msgEl = document.getElementById('aiCoachingMessage');
+    if (nameEl) nameEl.textContent = '사용자님';
+    if (msgEl) msgEl.textContent = '오늘도 깊은 호흡으로 하루를 시작해볼까요?';
+  }
+}
+
+// 🆕 AI 코칭 스타일 인사말 생성
+async function generateAICoachingGreeting(userId, displayName) {
+  try {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const y = yesterday.getFullYear();
+    const m = String(yesterday.getMonth() + 1).padStart(2, '0');
+    const d = String(yesterday.getDate()).padStart(2, '0');
+    const yesterdayStr = `${y}-${m}-${d}`;
+
+    const { data: yesterdayWorkouts, error } = await window.supabaseClient
+      .from('exercise_sessions')
+      .select('completed_breaths, created_at')
+      .eq('user_id', userId)
+      .gte('created_at', `${yesterdayStr} 00:00:00+00`)
+      .lt('created_at', `${yesterdayStr} 23:59:59+00`);
+    if (error) throw error;
+
+    const didWorkoutYesterday = Array.isArray(yesterdayWorkouts) && yesterdayWorkouts.length > 0;
+    const totalBreathsYesterday = didWorkoutYesterday
+      ? yesterdayWorkouts.reduce((sum, s) => sum + (s.completed_breaths || 0), 0)
+      : 0;
+
+    const greetingTemplates = {
+      noYesterdayWorkout: [
+        '새로운 하루, 새로운 시작이에요! 오늘은 어떤 호흡을 경험해볼까요?',
+        '숨고르기가 필요한 하루네요. 차근차근 시작해봐요!',
+        '오늘이야말로 호흡근육을 깨워볼 완벽한 타이밍이에요!',
+        '휴식 후 다시 만나니 더 반가워요. 오늘도 함께 호흡해요!',
+        '새로운 에너지로 가득한 하루! 깊은 호흡으로 채워봐요.'
+      ],
+      lightYesterdayWorkout: [
+        '어제의 노력이 보여요! 오늘은 조금 더 도전해볼까요?',
+        '꾸준함이 느껴져요. 오늘도 한 걸음씩 나아가봐요!',
+        '어제의 시작이 오늘의 힘이 되고 있어요. 계속 가봐요!',
+        '작은 실천이 큰 변화를 만들어요. 오늘도 응원할게요!',
+        '어제의 당신이 오늘의 동기가 되고 있네요!'
+      ],
+      goodYesterdayWorkout: [
+        '어제 정말 훌륭했어요! 이 페이스로 계속 가봐요!',
+        '연속 트레이닝의 힘을 느끼고 계시는군요! 멋져요!',
+        '어제의 성취가 오늘의 자신감이 되고 있어요!',
+        '꾸준한 노력이 습관으로 자리잡고 있네요. 대단해요!',
+        '어제 완성한 호흡 리듬을 오늘도 이어가봐요!'
+      ]
+    };
+
+    let selectedTemplates;
+    if (!didWorkoutYesterday) {
+      selectedTemplates = greetingTemplates.noYesterdayWorkout;
+    } else if (totalBreathsYesterday < 20) {
+      selectedTemplates = greetingTemplates.lightYesterdayWorkout;
+    } else {
+      selectedTemplates = greetingTemplates.goodYesterdayWorkout;
+    }
+
+    const randomIndex = Math.floor(Math.random() * selectedTemplates.length);
+    return selectedTemplates[randomIndex];
+  } catch (error) {
+    console.error('❌ AI 인사말 생성 실패:', error);
+    return '오늘도 깊은 호흡으로 하루를 시작해볼까요?';
+  }
+}
+
+// 🆕 오늘의 목표 데이터 로드 및 업데이트
+async function updateTodaysGoal() {
+  try {
+    if (!window.currentUserId) return;
+    const today = new Date();
+    const y = today.getFullYear();
+    const m = String(today.getMonth() + 1).padStart(2, '0');
+    const d = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${y}-${m}-${d}`;
+
+    const { data: todaySessions, error: sessionError } = await window.supabaseClient
+      .from('exercise_sessions')
+      .select('completed_breaths, created_at')
+      .eq('user_id', window.currentUserId)
+      .gte('created_at', `${todayStr} 00:00:00+00`)
+      .lt('created_at', `${todayStr} 23:59:59+00`);
+    if (sessionError) throw sessionError;
+
+    const todayBreaths = (todaySessions || []).reduce((sum, s) => sum + (s.completed_breaths || 0), 0);
+    const goalBreaths = 40;
+    const progressPercentage = Math.min((todayBreaths / goalBreaths) * 100, 100);
+
+    updateCircularProgress(todayBreaths, goalBreaths, progressPercentage);
+    await loadLatestAIAdvice();
+    console.log('✅ 오늘의 목표 업데이트 완료:', { todayBreaths, goalBreaths, progressPercentage });
+  } catch (error) {
+    console.error('❌ 오늘의 목표 업데이트 실패:', error);
+  }
+}
+
+// 🆕 원형 프로그레스바 업데이트
+function updateCircularProgress(current, target, percentage) {
+  const progressEl = document.getElementById('todaysGoalProgress');
+  const countEl = document.getElementById('todaysBreathCount');
+  const statusEl = document.getElementById('goalStatusText');
+  if (!progressEl || !countEl || !statusEl) return;
+  countEl.textContent = current;
+  const degree = (percentage / 100) * 360;
+  progressEl.style.background = `conic-gradient(#667eea ${degree}deg, #e5e7eb ${degree}deg)`;
+  if (current >= target) {
+    statusEl.textContent = '🎉 목표 달성!';
+    statusEl.className = 'goal-status completed';
+    progressEl.style.background = `conic-gradient(#059669 360deg, #059669 360deg)`;
+  } else if (current > 0) {
+    statusEl.textContent = `${target - current}회 더 가능해요!`;
+    statusEl.className = 'goal-status in-progress';
+  } else {
+    statusEl.textContent = '시작해보세요!';
+    statusEl.className = 'goal-status';
+  }
+}
+
+// 🆕 최신 AI 조언 로드
+async function loadLatestAIAdvice() {
+  try {
+    if (!window.currentUserId) return;
+    // 최근 세션의 ai_advice 조회 (사용자 본인 세션에 한해)
+    const { data: sessions, error: sErr } = await window.supabaseClient
+      .from('exercise_sessions')
+      .select('id')
+      .eq('user_id', window.currentUserId)
+      .order('created_at', { ascending: false })
+      .limit(10);
+    if (sErr) throw sErr;
+    const sessionIds = (sessions || []).map(s => s.id);
+    if (sessionIds.length === 0) {
+      const el = document.getElementById('latestAIAdvice');
+      if (el) {
+        el.textContent = '운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!';
+        el.style.fontStyle = 'italic';
+      }
+      return;
+    }
+
+    const { data: advices, error } = await window.supabaseClient
+      .from('ai_advice')
+      .select('comprehensive_advice, created_at')
+      .in('session_id', sessionIds)
+      .order('created_at', { ascending: false })
+      .limit(1);
+    if (error) throw error;
+
+    const adviceEl = document.getElementById('latestAIAdvice');
+    if (!adviceEl) return;
+    if (advices && advices.length > 0) {
+      const advice = advices[0].comprehensive_advice || '';
+      const truncated = advice.length > 80 ? advice.substring(0, 80) + '...' : advice;
+      adviceEl.textContent = truncated || '운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!';
+      adviceEl.style.fontStyle = 'normal';
+    } else {
+      adviceEl.textContent = '운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!';
+      adviceEl.style.fontStyle = 'italic';
+    }
+  } catch (error) {
+    console.error('❌ AI 조언 로드 실패:', error);
+    const adviceEl = document.getElementById('latestAIAdvice');
+    if (adviceEl) {
+      adviceEl.textContent = '운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!';
+      adviceEl.style.fontStyle = 'italic';
+    }
+  }
+}
 
 // 🏠 메인 앱 관련 함수들
 
@@ -1139,6 +1339,7 @@ function loadUserData() {
     displayUserStats(stats);
     updateChart();
     updateSocialProofData(); // 🔥 새로운 기능: 사회적 증명 데이터 업데이트
+    updateTodaysGoal(); // 🆕 오늘의 목표 업데이트
 }
 
 // 저항 설정 관리 함수들
