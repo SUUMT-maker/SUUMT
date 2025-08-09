@@ -315,115 +315,80 @@
                 </div>
             </div>
 
-            <!-- 통계 섹션 -->
-            <div class="stats-section">
-                <div class="section-header">
-                    <div>
-                        <h2 class="section-title">
-                            <span class="section-icon">📊</span>
-                            <span>오늘의 기록</span>
-                        </h2>
-                        <div class="section-subtitle">오늘 하루 나의 호흡 트레이닝 현황</div>
-                    </div>
-                </div>
-
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-card-title">오늘 호흡</div>
-                            <div class="stat-card-icon">🫁</div>
-                        </div>
-                        <div class="stat-card-value">
+            <!-- 추가 통계 카드 섹션 (모던) -->
+            <div class="additional-stats-section">
+                <div class="additional-stats-grid">
+                    <div class="stat-card-modern">
+                        <div class="stat-icon">🫁</div>
+                        <div class="stat-info">
                             <div class="stat-number" id="totalBreaths">0</div>
-                            <div class="stat-unit">회</div>
+                            <div class="stat-label">오늘 호흡</div>
                         </div>
                     </div>
-
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-card-title">오늘 완료</div>
-                            <div class="stat-card-icon">💪</div>
-                        </div>
-                        <div class="stat-card-value">
-                            <div class="stat-number" id="averageSets">0</div>
-                            <div class="stat-unit">세트</div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-card-title">연속 일수</div>
-                            <div class="stat-card-icon">🔥</div>
-                        </div>
-                        <div class="stat-card-value">
+                    <div class="stat-card-modern">
+                        <div class="stat-icon">🔥</div>
+                        <div class="stat-info">
                             <div class="stat-number" id="consecutiveDays">0</div>
-                            <div class="stat-unit">일</div>
+                            <div class="stat-label">연속 일수</div>
                         </div>
                     </div>
-
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-card-title">총 트레이닝</div>
-                            <div class="stat-card-icon">🏆</div>
-                        </div>
-                        <div class="stat-card-value">
-                            <div class="stat-number" id="totalExercises">0</div>
-                            <div class="stat-unit">회</div>
-                        </div>
-                    </div>
+                </div>
+                <!-- 기존 함수 호환용 숨김 값 -->
+                <div style="display:none;">
+                    <span id="averageSets">0</span>
+                    <span id="totalExercises">0</span>
                 </div>
             </div>
 
-            <!-- 🆕 개선된 오늘의 목표 섹션 -->
-            <div class="todays-goal-section">
-                <div class="goal-header">
-                    <div class="goal-title-container">
-                        <span class="goal-icon">🎯</span>
-                        <div>
-                            <h2 class="goal-title">오늘의 목표</h2>
-                            <p class="goal-subtitle">호흡 40회를 목표로 꾸준한 성장을 만들어가요</p>
-                        </div>
-                    </div>
+            <!-- 오늘의 목표 섹션 (모던 레이아웃) -->
+            <div class="modern-todays-goal-section">
+                <div class="goal-main-header">
+                    <h1 class="goal-main-title">TODAY'S GOAL</h1>
+                    <h2 class="goal-main-subtitle">오늘의 목표</h2>
                 </div>
-
-                <div class="goal-content">
-                    <!-- 개선된 대형 프로그레스바 -->
-                    <div class="goal-progress-container">
-                        <div class="large-circular-progress" id="todaysGoalProgress" aria-label="오늘의 목표 달성률">
-                            <div class="progress-track"></div>
-                            <div class="progress-fill" id="progressFill"></div>
-                            <div class="progress-inner">
-                                <div class="progress-percentage" aria-live="polite">
-                                    <span class="percentage-number" id="todaysPercentage">0</span>
-                                    <span class="percentage-symbol">%</span>
-                                </div>
-                                <div class="progress-label">달성률</div>
-                                <div class="goal-status" id="goalStatusText">시작해보세요!</div>
+                <div class="goal-progress-container">
+                    <div class="large-circular-progress" id="todaysGoalProgress">
+                        <div class="progress-track"></div>
+                        <div class="progress-fill" id="progressFill"></div>
+                        <div class="progress-inner">
+                            <div class="progress-percentage">
+                                <span class="percentage-number" id="todaysPercentage">0</span>
+                                <span class="percentage-symbol">%</span>
                             </div>
-                            <!-- 목표 달성 축하 파티클 -->
-                            <div class="celebration-particles" id="celebrationParticles"></div>
+                            <div class="progress-label">달성률</div>
                         </div>
                     </div>
-
-                    <!-- AI 조언 표시 -->
-                    <div class="ai-advice-display" id="latestAIAdviceContainer">
-                        <div class="ai-advice-content" id="latestAIAdvice">
-                            운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!
-                        </div>
+                </div>
+                <div class="goal-stats-row">
+                    <div class="goal-stat-card">
+                        <div class="stat-number">40</div>
+                        <div class="stat-label">목표 호흡</div>
+                    </div>
+                    <div class="goal-stat-card">
+                        <div class="stat-number" id="completedBreathsToday">0</div>
+                        <div class="stat-label">완료 호흡</div>
+                    </div>
+                    <div class="goal-stat-card">
+                        <div class="stat-number" id="completedSetsToday">0</div>
+                        <div class="stat-label">완료 세트</div>
                     </div>
                 </div>
             </div>
 
-            <!-- 차트 섹션 -->
-            <div class="chart-section">
-                <div class="section-header">
-                    <div>
-                        <h2 class="section-title">
-                            <span class="section-icon">📈</span>
-                            <span>주간 활동</span>
-                        </h2>
-                        <div class="section-subtitle" id="chartSubtitle">이번 주 트레이닝 성과를 한눈에</div>
+            <!-- AI 숨트레이너 섹션 (기존 내용 유지, 위치 조정) -->
+            <div class="ai-advice-section-modern">
+                <div class="ai-advice-display" id="latestAIAdviceContainer">
+                    <div class="ai-advice-content" id="latestAIAdvice">
+                        운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!
                     </div>
+                </div>
+            </div>
+
+            <!-- 주간 활동 차트 (미니멀) -->
+            <div class="weekly-chart-minimal">
+                <div class="chart-header-minimal">
+                    <h3>주간 활동</h3>
+                    <p class="chart-date-range" id="chartSubtitle">이번 주 트레이닝 성과</p>
                 </div>
 
                 <div class="chart-container">

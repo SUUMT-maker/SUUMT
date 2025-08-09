@@ -1,3 +1,44 @@
+/* ========================
+   홈: 오늘의 목표 (모던)
+   ======================== */
+.modern-todays-goal-section {
+  background: white;
+  margin: 20px;
+  padding: 32px 24px;
+  border-radius: 24px;
+  text-align: center;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+.goal-main-header { margin-bottom: 32px; }
+.goal-main-title { font-size: 16px; color: #6B7280; font-weight: 500; margin: 0 0 4px 0; letter-spacing: 0.5px; }
+.goal-main-subtitle { font-size: 24px; color: #1F2937; font-weight: 700; margin: 0; }
+.goal-stats-row { display: flex; justify-content: space-between; margin-top: 24px; gap: 16px; }
+.goal-stat-card { flex: 1; text-align: center; padding: 16px 8px; background: #F8FAFC; border-radius: 16px; }
+.goal-stat-card .stat-number { font-size: 18px; font-weight: 700; color: #1f2937; margin-bottom: 4px; }
+.goal-stat-card .stat-label { font-size: 12px; color: #6b7280; }
+
+/* 추가 통계 카드 (모던) */
+.additional-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 0 20px 24px; }
+.stat-card-modern { background: white; padding: 20px; border-radius: 16px; display: flex; align-items: center; gap: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.stat-card-modern .stat-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; background: #EEF2FF; }
+.stat-card-modern .stat-info .stat-number { font-size: 22px; font-weight: 800; color: #1f2937; line-height: 1; }
+.stat-card-modern .stat-info .stat-label { font-size: 12px; color: #6b7280; }
+
+/* AI 조언 섹션 (모던 래퍼만) */
+.ai-advice-section-modern { margin: 0 20px 24px; }
+
+/* 주간 활동 차트 (미니멀 헤더) */
+.weekly-chart-minimal { margin-top: 8px; }
+.chart-header-minimal { padding: 0 20px; display: flex; align-items: baseline; justify-content: space-between; }
+.chart-header-minimal h3 { margin: 0; font-size: 20px; font-weight: 700; color: #1f2937; }
+.chart-header-minimal .chart-date-range { margin: 4px 0 0 0; font-size: 12px; color: #6b7280; }
+
+@media (max-width: 480px) {
+  .modern-todays-goal-section { margin: 16px; padding: 24px 20px; }
+  .goal-main-subtitle { font-size: 20px; }
+  .goal-stats-row { gap: 12px; }
+  .stat-card-modern { padding: 16px; }
+}
 /* 🎨 모던 홈화면 스타일 */
 .modern-header { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 60px 24px 40px; position: relative; overflow: hidden; }
 .modern-header::before { content: ''; position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.15) 0%, transparent 40%), radial-gradient(circle at 80% 70%, rgba(255,255,255,0.12) 0%, transparent 50%); opacity: 0.5; }
