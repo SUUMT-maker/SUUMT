@@ -75,7 +75,22 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { exerciseData } = await req.json();
+    // 🔐 Authorization 헤더 확인
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    }
+
+    const token = authHeader.replace('Bearer ', '');
+
+    const body: RequestBody = await req.json();
+    const { exerciseData, sessionId: bodySessionId } = body;
     console.log('📊 운동 데이터:', exerciseData);
 
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
@@ -98,47 +113,98 @@ Deno.serve(async (req: Request) => {
         }
       : parseResponse(geminiResponse, exerciseData);
 
-    // 2️⃣ Supabase 저장
+    // 2️⃣ 사용자 컨텍스트에서 Supabase 클라이언트 생성 (RLS 준수)
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
     const { createClient } = await import("npm:@supabase/supabase-js@2.39.8");
-    const supabase = createClient(supabaseUrl!, supabaseKey!);
+    const supabase = createClient(supabaseUrl!, supabaseAnonKey!, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
 
-    const { data: inserted, error } = await supabase
-      .from('ai_advice')
-      .insert([{
-        session_id: exerciseData.sessionId || null,
-        intensity_advice: aiAdvice.intensityAdvice,
-        comprehensive_advice: aiAdvice.comprehensiveAdvice,
-        gemini_raw_response: geminiResponse
-      }])
-      .select('id, session_id, created_at');
+    // 2-1) JWT 검증 (간단 검증: 사용자 조회 시도)
+    const { data: authData, error: authError } = await supabase.auth.getUser();
+    if (authError || !authData?.user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401,
+        headers: {
+          'Content-Type': 'application/json',
+          'Access-Control-Allow-Origin': '*',
+        },
+      });
+    }
 
-    if (error) console.error('❌ ai_advice insert error:', error);
+    // 2-2) 세션 소유권 검증 (세션 ID가 있는 경우)
+    const incomingSessionId = bodySessionId || exerciseData.sessionId || null;
+    let isOwnedSession = false;
+    if (incomingSessionId) {
+      const { data: owned } = await supabase
+        .from('exercise_sessions')
+        .select('id')
+        .eq('id', incomingSessionId)
+        .limit(1)
+        .maybeSingle();
+      isOwnedSession = !!owned?.id;
+      if (!isOwnedSession) {
+        return new Response(JSON.stringify({ error: 'Forbidden: session not owned' }), {
+          status: 403,
+          headers: {
+            'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*',
+          },
+        });
+      }
+    }
+
+    let inserted: Array<{ id: string }> | null = null;
+    // 동기부여(motivation) 요청은 세션에 묶이지 않으므로 DB 저장을 생략
+    if (!isMotivation && incomingSessionId && isOwnedSession) {
+      const insertRes = await supabase
+        .from('ai_advice')
+        .insert([
+          {
+            session_id: incomingSessionId,
+            intensity_advice: aiAdvice.intensityAdvice,
+            comprehensive_advice: aiAdvice.comprehensiveAdvice,
+            gemini_raw_response: geminiResponse,
+          },
+        ])
+        .select('id, session_id, created_at');
+      if (insertRes.error) {
+        console.error('❌ ai_advice insert error:', insertRes.error);
+      } else {
+        inserted = insertRes.data as Array<{ id: string }>;
+      }
+    }
 
     // 3️⃣ 하루 요약(summary) 생성
-    const today = new Date().toISOString().split('T')[0];
-    const { data: dailyAdvices } = await supabase
-      .from('ai_advice')
-      .select('comprehensive_advice')
-      .eq('session_id', exerciseData.sessionId)
-      .gte('created_at', `${today}T00:00:00`)
-      .lte('created_at', `${today}T23:59:59`);
+    if (!isMotivation && incomingSessionId) {
+      const today = new Date().toISOString().split('T')[0];
+      const { data: dailyAdvices } = await supabase
+        .from('ai_advice')
+        .select('comprehensive_advice')
+        .eq('session_id', incomingSessionId)
+        .gte('created_at', `${today}T00:00:00`)
+        .lte('created_at', `${today}T23:59:59`);
 
-    if (dailyAdvices && dailyAdvices.length > 1) {
-      const summaryPrompt = generateDailySummaryPrompt(dailyAdvices);
-      const summaryResponse = await callGeminiAPI(geminiApiKey, summaryPrompt);
-      const summaryText = parseSummary(summaryResponse);
+      if (dailyAdvices && dailyAdvices.length > 1) {
+        const summaryPrompt = generateDailySummaryPrompt(dailyAdvices);
+        const summaryResponse = await callGeminiAPI(geminiApiKey, summaryPrompt);
+        const summaryText = parseSummary(summaryResponse);
 
-      if (summaryText) {
-        // 하루 대표 세션(첫 번째 insert)에 summary 업데이트
-        const latestId = inserted?.[0]?.id;
-        if (latestId) {
-          await supabase
-            .from('ai_advice')
-            .update({ summary: summaryText })
-            .eq('id', latestId);
-          console.log('✅ Daily summary updated:', summaryText);
+        if (summaryText) {
+          const latestId = inserted?.[0]?.id;
+          if (latestId) {
+            // UPDATE 정책이 없을 수 있으므로 실패해도 무시하고 로깅만 수행
+            const updateRes = await supabase
+              .from('ai_advice')
+              .update({ summary: summaryText })
+              .eq('id', latestId);
+            if (updateRes.error) {
+              console.warn('⚠️ Daily summary update failed (policy may block):', updateRes.error.message);
+            } else {
+              console.log('✅ Daily summary updated:', summaryText);
+            }
+          }
         }
       }
     }
