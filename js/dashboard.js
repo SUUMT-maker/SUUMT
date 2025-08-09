@@ -425,13 +425,13 @@ class IntegratedRecordsDashboard {
         }
     }
 
-    // 🔧 운동 결과 화면과 동일한 방식으로 AI 조언 요청
+    // 🔧 운동 결과 화면과 동일한 방식으로 AI 조언 요청 (+ DB 저장)
     async getMotivationAdviceFromAI(analysisData) {
         try {
             console.log('🤖 Supabase AI 동기부여 조언 요청 시작');
             console.log('📊 전달할 분석 데이터:', analysisData);
             
-            // 🔧 운동 결과 화면과 동일한 데이터 구조로 변환
+            // 🔧 운동 결과 화면과 동일한 데이터 구조로 변환 + 동기부여 특화 데이터
             const requestBody = {
                 exerciseData: {
                     // 기본 운동 데이터 (Edge Function이 기대하는 형태)
@@ -445,7 +445,7 @@ class IntegratedRecordsDashboard {
                     exerciseTime: this.formatExerciseTime(analysisData.totalSessions),
                     isAborted: false,
                     
-                    // 추가 분석 데이터 (동기부여용)
+                    // 🎯 동기부여 특화 데이터 (더 풍부한 컨텍스트 제공)
                     totalSessions: analysisData.totalSessions,
                     completionRate: analysisData.completionRate,
                     consecutiveDays: analysisData.consecutiveDays,
@@ -456,14 +456,20 @@ class IntegratedRecordsDashboard {
                     
                     // 동기부여 요청임을 표시
                     requestType: 'motivation',
-                    analysisType: 'comprehensive_progress'
+                    analysisType: 'comprehensive_progress',
+                    
+                    // 🔧 추가 컨텍스트 정보
+                    userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+                    requestTime: new Date().toISOString(),
+                    userLevel: analysisData.level,
+                    progressTrend: analysisData.trend
                 },
                 sessionId: 'motivation_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
             };
             
             console.log('🌐 Supabase 요청 데이터:', requestBody);
             
-            // 🔧 운동 결과 화면과 동일한 URL 구성과 헤더 순서
+            // API 요청
             const SUPABASE_URL = 'https://rfqbzibewzvqopqgovbc.supabase.co';
             const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmcWJ6aWJld3p2cW9wcWdvdmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNzIwNTMsImV4cCI6MjA2OTk0ODA1M30.nAXbnAFe4jM7F56QN4b42NhwNJG_iuSXOVM5zC72Bs4';
             
@@ -484,13 +490,26 @@ class IntegratedRecordsDashboard {
             console.log('📦 Supabase 응답:', result);
             
             if (result.success && result.advice) {
-                return {
+                const motivationData = {
                     motivationMessage: result.advice.comprehensiveAdvice || result.advice.intensityAdvice || result.advice,
                     intensityAdvice: result.advice.intensityAdvice,
                     comprehensiveAdvice: result.advice.comprehensiveAdvice,
                     insight: this.extractInsightFromAdvice(result.advice),
-                    source: 'ai_gemini'
+                    source: 'ai_gemini',
+                    sessionId: requestBody.sessionId,
+                    analysisData: analysisData,
+                    requestTime: new Date().toISOString()
                 };
+                
+                // 🔥 동기부여 답변을 데이터베이스에 저장
+                try {
+                    await this.saveMotivationToDatabase(motivationData, requestBody.sessionId);
+                    console.log('✅ 동기부여 답변 데이터베이스 저장 완료');
+                } catch (saveError) {
+                    console.error('❌ 동기부여 답변 저장 실패 (기능에는 영향 없음):', saveError);
+                }
+                
+                return motivationData;
             }
             
             throw new Error(result.message || 'AI 동기부여 조언 생성 실패');
@@ -595,7 +614,7 @@ class IntegratedRecordsDashboard {
         };
     }
 
-    // 💬 동기부여 메시지 UI 표시
+    // 💬 동기부여 메시지 UI 표시 (+ 평가 버튼)
     showMotivationMessage(motivationData) {
         const contentEl = document.getElementById('aiEvaluationContent');
         const badgeEl = document.getElementById('aiEvaluationBadge');
@@ -617,6 +636,26 @@ class IntegratedRecordsDashboard {
                     <div style="font-size: 13px; color: #4b5563;">${motivationData.insight}</div>
                 </div>
                 ` : ''}
+                
+                ${motivationData.sessionId ? `
+                <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
+                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">이 조언이 도움이 되었나요?</div>
+                    <div style="display: flex; gap: 8px; justify-content: center;">
+                        <button onclick="window.integratedDashboard.rateMotivation('${motivationData.sessionId}', 5, '매우 도움됨')" 
+                                style="padding: 4px 8px; background: #10b981; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">
+                            👍 도움됨
+                        </button>
+                        <button onclick="window.integratedDashboard.rateMotivation('${motivationData.sessionId}', 3, '보통')" 
+                                style="padding: 4px 8px; background: #6b7280; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">
+                            😐 보통
+                        </button>
+                        <button onclick="window.integratedDashboard.rateMotivation('${motivationData.sessionId}', 1, '별로')" 
+                                style="padding: 4px 8px; background: #ef4444; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">
+                            👎 별로
+                        </button>
+                    </div>
+                </div>
+                ` : ''}
             `;
         }
         
@@ -626,6 +665,273 @@ class IntegratedRecordsDashboard {
         
         if (actionsEl) {
             actionsEl.style.display = 'flex';
+        }
+    }
+
+    // 🔥 동기부여 답변을 데이터베이스에 저장
+    async saveMotivationToDatabase(motivationData, sessionId) {
+        try {
+            console.log('💾 동기부여 답변 데이터베이스 저장 시작');
+            
+            const motivationRecord = {
+                user_id: this.userId,
+                session_id: sessionId,
+                motivation_message: motivationData.motivationMessage,
+                comprehensive_advice: motivationData.comprehensiveAdvice,
+                intensity_advice: motivationData.intensityAdvice,
+                insight: motivationData.insight,
+                analysis_data: motivationData.analysisData,
+                user_level: motivationData.analysisData.level,
+                user_trend: motivationData.analysisData.trend,
+                total_sessions: motivationData.analysisData.totalSessions,
+                completion_rate: motivationData.analysisData.completionRate,
+                consecutive_days: motivationData.analysisData.consecutiveDays,
+                avg_resistance: motivationData.analysisData.avgResistance,
+                ai_source: 'gemini',
+                request_type: 'motivation',
+                response_quality: null,
+                created_at: new Date().toISOString(),
+                request_time: motivationData.requestTime
+            };
+            
+            console.log('📝 저장할 동기부여 데이터:', motivationRecord);
+            
+            const { data, error } = await this.supabaseClient
+                .from('motivation_responses')
+                .insert(motivationRecord)
+                .select();
+            
+            if (error) {
+                throw error;
+            }
+            
+            console.log('✅ 동기부여 응답 저장 성공:', data[0]);
+            return data[0];
+            
+        } catch (error) {
+            console.error('❌ 동기부여 응답 저장 실패:', error);
+            throw error;
+        }
+    }
+
+    // 🔥 사용자 피드백을 받아 응답 품질 업데이트
+    async updateMotivationQuality(sessionId, qualityRating, userFeedback = null) {
+        try {
+            console.log(`📈 동기부여 응답 품질 업데이트: ${sessionId} → ${qualityRating}`);
+            
+            const updateData = {
+                response_quality: qualityRating,
+                user_feedback: userFeedback,
+                feedback_time: new Date().toISOString()
+            };
+            
+            const { data, error } = await this.supabaseClient
+                .from('motivation_responses')
+                .update(updateData)
+                .eq('session_id', sessionId)
+                .eq('user_id', this.userId)
+                .select();
+            
+            if (error) {
+                throw error;
+            }
+            
+            console.log('✅ 응답 품질 업데이트 완료:', data[0]);
+            return data[0];
+            
+        } catch (error) {
+            console.error('❌ 응답 품질 업데이트 실패:', error);
+            throw error;
+        }
+    }
+
+    // 🔥 과거 동기부여 응답 조회
+    async getMotivationHistory(limit = 10) {
+        try {
+            console.log(`📚 과거 동기부여 응답 조회 (최근 ${limit}개)`);
+            
+            const { data, error } = await this.supabaseClient
+                .from('motivation_responses')
+                .select('*')
+                .eq('user_id', this.userId)
+                .order('created_at', { ascending: false })
+                .limit(limit);
+            
+            if (error) {
+                throw error;
+            }
+            
+            console.log(`✅ 과거 동기부여 응답 ${data.length}개 조회 완료`);
+            return data;
+            
+        } catch (error) {
+            console.error('❌ 동기부여 히스토리 조회 실패:', error);
+            return [];
+        }
+    }
+
+    // 🔥 동기부여 응답 패턴 분석
+    async analyzeMotivationPatterns() {
+        try {
+            console.log('🔍 동기부여 응답 패턴 분석 시작');
+            
+            const history = await this.getMotivationHistory(30);
+            
+            if (history.length === 0) {
+                return {
+                    pattern: 'insufficient_data',
+                    message: '분석할 데이터가 부족합니다.'
+                };
+            }
+            
+            const levels = history.map(h => h.user_level);
+            const levelProgress = this.analyzeLevelProgression(levels);
+            
+            const trends = history.map(h => h.user_trend);
+            const trendPattern = this.analyzeTrendPattern(trends);
+            
+            const qualityRatings = history
+                .filter(h => h.response_quality !== null)
+                .map(h => h.response_quality);
+            const avgQuality = qualityRatings.length > 0 
+                ? qualityRatings.reduce((sum, rating) => sum + rating, 0) / qualityRatings.length 
+                : null;
+            
+            const daysSinceFirst = history.length > 0 
+                ? Math.ceil((new Date() - new Date(history[history.length - 1].created_at)) / (1000 * 60 * 60 * 24))
+                : 0;
+            const usageFrequency = daysSinceFirst > 0 ? history.length / daysSinceFirst : 0;
+            
+            return {
+                pattern: 'analyzed',
+                levelProgress,
+                trendPattern,
+                avgQuality,
+                usageFrequency,
+                totalResponses: history.length,
+                daysSinceFirst,
+                insights: this.generatePatternInsights(levelProgress, trendPattern, avgQuality, usageFrequency)
+            };
+            
+        } catch (error) {
+            console.error('❌ 동기부여 패턴 분석 실패:', error);
+            return {
+                pattern: 'error',
+                message: '패턴 분석 중 오류가 발생했습니다.'
+            };
+        }
+    }
+
+    // 🔥 레벨 진행 분석
+    analyzeLevelProgression(levels) {
+        const levelOrder = ['beginner', 'intermediate', 'advanced', 'expert'];
+        const progressions = [];
+        
+        for (let i = 1; i < levels.length; i++) {
+            const currentIndex = levelOrder.indexOf(levels[i-1]);
+            const previousIndex = levelOrder.indexOf(levels[i]);
+            
+            if (currentIndex > previousIndex) {
+                progressions.push('up');
+            } else if (currentIndex < previousIndex) {
+                progressions.push('down');
+            } else {
+                progressions.push('stable');
+            }
+        }
+        
+        const upCount = progressions.filter(p => p === 'up').length;
+        const downCount = progressions.filter(p => p === 'down').length;
+        const stableCount = progressions.filter(p => p === 'stable').length;
+        
+        return {
+            trend: upCount > downCount ? 'improving' : downCount > upCount ? 'declining' : 'stable',
+            upCount,
+            downCount,
+            stableCount,
+            currentLevel: levels[0],
+            startLevel: levels[levels.length - 1]
+        };
+    }
+
+    // 🔥 트렌드 패턴 분석
+    analyzeTrendPattern(trends) {
+        const trendCounts = trends.reduce((acc, trend) => {
+            acc[trend] = (acc[trend] || 0) + 1;
+            return acc;
+        }, {});
+        
+        const dominantTrend = Object.keys(trendCounts).reduce((a, b) => 
+            trendCounts[a] > trendCounts[b] ? a : b
+        );
+        
+        return {
+            dominantTrend,
+            trendCounts,
+            consistency: Math.max(...Object.values(trendCounts)) / trends.length
+        };
+    }
+
+    // 🔥 패턴 인사이트 생성
+    generatePatternInsights(levelProgress, trendPattern, avgQuality, usageFrequency) {
+        const insights = [];
+        
+        if (levelProgress.trend === 'improving') {
+            insights.push('꾸준히 실력이 향상되고 있어요! 🚀');
+        }
+        
+        if (trendPattern.dominantTrend === 'excellent_progress') {
+            insights.push('대부분의 기간 동안 훌륭한 성과를 보이고 계세요! ⭐');
+        }
+        
+        if (avgQuality && avgQuality >= 4) {
+            insights.push('AI 조언이 도움이 되고 있다니 기뻐요! 🤖');
+        }
+        
+        if (usageFrequency >= 0.5) {
+            insights.push('정기적으로 동기부여를 받으시는 모습이 훌륭해요! 📅');
+        }
+        
+        if (insights.length === 0) {
+            insights.push('데이터를 더 쌓으면 더 정확한 분석을 받을 수 있어요! 📊');
+        }
+        
+        return insights;
+    }
+
+    // 🔥 동기부여 응답 평가
+    async rateMotivation(sessionId, rating, feedback) {
+        try {
+            console.log(`⭐ 동기부여 응답 평가: ${rating}점`);
+            
+            await this.updateMotivationQuality(sessionId, rating, feedback);
+            
+            // 사용자에게 피드백 제공
+            const button = event.target;
+            button.textContent = '✅ 감사합니다!';
+            button.style.background = '#10b981';
+            
+            // 다른 평가 버튼들 비활성화
+            const allButtons = document.querySelectorAll(`[onclick*="${sessionId}"]`);
+            allButtons.forEach(btn => {
+                if (btn !== button) {
+                    btn.style.opacity = '0.5';
+                    btn.style.pointerEvents = 'none';
+                }
+            });
+            
+            // GA 이벤트
+            if (typeof gtag !== 'undefined') {
+                gtag('event', 'motivation_rated', {
+                    session_id: sessionId,
+                    rating: rating,
+                    feedback: feedback,
+                    user_id: this.userId
+                });
+            }
+            
+        } catch (error) {
+            console.error('❌ 동기부여 평가 실패:', error);
         }
     }
 
