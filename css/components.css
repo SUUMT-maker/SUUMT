@@ -2227,6 +2227,66 @@
   .goal-stats-grid { gap: 10px; }
   .stat-number { font-size: 17px; }
 }
+
+/* =========================
+   TODAY'S GOAL – cleanup
+   ========================= */
+
+/* (1) % 중복 방지: 심볼은 CSS로만 출력 */
+.percentage-symbol { display: none !important; }
+.progress-percentage {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 2px;
+}
+.percentage-number {
+  /* 숫자 정렬 안정화 */
+  font-feature-settings: "tnum";
+  letter-spacing: -0.3px;
+  line-height: 1;
+  display: inline-block;
+}
+.percentage-number::after {
+  content: '%';
+  margin-left: 2px;
+  font-size: 0.55em;
+  color: #9aa4b2;
+  font-weight: 700;
+  line-height: 1;
+  position: relative;
+  top: -0.02em; /* 미세 baseline 보정 */
+}
+
+/* (2) 0% 정렬 보정: 내부 컨테이너 정중앙 */
+.large-circular-progress .progress-inner {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* (3) 통계칩 아이콘 제거 + 숫자 집중 */
+.stat-icon { display: none !important; }
+.goal-stats-grid { gap: 12px; }
+.goal-stat-item { text-align: center; }
+.stat-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;   /* 숫자 중앙 배치 */
+  gap: 8px;
+  background: #f6f8fc;       /* 은은한 박스만 유지 */
+  border: 1px solid #e7ecf5;
+  border-radius: 12px;
+  padding: 10px 12px;
+}
+.stat-text { line-height: 1.1; }
+.stat-number { font-size: 18px; font-weight: 800; color: #1f2937; }
+.stat-label  { font-size: 11px; font-weight: 600; color: #7a8896; }
+
+/* (4) 헤더와 TODAY'S GOAL 카드 간격 확대 */
+.main-header + .todays-goal-section {
+  margin-top: 22px !important; /* 기존 14px → 22px */
+}
 /* 📒 Records 화면 스타일 */
 .records-calendar {
     background: white;
