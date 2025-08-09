@@ -32,20 +32,21 @@ const INTEGRATED_RECORDS_HTML = `
                 </div>
             </div>
             
-            <div id="aiEvaluationContent" style="background: rgba(255,255,255,0.95); color: #374151; padding: 20px; border-radius: 16px; line-height: 1.6; font-size: 15px; backdrop-filter: blur(10px);">
-                <div style="display: flex; align-items: center; justify-content: center; gap: 12px; color: #6B7280;">
-                    <div style="width: 24px; height: 24px; border: 3px solid #667eea; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                    <span>AI가 당신의 호흡 데이터를 분석하고 있습니다...</span>
+            <div id="aiEvaluationContent" style="background: rgba(255,255,255,0.95); color: #374151; padding: 20px; border-radius: 16px; line-height: 1.6; font-size: 15px; backdrop-filter: blur(10px); text-align: center;">
+                <div style="margin-bottom: 16px;">
+                    <div style="font-size: 24px; margin-bottom: 8px;">🤖</div>
+                    <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">AI 숨트레이너 종합 평가</h4>
+                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #6b7280;">당신의 호흡 운동 데이터를 분석해서 개인화된 조언을 받아보세요</p>
                 </div>
+                <button onclick="window.integratedDashboard.requestAIEvaluation()" style="background: #667eea; color: white; border: none; border-radius: 12px; padding: 12px 24px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">
+                    🧠 AI 종합 평가 받기
+                </button>
             </div>
             
-            <!-- AI 동기부여 액션 버튼들 -->
-            <div id="aiMotivationActions" style="display: none; margin-top: 16px; display: flex; gap: 12px;">
+            <!-- AI 동기부여 액션 버튼들 (단순화) -->
+            <div id="aiMotivationActions" style="margin-top: 16px; display: flex; gap: 12px;">
                 <button onclick="window.integratedDashboard.startQuickWorkout()" style="flex: 1; background: rgba(255, 255, 255, 0.2); border: none; border-radius: 12px; padding: 10px 16px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease;">
                     💪 지금 운동하기
-                </button>
-                <button onclick="window.integratedDashboard.refreshMotivation()" style="flex: 1; background: rgba(255, 255, 255, 0.2); border: none; border-radius: 12px; padding: 10px 16px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease;">
-                    🔄 새로운 조언
                 </button>
             </div>
         </div>
@@ -169,6 +170,36 @@ class IntegratedRecordsDashboard {
         this.motivationCooldownMs = 30 * 1000; // 30초 쿨다운
     }
 
+    // 🧠 사용자 요청 시 AI 종합 평가 시작
+    async requestAIEvaluation() {
+        console.log('🧠 사용자 요청에 의한 AI 종합 평가 시작');
+        
+        const contentEl = document.getElementById('aiEvaluationContent');
+        const badgeEl = document.getElementById('aiEvaluationBadge');
+        
+        if (contentEl) {
+            contentEl.innerHTML = `
+                <div style="display: flex; align-items: center; justify-content: center; gap: 12px; color: #6B7280;">
+                    <div style="width: 24px; height: 24px; border: 3px solid #667eea; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                    <span>AI가 당신의 호흡 데이터를 분석하고 있습니다...</span>
+                </div>
+            `;
+        }
+        
+        if (badgeEl) {
+            badgeEl.textContent = '분석 중...';
+        }
+        
+        await this.loadMotivationMessage();
+        
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'ai_evaluation_requested', {
+                user_id: this.userId,
+                timestamp: new Date().toISOString()
+            });
+        }
+    }
+
     // 🔧 초기화
     async init() {
         this.userId = window.currentUserId;
@@ -181,20 +212,20 @@ class IntegratedRecordsDashboard {
 
         console.log('📊 통합 기록 대시보드 초기화:', this.userId);
         
-        // ✨ AI 동기부여 시스템 초기화
+        // ✨ AI 동기부여 시스템 초기화 (자동 분석 제거)
         await this.initMotivationSystem();
         
         return true;
     }
 
-    // 🧠 AI 동기부여 시스템 초기화
+    // 🧠 AI 동기부여 시스템 초기화 (자동 분석 비활성화)
     async initMotivationSystem() {
-        console.log('🧠 AI 동기부여 시스템 초기화...');
+        console.log('🧠 AI 동기부여 시스템 초기화 (수동 모드)...');
         
-        // 정기 업데이트 설정 (10분마다로 변경 - 부하 감소)
-        this.motivationUpdateInterval = setInterval(() => {
-            this.loadMotivationMessage();
-        }, 10 * 60 * 1000);
+        // 자동 업데이트 제거 - 사용자가 원할 때만 분석
+        // this.motivationUpdateInterval = setInterval(() => {
+        //     this.loadMotivationMessage();
+        // }, 10 * 60 * 1000);
     }
 
     // 🕐 UTC를 KST로 변환하는 유틸리티 함수
@@ -375,17 +406,6 @@ class IntegratedRecordsDashboard {
         // in-flight 가드
         if (this.isMotivationLoading) {
             console.log('⏳ 이미 요청 처리 중입니다. 중복 호출 방지.');
-            return;
-        }
-
-        // 30초 쿨다운
-        const nowTs = Date.now();
-        if (this.lastMotivationUpdate && (nowTs - this.lastMotivationUpdate.getTime() < this.motivationCooldownMs)) {
-            const remain = Math.ceil((this.motivationCooldownMs - (nowTs - this.lastMotivationUpdate.getTime())) / 1000);
-            console.log(`⏳ 쿨다운 진행중: ${remain}s 남음 (캐시 표시)`);
-            if (this.motivationCache) {
-                this.showMotivationMessage(this.motivationCache);
-            }
             return;
         }
 
@@ -639,24 +659,18 @@ class IntegratedRecordsDashboard {
         };
     }
 
-    // 💬 동기부여 메시지 UI 표시 (+ 평가 버튼, 출처 배지)
+    // 💬 동기부여 메시지 UI 표시 (불필요한 요소들 제거)
     showMotivationMessage(motivationData) {
         const contentEl = document.getElementById('aiEvaluationContent');
         const badgeEl = document.getElementById('aiEvaluationBadge');
         const actionsEl = document.getElementById('aiMotivationActions');
-        const sourceLabel = motivationData.source === 'ai_gemini' ? 'AI' : '폴백';
         
         if (contentEl) {
             contentEl.innerHTML = `
                 <div style="margin-bottom: 16px;">
-                    <div style="display:flex; align-items:center; gap:8px;">
-                        <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937; flex:1;">
-                            ${motivationData.title || '🤖 AI 숨트레이너'}
-                        </h4>
-                        <span title="응답 출처" style="background:#EEF2FF; color:#4F46E5; border:1px solid #E5E7EB; padding:2px 8px; border-radius:12px; font-size:11px; font-weight:600;">
-                            출처: ${sourceLabel}
-                        </span>
-                    </div>
+                    <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">
+                        ${motivationData.title || '🤖 AI 숨트레이너'}
+                    </h4>
                     <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #4b5563;">
                         ${(motivationData.message || '계속 화이팅하세요!').replace(/\n/g, '<br>')}
                     </p>
@@ -665,26 +679,6 @@ class IntegratedRecordsDashboard {
                 <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; margin-top: 12px;">
                     <div style="font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #6b7280;">💡 트레이너 인사이트</div>
                     <div style="font-size: 13px; color: #4b5563;">${motivationData.insight}</div>
-                </div>
-                ` : ''}
-                
-                ${motivationData.sessionId ? `
-                <div style="margin-top: 16px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
-                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 8px;">이 조언이 도움이 되었나요?</div>
-                    <div style="display: flex; gap: 8px; justify-content: center;">
-                        <button onclick="window.integratedDashboard.rateMotivation('${motivationData.sessionId}', 5, '매우 도움됨', this)" 
-                                style="padding: 4px 8px; background: #10b981; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">
-                            👍 도움됨
-                        </button>
-                        <button onclick="window.integratedDashboard.rateMotivation('${motivationData.sessionId}', 3, '보통', this)" 
-                                style="padding: 4px 8px; background: #6b7280; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">
-                            😐 보통
-                        </button>
-                        <button onclick="window.integratedDashboard.rateMotivation('${motivationData.sessionId}', 1, '별로', this)" 
-                                style="padding: 4px 8px; background: #ef4444; color: white; border: none; border-radius: 4px; font-size: 11px; cursor: pointer;">
-                            👎 별로
-                        </button>
-                    </div>
                 </div>
                 ` : ''}
             `;
@@ -1132,7 +1126,7 @@ class IntegratedRecordsDashboard {
         return chartData;
     }
 
-    // 🎨 UI 업데이트
+    // 🎨 UI 업데이트 (AI 자동 분석 제거)
     updateUI() {
         const stats = this.calculateStats();
         
@@ -1148,8 +1142,8 @@ class IntegratedRecordsDashboard {
         // 달력 렌더링
         this.renderCalendar();
         
-        // ✨ AI 동기부여 메시지 로드
-        this.loadMotivationMessage();
+        // ✨ AI 동기부여는 사용자 요청 시에만 실행
+        // this.loadMotivationMessage(); // 제거됨
     }
 
     // 📈 내 호흡 기록 차트 렌더링
