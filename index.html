@@ -315,36 +315,13 @@
                 </div>
             </div>
 
-            <!-- 추가 통계 카드 섹션 (모던) -->
-            <div class="additional-stats-section">
-                <div class="additional-stats-grid">
-                    <div class="stat-card-modern">
-                        <div class="stat-icon">🫁</div>
-                        <div class="stat-info">
-                            <div class="stat-number" id="totalBreaths">0</div>
-                            <div class="stat-label">오늘 호흡</div>
-                        </div>
-                    </div>
-                    <div class="stat-card-modern">
-                        <div class="stat-icon">🔥</div>
-                        <div class="stat-info">
-                            <div class="stat-number" id="consecutiveDays">0</div>
-                            <div class="stat-label">연속 일수</div>
-                        </div>
-                    </div>
-                </div>
-                <!-- 기존 함수 호환용 숨김 값 -->
-                <div style="display:none;">
-                    <span id="averageSets">0</span>
-                    <span id="totalExercises">0</span>
-                </div>
-            </div>
+            <!-- 상단 통계 카드 섹션 제거됨 -->
 
-            <!-- 오늘의 목표 섹션 (모던 레이아웃) -->
-            <div class="modern-todays-goal-section">
-                <div class="goal-main-header">
-                    <h1 class="goal-main-title">TODAY'S GOAL</h1>
-                    <h2 class="goal-main-subtitle">오늘의 목표</h2>
+            <!-- TODAY'S GOAL 섹션 (이미지 기준) -->
+            <div class="todays-goal-section">
+                <div class="goal-header">
+                    <h2 class="goal-main-title">TODAY'S GOAL</h2>
+                    <h3 class="goal-main-subtitle">오늘의 목표</h3>
                 </div>
                 <div class="goal-progress-container">
                     <div class="large-circular-progress" id="todaysGoalProgress">
@@ -359,28 +336,35 @@
                         </div>
                     </div>
                 </div>
-                <div class="goal-stats-row">
-                    <div class="goal-stat-card">
+                <div class="goal-stats-grid">
+                    <div class="goal-stat-item">
                         <div class="stat-number">40</div>
                         <div class="stat-label">목표 호흡</div>
                     </div>
-                    <div class="goal-stat-card">
-                        <div class="stat-number" id="completedBreathsToday">0</div>
+                    <div class="goal-stat-item">
+                        <div class="stat-number" id="totalBreaths">0</div>
                         <div class="stat-label">완료 호흡</div>
                     </div>
-                    <div class="goal-stat-card">
-                        <div class="stat-number" id="completedSetsToday">0</div>
+                    <div class="goal-stat-item">
+                        <div class="stat-number" id="averageSets">0</div>
                         <div class="stat-label">완료 세트</div>
                     </div>
                 </div>
             </div>
 
-            <!-- AI 숨트레이너 섹션 (기존 내용 유지, 위치 조정) -->
-            <div class="ai-advice-section-modern">
-                <div class="ai-advice-display" id="latestAIAdviceContainer">
-                    <div class="ai-advice-content" id="latestAIAdvice">
-                        운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!
+            <!-- AI 숨트레이너 심플 카드 -->
+            <div class="ai-trainer-simple-card">
+                <div class="ai-trainer-header">
+                    <div class="ai-trainer-info">
+                        <div class="ai-trainer-avatar">🧠</div>
+                        <div class="ai-trainer-text">
+                            <h4>AI 숨트레이너</h4>
+                            <span>개인 맞춤 조언</span>
+                        </div>
                     </div>
+                </div>
+                <div class="ai-trainer-message" id="latestAIAdvice">
+                    운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!
                 </div>
             </div>
 

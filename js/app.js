@@ -179,6 +179,7 @@ function updateEnhancedCircularProgress(current, target, percentage) {
 
   // 퍼센트 숫자 애니메이션
   const displayPercentage = Math.round((current / target) * 100);
+  // 숫자만 업데이트 (기호는 CSS로 표시)
   animateNumber(percentageEl, parseInt(percentageEl.textContent) || 0, displayPercentage, 800);
 
   // 링 채움(시각적)
