@@ -177,6 +177,9 @@ function updateEnhancedCircularProgress(current, target, percentage) {
   const particles = document.getElementById('celebrationParticles');
   if (!progressFill || !percentageEl || !statusEl) return;
 
+  // ▶ 카드 루트 가져오기 (완료 테마 전환용)
+  const goalCard = document.querySelector('.todays-goal-section');
+
   // 퍼센트 숫자 애니메이션
   const displayPercentage = Math.round((current / target) * 100);
   // 숫자만 업데이트 (기호는 CSS로 표시)
@@ -187,23 +190,39 @@ function updateEnhancedCircularProgress(current, target, percentage) {
   progressFill.classList.remove('completed');
   percentageEl.classList.remove('completed');
 
+  // ▶ 상태칩 접근성
+  statusEl.setAttribute('aria-live', 'polite');
+
   if (current >= target) {
     progressFill.classList.remove('default');
     progressFill.classList.add('completed');
     percentageEl.classList.add('completed');
     statusEl.textContent = '🎉 목표 달성!';
     statusEl.className = 'goal-status completed';
+
+    // ▶ 완료 테마 적용 (보라 → 그린)
+    if (goalCard) goalCard.classList.add('completed-theme');
+
+    // 파티클 버스트
     if (particles) {
       particles.classList.add('active');
-      setTimeout(() => particles.classList.remove('active'), 2000);
+      setTimeout(() => particles.classList.remove('active'), 1500);
     }
     if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
+
   } else if (current > 0) {
     statusEl.textContent = `${target - current}회 더 가능해요!`;
     statusEl.className = 'goal-status in-progress';
+
+    // ▶ 진행 중엔 완료 테마 해제
+    if (goalCard) goalCard.classList.remove('completed-theme');
+
   } else {
     statusEl.textContent = '시작해보세요!';
     statusEl.className = 'goal-status';
+
+    // ▶ 0%에서도 완료 테마 해제
+    if (goalCard) goalCard.classList.remove('completed-theme');
   }
 }
 

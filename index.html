@@ -339,10 +339,12 @@
                             <div class="progress-percentage">
                                 <span class="percentage-number" id="todaysPercentage">0</span>
                             </div>
-                            <div class="progress-label">달성률</div>
+                             <div id="goalStatusText" class="progress-label" aria-live="polite">달성률</div>
                         </div>
                     </div>
                 </div>
+                <!-- 완료 파티클 버스트 -->
+                <div id="celebrationParticles" class="celebration-particles"></div>
                 <div class="goal-stats-grid" role="group" aria-label="오늘의 목표 통계">
                   <div class="goal-mini" aria-label="목표 호흡">
                     <div class="num" id="targetBreaths">40</div>

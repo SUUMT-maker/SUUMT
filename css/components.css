@@ -2719,3 +2719,37 @@
   .goal-mini .num { font-size: 20px; }
   .goal-mini .label { font-size: 10.5px; }
 }
+
+/* ✅ 완료 테마 (보라 → 그린), 부드러운 800ms 전환 */
+.todays-goal-section {
+  transition: border-color .8s ease, box-shadow .8s ease, background-color .8s ease;
+}
+.todays-goal-section::before {
+  transition: background .8s ease, opacity .8s ease;
+}
+
+/* 기본 보라용 상단 보더가 정의돼 있으므로, 완료 시 그린 계열로 교체 */
+.todays-goal-section.completed-theme {
+  border-left-color: #10b981; /* 에메랄드 */
+  box-shadow: 0 8px 28px rgba(16, 185, 129, 0.18);
+  background-color: #ffffff;
+}
+.todays-goal-section.completed-theme::before {
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+  opacity: 1;
+}
+
+/* 텍스트/아이콘 가독성 향상 (자동 반전 느낌) */
+.todays-goal-section.completed-theme .goal-main-subtitle { color: #065f46; }
+.todays-goal-section.completed-theme .stat-number       { color: #065f46; }
+.todays-goal-section.completed-theme .stat-label        { color: #047857; }
+
+/* 원형 퍼센트 숫자도 그린 계열로 */
+.todays-goal-section.completed-theme .percentage-number { color: #10b981; }
+
+/* 상태칩 색상 보강 */
+.goal-status.completed {
+  color: #065f46;
+  background: #d1fae5;
+  border: 1px solid #a7f3d0;
+}
