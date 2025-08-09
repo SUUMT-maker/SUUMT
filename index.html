@@ -291,6 +291,116 @@
     <div class="app-container">
         <!-- 메인 화면 -->
         <div id="mainScreen" class="screen active">
+            <!-- 🆕 완전한 모던 레이아웃 (기존 레이아웃 위에 추가) -->
+            <div class="modern-layout-container" style="position: relative; z-index: 10;">
+                <!-- 모던 헤더 -->
+                <div class="modern-header">
+                    <div class="user-section">
+                        <div class="user-greeting">
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                        <circle cx="12" cy="8" r="3" fill="white"/>
+                                        <path d="M12 14c-4 0-7 2-7 4v2h14v-2c0-2-3-4-7-4z" fill="white"/>
+                                    </svg>
+                                </div>
+                                <div class="user-text">
+                                    <h3 id="modernUserGreeting">안녕하세요, 사용자님</h3>
+                                    <p id="modernAiCoachingMessage">오늘도 깊은 호흡으로 시작해보세요</p>
+                                </div>
+                            </div>
+                            <div class="live-indicator">
+                                <div class="live-dot"></div>
+                                <span id="modernMainLiveUsersText">24,069명 참여중</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 모던 메인 콘텐츠 -->
+                <div class="modern-main-content">
+                    <!-- 오늘의 목표 (메인 포커스) -->
+                    <div class="modern-today-goal">
+                        <div class="goal-header">
+                            <div class="goal-label">Today's Goal</div>
+                            <h2 class="goal-title">오늘의 목표</h2>
+                        </div>
+                        
+                        <div class="modern-progress-circle">
+                            <svg class="progress-ring">
+                                <defs>
+                                    <linearGradient id="modernGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                        <stop offset="0%" style="stop-color:#667eea"/>
+                                        <stop offset="100%" style="stop-color:#4ade80"/>
+                                    </linearGradient>
+                                </defs>
+                                <circle class="progress-background" cx="70" cy="70" r="60"/>
+                                <circle class="progress-bar" cx="70" cy="70" r="60" id="modernProgressBar"/>
+                            </svg>
+                            <div class="progress-text">
+                                <div class="progress-percentage" id="modernTodaysPercentage">0%</div>
+                                <div class="progress-label">달성률</div>
+                            </div>
+                        </div>
+
+                        <div class="goal-details">
+                            <div class="goal-stat">
+                                <div class="goal-stat-number">40</div>
+                                <div class="goal-stat-label">목표 호흡</div>
+                            </div>
+                            <div class="goal-stat">
+                                <div class="goal-stat-number" id="modernCompletedBreaths">0</div>
+                                <div class="goal-stat-label">완료 호흡</div>
+                            </div>
+                            <div class="goal-stat">
+                                <div class="goal-stat-number" id="modernCompletedSets">0</div>
+                                <div class="goal-stat-label">완료 세트</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 빠른 통계 -->
+                    <div class="modern-quick-stats">
+                        <div class="modern-stat-card">
+                            <div class="stat-header">
+                                <span class="stat-title">오늘 호흡</span>
+                                <div class="stat-icon breath">🫁</div>
+                            </div>
+                            <div class="stat-value" id="modernTotalBreaths">0</div>
+                        </div>
+                        
+                        <div class="modern-stat-card">
+                            <div class="stat-header">
+                                <span class="stat-title">연속 일수</span>
+                                <div class="stat-icon streak">🔥</div>
+                            </div>
+                            <div class="stat-value" id="modernConsecutiveDays">0</div>
+                        </div>
+                    </div>
+
+                    <!-- AI 조언 -->
+                    <div class="modern-ai-advice">
+                        <div class="ai-header">
+                            <div class="ai-avatar">🤖</div>
+                            <div class="ai-info">
+                                <h4>AI 숨트레이너</h4>
+                                <p>개인 맞춤 조언</p>
+                            </div>
+                        </div>
+                        <div class="ai-message" id="modernLatestAIAdvice">
+                            운동을 완료하시면 맞춤형 AI 조언을 받을 수 있어요!
+                        </div>
+                    </div>
+
+                    <!-- 액션 버튼 -->
+                    <button class="modern-action-button" onclick="switchTab('workout')">
+                        <span>🚀</span>
+                        <span>지금 트레이닝 시작하기</span>
+                    </button>
+                </div>
+            </div>
+            <!-- 🔧 기존 레이아웃은 숨김 처리 (나중에 제거 가능) -->
+            <div class="legacy-layout" style="display: none;">
             <!-- 메인 헤더 -->
             <div class="main-header">
                 <div class="user-section">
@@ -457,6 +567,7 @@
                     </div>
                 </div>
             </div>
+            </div><!-- /.legacy-layout -->
         </div>
 
         <!-- 운동 화면 -->
