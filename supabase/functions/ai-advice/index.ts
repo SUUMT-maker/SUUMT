@@ -1,3 +1,5 @@
+// @ts-nocheck
+/* global Deno */
 // Follow this setup guide to integrate the Deno language server with your editor:
 // https://deno.land/manual/getting_started/setup_your_environment
 // This enables autocomplete, go to definition, etc.
@@ -16,6 +18,16 @@ interface ExerciseData {
   exerciseTime: string;
   isAborted: boolean;
   sessionId?: string;
+  // motivation 요청 시 추가로 올 수 있는 필드들
+  totalSessions?: number;
+  completionRate?: number;
+  consecutiveDays?: number;
+  level?: string;
+  trend?: string;
+  recentSessions?: number;
+  lastExercise?: string;
+  requestType?: string; // 'motivation'
+  analysisType?: string; // 'comprehensive_progress'
 }
 
 interface RequestBody {
@@ -69,10 +81,22 @@ Deno.serve(async (req: Request) => {
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
     if (!geminiApiKey) throw new Error('API 키가 설정되지 않았습니다.');
 
-    // 1️⃣ 세션별 조언 생성
-    const sessionPrompt = generateSessionPrompt(exerciseData);
-    const geminiResponse = await callGeminiAPI(geminiApiKey, sessionPrompt);
-    const aiAdvice = parseResponse(geminiResponse, exerciseData);
+    // 1️⃣ 요청 유형에 따라 프롬프트 생성 (세션/동기부여)
+    const isMotivation = exerciseData.requestType === 'motivation';
+    const prompt = isMotivation
+      ? generateMotivationPrompt(exerciseData)
+      : generateSessionPrompt(exerciseData);
+
+    const geminiResponse = await callGeminiAPI(geminiApiKey, prompt);
+
+    // 2️⃣ 응답 파싱 (motivation은 일반 텍스트를 종합 조언으로 사용)
+    const aiAdvice = isMotivation
+      ? {
+          intensityAdvice: '',
+          comprehensiveAdvice:
+            parsePlainText(geminiResponse) ?? getDefaultAdvice(exerciseData).comprehensiveAdvice,
+        }
+      : parseResponse(geminiResponse, exerciseData);
 
     // 2️⃣ Supabase 저장
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -183,6 +207,57 @@ function generateSessionPrompt(exerciseData: ExerciseData): string {
 `;
 }
 
+// 🚀 동기부여(기록 탭)용 개인화 프롬프트 생성
+function generateMotivationPrompt(exerciseData: ExerciseData): string {
+  const totalSessions = exerciseData.totalSessions ?? 0;
+  const completionRate = exerciseData.completionRate ?? 0;
+  const consecutiveDays = exerciseData.consecutiveDays ?? 0;
+  const avgInhale = exerciseData.resistanceSettings?.inhale ?? 1;
+  const avgExhale = exerciseData.resistanceSettings?.exhale ?? 1;
+  const level = exerciseData.level ?? 'beginner';
+  const trend = exerciseData.trend ?? 'stable';
+  const recentSessions = exerciseData.recentSessions ?? 0;
+  const totalBreaths = exerciseData.completedBreaths ?? 0;
+
+  const motivationPrompt = `
+당신은 숨트 호흡운동기구 전용 AI 트레이너입니다. 사용자의 운동 데이터를 분석하여 개인화된 동기부여 메시지를 제공해주세요.
+
+## 사용자 운동 데이터:
+- 총 운동 세션: ${totalSessions}회
+- 완료율: ${completionRate}%
+- 연속 운동일: ${consecutiveDays}일
+- 평균 저항 강도: ${avgInhale}/${avgExhale}
+- 사용자 레벨: ${level}
+- 최근 트렌드: ${trend}
+- 최근 7일 세션: ${recentSessions}회
+- 총 완료 호흡: ${totalBreaths}회
+
+## 응답 가이드라인:
+1. **개인화**: 사용자의 구체적인 수치와 성과를 언급하세요
+2. **동기부여**: 긍정적이고 격려하는 톤을 유지하세요
+3. **실용적 조언**: 다음 단계나 개선점을 구체적으로 제시하세요
+4. **감정적 연결**: 사용자의 노력을 인정하고 성취감을 느끼게 하세요
+5. **길이**: 2-3문장으로 간결하면서도 의미있게 작성하세요
+
+## 레벨별 맞춤 메시지:
+- **초급자(beginner)**: 격려와 기초 습관 형성에 집중
+- **중급자(intermediate)**: 성장 인정과 다음 단계 도전 제안
+- **고급자(advanced)**: 전문성 인정과 새로운 목표 설정
+- **전문가(expert)**: 리더십과 다른 사람들에게 영감을 주는 역할 강조
+
+## 트렌드별 접근:
+- **excellent_progress**: 뛰어난 성과 축하와 지속 격려
+- **good_progress**: 꾸준한 발전이 눈에 보여요. 좋은 페이스를 유지하고 있어요!
+- **stable**: 안정성 칭찬과 새로운 자극 제안
+- **needs_encouragement**: 따뜻한 위로와 재시작 격려
+
+한국어로 친근하고 따뜻한 톤으로 응답해주세요. 이모지를 적절히 사용하여 감정을 표현하세요.
+`;
+
+  return motivationPrompt;
+}
+
+
 function generateDailySummaryPrompt(dailyAdvices: Array<{comprehensive_advice: string}>): string {
   const list = dailyAdvices.map((a, i) => `${i+1}. ${a.comprehensive_advice}`).join('\n');
   return `
@@ -253,6 +328,12 @@ function parseResponse(geminiResponse: GeminiResponse, exerciseData: ExerciseDat
     console.error('응답 파싱 오류:', error);
     return getDefaultAdvice(exerciseData);
   }
+}
+
+// 📄 일반 텍스트 파싱 (motivation용)
+function parsePlainText(geminiResponse: GeminiResponse): string | null {
+  const text = geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
+  return text || null;
 }
 
 function parseSummary(geminiResponse: GeminiResponse): string | null {
