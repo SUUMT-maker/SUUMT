@@ -2343,7 +2343,6 @@
 .todays-goal-section .progress-percentage::after { content: none !important; }
 .todays-goal-section .progress-percentage { display: flex !important; align-items: baseline !important; justify-content: center !important; gap: 2px; }
 .todays-goal-section .percentage-number { font-feature-settings: "tnum"; letter-spacing: -0.3px; line-height: 1; display: inline-block; }
-.todays-goal-section .percentage-unit { font-size: 0.55em; color: #9aa4b2; font-weight: 700; line-height: 1; position: relative; top: -0.02em; }
 
 /* 숫자(위) / 달성률(아래) 세로 스택 고정 (강화) */
 .todays-goal-section .progress-inner { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: center !important; gap: 6px; }
