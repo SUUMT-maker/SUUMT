@@ -2684,3 +2684,38 @@
   width: 20px;
   height: 20px;
 }
+
+/* === Goal mini stats – clean version === */
+.goal-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin-top: 24px; /* 살짝 위로 당겨 깔끔하게 */
+}
+
+.goal-mini {
+  background: #f7f9fc;
+  border: 1px solid #e6eaf2;
+  border-radius: 14px;
+  padding: 14px 10px;
+  text-align: center;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.goal-mini:hover { transform: translateY(-1px); box-shadow: 0 6px 14px rgba(20,30,55,.06); }
+
+.goal-mini .num {
+  font: 800 22px/1 'Space Grotesk', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: #1f2937;
+  letter-spacing: -.2px;
+  margin-bottom: 6px;
+}
+.goal-mini .label {
+  font: 600 11px/1.2 system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  color: #64748b;
+}
+
+/* 작은 화면 미세조정 */
+@media (max-width: 375px) {
+  .goal-mini .num { font-size: 20px; }
+  .goal-mini .label { font-size: 10.5px; }
+}
