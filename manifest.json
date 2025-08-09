@@ -1,7 +1,7 @@
 {
   "name": "숨트레이너 - AI 폐활량 운동",
   "short_name": "숨트레이너",
-  "version": "1.0.4",
+  "version": "1.0.6",
   "description": "AI와 함께하는 스마트 호흡운동 트레이닝 앱",
   "start_url": "/?v=1.0.4",
   "display": "standalone",
