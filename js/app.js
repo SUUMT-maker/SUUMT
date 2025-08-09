@@ -2267,48 +2267,6 @@ function syncModernElements() {
       const num = parseInt(percentEl.textContent, 10);
       if (!Number.isNaN(num)) percentEl.textContent = `${num}%`;
     }
-
-    // 모던 레이아웃 동기화
-    const userGreeting = document.getElementById('userGreeting');
-    const modernUserGreeting = document.getElementById('modernUserGreeting');
-    if (userGreeting && modernUserGreeting) modernUserGreeting.textContent = userGreeting.textContent;
-
-    const aiCoachingMessage = document.getElementById('aiCoachingMessage');
-    const modernAiCoachingMessage = document.getElementById('modernAiCoachingMessage');
-    if (aiCoachingMessage && modernAiCoachingMessage) modernAiCoachingMessage.textContent = aiCoachingMessage.textContent;
-
-    const liveUsersLegacy = document.getElementById('mainLiveUsersText');
-    const liveUsersModern = document.getElementById('modernMainLiveUsersText');
-    if (liveUsersLegacy && liveUsersModern) liveUsersModern.textContent = liveUsersLegacy.textContent;
-
-    const legacyPercent = document.getElementById('todaysPercentage');
-    const modernPercent = document.getElementById('modernTodaysPercentage');
-    if (legacyPercent && modernPercent) modernPercent.textContent = /%$/.test(legacyPercent.textContent) ? legacyPercent.textContent : `${legacyPercent.textContent}%`;
-
-    const legacyBreaths = document.getElementById('totalBreaths');
-    const modernTotalBreaths = document.getElementById('modernTotalBreaths');
-    if (legacyBreaths && modernTotalBreaths) modernTotalBreaths.textContent = legacyBreaths.textContent;
-
-    const legacyStreak = document.getElementById('consecutiveDays');
-    const modernStreak = document.getElementById('modernConsecutiveDays');
-    if (legacyStreak && modernStreak) modernStreak.textContent = legacyStreak.textContent;
-
-    const legacyAdvice = document.getElementById('latestAIAdvice');
-    const modernAdvice = document.getElementById('modernLatestAIAdvice');
-    if (legacyAdvice && modernAdvice) modernAdvice.textContent = legacyAdvice.textContent;
-
-    // 모던 원형 진행바(ring) dashoffset 계산: r=60 => circumference ~ 377
-    const ring = document.getElementById('modernProgressBar');
-    if (ring && legacyPercent) {
-      const num = parseInt(legacyPercent.textContent, 10) || 0;
-      const clamped = Math.max(0, Math.min(100, num));
-      const circumference = 2 * Math.PI * 60; // 377
-      const offset = circumference - (clamped / 100) * circumference;
-      ring.style.strokeDasharray = `${circumference}`;
-      ring.style.strokeDashoffset = `${offset}`;
-      ring.style.stroke = 'url(#modernGradient)';
-      ring.style.strokeLinecap = 'round';
-    }
   } catch (e) {
     console.warn('syncModernElements 실패:', e);
   }
