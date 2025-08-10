@@ -2503,7 +2503,7 @@ async function getTodayGoalData() {
     };
 }
 
-// 🎯 원형 프로그레스 업데이트
+// 🎯 원형 프로그레스 업데이트 (강화된 버전)
 function updateGoalProgress(data) {
     const { percentage, isCompleted } = data;
     
@@ -2511,6 +2511,7 @@ function updateGoalProgress(data) {
     const progressCircle = document.getElementById('progressCircle');
     const celebrationCircle = document.getElementById('celebrationCircle');
     const progressPercentage = document.getElementById('progressPercentage');
+    const progressLabel = document.getElementById('progressLabel');
     const goalCard = document.querySelector('.goal-card');
     
     if (!progressCircle || !progressPercentage) return;
@@ -2529,29 +2530,46 @@ function updateGoalProgress(data) {
     
     // 100% 달성 시 축하 이펙트
     if (isCompleted) {
-        // 진행률 색상 변경
-        progressCircle.style.stroke = '#22c55e';
-        progressPercentage.classList.add('completed');
+        setTimeout(() => {
+            // 1. 진행률 색상 변경 (파란색 → 초록색)
+            progressCircle.style.stroke = '#22c55e';
+            
+            // 2. 텍스트 스타일 변경
+            progressPercentage.classList.add('completed');
+            progressLabel.classList.add('completed');
+            progressLabel.textContent = '완료!';
+            
+            // 3. 축하 원 표시
+            if (celebrationCircle) {
+                celebrationCircle.style.display = 'block';
+                celebrationCircle.style.strokeDashoffset = '0';
+            }
+            
+            // 4. 카드 전체 축하 이펙트
+            goalCard.classList.add('achievement');
+            
+            // 5. 프로그레스 원 살짝 커지는 효과
+            progressCircle.style.transform = 'scale(1.05)';
+            setTimeout(() => {
+                progressCircle.style.transform = 'scale(1)';
+            }, 400);
+            
+            console.log('🎉 목표 달성 축하 이펙트 실행');
+            
+        }, 800);
         
-        // 축하 원 표시
-        if (celebrationCircle) {
-            celebrationCircle.style.display = 'block';
-            celebrationCircle.style.strokeDashoffset = '0';
-        }
-        
-        // 카드 전체 축하 이펙트
-        goalCard.classList.add('achievement');
-        
-        // 3초 후 이펙트 제거
+        // 6. 3초 후 이펙트 제거
         setTimeout(() => {
             goalCard.classList.remove('achievement');
-        }, 3000);
+        }, 3500);
         
-        console.log('🎉 목표 달성 축하 이펙트 실행');
     } else {
         // 미달성 시 기본 색상
         progressCircle.style.stroke = '#667eea';
+        progressCircle.style.transform = 'scale(1)';
         progressPercentage.classList.remove('completed');
+        progressLabel.classList.remove('completed');
+        progressLabel.textContent = '달성률';
         
         if (celebrationCircle) {
             celebrationCircle.style.display = 'none';
@@ -2559,7 +2577,7 @@ function updateGoalProgress(data) {
     }
 }
 
-// 🎯 목표 통계 카드 업데이트
+// 🎯 목표 통계 카드 업데이트 (기존 함수명 유지)
 function updateGoalStats(data) {
     const { target, completedBreaths, completedSets } = data;
     
@@ -2573,14 +2591,19 @@ function updateGoalStats(data) {
     if (setsEl) setsEl.textContent = completedSets;
 }
 
-// 🎯 기본 목표 카드 설정 (폴백)
+// 🎯 기본 목표 카드 설정 (기존 함수명 유지)
 function setDefaultGoalCard() {
     const progressPercentage = document.getElementById('progressPercentage');
+    const progressLabel = document.getElementById('progressLabel');
     const targetEl = document.getElementById('targetBreaths');
     const completedEl = document.getElementById('completedBreaths');
     const setsEl = document.getElementById('completedSets');
     
     if (progressPercentage) progressPercentage.textContent = '0%';
+    if (progressLabel) {
+        progressLabel.textContent = '달성률';
+        progressLabel.classList.remove('completed');
+    }
     if (targetEl) targetEl.textContent = '40';
     if (completedEl) completedEl.textContent = '0';
     if (setsEl) setsEl.textContent = '0';
