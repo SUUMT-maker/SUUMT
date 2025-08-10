@@ -1086,10 +1086,10 @@ function selectWorkoutMode(mode) {
 // 사용자 데이터 로드
 function loadUserData() {
     const stats = getLocalStats();
-    displayUserStats(stats);
     updateChart();
     updateSocialProofData(); // 🔥 새로운 기능: 사회적 증명 데이터 업데이트
     updateGreetingCard(); // 🎯 새로운 기능: 인삿말 카드 업데이트
+    updateGoalCard(); // 🎯 새로운 기능: 목표 카드 업데이트
 }
 
 // 저항 설정 관리 함수들
@@ -2434,4 +2434,154 @@ function selectMotivationalMessage(motivationData, userInfo) {
         message: MOTIVATION_MESSAGES.default.general,
         type: ''
     };
+}
+
+// 🎯 목표 카드 업데이트 함수
+async function updateGoalCard() {
+    try {
+        console.log('🎯 목표 카드 업데이트 시작');
+        
+        const todayData = await getTodayGoalData();
+        console.log('📊 오늘 목표 데이터:', todayData);
+        
+        updateGoalProgress(todayData);
+        updateGoalStats(todayData);
+        
+        console.log('✅ 목표 카드 업데이트 완료');
+        
+    } catch (error) {
+        console.error('❌ 목표 카드 업데이트 실패:', error);
+        setDefaultGoalCard();
+    }
+}
+
+// 🎯 오늘 목표 데이터 조회 (Supabase + 로컬)
+async function getTodayGoalData() {
+    const target = 40; // 고정 목표
+    let completedBreaths = 0;
+    let completedSets = 0;
+    
+    try {
+        // Supabase 데이터 시도
+        if (window.supabaseClient && window.currentUserId) {
+            const today = new Date();
+            const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
+            
+            const { data: sessions, error } = await window.supabaseClient
+                .from('exercise_sessions')
+                .select('completed_breaths, completed_sets')
+                .eq('user_id', window.currentUserId)
+                .gte('created_at', todayStart.toISOString())
+                .lt('created_at', todayEnd.toISOString());
+            
+            if (!error && sessions) {
+                completedBreaths = sessions.reduce((sum, s) => sum + (s.completed_breaths || 0), 0);
+                completedSets = sessions.reduce((sum, s) => sum + (s.completed_sets || 0), 0);
+                console.log('✅ Supabase 데이터 사용');
+            }
+        }
+    } catch (err) {
+        console.log('⚠️ Supabase 조회 실패, 로컬 데이터 사용');
+    }
+    
+    // 로컬 데이터 폴백
+    if (completedBreaths === 0) {
+        completedBreaths = getTodayBreaths();
+        completedSets = getTodayCompletedSets();
+        console.log('📱 로컬 데이터 사용');
+    }
+    
+    const percentage = Math.round((completedBreaths / target) * 100);
+    
+    return {
+        target,
+        completedBreaths,
+        completedSets,
+        percentage,
+        isCompleted: percentage >= 100
+    };
+}
+
+// 🎯 원형 프로그레스 업데이트
+function updateGoalProgress(data) {
+    const { percentage, isCompleted } = data;
+    
+    // 프로그레스 서클 요소
+    const progressCircle = document.getElementById('progressCircle');
+    const celebrationCircle = document.getElementById('celebrationCircle');
+    const progressPercentage = document.getElementById('progressPercentage');
+    const goalCard = document.querySelector('.goal-card');
+    
+    if (!progressCircle || !progressPercentage) return;
+    
+    // 원의 둘레 계산 (반지름 80 기준)
+    const circumference = 2 * Math.PI * 80; // 502.65
+    
+    // 진행률 계산 (100% 초과 가능)
+    const dashOffset = circumference - (Math.min(percentage, 200) / 100) * circumference;
+    
+    // 프로그레스 애니메이션
+    setTimeout(() => {
+        progressCircle.style.strokeDashoffset = dashOffset;
+        progressPercentage.textContent = `${percentage}%`;
+    }, 100);
+    
+    // 100% 달성 시 축하 이펙트
+    if (isCompleted) {
+        // 진행률 색상 변경
+        progressCircle.style.stroke = '#22c55e';
+        progressPercentage.classList.add('completed');
+        
+        // 축하 원 표시
+        if (celebrationCircle) {
+            celebrationCircle.style.display = 'block';
+            celebrationCircle.style.strokeDashoffset = '0';
+        }
+        
+        // 카드 전체 축하 이펙트
+        goalCard.classList.add('achievement');
+        
+        // 3초 후 이펙트 제거
+        setTimeout(() => {
+            goalCard.classList.remove('achievement');
+        }, 3000);
+        
+        console.log('🎉 목표 달성 축하 이펙트 실행');
+    } else {
+        // 미달성 시 기본 색상
+        progressCircle.style.stroke = '#667eea';
+        progressPercentage.classList.remove('completed');
+        
+        if (celebrationCircle) {
+            celebrationCircle.style.display = 'none';
+        }
+    }
+}
+
+// 🎯 목표 통계 카드 업데이트
+function updateGoalStats(data) {
+    const { target, completedBreaths, completedSets } = data;
+    
+    // 요소 업데이트
+    const targetEl = document.getElementById('targetBreaths');
+    const completedEl = document.getElementById('completedBreaths');
+    const setsEl = document.getElementById('completedSets');
+    
+    if (targetEl) targetEl.textContent = target;
+    if (completedEl) completedEl.textContent = completedBreaths;
+    if (setsEl) setsEl.textContent = completedSets;
+}
+
+// 🎯 기본 목표 카드 설정 (폴백)
+function setDefaultGoalCard() {
+    const progressPercentage = document.getElementById('progressPercentage');
+    const targetEl = document.getElementById('targetBreaths');
+    const completedEl = document.getElementById('completedBreaths');
+    const setsEl = document.getElementById('completedSets');
+    
+    if (progressPercentage) progressPercentage.textContent = '0%';
+    if (targetEl) targetEl.textContent = '40';
+    if (completedEl) completedEl.textContent = '0';
+    if (setsEl) setsEl.textContent = '0';
 }

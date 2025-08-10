@@ -311,60 +311,85 @@
                 </div>
             </div>
 
-            <!-- 통계 섹션 -->
-            <div class="stats-section">
+            <!-- 오늘의 목표 섹션 -->
+            <div class="goal-section">
                 <div class="section-header">
                     <div>
                         <h2 class="section-title">
-                            <span class="section-icon">📊</span>
-                            <span>오늘의 기록</span>
+                            <span class="section-icon">🎯</span>
+                            <span>오늘의 목표</span>
                         </h2>
                         <div class="section-subtitle">오늘 하루 나의 호흡 트레이닝 현황</div>
                     </div>
                 </div>
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-card-title">오늘 호흡</div>
-                            <div class="stat-card-icon">🫁</div>
-                        </div>
-                        <div class="stat-card-value">
-                            <div class="stat-number" id="totalBreaths">0</div>
-                            <div class="stat-unit">회</div>
+                <!-- 목표 달성 카드 -->
+                <div class="goal-card">
+                    <!-- 원형 프로그레스 -->
+                    <div class="circular-progress-container">
+                        <svg class="circular-progress" width="200" height="200" viewBox="0 0 200 200">
+                            <!-- 배경 원 -->
+                            <circle
+                                cx="100"
+                                cy="100"
+                                r="80"
+                                fill="none"
+                                stroke="#e5e7eb"
+                                stroke-width="8"
+                            />
+                            <!-- 진행률 원 -->
+                            <circle
+                                id="progressCircle"
+                                cx="100"
+                                cy="100"
+                                r="80"
+                                fill="none"
+                                stroke="#667eea"
+                                stroke-width="8"
+                                stroke-linecap="round"
+                                stroke-dasharray="502.65"
+                                stroke-dashoffset="502.65"
+                                transform="rotate(-90 100 100)"
+                                class="progress-stroke"
+                            />
+                            <!-- 100% 달성 이펙트 원 (숨겨짐) -->
+                            <circle
+                                id="celebrationCircle"
+                                cx="100"
+                                cy="100"
+                                r="85"
+                                fill="none"
+                                stroke="#22c55e"
+                                stroke-width="4"
+                                stroke-linecap="round"
+                                stroke-dasharray="534.07"
+                                stroke-dashoffset="534.07"
+                                transform="rotate(-90 100 100)"
+                                class="celebration-stroke"
+                                style="display: none;"
+                            />
+                        </svg>
+                        
+                        <!-- 중앙 텍스트 -->
+                        <div class="progress-text">
+                            <div class="progress-percentage" id="progressPercentage">0%</div>
+                            <div class="progress-label">달성률</div>
                         </div>
                     </div>
 
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-card-title">오늘 완료</div>
-                            <div class="stat-card-icon">💪</div>
+                    <!-- 하단 통계 카드들 -->
+                    <div class="goal-stats">
+                        <div class="goal-stat-card">
+                            <div class="stat-number" id="targetBreaths">40</div>
+                            <div class="stat-label">목표 호흡</div>
                         </div>
-                        <div class="stat-card-value">
-                            <div class="stat-number" id="averageSets">0</div>
-                            <div class="stat-unit">세트</div>
+                        <div class="goal-stat-card highlight">
+                            <div class="stat-number" id="completedBreaths">0</div>
+                            <div class="stat-label">완료 호흡</div>
                         </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-card-title">연속 일수</div>
-                            <div class="stat-card-icon">🔥</div>
-                        </div>
-                        <div class="stat-card-value">
-                            <div class="stat-number" id="consecutiveDays">0</div>
-                            <div class="stat-unit">일</div>
-                        </div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-card-header">
-                            <div class="stat-card-title">총 트레이닝</div>
-                            <div class="stat-card-icon">🏆</div>
-                        </div>
-                        <div class="stat-card-value">
-                            <div class="stat-number" id="totalExercises">0</div>
-                            <div class="stat-unit">회</div>
+                        <div class="goal-stat-card">
+                            <div class="stat-number" id="completedSets">0</div>
+                            <div class="stat-label">완료 세트</div>
                         </div>
                     </div>
                 </div>

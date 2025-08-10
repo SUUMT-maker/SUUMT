@@ -1982,3 +1982,189 @@
   width: 20px;
   height: 20px;
 }
+
+/* 🎯 오늘의 목표 카드 스타일 */
+.goal-section {
+    margin-bottom: 24px;
+}
+
+.goal-card {
+    background: white;
+    border: 1px solid #E7E7E7;
+    border-radius: 24px;
+    padding: 32px 24px 24px 24px;
+    margin: 0 20px 24px;
+    text-align: center;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    position: relative;
+}
+
+/* 원형 프로그레스 컨테이너 */
+.circular-progress-container {
+    position: relative;
+    display: inline-block;
+    margin-bottom: 24px;
+}
+
+.circular-progress {
+    transform: rotate(0deg);
+    filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.2));
+}
+
+/* 진행률 스트로크 애니메이션 */
+.progress-stroke {
+    transition: stroke-dashoffset 1s ease-in-out, stroke 0.3s ease;
+}
+
+/* 축하 이펙트 스트로크 */
+.celebration-stroke {
+    animation: celebrationPulse 2s ease-in-out infinite;
+    opacity: 0.8;
+}
+
+@keyframes celebrationPulse {
+    0%, 100% { 
+        stroke-width: 4;
+        opacity: 0.8;
+    }
+    50% { 
+        stroke-width: 6;
+        opacity: 1;
+    }
+}
+
+/* 중앙 텍스트 */
+.progress-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+}
+
+.progress-percentage {
+    font-size: 36px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 4px;
+    transition: color 0.3s ease;
+}
+
+.progress-percentage.completed {
+    color: #22c55e;
+    animation: completedBounce 0.6s ease-out;
+}
+
+@keyframes completedBounce {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+.progress-label {
+    font-size: 14px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+/* 하단 통계 카드들 */
+.goal-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+}
+
+.goal-stat-card {
+    background: #f8f9fa;
+    border-radius: 16px;
+    padding: 16px 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.goal-stat-card.highlight {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.goal-stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.goal-stat-card.highlight:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.goal-stat-card .stat-number {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 4px;
+    line-height: 1;
+}
+
+.goal-stat-card.highlight .stat-number {
+    color: white;
+}
+
+.goal-stat-card .stat-label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 500;
+}
+
+.goal-stat-card.highlight .stat-label {
+    color: rgba(255, 255, 255, 0.9);
+}
+
+/* 100% 달성 축하 이펙트 */
+.goal-card.achievement {
+    animation: achievementGlow 2s ease-in-out;
+    box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
+}
+
+@keyframes achievementGlow {
+    0%, 100% {
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    }
+    50% {
+        box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+    }
+}
+
+/* 모바일 최적화 */
+@media (max-width: 480px) {
+    .goal-card {
+        margin: 0 16px 24px;
+        padding: 24px 16px 20px 16px;
+    }
+    
+    .circular-progress {
+        width: 160px;
+        height: 160px;
+    }
+    
+    .progress-percentage {
+        font-size: 28px;
+    }
+    
+    .goal-stats {
+        gap: 12px;
+    }
+    
+    .goal-stat-card {
+        padding: 12px 8px;
+    }
+    
+    .goal-stat-card .stat-number {
+        font-size: 20px;
+    }
+    
+    .goal-stat-card .stat-label {
+        font-size: 11px;
+    }
+}
