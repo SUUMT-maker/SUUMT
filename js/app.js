@@ -1951,19 +1951,30 @@ if (document.readyState === 'loading') {
 // 🎯 새로운 기능: 인삿말 카드 업데이트 함수
 async function updateGreetingCard() {
     try {
+        console.log('🔍 인삿말 카드 업데이트 시작');
+        
         const userInfo = await getUserInfo();
+        console.log('👤 사용자 정보:', userInfo);
+        
         const exerciseContext = await getExerciseContext();
+        console.log('💪 운동 컨텍스트:', exerciseContext);
+        
         const greeting = generatePersonalizedGreeting(userInfo, exerciseContext);
+        console.log('💬 생성된 인삿말:', greeting);
         
-        // UI 업데이트
-        document.getElementById('greetingPrefix').textContent = greeting.prefix;
-        document.getElementById('userName').textContent = greeting.userName;
-        
+        // UI 업데이트 - 한 번에 처리
+        const prefixEl = document.getElementById('greetingPrefix');
+        const userNameEl = document.getElementById('userName');
         const messageEl = document.getElementById('greetingMessage');
-        messageEl.textContent = greeting.message;
-        messageEl.className = `greeting-message ${greeting.messageType || ''}`;
         
-        console.log('✅ 인삿말 카드 업데이트 완료:', greeting);
+        if (prefixEl) prefixEl.textContent = greeting.prefix;
+        if (userNameEl) userNameEl.textContent = greeting.userName;
+        if (messageEl) {
+            messageEl.textContent = greeting.message;
+            messageEl.className = `greeting-message ${greeting.messageType || ''}`;
+        }
+        
+        console.log('✅ 인삿말 카드 업데이트 완료');
         
     } catch (error) {
         console.error('❌ 인삿말 카드 업데이트 실패:', error);
@@ -1974,18 +1985,43 @@ async function updateGreetingCard() {
 
 // 🎯 사용자 정보 조회 함수
 async function getUserInfo() {
-    // 로그인된 사용자 정보 가져오기
+    console.log('🔍 사용자 정보 조회 시작');
+    
+    // 1. 전역 변수에서 먼저 확인
+    if (window.currentUserInfo && window.currentUserInfo.nickname) {
+        console.log('✅ 전역 변수에서 사용자 정보 발견');
+        return {
+            nickname: window.currentUserInfo.nickname,
+            isLoggedIn: true
+        };
+    }
+    
+    // 2. Supabase에서 직접 조회
     if (window.supabaseClient && window.currentUserId) {
-        const { data: { user } } = await window.supabaseClient.auth.getUser();
-        if (user && user.user_metadata) {
-            return {
-                nickname: user.user_metadata.nickname || user.user_metadata.name || '트레이너',
-                isLoggedIn: true
-            };
+        try {
+            const { data: { user }, error } = await window.supabaseClient.auth.getUser();
+            console.log('📡 Supabase 사용자 정보:', user);
+            
+            if (!error && user && user.user_metadata) {
+                const nickname = user.user_metadata.nickname || 
+                               user.user_metadata.name || 
+                               user.user_metadata.full_name || 
+                               '트레이너';
+                               
+                console.log('✅ Supabase에서 닉네임 추출:', nickname);
+                
+                return {
+                    nickname: nickname,
+                    isLoggedIn: true
+                };
+            }
+        } catch (err) {
+            console.error('❌ Supabase 사용자 정보 조회 실패:', err);
         }
     }
     
-    // 비로그인 시 기본값
+    // 3. 비로그인 시 기본값
+    console.log('⚠️ 로그인되지 않음, 기본값 사용');
     return {
         nickname: 'AI 숨트레이너',
         isLoggedIn: false
@@ -2042,7 +2078,14 @@ function generatePersonalizedGreeting(userInfo, exerciseContext) {
     }
     
     // 사용자명 설정
-    const displayName = isLoggedIn ? `${nickname}님` : 'AI 숨트레이너';
+    let displayName;
+    if (isLoggedIn && nickname && nickname !== '트레이너') {
+        displayName = `${nickname}님`;
+    } else {
+        displayName = 'AI 숨트레이너';
+    }
+
+    console.log('👤 최종 표시명:', displayName);
     
     // 상황별 메시지 생성
     let message = '';
