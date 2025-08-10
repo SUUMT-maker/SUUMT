@@ -2177,7 +2177,7 @@
 }
 
 .goal-stat-card.highlight .stat-label {
-    color: rgba(255, 255, 255, 0.9);
+    color: white;
 }
 
 /* 100% 달성 축하 이펙트 */
