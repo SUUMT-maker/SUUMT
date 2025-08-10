@@ -313,21 +313,19 @@
 
             <!-- 오늘의 목표 섹션 -->
             <div class="goal-section">
-                <div class="section-header">
-                    <div>
-                        <h2 class="section-title">
-                            <span class="section-icon">🎯</span>
-                            <span>오늘의 목표</span>
-                        </h2>
-                        <div class="section-subtitle">오늘 하루 나의 호흡 트레이닝 현황</div>
-                    </div>
-                </div>
-
                 <!-- 목표 달성 카드 -->
                 <div class="goal-card">
+                    <!-- 카드 헤더 (통합된 제목) -->
+                    <div class="goal-card-header">
+                        <h2 class="goal-card-title">
+                            <span class="goal-card-icon">🎯</span>
+                            <span>오늘의 목표</span>
+                        </h2>
+                    </div>
+
                     <!-- 원형 프로그레스 -->
                     <div class="circular-progress-container">
-                        <svg class="circular-progress" width="200" height="200" viewBox="0 0 200 200">
+                        <svg class="circular-progress" width="240" height="240" viewBox="0 0 200 200">
                             <!-- 배경 원 -->
                             <circle
                                 cx="100"
@@ -335,7 +333,7 @@
                                 r="80"
                                 fill="none"
                                 stroke="#e5e7eb"
-                                stroke-width="8"
+                                stroke-width="12"
                             />
                             <!-- 진행률 원 -->
                             <circle
@@ -345,7 +343,7 @@
                                 r="80"
                                 fill="none"
                                 stroke="#667eea"
-                                stroke-width="8"
+                                stroke-width="12"
                                 stroke-linecap="round"
                                 stroke-dasharray="502.65"
                                 stroke-dashoffset="502.65"
@@ -360,7 +358,7 @@
                                 r="85"
                                 fill="none"
                                 stroke="#22c55e"
-                                stroke-width="4"
+                                stroke-width="8"
                                 stroke-linecap="round"
                                 stroke-dasharray="534.07"
                                 stroke-dashoffset="534.07"
@@ -373,7 +371,7 @@
                         <!-- 중앙 텍스트 -->
                         <div class="progress-text">
                             <div class="progress-percentage" id="progressPercentage">0%</div>
-                            <div class="progress-label">달성률</div>
+                            <div class="progress-label" id="progressLabel">달성률</div>
                         </div>
                     </div>
 
@@ -385,7 +383,7 @@
                         </div>
                         <div class="goal-stat-card highlight">
                             <div class="stat-number" id="completedBreaths">0</div>
-                            <div class="stat-label">완료 호흡</div>
+                            <div class="progress-label">완료 호흡</div>
                         </div>
                         <div class="goal-stat-card">
                             <div class="stat-number" id="completedSets">0</div>
