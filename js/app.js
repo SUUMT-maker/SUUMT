@@ -1963,11 +1963,9 @@ async function updateGreetingCard() {
         console.log('💬 생성된 인삿말:', greeting);
         
         // UI 업데이트 - 한 번에 처리
-        const prefixEl = document.getElementById('greetingPrefix');
         const userNameEl = document.getElementById('userName');
         const messageEl = document.getElementById('greetingMessage');
         
-        if (prefixEl) prefixEl.textContent = greeting.prefix;
         if (userNameEl) userNameEl.textContent = greeting.userName;
         if (messageEl) {
             messageEl.textContent = greeting.message;
@@ -2112,9 +2110,12 @@ function generatePersonalizedGreeting(userInfo, exerciseContext) {
         messageType = 'encouraging';
     }
     
+    // 인삿말과 닉네임을 한 줄로 합치기
+    const fullGreeting = `${timeBasedPrefix} ${displayName}`;
+
     return {
-        prefix: timeBasedPrefix,
-        userName: displayName,
+        prefix: '', // 빈 문자열로 설정
+        userName: fullGreeting, // 전체 인삿말을 userName에 넣기
         message: message,
         messageType: messageType
     };
@@ -2122,7 +2123,6 @@ function generatePersonalizedGreeting(userInfo, exerciseContext) {
 
 // 🎯 기본 인삿말 설정 (폴백용)
 function setDefaultGreeting() {
-    document.getElementById('greetingPrefix').textContent = '안녕하세요,';
-    document.getElementById('userName').textContent = 'AI 숨트레이너';
+    document.getElementById('userName').textContent = '안녕하세요, AI 숨트레이너';
     document.getElementById('greetingMessage').textContent = '오늘도 깊은 호흡으로 하루를 시작해보세요.';
 }
