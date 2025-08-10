@@ -1983,52 +1983,101 @@
   height: 20px;
 }
 
-/* 🎯 오늘의 목표 카드 스타일 */
+/* 🎯 오늘의 목표 카드 스타일 개선 - components.css 파일에서 기존 .goal-card 스타일을 찾아 완전히 교체 */
+
+/* 목표 섹션 전체 */
 .goal-section {
     margin-bottom: 24px;
 }
 
+/* 기존 섹션 헤더 숨김 (목표 카드와 통합) */
+.goal-section .section-header {
+    display: none;
+}
+
+/* 목표 카드 메인 컨테이너 */
 .goal-card {
     background: white;
     border: 1px solid #E7E7E7;
-    border-radius: 24px;
-    padding: 32px 24px 24px 24px;
+    border-radius: 32px;
+    padding: 32px 24px 28px 24px;
     margin: 0 20px 24px;
     text-align: center;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
     position: relative;
+    transition: all 0.3s ease;
+}
+
+.goal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* 카드 상단 제목 영역 */
+.goal-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #F1F5F9;
+}
+
+.goal-card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1E1E1E;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.goal-card-icon {
+    font-size: 24px;
 }
 
 /* 원형 프로그레스 컨테이너 */
 .circular-progress-container {
     position: relative;
     display: inline-block;
-    margin-bottom: 24px;
+    margin-bottom: 32px;
 }
 
 .circular-progress {
     transform: rotate(0deg);
-    filter: drop-shadow(0 4px 12px rgba(102, 126, 234, 0.2));
+    filter: drop-shadow(0 8px 24px rgba(102, 126, 234, 0.25));
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    width: 240px;
+    height: 240px;
 }
 
-/* 진행률 스트로크 애니메이션 */
+/* 진행률 스트로크 */
 .progress-stroke {
-    transition: stroke-dashoffset 1s ease-in-out, stroke 0.3s ease;
+    transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s ease;
+    stroke-width: 12;
+    stroke-linecap: round;
+}
+
+/* 배경 원 */
+.circular-progress circle:first-child {
+    stroke-width: 12;
 }
 
 /* 축하 이펙트 스트로크 */
 .celebration-stroke {
     animation: celebrationPulse 2s ease-in-out infinite;
     opacity: 0.8;
+    stroke-width: 8;
 }
 
 @keyframes celebrationPulse {
     0%, 100% { 
-        stroke-width: 4;
+        stroke-width: 8;
         opacity: 0.8;
     }
     50% { 
-        stroke-width: 6;
+        stroke-width: 12;
         opacity: 1;
     }
 }
@@ -2043,68 +2092,78 @@
 }
 
 .progress-percentage {
-    font-size: 36px;
-    font-weight: 700;
+    font-size: 48px;
+    font-weight: 800;
     color: #1f2937;
-    margin-bottom: 4px;
-    transition: color 0.3s ease;
+    margin-bottom: 6px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 1;
 }
 
 .progress-percentage.completed {
     color: #22c55e;
-    animation: completedBounce 0.6s ease-out;
+    animation: completedBounce 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
 }
 
 @keyframes completedBounce {
     0% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+    30% { transform: scale(1.15); }
+    60% { transform: scale(0.95); }
+    80% { transform: scale(1.05); }
     100% { transform: scale(1); }
 }
 
 .progress-label {
-    font-size: 14px;
+    font-size: 16px;
     color: #6b7280;
-    font-weight: 500;
+    font-weight: 600;
+    transition: all 0.3s ease;
+}
+
+.progress-label.completed {
+    color: #22c55e;
+    font-weight: 700;
 }
 
 /* 하단 통계 카드들 */
 .goal-stats {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
-    gap: 16px;
+    gap: 20px;
 }
 
 .goal-stat-card {
-    background: #f8f9fa;
-    border-radius: 16px;
-    padding: 16px 12px;
+    background: #F8F9FA;
+    border: 1px solid #E5E7EB;
+    border-radius: 20px;
+    padding: 20px 16px;
     text-align: center;
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
 }
 
 .goal-stat-card.highlight {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.goal-stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.goal-stat-card.highlight:hover {
     transform: translateY(-4px);
-    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+    border-color: #667eea;
+}
+
+.goal-stat-card:hover:not(.highlight) {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+    background: white;
+    border-color: #667eea;
 }
 
 .goal-stat-card .stat-number {
-    font-size: 24px;
-    font-weight: 600;
+    font-size: 32px;
+    font-weight: 700;
     color: #1f2937;
-    margin-bottom: 4px;
+    margin-bottom: 6px;
     line-height: 1;
+    transition: all 0.3s ease;
 }
 
 .goal-stat-card.highlight .stat-number {
@@ -2112,9 +2171,9 @@
 }
 
 .goal-stat-card .stat-label {
-    font-size: 12px;
+    font-size: 14px;
     color: #6b7280;
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .goal-stat-card.highlight .stat-label {
@@ -2123,16 +2182,27 @@
 
 /* 100% 달성 축하 이펙트 */
 .goal-card.achievement {
-    animation: achievementGlow 2s ease-in-out;
-    box-shadow: 0 4px 20px rgba(34, 197, 94, 0.3);
+    animation: achievementGlow 2.5s ease-in-out;
+    border-color: #22c55e;
 }
 
 @keyframes achievementGlow {
     0%, 100% {
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        border-color: #E7E7E7;
+    }
+    25% {
+        box-shadow: 0 8px 32px rgba(34, 197, 94, 0.2);
+        border-color: #22c55e;
     }
     50% {
-        box-shadow: 0 8px 24px rgba(34, 197, 94, 0.3);
+        box-shadow: 0 12px 40px rgba(34, 197, 94, 0.3);
+        border-color: #22c55e;
+        transform: translateY(-2px);
+    }
+    75% {
+        box-shadow: 0 8px 32px rgba(34, 197, 94, 0.2);
+        border-color: #22c55e;
     }
 }
 
@@ -2141,30 +2211,49 @@
     .goal-card {
         margin: 0 16px 24px;
         padding: 24px 16px 20px 16px;
+        border-radius: 28px;
+    }
+    
+    .goal-card-header {
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+    }
+    
+    .goal-card-title {
+        font-size: 18px;
+    }
+    
+    .goal-card-icon {
+        font-size: 22px;
     }
     
     .circular-progress {
-        width: 160px;
-        height: 160px;
+        width: 200px;
+        height: 200px;
     }
     
     .progress-percentage {
-        font-size: 28px;
+        font-size: 40px;
+    }
+    
+    .progress-label {
+        font-size: 14px;
     }
     
     .goal-stats {
-        gap: 12px;
+        gap: 16px;
     }
     
     .goal-stat-card {
-        padding: 12px 8px;
+        padding: 16px 12px;
+        border-radius: 16px;
     }
     
     .goal-stat-card .stat-number {
-        font-size: 20px;
+        font-size: 28px;
     }
     
     .goal-stat-card .stat-label {
-        font-size: 11px;
+        font-size: 13px;
     }
 }
