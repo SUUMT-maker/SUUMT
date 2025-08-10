@@ -141,7 +141,7 @@ function updateChart() {
     // 주간 제목 업데이트
     const weekStartStr = formatDateForUser(weekStart);
     const weekEndStr = formatDateForUser(weekDates[6]);
-    chartSubtitle.textContent = `${weekStartStr} ~ ${weekEndStr} 트레이닝 성과`;
+    chartSubtitle.textContent = `${weekStartStr} ~ ${weekEndStr}`;
 
     // 🔧 각 날짜별 완료 세트 수 계산
     const dailySets = weekDates.map(targetDate => {
@@ -203,6 +203,9 @@ function updateChart() {
             bar.title = `${dateStr}: ${totalSets}세트 완료`;
         }
     });
+    
+    // 🎯 주간 인사이트 업데이트
+    updateWeeklyInsights(dailySets, weekDates);
 }
 
 // 🎮 배지 시스템 헬퍼 함수들
@@ -403,5 +406,74 @@ function handleQuizCompletionBadges() {
         setTimeout(() => {
             showBadgePopup(badgesToShow[0]);
         }, 1000);
+    }
+} 
+
+// 🎯 주간 인사이트 업데이트 함수
+function updateWeeklyInsights(dailySets, weekDates) {
+    const weeklyTotalSets = dailySets.reduce((sum, sets) => sum + sets, 0);
+    const weeklyAvgSets = weeklyTotalSets / 7;
+    
+    // 이전 주 데이터 계산
+    const prevWeekStart = new Date(weekDates[0]);
+    prevWeekStart.setDate(prevWeekStart.getDate() - 7);
+    const prevWeekDates = Array.from({length: 7}, (_, i) => {
+        const date = new Date(prevWeekStart);
+        date.setDate(prevWeekStart.getDate() + i);
+        return date;
+    });
+    
+    const history = getExerciseHistory();
+    const prevWeekSets = prevWeekDates.map(targetDate => {
+        const dayData = history.filter(record => {
+            const recordDate = new Date(record.date);
+            return recordDate.toDateString() === targetDate.toDateString();
+        });
+        return dayData.reduce((sum, record) => sum + record.completedSets, 0);
+    });
+    
+    const prevWeekTotal = prevWeekSets.reduce((sum, sets) => sum + sets, 0);
+    const prevWeekAvg = prevWeekTotal / 7;
+    
+    // UI 업데이트
+    const weeklyTotalEl = document.getElementById('weeklyTotalSets');
+    const weeklyAvgEl = document.getElementById('weeklyAvgSets');
+    const setsTrendEl = document.getElementById('weeklySetsTrend');
+    const avgTrendEl = document.getElementById('weeklyAvgTrend');
+    
+    if (weeklyTotalEl) weeklyTotalEl.textContent = weeklyTotalSets;
+    if (weeklyAvgEl) weeklyAvgEl.textContent = weeklyAvgSets.toFixed(1);
+    
+    // 트렌드 계산 및 표시
+    if (setsTrendEl && prevWeekTotal > 0) {
+        const setsChange = weeklyTotalSets - prevWeekTotal;
+        const setsChangePercent = Math.round((setsChange / prevWeekTotal) * 100);
+        
+        if (setsChange > 0) {
+            setsTrendEl.textContent = `+${setsChangePercent}% ↗`;
+            setsTrendEl.className = 'insight-trend positive';
+        } else if (setsChange < 0) {
+            setsTrendEl.textContent = `${setsChangePercent}% ↘`;
+            setsTrendEl.className = 'insight-trend negative';
+        } else {
+            setsTrendEl.textContent = '변화 없음';
+            setsTrendEl.className = 'insight-trend neutral';
+        }
+    }
+    
+    if (avgTrendEl && prevWeekAvg > 0) {
+        const avgChange = weeklyAvgSets - prevWeekAvg;
+        const avgChangePercent = Math.round((avgChange / prevWeekAvg) * 100);
+        
+        if (avgChange > 0) {
+            avgTrendEl.textContent = `+${avgChangePercent}% ↗`;
+            avgTrendEl.className = 'insight-trend positive';
+        } else if (avgChange < 0) {
+            avgTrendEl.textContent = `${avgChangePercent}% ↘`;
+            avgTrendEl.className = 'insight-trend negative';
+        } else {
+            avgTrendEl.textContent = '변화 없음';
+            avgTrendEl.className = 'insight-trend neutral';
+        }
     }
 } 

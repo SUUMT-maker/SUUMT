@@ -966,24 +966,126 @@
 }
 
 /* 차트 컨테이너 */
-.chart-container {
+/* 주간 활동 통합 카드 */
+.weekly-activity-card {
     background: white;
     border: 1px solid #E7E7E7;
-    border-radius: 24px;
+    border-radius: 32px;
+    padding: 32px 24px 28px 24px;
     margin: 0 20px 24px;
-    padding: 20px 20px 30px 20px;
-    overflow: visible;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+.weekly-activity-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* 카드 상단 제목 영역 (목표 카드와 동일) */
+.weekly-card-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #F1F5F9;
+}
+
+.weekly-card-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1E1E1E;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.weekly-card-icon {
+    font-size: 24px;
+}
+
+.weekly-card-subtitle {
+    font-size: 14px;
+    color: #6b7280;
+    text-align: center;
+    margin: 0;
+}
+
+/* 차트 영역 */
+.weekly-chart-area {
+    margin-bottom: 24px;
 }
 
 .chart-legend {
     text-align: center;
-    margin-bottom: 16px;
-    padding: 8px 12px;
-    background: rgba(102, 126, 234, 0.1);
-    border-radius: 12px;
-    font-size: 12px;
+    margin-bottom: 20px;
+    padding: 10px 16px;
+    background: rgba(102, 126, 234, 0.08);
+    border-radius: 16px;
+    font-size: 13px;
     color: #667eea;
     font-weight: 600;
+    border: 1px solid rgba(102, 126, 234, 0.15);
+}
+
+/* 하단 인사이트 영역 */
+.weekly-insights {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    padding-top: 20px;
+    border-top: 2px solid #F1F5F9;
+}
+
+.weekly-insight-card {
+    background: #F8F9FA;
+    border: 1px solid #E5E7EB;
+    border-radius: 16px;
+    padding: 16px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.weekly-insight-card:hover {
+    background: white;
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+}
+
+.insight-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 4px;
+    line-height: 1;
+}
+
+.insight-label {
+    font-size: 12px;
+    color: #6b7280;
+    font-weight: 600;
+}
+
+.insight-trend {
+    font-size: 11px;
+    font-weight: 600;
+    margin-top: 4px;
+}
+
+.insight-trend.positive {
+    color: #059669;
+}
+
+.insight-trend.negative {
+    color: #dc2626;
+}
+
+.insight-trend.neutral {
+    color: #6b7280;
 }
 
 .chart-area {

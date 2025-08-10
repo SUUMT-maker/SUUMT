@@ -395,44 +395,60 @@
 
             <!-- 차트 섹션 -->
             <div class="chart-section">
-                <div class="section-header">
-                    <div>
-                        <h2 class="section-title">
-                            <span class="section-icon">📈</span>
+                <div class="weekly-activity-card">
+                    <!-- 통합된 헤더 -->
+                    <div class="weekly-card-header">
+                        <h2 class="weekly-card-title">
+                            <span class="weekly-card-icon">📈</span>
                             <span>주간 활동</span>
                         </h2>
-                        <div class="section-subtitle" id="chartSubtitle">이번 주 트레이닝 성과를 한눈에</div>
+                        <div class="weekly-card-subtitle" id="chartSubtitle">이번 주 트레이닝 성과를 한눈에</div>
                     </div>
-                </div>
-
-                <div class="chart-container">
-                    <div class="chart-legend">완료한 세트 수 (일별)</div>
-                    <div class="chart-area">
-                        <div class="chart-y-axis">
-                            <div class="y-label">4</div>
-                            <div class="y-label">3</div>
-                            <div class="y-label">2</div>
-                            <div class="y-label">1</div>
-                            <div class="y-label">0</div>
+                    
+                    <!-- 차트 영역 -->
+                    <div class="weekly-chart-area">
+                        <div class="chart-legend">완료한 세트 수 (일별)</div>
+                        <div class="chart-area">
+                            <div class="chart-y-axis">
+                                <div class="y-label">4</div>
+                                <div class="y-label">3</div>
+                                <div class="y-label">2</div>
+                                <div class="y-label">1</div>
+                                <div class="y-label">0</div>
+                            </div>
+                            <div class="chart-bars" id="chartBars">
+                                <div class="chart-bar" style="height: 0%" data-day="0"></div>
+                                <div class="chart-bar" style="height: 0%" data-day="1"></div>
+                                <div class="chart-bar" style="height: 0%" data-day="2"></div>
+                                <div class="chart-bar" style="height: 0%" data-day="3"></div>
+                                <div class="chart-bar" style="height: 0%" data-day="4"></div>
+                                <div class="chart-bar" style="height: 0%" data-day="5"></div>
+                                <div class="chart-bar" style="height: 0%" data-day="6"></div>
+                            </div>
                         </div>
-                        <div class="chart-bars" id="chartBars">
-                            <div class="chart-bar" style="height: 0%" data-day="0"></div>
-                            <div class="chart-bar" style="height: 0%" data-day="1"></div>
-                            <div class="chart-bar" style="height: 0%" data-day="2"></div>
-                            <div class="chart-bar" style="height: 0%" data-day="3"></div>
-                            <div class="chart-bar" style="height: 0%" data-day="4"></div>
-                            <div class="chart-bar" style="height: 0%" data-day="5"></div>
-                            <div class="chart-bar" style="height: 0%" data-day="6"></div>
+                        <div class="chart-x-axis" id="chartXAxis">
+                            <div class="x-label">일</div>
+                            <div class="x-label">월</div>
+                            <div class="x-label">화</div>
+                            <div class="x-label">수</div>
+                            <div class="x-label">목</div>
+                            <div class="x-label">금</div>
+                            <div class="x-label">토</div>
                         </div>
                     </div>
-                    <div class="chart-x-axis" id="chartXAxis">
-                        <div class="x-label">일</div>
-                        <div class="x-label">월</div>
-                        <div class="x-label">화</div>
-                        <div class="x-label">수</div>
-                        <div class="x-label">목</div>
-                        <div class="x-label">금</div>
-                        <div class="x-label">토</div>
+                    
+                    <!-- 하단 인사이트 -->
+                    <div class="weekly-insights">
+                        <div class="weekly-insight-card">
+                            <div class="insight-number" id="weeklyTotalSets">0</div>
+                            <div class="insight-label">이번 주 총 세트</div>
+                            <div class="insight-trend neutral" id="weeklySetsTrend">--</div>
+                        </div>
+                        <div class="weekly-insight-card">
+                            <div class="insight-number" id="weeklyAvgSets">0.0</div>
+                            <div class="insight-label">일평균 세트</div>
+                            <div class="insight-trend neutral" id="weeklyAvgTrend">--</div>
+                        </div>
                     </div>
                 </div>
             </div>
