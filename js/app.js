@@ -24,9 +24,24 @@ window.supabaseClient.auth.onAuthStateChange((event, session) => {
     console.log('👤 User ID:', session.user.id);
     window.currentUserId = session.user.id;
 
+    // 🎯 사용자 정보 저장
+    if (session.user.user_metadata) {
+        window.currentUserInfo = {
+            nickname: session.user.user_metadata.nickname || session.user.user_metadata.name,
+            email: session.user.email,
+            loginTime: new Date().toISOString()
+        };
+        console.log('👤 User Info:', window.currentUserInfo);
+    }
+
     // 화면 전환
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('homeScreen').style.display = 'block';
+    
+    // 🎯 로그인 후 인삿말 업데이트
+    setTimeout(() => {
+        updateGreetingCard();
+    }, 500);
   }
 });
 
@@ -37,8 +52,24 @@ window.supabaseClient.auth.onAuthStateChange((event, session) => {
     console.log('✅ Session found:', session.user);
     console.log('👤 User ID:', session.user.id);
     window.currentUserId = session.user.id;
+    
+    // 🎯 사용자 정보 저장
+    if (session.user.user_metadata) {
+        window.currentUserInfo = {
+            nickname: session.user.user_metadata.nickname || session.user.user_metadata.name,
+            email: session.user.email,
+            loginTime: new Date().toISOString()
+        };
+        console.log('👤 User Info:', window.currentUserInfo);
+    }
+    
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('homeScreen').style.display = 'block';
+    
+    // 🎯 세션 복구 후 인삿말 업데이트
+    setTimeout(() => {
+        updateGreetingCard();
+    }, 500);
   }
 })();
 
@@ -281,48 +312,6 @@ function hideBottomNav() {
 }
 
 // 📒 Records 관련 함수들
-async function fetchAiAdviceForDate(date) {
-    const client = window.supabaseClient;
-    if (!client) return null;
-
-    try {
-        // Step 1: Fetch session IDs for the date
-        const { data: sessions, error: sessionError } = await client
-            .from('exercise_sessions')
-            .select('id')
-            .eq('exercise_date', date);
-
-        if (sessionError || !sessions?.length) {
-            console.warn('⚠️ No exercise sessions found for', date);
-            return null;
-        }
-
-        const sessionIds = sessions.map(s => s.id);
-
-        // Step 2: Fetch AI advice with summary first
-        const { data: advices, error: adviceError } = await client
-            .from('ai_advice')
-            .select('summary, comprehensive_advice, session_id')
-            .in('session_id', sessionIds)
-            .order('created_at', { ascending: false })
-            .limit(1);
-
-        if (adviceError || !advices?.length) {
-            console.warn('⚠️ No AI advice found for', date);
-            return null;
-        }
-
-        const advice = advices[0];
-        const result = advice.summary || advice.comprehensive_advice || null;
-        
-        console.log('✅ AI advice fetched for', date, ':', result);
-        return result;
-
-    } catch (err) {
-        console.error('❌ Error fetching AI advice:', err);
-        return null;
-    }
-}
 
 async function fetchExerciseSessions() {
     const client = window.supabaseClient;
@@ -360,53 +349,7 @@ function transformSessionToRecord(session) {
     };
 }
 
-function renderCalendar(sessions) {
-    const calendarContainer = document.querySelector('.records-calendar');
-    
-    // UTC → KST 시간대 보정하여 날짜별로 세션 그룹화
-    const sessionsByDate = {};
-    sessions.forEach(session => {
-        const sessionDate = toKSTDateString(session.created_at);
-        
-        if (!sessionsByDate[sessionDate]) {
-            sessionsByDate[sessionDate] = [];
-        }
-        sessionsByDate[sessionDate].push(session);
-    });
-    
-    const days = Object.keys(sessionsByDate);
-    console.log('📅 KST 기준 운동 기록 날짜들:', days);
 
-    // 현재 날짜 기준으로 년월 계산
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth() + 1; // 0-based to 1-based
-
-    let html = '<table class="calendar"><tr>';
-    for (let d = 1; d <= 30; d++) {
-        const dayStr = d.toString().padStart(2, '0');
-        const fullDate = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${dayStr}`;
-        const hasRecord = days.includes(fullDate);
-        
-        if (hasRecord) {
-            console.log(`✅ ${fullDate}에 운동 기록 있음`);
-        }
-        
-        html += `<td class="${hasRecord ? 'has-record' : ''}" data-day="${fullDate}">${d}</td>`;
-        if (d % 7 === 0) html += '</tr><tr>';
-    }
-    html += '</tr></table>';
-    calendarContainer.innerHTML = html;
-
-    calendarContainer.querySelectorAll('td').forEach(td => {
-        td.addEventListener('click', async () => {
-            const day = td.getAttribute('data-day');
-            const daySessions = sessionsByDate[day] || [];
-            const selectedSession = daySessions.find(s => s.completed_sets > 0) || daySessions[0];
-            await renderRecordSummary(selectedSession);
-        });
-    });
-}
 
 async function renderRecordSummary(session) {
     const dateEl = document.getElementById('selectedDate');
@@ -1118,6 +1061,13 @@ function switchTab(tabName) {
     if (tabName === 'records') {
         onRecordsTabClick();
     }
+    
+    // 홈 탭으로 이동 시 인삿말 업데이트
+    if (tabName === 'home') {
+        setTimeout(() => {
+            updateGreetingCard();
+        }, 300);
+    }
 }
 
 // 운동 모드 선택 함수
@@ -1139,6 +1089,7 @@ function loadUserData() {
     displayUserStats(stats);
     updateChart();
     updateSocialProofData(); // 🔥 새로운 기능: 사회적 증명 데이터 업데이트
+    updateGreetingCard(); // 🎯 새로운 기능: 인삿말 카드 업데이트
 }
 
 // 저항 설정 관리 함수들
@@ -1277,6 +1228,11 @@ async function showResultScreen() {
         // 🔥 새로운 기능: 사회적 증명 UI 초기화
         updateSocialProofData();
         initReviewsCarousel();
+        
+        // 🎯 결과 화면 표시 후 인삿말 업데이트
+        setTimeout(() => {
+            updateGreetingCard();
+        }, 500);
         
         if (newBadges.length > 0) {
             // 첫 번째 새 배지만 팝업으로 표시 (여러 개면 순차적으로)
@@ -1458,6 +1414,11 @@ function handleExerciseResult(result) {
     
     document.getElementById('intensityAdvice').innerHTML = finalIntensityAdvice.replace(/\n/g, '<br>');
     document.getElementById('comprehensiveAdvice').innerHTML = finalComprehensiveAdvice.replace(/\n/g, '<br>');
+    
+    // 🎯 운동 완료 후 인삿말 업데이트
+    setTimeout(() => {
+        updateGreetingCard();
+    }, 1000);
 }
 
 // 🔥 새로운 기능: 스마트 실시간 데이터 생성
@@ -1985,4 +1946,140 @@ if (document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', initAutoUpdateSystem);
 } else {
   initAutoUpdateSystem();
+}
+
+// 🎯 새로운 기능: 인삿말 카드 업데이트 함수
+async function updateGreetingCard() {
+    try {
+        const userInfo = await getUserInfo();
+        const exerciseContext = await getExerciseContext();
+        const greeting = generatePersonalizedGreeting(userInfo, exerciseContext);
+        
+        // UI 업데이트
+        document.getElementById('greetingPrefix').textContent = greeting.prefix;
+        document.getElementById('userName').textContent = greeting.userName;
+        
+        const messageEl = document.getElementById('greetingMessage');
+        messageEl.textContent = greeting.message;
+        messageEl.className = `greeting-message ${greeting.messageType || ''}`;
+        
+        console.log('✅ 인삿말 카드 업데이트 완료:', greeting);
+        
+    } catch (error) {
+        console.error('❌ 인삿말 카드 업데이트 실패:', error);
+        // 폴백: 기본 인삿말 사용
+        setDefaultGreeting();
+    }
+}
+
+// 🎯 사용자 정보 조회 함수
+async function getUserInfo() {
+    // 로그인된 사용자 정보 가져오기
+    if (window.supabaseClient && window.currentUserId) {
+        const { data: { user } } = await window.supabaseClient.auth.getUser();
+        if (user && user.user_metadata) {
+            return {
+                nickname: user.user_metadata.nickname || user.user_metadata.name || '트레이너',
+                isLoggedIn: true
+            };
+        }
+    }
+    
+    // 비로그인 시 기본값
+    return {
+        nickname: 'AI 숨트레이너',
+        isLoggedIn: false
+    };
+}
+
+// 🎯 운동 컨텍스트 조회 함수
+async function getExerciseContext() {
+    const today = getCurrentUserTime();
+    const yesterday = new Date(today.getTime() - 24 * 60 * 60 * 1000);
+    
+    // 오늘 날짜 문자열 (KST)
+    const todayStr = today.toDateString();
+    const yesterdayStr = yesterday.toDateString();
+    
+    // 로컬스토리지에서 운동 기록 조회
+    const history = getExerciseHistory();
+    
+    const todaySessions = history.filter(record => {
+        const recordDate = new Date(record.date);
+        return recordDate.toDateString() === todayStr;
+    });
+    
+    const yesterdaySessions = history.filter(record => {
+        const recordDate = new Date(record.date);
+        return recordDate.toDateString() === yesterdayStr;
+    });
+    
+    return {
+        today_sessions_count: todaySessions.length,
+        yesterday_sessions_count: yesterdaySessions.length,
+        today_date_kst: todayStr,
+        last_exercise_date: history.length > 0 ? new Date(history[0].date).toDateString() : null
+    };
+}
+
+// 🎯 개인화된 인삿말 생성 함수
+function generatePersonalizedGreeting(userInfo, exerciseContext) {
+    const { nickname, isLoggedIn } = userInfo;
+    const { today_sessions_count, yesterday_sessions_count, today_date_kst, last_exercise_date } = exerciseContext;
+    
+    // 시간대별 인삿말 prefix
+    const currentHour = getCurrentUserTime().getHours();
+    let timeBasedPrefix = '안녕하세요,';
+    
+    if (currentHour >= 5 && currentHour < 12) {
+        timeBasedPrefix = '좋은 아침이에요,';
+    } else if (currentHour >= 12 && currentHour < 18) {
+        timeBasedPrefix = '안녕하세요,';
+    } else if (currentHour >= 18 && currentHour < 22) {
+        timeBasedPrefix = '수고하셨어요,';
+    } else {
+        timeBasedPrefix = '늦은 시간이네요,';
+    }
+    
+    // 사용자명 설정
+    const displayName = isLoggedIn ? `${nickname}님` : 'AI 숨트레이너';
+    
+    // 상황별 메시지 생성
+    let message = '';
+    let messageType = '';
+    
+    if (!isLoggedIn) {
+        message = '오늘도 깊은 호흡으로 하루를 시작해보세요.';
+        messageType = '';
+    } else if (today_sessions_count > 0) {
+        // 오늘 이미 운동함
+        message = `오늘 벌써 ${today_sessions_count}번 트레이닝! 정말 대단해요! 🔥`;
+        messageType = 'celebrating';
+    } else if (yesterday_sessions_count > 0) {
+        // 어제 운동함, 오늘 아직 안함
+        message = '어제보다 한 번 더 도전해보는 건 어때요?';
+        messageType = 'encouraging';
+    } else if (last_exercise_date && last_exercise_date !== today_date_kst) {
+        // 과거에 운동한 적 있지만 최근에 안함
+        message = '다시 호흡근 강화 여정을 시작해볼까요?';
+        messageType = 'encouraging';
+    } else {
+        // 첫 사용자
+        message = '첫 호흡 트레이닝을 시작해보세요!';
+        messageType = 'encouraging';
+    }
+    
+    return {
+        prefix: timeBasedPrefix,
+        userName: displayName,
+        message: message,
+        messageType: messageType
+    };
+}
+
+// 🎯 기본 인삿말 설정 (폴백용)
+function setDefaultGreeting() {
+    document.getElementById('greetingPrefix').textContent = '안녕하세요,';
+    document.getElementById('userName').textContent = 'AI 숨트레이너';
+    document.getElementById('greetingMessage').textContent = '오늘도 깊은 호흡으로 하루를 시작해보세요.';
 }
