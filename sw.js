@@ -1,4 +1,4 @@
-const VERSION = '1.0.7';
+const VERSION = '1.0.8';
 const CACHE_NAME = `breath-trainer-v${VERSION}`;
 const STATIC_CACHE = `static-${VERSION}`;
 
@@ -21,9 +21,9 @@ const STATIC_ASSETS = [
   '/icons/icon-512x512.png'
 ];
 
-// 🚀 즉시 활성화 - 자동 업데이트
+// 🔒 개발 모드: 자동 업데이트 비활성화
 self.addEventListener('install', event => {
-  console.log(`🚀 SW: Installing version ${VERSION}`);
+  console.log(`🚀 SW: Installing version ${VERSION} (DEV MODE)`);
   
   event.waitUntil(
     caches.open(STATIC_CACHE)
@@ -32,15 +32,15 @@ self.addEventListener('install', event => {
         return cache.addAll(STATIC_ASSETS);
       })
       .then(() => {
-        console.log('🔄 SW: Skipping waiting - auto update');
-        return self.skipWaiting(); // 🔧 즉시 활성화
+        console.log('⏸️ SW: Waiting for manual activation (DEV MODE)');
+        // skipWaiting() 제거 - 수동 활성화 대기
       })
   );
 });
 
-// 🔄 자동 제어권 획득
+// 🔒 수동 제어권 획득 (자동 업데이트 방지)
 self.addEventListener('activate', event => {
-  console.log(`🔄 SW: Activating version ${VERSION}`);
+  console.log(`🔄 SW: Activating version ${VERSION} (DEV MODE)`);
   
   event.waitUntil(
     caches.keys()
@@ -55,22 +55,8 @@ self.addEventListener('activate', event => {
         return Promise.all(deletePromises);
       })
       .then(() => {
-        console.log('✨ SW: Taking immediate control');
-        return self.clients.claim(); // 🔧 즉시 제어권 획득
-      })
-      .then(() => {
-        // 🔄 모든 클라이언트에 버전 업데이트 신호 전송
-        return self.clients.matchAll();
-      })
-      .then(clients => {
-        clients.forEach(client => {
-          // 🔍 버전 변경 감지 - 클라이언트의 현재 버전과 비교
-          client.postMessage({ 
-            type: 'CACHE_UPDATED', 
-            version: VERSION,
-            timestamp: Date.now()
-          });
-        });
+        console.log('✨ SW: Manual control only (DEV MODE)');
+        // clients.claim() 제거 - 자동 제어권 획득 방지
       })
   );
 });
@@ -132,9 +118,10 @@ self.addEventListener('message', event => {
   if (event.data && event.data.type === 'GET_VERSION') {
     event.ports[0].postMessage({ 
       version: VERSION,
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      mode: 'DEV'
     });
   }
 });
 
-console.log(`✅ SW: Service Worker ${VERSION} loaded`);
+console.log(`✅ SW: Service Worker ${VERSION} loaded (DEV MODE - Auto-update disabled)`);
