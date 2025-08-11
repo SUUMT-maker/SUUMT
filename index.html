@@ -155,13 +155,19 @@
 </head>
 <body>
   <!-- 로그인 화면 -->
-  <div id="loginScreen" class="login-container">
-    <img src="images/suumt-logo.png" class="app-logo" alt="SUUMT Logo"/>
-    <h2>숨트레이너 시작하기</h2>
-    <button id="loginKakaoBtn" class="kakao-login-btn">
-      <img src="images/suumt-logo.png" class="kakao-icon"/> 카카오로 로그인
-    </button>
-  </div>
+<div id="loginScreen" class="login-container">
+  <img src="images/suumt-logo.png" class="app-logo" alt="SUUMT Logo"/>
+  <h2>숨트레이너 시작하기</h2>
+  <p class="login-subtitle">AI가 분석하는 개인 맞춤 호흡 강화!<br>카카오톡으로 간편하게 시작해보세요</p>
+  <button id="loginKakaoBtn" class="kakao-login-btn">
+    <div class="kakao-login-content">
+      <svg class="kakao-icon" viewBox="0 0 24 24" fill="none">
+        <path d="M12 3C7.03 3 3 6.16 3 10.08c0 2.53 1.66 4.76 4.19 6.05L6.5 19.5a.5.5 0 00.79.61l4.25-3.12c.49.07.98.11 1.46.11 4.97 0 9-3.16 9-7.08S16.97 3 12 3z" fill="currentColor"/>
+      </svg>
+      카카오로 시작하기
+    </div>
+  </button>
+</div>
 
   <!-- 홈 화면 (기존 앱의 첫 화면 컨테이너) -->
   <div id="homeScreen" style="display:none;">
