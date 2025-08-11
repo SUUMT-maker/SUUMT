@@ -46,7 +46,7 @@
         },
         {
           "key": "X-Version",
-          "value": "1.0.4"
+          "value": "1.0.9"
         }
       ]
     },
@@ -59,11 +59,11 @@
         },
         {
           "key": "Service-Worker-Allowed",
-          "value": "/"
+          "value": "1.0.9"
         },
         {
           "key": "X-Version",
-          "value": "1.0.4"
+          "value": "1.0.9"
         }
       ]
     },
@@ -76,7 +76,7 @@
         },
         {
           "key": "X-Version",
-          "value": "1.0.4"
+          "value": "1.0.9"
         }
       ]
     },
