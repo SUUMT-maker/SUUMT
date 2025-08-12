@@ -486,7 +486,7 @@ async function fetchAiAdviceForDate(date) {
         // ai_advice 테이블에서 조언 조회
         const { data: advices, error: adviceError } = await window.supabaseClient
             .from('ai_advice')
-            .select('comprehensive_advice, intensity_advice, summary')
+            .select('comprehensive_advice, summary')
             .in('session_id', sessionIds)
             .order('created_at', { ascending: false })
             .limit(1);
@@ -499,7 +499,6 @@ async function fetchAiAdviceForDate(date) {
         if (advices && advices.length > 0) {
             const advice = advices[0];
             const adviceText = advice.comprehensive_advice || 
-                              advice.intensity_advice || 
                               advice.summary || 
                               '운동을 완료하셨습니다!';
             
@@ -1197,7 +1196,7 @@ async function showResultScreen() {
         document.getElementById('completedSets').textContent = `${window.exerciseData.completedSets}/2`;
         document.getElementById('totalBreathsResult').textContent = `${window.exerciseData.completedBreaths}회`;
         
-        document.getElementById('intensityAdvice').textContent = '강도 조절 분석을 진행하고 있습니다...';
+
         document.getElementById('comprehensiveAdvice').textContent = 'AI 숨트레이너가 당신의 트레이닝을 분석하고 있습니다...';
         
         const exerciseDataWithFeedback = {
@@ -1267,10 +1266,9 @@ async function showResultScreen() {
             // 데이터베이스 저장 실패해도 기존 기능은 계속 작동
         }
         
-        if (typeof aiAdvice === 'object' && aiAdvice.intensityAdvice && aiAdvice.comprehensiveAdvice) {
+        if (typeof aiAdvice === 'object' && aiAdvice.comprehensiveAdvice) {
             handleExerciseResult({
                 success: true,
-                intensityAdvice: aiAdvice.intensityAdvice,
                 comprehensiveAdvice: aiAdvice.comprehensiveAdvice,
                 stats: updatedStats,
                 savedToDatabase: !!savedSession,
@@ -1279,8 +1277,7 @@ async function showResultScreen() {
         } else if (typeof aiAdvice === 'string') {
             handleExerciseResult({
                 success: true,
-                intensityAdvice: aiAdvice,
-                comprehensiveAdvice: "AI 트레이너가 당신의 꾸준한 노력을 응원합니다!",
+                comprehensiveAdvice: aiAdvice,
                 stats: updatedStats,
                 savedToDatabase: !!savedSession,
                 sessionId: savedSession?.id
@@ -1294,7 +1291,7 @@ async function showResultScreen() {
     } catch (error) {
         console.error('❌ showResultScreen 오류:', error);
         
-        document.getElementById('intensityAdvice').textContent = '분석을 불러오는 중 문제가 발생했습니다.';
+
         document.getElementById('comprehensiveAdvice').textContent = '네트워크 연결을 확인하고 다시 시도해주세요.';
         
         const updatedStats = updateLocalStats(window.exerciseData);
@@ -1359,7 +1356,6 @@ async function saveAIAdviceToDatabase(sessionId, adviceData) {
         
         const advice = {
             session_id: sessionId,
-            intensity_advice: adviceData.intensityAdvice || '',
             comprehensive_advice: adviceData.comprehensiveAdvice || '',
             summary: null, // 추후 구현
             gemini_raw_response: adviceData // 전체 응답 저장
@@ -1404,15 +1400,13 @@ function handleExerciseResult(result) {
         console.log('📱 로컬스토리지 저장 모드 (데이터베이스 연결 실패)');
     }
     
-    let finalIntensityAdvice = result.intensityAdvice;
     let finalComprehensiveAdvice = result.comprehensiveAdvice;
     
     const additionalAdvice = generateLocalAdviceAddition(analysis, userFeedback, window.exerciseData.isAborted);
     if (additionalAdvice) {
-        finalIntensityAdvice += additionalAdvice;
+        finalComprehensiveAdvice += additionalAdvice;
     }
     
-    document.getElementById('intensityAdvice').innerHTML = finalIntensityAdvice.replace(/\n/g, '<br>');
     document.getElementById('comprehensiveAdvice').innerHTML = finalComprehensiveAdvice.replace(/\n/g, '<br>');
     
     // 🎯 운동 완료 후 인삿말 업데이트
@@ -1629,8 +1623,7 @@ async function getTrainerAdvice(exerciseData) {
         
         if (result.success && result.advice) {
             return {
-                intensityAdvice: result.advice.intensityAdvice || result.advice,
-                comprehensiveAdvice: result.advice.comprehensiveAdvice || "AI 트레이너가 당신의 꾸준한 노력을 응원합니다!"
+                comprehensiveAdvice: result.advice.comprehensiveAdvice || result.advice
             };
         }
         
@@ -1647,8 +1640,7 @@ async function getTrainerAdvice(exerciseData) {
         
         const randomIndex = Math.floor(Math.random() * defaultAdvices.length);
         return {
-            intensityAdvice: defaultAdvices[randomIndex],
-            comprehensiveAdvice: "꾸준히 도전하는 의지가 정말 대단해요!"
+            comprehensiveAdvice: defaultAdvices[randomIndex]
         };
     }
 }
