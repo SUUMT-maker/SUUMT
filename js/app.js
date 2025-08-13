@@ -1252,7 +1252,13 @@ async function showResultScreen() {
             savedSession = await saveExerciseToDatabase(exerciseDataWithFeedback);
             
             // 2. AI 조언 요청 (세션이 저장된 후)
-            const aiAdvice = await getTrainerAdvice(exerciseDataWithFeedback);
+            // savedSession 체크 (getTrainerAdvice 호출 전에 추가)
+            if (!savedSession || !savedSession.id) {
+                console.warn('⚠️ 세션 저장 실패, 기본 조언 사용');
+                throw new Error('세션 ID를 찾을 수 없습니다');
+            }
+
+            const aiAdvice = await getTrainerAdvice(exerciseDataWithFeedback, savedSession.id);
             
             console.log('🤖 AI 조언 결과:', aiAdvice);
             
@@ -1589,10 +1595,16 @@ function generateLocalAdviceAddition(analysis, currentFeedback, isAborted) {
 }
 
 // 🔧 AI 조언 요청
-async function getTrainerAdvice(exerciseData) {
+async function getTrainerAdvice(exerciseData, sessionId) {
     try {
+        // sessionId 유효성 검사 추가
+        if (!sessionId) {
+            throw new Error('세션 ID가 필요합니다');
+        }
+        
         console.log('🤖 Supabase AI 조언 요청 시작');
-        console.log('📊 전달할 운동 데이터:', exerciseData);
+        console.log('📊 세션 ID:', sessionId);
+        console.log('📊 운동 데이터 (참고용):', exerciseData);
         
         const response = await fetch(`${SUPABASE_URL}/functions/v1/exercise-advice`, {
             method: 'POST',
@@ -1600,7 +1612,7 @@ async function getTrainerAdvice(exerciseData) {
                 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ sessionId: savedSession.id })
+            body: JSON.stringify({ sessionId: sessionId })
         });
         
         if (!response.ok) {
