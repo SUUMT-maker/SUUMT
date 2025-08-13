@@ -5,7 +5,7 @@
 // This enables autocomplete, go to definition, etc.
 
 // Setup type definitions for built-in Supabase Runtime APIs
-import "jsr:@supabase/functions-js/edge-runtime.d.ts";
+/// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
 
 interface ExerciseData {
   resistanceSettings: {
@@ -89,14 +89,17 @@ Deno.serve(async (req: Request) => {
 
     const geminiResponse = await callGeminiAPI(geminiApiKey, prompt);
 
-    // 2️⃣ 응답 파싱 (motivation은 일반 텍스트를 종합 조언으로 사용)
+    // 2️⃣ 응답 파싱 - 동기부여와 세션 모두 동일한 방식으로 처리
     const aiAdvice = isMotivation
       ? {
           intensityAdvice: '',
           comprehensiveAdvice:
             parsePlainText(geminiResponse) ?? getDefaultAdvice(exerciseData).comprehensiveAdvice,
         }
-      : parseResponse(geminiResponse, exerciseData);
+      : {
+          intensityAdvice: '',
+          comprehensiveAdvice: ''
+        };
 
     // 2️⃣ Supabase 저장
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -104,13 +107,18 @@ Deno.serve(async (req: Request) => {
     const { createClient } = await import("npm:@supabase/supabase-js@2.39.8");
     const supabase = createClient(supabaseUrl!, supabaseKey!);
 
+    // 새로운 저장 로직 - gemini_raw_response에만 실제 AI 응답 저장
+    const actualAIResponse = isMotivation 
+      ? (parsePlainText(geminiResponse) ?? getDefaultAdvice(exerciseData).comprehensiveAdvice)
+      : (parsePlainText(geminiResponse) ?? getDefaultAdvice(exerciseData).comprehensiveAdvice);
+
     const { data: inserted, error } = await supabase
       .from('ai_advice')
       .insert([{
         session_id: exerciseData.sessionId || null,
-        intensity_advice: aiAdvice.intensityAdvice,
-        comprehensive_advice: aiAdvice.comprehensiveAdvice,
-        gemini_raw_response: geminiResponse
+        intensity_advice: '',
+        comprehensive_advice: '',
+        gemini_raw_response: actualAIResponse
       }])
       .select('id, session_id, created_at');
 
@@ -178,33 +186,28 @@ Deno.serve(async (req: Request) => {
 function generateSessionPrompt(exerciseData: ExerciseData): string {
   const { resistanceSettings, userFeedback, completedSets, completedBreaths, exerciseTime, isAborted } = exerciseData;
 
-  return `
-호흡 트레이너 AI 코치입니다. 사용자의 오늘 세션 요약:
+  return `당신은 숨트레이너 앱의 친근한 호흡운동 코치입니다.
 
-{
-  "inhale": ${resistanceSettings.inhale},
-  "exhale": ${resistanceSettings.exhale},
-  "sets": ${completedSets},
-  "breaths": ${completedBreaths},
-  "duration": "${exerciseTime}",
-  "aborted": ${isAborted},
-  "feedback": "${userFeedback || 'none'}"
-}
+📊 오늘 운동 데이터:
+- 저항 설정: 들숨${resistanceSettings.inhale}/날숨${resistanceSettings.exhale}
+- 운동 성과: ${completedSets}세트 ${completedBreaths}회, ${exerciseTime}
+- 완료 상태: ${isAborted ? '중단됨' : '완료'}
+- 체감 난이도: ${userFeedback || '미제공'} (easy=쉬웠음, perfect=적당함, hard=힘들었음)
 
-규칙:
-1. 강도 조절(Intensity Advice)
-   - The Breather "IN THE ZONE"(5~7단계) 기준
-   - 편했음 & 완주 → 1단계 상향
-   - 적당함 & 완주 → 유지
-   - 힘듦 or 중단 → 1단계 하향
-2. 종합 평가(Comprehensive Advice)
-   - 감정적 격려 + 장기 목표 강조
-   - 최대 100자, 친근하고 동기부여 톤
+🎯 응답 요청:
+다음 내용을 포함한 2-3문장의 자연스러운 조언을 작성해주세요:
 
-출력 형식:
-###INTENSITY### 강도조절 한 문장 ###INTENSITY###
-###COMPREHENSIVE### 종합격려 한 문장 ###COMPREHENSIVE###
-`;
+1. **저항 강도 조절**: 사용자 피드백과 운동 패턴을 고려한 구체적 조언
+   - easy & 완료 → 1단계 상향 제안
+   - perfect & 완료 → 현재 강도 유지
+   - hard 또는 중단 → 1단계 하향 제안
+
+2. **성과 인정 및 격려**: 
+   - 오늘 운동 성과 인정
+   - 꾸준한 호흡운동이 일상생활에 가져올 구체적 변화 (계단 오르기, 스트레스 관리, 수면 개선, 집중력 향상, 심호흡 습관 등)
+   - 따뜻한 격려 메시지
+
+친근하고 간결하게, 태그나 구분자 없이 자연스러운 하나의 조언으로 작성해주세요.`;
 }
 
 // 🚀 동기부여(기록 탭)용 개인화 프롬프트 생성
