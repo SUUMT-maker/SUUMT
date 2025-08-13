@@ -1252,13 +1252,7 @@ async function showResultScreen() {
             savedSession = await saveExerciseToDatabase(exerciseDataWithFeedback);
             
             // 2. AI 조언 요청 (세션이 저장된 후)
-            // savedSession 체크 (getTrainerAdvice 호출 전에 추가)
-            if (!savedSession || !savedSession.id) {
-                console.warn('⚠️ 세션 저장 실패, 기본 조언 사용');
-                throw new Error('세션 ID를 찾을 수 없습니다');
-            }
-
-            const aiAdvice = await getTrainerAdvice(exerciseDataWithFeedback, savedSession.id);
+            const aiAdvice = await getTrainerAdvice(exerciseDataWithFeedback);
             
             console.log('🤖 AI 조언 결과:', aiAdvice);
             
@@ -1595,24 +1589,35 @@ function generateLocalAdviceAddition(analysis, currentFeedback, isAborted) {
 }
 
 // 🔧 AI 조언 요청
-async function getTrainerAdvice(exerciseData, sessionId) {
+async function getTrainerAdvice(exerciseData) {
     try {
-        // sessionId 유효성 검사 추가
-        if (!sessionId) {
-            throw new Error('세션 ID가 필요합니다');
+        if (!exerciseData) {
+            throw new Error('운동 데이터가 필요합니다');
         }
         
         console.log('🤖 Supabase AI 조언 요청 시작');
-        console.log('📊 세션 ID:', sessionId);
-        console.log('📊 운동 데이터 (참고용):', exerciseData);
+        console.log('📊 전달할 운동 데이터:', exerciseData);
         
-        const response = await fetch(`${SUPABASE_URL}/functions/v1/exercise-advice`, {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-advice`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ sessionId: sessionId })
+            body: JSON.stringify({
+                exerciseData: {
+                    resistanceSettings: {
+                        inhale: exerciseData.resistanceSettings ? exerciseData.resistanceSettings.inhale : 1,
+                        exhale: exerciseData.resistanceSettings ? exerciseData.resistanceSettings.exhale : 1
+                    },
+                    userFeedback: exerciseData.userFeedback || null,
+                    completedSets: exerciseData.completedSets || 0,
+                    completedBreaths: exerciseData.completedBreaths || 0,
+                    exerciseTime: exerciseData.exerciseTime || '0:00',
+                    isAborted: exerciseData.isAborted || false
+                },
+                sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+            })
         });
         
         if (!response.ok) {
