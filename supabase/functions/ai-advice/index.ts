@@ -195,15 +195,15 @@ Deno.serve(async (req: Request) => {
 // 📊 과거 운동 기록 조회 (현재 세션 제외)
 async function getPastExerciseHistory(supabase: any, userId: string): Promise<UserHistory> {
   try {
-    // 최근 30일 운동 기록 조회
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    // 최근 7일 운동 기록 조회 (30일 → 7일로 변경)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
 
     const { data: sessions, error } = await supabase
       .from('exercise_sessions')
       .select('*')
       .eq('user_id', userId)
-      .gte('created_at', thirtyDaysAgo.toISOString())
+      .gte('created_at', sevenDaysAgo.toISOString())
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -349,42 +349,49 @@ function getDefaultPastHistory(): UserHistory {
   };
 }
 
+// 🔥 추가할 함수 2: 최근 패턴 컨텍스트 생성
+function generateRecentPatternContext(combinedStats: CombinedStats): string {
+  const { totalSessions, consecutiveDays } = combinedStats;
+  
+  if (totalSessions === 1) {
+    return "첫 번째 운동입니다";
+  }
+  
+  if (consecutiveDays >= 2) {
+    return "어제도 완료하셨네요";
+  }
+  
+  if (totalSessions >= 3) {
+    return "최근 꾸준히 하고 계시네요";
+  }
+  
+  return "며칠만에 다시 하시는군요";
+}
+
 // 🤖 조합된 데이터로 프롬프트 생성
 function generateCombinedPrompt(exerciseData: ExerciseData, combinedStats: CombinedStats): string {
   const { resistanceSettings, userFeedback, completedSets, completedBreaths, exerciseTime, isAborted } = exerciseData;
-  const { totalSessions, completionRate, consecutiveDays, averageResistance, progressDirection } = combinedStats;
+  const recentPatternContext = generateRecentPatternContext(combinedStats);
 
-  return `당신은 숨트레이너 앱의 전문 호흡운동 코치입니다. 사용자의 오늘 운동과 과거 기록을 종합하여 개인화된 조언을 제공해주세요.
+  return `당신은 숨트레이너 앱의 친근한 호흡운동 코치입니다.
 
-## 📊 오늘 운동 결과:
-- 저항 설정: 들숨 ${resistanceSettings.inhale} / 날숨 ${resistanceSettings.exhale}
+📊 오늘 운동 데이터:
+- 저항 설정: 들숨${resistanceSettings.inhale}/날숨${resistanceSettings.exhale}
 - 운동 성과: ${completedSets}세트 ${completedBreaths}회, ${exerciseTime}
 - 완료 상태: ${isAborted ? '중단됨' : '완료'}
 - 체감 난이도: ${userFeedback || '미제공'} (easy=쉬웠음, perfect=적당함, hard=힘들었음)
 
-## 📈 종합 운동 통계 (오늘 포함):
-- 총 운동 세션: ${totalSessions}회
-- 전체 완료율: ${completionRate}%
-- 연속 운동일: ${consecutiveDays}일
-- 평균 저항 강도: ${averageResistance}
-- 오늘의 진전: ${progressDirection}
+📅 최근 패턴: ${recentPatternContext}
 
-## 🎯 개인화된 조언 요청:
-오늘 운동과 전체 기록을 바탕으로 다음을 포함한 2-3문장의 조언을 작성해주세요:
+🎯 응답 요청:
+다음 내용을 포함한 2-3문장의 자연스러운 조언을 작성해주세요:
+1. **저항 강도 조절**: 사용자 피드백을 고려한 구체적 조언
+   - easy & 완료 → 1단계 상향 제안
+   - perfect & 완료 → 현재 강도 유지
+   - hard 또는 중단 → 1단계 하향 제안
+2. **성과 인정 및 격려**: 오늘 성과 인정 + 따뜻한 격려와 동기부여
 
-1. **오늘 성과 인정**: 
-   - ${totalSessions}번째 운동의 의미
-   - ${isAborted ? '중단했지만' : '완주한'} 오늘의 노력 격려
-
-2. **개인 맞춤 강도 조절**: 
-   - 오늘 저항(${(resistanceSettings.inhale + resistanceSettings.exhale) / 2})과 평균(${averageResistance}) 비교
-   - 사용자 피드백(${userFeedback || '없음'})을 고려한 다음 단계 제안
-
-3. **성장 여정 격려**: 
-   - ${consecutiveDays}일 연속 기록과 ${completionRate}% 완료율 맥락
-   - 지속 가능한 다음 목표 제시
-
-친근하고 전문적인 톤으로, 사용자의 개별 여정을 인정하며 구체적이고 실용적인 조언을 작성해주세요.`;
+친근하고 간결하게, 태그나 구분자 없이 자연스러운 하나의 조언으로 작성해주세요.`;
 }
 
 // 🤖 Gemini API 호출
