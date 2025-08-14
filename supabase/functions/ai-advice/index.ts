@@ -107,18 +107,23 @@ Deno.serve(async (req: Request) => {
     const { createClient } = await import("npm:@supabase/supabase-js@2.39.8");
     const supabase = createClient(supabaseUrl!, supabaseKey!);
 
-    // 새로운 저장 로직 - gemini_raw_response에만 실제 AI 응답 저장
-    const actualAIResponse = isMotivation 
-      ? (parsePlainText(geminiResponse) ?? getDefaultAdvice(exerciseData).comprehensiveAdvice)
-      : (parsePlainText(geminiResponse) ?? getDefaultAdvice(exerciseData).comprehensiveAdvice);
+    // 실제 AI 응답 텍스트 추출
+    const actualAIResponse = parsePlainText(geminiResponse);
+    const fallbackAdvice = getDefaultAdvice(exerciseData).comprehensiveAdvice;
+
+    // 최종 응답 결정 (AI 응답이 있으면 사용, 없으면 fallback)
+    const finalResponse = actualAIResponse || fallbackAdvice;
+
+    console.log('🔍 실제 AI 응답:', actualAIResponse);
+    console.log('🔄 최종 사용 응답:', finalResponse);
 
     const { data: inserted, error } = await supabase
       .from('ai_advice')
       .insert([{
         session_id: exerciseData.sessionId || null,
-        intensity_advice: '',
-        comprehensive_advice: '',
-        gemini_raw_response: actualAIResponse
+        intensity_advice: null,
+        comprehensive_advice: null,
+        gemini_raw_response: finalResponse
       }])
       .select('id, session_id, created_at');
 
@@ -153,7 +158,10 @@ Deno.serve(async (req: Request) => {
 
     return new Response(JSON.stringify({
       success: true,
-      advice: aiAdvice,
+      advice: {
+        intensityAdvice: '',
+        comprehensiveAdvice: finalResponse
+      },
       timestamp: new Date().toISOString(),
     }), {
       status: 200,
