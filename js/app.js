@@ -1180,7 +1180,7 @@ function selectFeedback(feedback) {
     showResultScreen();
 }
 
-// 결과 화면 관련 함수들
+// 🔥 정리된 showResultScreen 함수 - 데이터베이스 저장 로직 제거
 async function showResultScreen() {
     try {
         console.log('📋 결과 화면 표시 시작');
@@ -1229,7 +1229,7 @@ async function showResultScreen() {
         updateSocialProofData();
         initReviewsCarousel();
         
-        // 🎯 결과 화면 표시 후 인삿말 업데이트
+        // 🎯 결과 화면 표시 후 인사말 업데이트
         setTimeout(() => {
             updateGreetingCard();
         }, 500);
@@ -1241,48 +1241,43 @@ async function showResultScreen() {
             }, 1000);
         }
         
-        // 🔄 새로운 기능: Supabase 데이터베이스 저장 통합 처리
-        console.log('🔄 Supabase 데이터베이스 저장 시작');
-        
-        let savedSession = null;
-        let savedAdvice = null;
+        // 🔥 백엔드에서 AI 조언 요청 (운동 기록 저장 + AI 생성)
+        console.log('🤖 백엔드 AI 조언 요청 시작');
         
         try {
-            // 1. 운동 데이터 저장
-            savedSession = await saveExerciseToDatabase(exerciseDataWithFeedback);
-            
-            // 2. AI 조언 요청 (세션이 저장된 후)
             const aiAdvice = await getTrainerAdvice(exerciseDataWithFeedback);
             
-            console.log('🤖 AI 조언 결과:', aiAdvice);
+            console.log('🤖 AI 조언 응답:', aiAdvice);
             
-
+            if (typeof aiAdvice === 'object' && aiAdvice.comprehensiveAdvice) {
+                handleExerciseResult({
+                    success: true,
+                    comprehensiveAdvice: aiAdvice.comprehensiveAdvice,
+                    stats: updatedStats
+                });
+            } else if (typeof aiAdvice === 'string') {
+                handleExerciseResult({
+                    success: true,
+                    comprehensiveAdvice: aiAdvice,
+                    stats: updatedStats
+                });
+            } else {
+                throw new Error('AI 조언 형식 오류');
+            }
             
-            console.log('💾 데이터베이스 저장 완료 - 세션:', savedSession?.id, '조언:', savedAdvice?.id);
+        } catch (aiError) {
+            console.error('❌ AI 조언 요청 실패:', aiError);
             
-        } catch (dbError) {
-            console.error('❌ 데이터베이스 저장 중 오류 (기존 기능에는 영향 없음):', dbError);
-            // 데이터베이스 저장 실패해도 기존 기능은 계속 작동
-        }
-        
-        if (typeof aiAdvice === 'object' && aiAdvice.comprehensiveAdvice) {
-            handleExerciseResult({
-                success: true,
-                comprehensiveAdvice: aiAdvice.comprehensiveAdvice,
-                stats: updatedStats,
-                savedToDatabase: !!savedSession,
-                sessionId: savedSession?.id
-            });
-        } else if (typeof aiAdvice === 'string') {
-            handleExerciseResult({
-                success: true,
-                comprehensiveAdvice: aiAdvice,
-                stats: updatedStats,
-                savedToDatabase: !!savedSession,
-                sessionId: savedSession?.id
-            });
-        } else {
-            throw new Error('AI 조언 형식 오류');
+            // AI 조언 실패 시 기본 메시지 표시
+            document.getElementById('intensityAdvice').textContent = '분석을 불러오는 중 문제가 발생했습니다.';
+            document.getElementById('comprehensiveAdvice').textContent = '네트워크 연결을 확인하고 다시 시도해주세요.';
+            
+            // 로컬 기능은 계속 작동
+            const updatedStats = updateLocalStats(window.exerciseData);
+            addExerciseHistory(window.exerciseData);
+            updateBadgesDisplay();
+            updateSocialProofData();
+            initReviewsCarousel();
         }
         
         console.log('✅ 결과 화면 처리 완료');
@@ -1301,104 +1296,16 @@ async function showResultScreen() {
     }
 }
 
-// 💾 Supabase 데이터베이스 저장 함수들 (기존 기능에 영향 없음)
-async function saveExerciseToDatabase(exerciseData) {
-    try {
-        console.log('💾 Supabase 데이터베이스에 운동 데이터 저장 시작:', exerciseData);
-        
-        const sessionData = {
-            user_id: window.currentUserId, // 로그인된 사용자 ID
-            exercise_date: new Date().toISOString().split('T')[0],
-            exercise_time: exerciseData.exerciseTime || '0:00',
-            completed_sets: exerciseData.completedSets || 0,
-            completed_breaths: exerciseData.completedBreaths || 0,
-            total_target_breaths: 20,
-            is_aborted: exerciseData.isAborted || false,
-            user_feedback: exerciseData.userFeedback || null,
-            inhale_resistance: exerciseData.resistanceSettings?.inhale || 1,
-            exhale_resistance: exerciseData.resistanceSettings?.exhale || 1
-        };
 
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/exercise_sessions`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                'apikey': SUPABASE_ANON_KEY,
-                'Prefer': 'return=representation'
-            },
-            body: JSON.stringify(sessionData)
-        });
 
-        if (!response.ok) {
-            throw new Error(`저장 실패: ${response.status}`);
-        }
 
-        const savedSession = await response.json();
-        console.log('✅ 운동 데이터 저장 완료:', savedSession[0]);
-        return savedSession[0];
-        
-    } catch (error) {
-        console.error('❌ 데이터베이스 저장 실패 (기존 기능에는 영향 없음):', error);
-        return null; // 실패해도 앱은 계속 작동
-    }
-}
 
-async function saveAIAdviceToDatabase(sessionId, adviceData) {
-    try {
-        if (!sessionId || !adviceData) {
-            console.log('⚠️ 세션 ID 또는 조언 데이터 없음, 저장 생략');
-            return null;
-        }
-
-        console.log('🤖 AI 조언 데이터베이스 저장 시작');
-        
-        const advice = {
-            session_id: sessionId,
-            intensity_advice: adviceData.intensityAdvice || '',
-            comprehensive_advice: adviceData.comprehensiveAdvice || '',
-            summary: null, // 추후 구현
-            gemini_raw_response: adviceData // 전체 응답 저장
-        };
-
-        const response = await fetch(`${SUPABASE_URL}/rest/v1/ai_advice`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-                'apikey': SUPABASE_ANON_KEY,
-                'Prefer': 'return=representation'
-            },
-            body: JSON.stringify(advice)
-        });
-
-        if (!response.ok) {
-            throw new Error(`AI 조언 저장 실패: ${response.status}`);
-        }
-
-        const savedAdvice = await response.json();
-        console.log('✅ AI 조언 저장 완료:', savedAdvice[0]);
-        return savedAdvice[0];
-        
-    } catch (error) {
-        console.error('❌ AI 조언 저장 실패 (기존 기능에는 영향 없음):', error);
-        return null;
-    }
-}
-
-// 🎯 개선된 결과 처리 함수 (스마트 분석 적용 + 데이터베이스 저장 상태 처리)
+// 🎯 개선된 결과 처리 함수 (데이터베이스 저장 로직 제거)
 function handleExerciseResult(result) {
     addFeedbackHistory(userFeedback, resistanceSettings);
     const analysis = analyzeFeedbackPattern(userFeedback, resistanceSettings);
     
     console.log('🧠 스마트 분석 결과:', analysis);
-    
-    // 데이터베이스 저장 상태 로깅
-    if (result.savedToDatabase) {
-        console.log('💾 데이터베이스 저장 완료 - 세션 ID:', result.sessionId);
-    } else {
-        console.log('📱 로컬스토리지 저장 모드 (데이터베이스 연결 실패)');
-    }
     
     let finalComprehensiveAdvice = result.comprehensiveAdvice;
     
@@ -1415,7 +1322,7 @@ function handleExerciseResult(result) {
     
     document.getElementById('comprehensiveAdvice').innerHTML = finalComprehensiveAdvice.replace(/\n/g, '<br>');
     
-    // 🎯 운동 완료 후 인삿말 업데이트
+    // 🎯 운동 완료 후 인사말 업데이트
     setTimeout(() => {
         updateGreetingCard();
     }, 1000);
@@ -1588,7 +1495,7 @@ function generateLocalAdviceAddition(analysis, currentFeedback, isAborted) {
     return additionalAdvice;
 }
 
-// 🔧 AI 조언 요청
+// 🔧 AI 조언 요청 함수 (유지 - 백엔드 호출만)
 async function getTrainerAdvice(exerciseData) {
     try {
         if (!exerciseData) {
@@ -1614,7 +1521,8 @@ async function getTrainerAdvice(exerciseData) {
                     completedSets: exerciseData.completedSets || 0,
                     completedBreaths: exerciseData.completedBreaths || 0,
                     exerciseTime: exerciseData.exerciseTime || '0:00',
-                    isAborted: exerciseData.isAborted || false
+                    isAborted: exerciseData.isAborted || false,
+                    userId: window.currentUserId || null  // 사용자 ID 추가
                 },
                 sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
             })
