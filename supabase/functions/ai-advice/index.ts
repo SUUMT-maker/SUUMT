@@ -1,10 +1,5 @@
 // @ts-nocheck
 /* global Deno */
-// Follow this setup guide to integrate the Deno language server with your editor:
-// https://deno.land/manual/getting_started/setup_your_environment
-// This enables autocomplete, go to definition, etc.
-
-// Setup type definitions for built-in Supabase Runtime APIs
 /// <reference types="https://esm.sh/@supabase/functions-js/src/edge-runtime.d.ts" />
 
 interface ExerciseData {
@@ -17,17 +12,7 @@ interface ExerciseData {
   completedBreaths: number;
   exerciseTime: string;
   isAborted: boolean;
-  sessionId?: string;
-  // motivation 요청 시 추가로 올 수 있는 필드들
-  totalSessions?: number;
-  completionRate?: number;
-  consecutiveDays?: number;
-  level?: string;
-  trend?: string;
-  recentSessions?: number;
-  lastExercise?: string;
-  requestType?: string; // 'motivation'
-  analysisType?: string; // 'comprehensive_progress'
+  userId: string;
 }
 
 interface RequestBody {
@@ -45,9 +30,21 @@ interface GeminiResponse {
   }>;
 }
 
-interface AIAdviceResponse {
-  intensityAdvice: string;
-  comprehensiveAdvice: string;
+interface UserHistory {
+  pastSessions: number;
+  pastCompletionRate: number;
+  consecutiveDays: number;
+  averageResistance: number;
+  recentTrend: string;
+}
+
+interface CombinedStats {
+  totalSessions: number;
+  completionRate: number;
+  consecutiveDays: number;
+  averageResistance: number;
+  recentTrend: string;
+  progressDirection: string;
 }
 
 Deno.serve(async (req: Request) => {
@@ -63,7 +60,6 @@ Deno.serve(async (req: Request) => {
     });
   }
 
-  // POST 요청만 허용
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'Method not allowed' }), {
       status: 405,
@@ -75,93 +71,98 @@ Deno.serve(async (req: Request) => {
   }
 
   try {
-    const { exerciseData } = await req.json();
-    console.log('📊 운동 데이터:', exerciseData);
+    const requestBody = await req.json();
+    console.log('📊 받은 요청 데이터:', requestBody);
 
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiApiKey) throw new Error('API 키가 설정되지 않았습니다.');
+    const { exerciseData, sessionId } = requestBody;
+    
+    if (!exerciseData || !exerciseData.userId) {
+      throw new Error('사용자 ID가 필요합니다.');
+    }
 
-    // 1️⃣ 요청 유형에 따라 프롬프트 생성 (세션/동기부여)
-    const isMotivation = exerciseData.requestType === 'motivation';
-    const prompt = isMotivation
-      ? generateMotivationPrompt(exerciseData)
-      : generateSessionPrompt(exerciseData);
+    console.log('🏃‍♀️ 현재 세션 데이터:', exerciseData);
 
-    const geminiResponse = await callGeminiAPI(geminiApiKey, prompt);
-
-    // 2️⃣ 응답 파싱 - 동기부여와 세션 모두 동일한 방식으로 처리
-    const aiAdvice = isMotivation
-      ? {
-          intensityAdvice: '',
-          comprehensiveAdvice:
-            parsePlainText(geminiResponse) ?? getDefaultAdvice(exerciseData).comprehensiveAdvice,
-        }
-      : {
-          intensityAdvice: '',
-          comprehensiveAdvice: ''
-        };
-
-    // 2️⃣ Supabase 저장
+    // Supabase 클라이언트 초기화
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
     const { createClient } = await import("npm:@supabase/supabase-js@2.39.8");
     const supabase = createClient(supabaseUrl!, supabaseKey!);
 
-    // 실제 AI 응답 텍스트 추출
-    const actualAIResponse = parsePlainText(geminiResponse);
-    const fallbackAdvice = getDefaultAdvice(exerciseData).comprehensiveAdvice;
+    // 📊 1단계: 과거 운동 기록 조회 (현재 세션 제외)
+    console.log('📈 과거 운동 기록 조회 시작...');
+    const pastHistory = await getPastExerciseHistory(supabase, exerciseData.userId);
+    console.log('📊 과거 기록:', pastHistory);
 
-    // 최종 응답 결정 (AI 응답이 있으면 사용, 없으면 fallback)
-    const finalResponse = actualAIResponse || fallbackAdvice;
+    // 🔄 2단계: 과거 + 현재 세션 조합해서 통계 계산
+    console.log('🔄 과거 + 현재 세션 조합 중...');
+    const combinedStats = combineHistoryWithCurrentSession(pastHistory, exerciseData);
+    console.log('📈 조합된 통계:', combinedStats);
 
-    console.log('🔍 실제 AI 응답:', actualAIResponse);
-    console.log('🔄 최종 사용 응답:', finalResponse);
+    // 🤖 3단계: 조합된 데이터로 개인화된 AI 조언 생성
+    console.log('🤖 개인화된 AI 조언 생성 시작...');
+    
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+    if (!geminiApiKey) {
+      throw new Error('Gemini API 키가 설정되지 않았습니다.');
+    }
 
-    const { data: inserted, error } = await supabase
-      .from('ai_advice')
-      .insert([{
-        session_id: exerciseData.sessionId || null,
-        intensity_advice: null,
-        comprehensive_advice: null,
-        gemini_raw_response: finalResponse
-      }])
-      .select('id, session_id, created_at');
+    const personalizedPrompt = generateCombinedPrompt(exerciseData, combinedStats);
+    const geminiResponse = await callGeminiAPI(geminiApiKey, personalizedPrompt);
+    const aiAdvice = parseAIResponse(geminiResponse) || getDefaultAdvice(exerciseData, combinedStats);
 
-    if (error) console.error('❌ ai_advice insert error:', error);
+    console.log('🎯 생성된 AI 조언:', aiAdvice);
 
-    // 3️⃣ 하루 요약(summary) 생성
-    const today = new Date().toISOString().split('T')[0];
-    const { data: dailyAdvices } = await supabase
-      .from('ai_advice')
-      .select('comprehensive_advice')
-      .eq('session_id', exerciseData.sessionId)
-      .gte('created_at', `${today}T00:00:00`)
-      .lte('created_at', `${today}T23:59:59`);
+    // 💾 4단계: 현재 세션을 exercise_sessions에 저장
+    console.log('💾 현재 세션 저장 시작...');
+    
+    const sessionData = {
+      user_id: exerciseData.userId,
+      exercise_date: new Date().toISOString().split('T')[0],
+      exercise_time: exerciseData.exerciseTime || '0:00',
+      completed_sets: exerciseData.completedSets || 0,
+      completed_breaths: exerciseData.completedBreaths || 0,
+      total_target_breaths: 20,
+      is_aborted: exerciseData.isAborted || false,
+      user_feedback: exerciseData.userFeedback || null,
+      inhale_resistance: exerciseData.resistanceSettings?.inhale || 1,
+      exhale_resistance: exerciseData.resistanceSettings?.exhale || 1,
+    };
 
-    if (dailyAdvices && dailyAdvices.length > 1) {
-      const summaryPrompt = generateDailySummaryPrompt(dailyAdvices);
-      const summaryResponse = await callGeminiAPI(geminiApiKey, summaryPrompt);
-      const summaryText = parseSummary(summaryResponse);
+    const { data: savedSession, error: sessionError } = await supabase
+      .from('exercise_sessions')
+      .insert(sessionData)
+      .select('id, created_at')
+      .single();
 
-      if (summaryText) {
-        // 하루 대표 세션(첫 번째 insert)에 summary 업데이트
-        const latestId = inserted?.[0]?.id;
-        if (latestId) {
-          await supabase
-            .from('ai_advice')
-            .update({ summary: summaryText })
-            .eq('id', latestId);
-          console.log('✅ Daily summary updated:', summaryText);
-        }
+    if (sessionError) {
+      console.warn('⚠️ 세션 저장 실패 (AI 조언에는 영향 없음):', sessionError);
+    } else {
+      console.log('✅ 세션 저장 완료:', savedSession);
+      
+      // 📝 5단계: AI 조언 저장 (선택사항)
+      const { error: adviceError } = await supabase
+        .from('ai_advice')
+        .insert({
+          session_id: savedSession.id,
+          intensity_advice: null,
+          comprehensive_advice: null,
+          gemini_raw_response: aiAdvice,
+        });
+
+      if (adviceError) {
+        console.warn('⚠️ AI 조언 저장 실패 (기능에는 영향 없음):', adviceError);
       }
     }
 
+    // 🚀 6단계: 클라이언트에 응답
     return new Response(JSON.stringify({
       success: true,
       advice: {
         intensityAdvice: '',
-        comprehensiveAdvice: finalResponse
+        comprehensiveAdvice: aiAdvice
       },
+      sessionId: savedSession?.id || sessionId,
+      userStats: combinedStats,
       timestamp: new Date().toISOString(),
     }), {
       status: 200,
@@ -173,10 +174,14 @@ Deno.serve(async (req: Request) => {
 
   } catch (error) {
     console.error('❌ Edge Function Error:', error);
+    
     return new Response(JSON.stringify({
       success: false,
       error: error.message,
-      advice: getDefaultAdvice(null),
+      advice: {
+        intensityAdvice: '',
+        comprehensiveAdvice: '운동을 완료하셨습니다! 꾸준한 노력이 성과로 이어질 거예요.'
+      },
     }), {
       status: 500,
       headers: {
@@ -187,104 +192,202 @@ Deno.serve(async (req: Request) => {
   }
 });
 
-// ------------------------
-// Prompt Generators
-// ------------------------
+// 📊 과거 운동 기록 조회 (현재 세션 제외)
+async function getPastExerciseHistory(supabase: any, userId: string): Promise<UserHistory> {
+  try {
+    // 최근 30일 운동 기록 조회
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-function generateSessionPrompt(exerciseData: ExerciseData): string {
+    const { data: sessions, error } = await supabase
+      .from('exercise_sessions')
+      .select('*')
+      .eq('user_id', userId)
+      .gte('created_at', thirtyDaysAgo.toISOString())
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('과거 기록 조회 오류:', error);
+      return getDefaultPastHistory();
+    }
+
+    if (!sessions || sessions.length === 0) {
+      console.log('과거 기록 없음 - 신규 사용자');
+      return getDefaultPastHistory();
+    }
+
+    // 과거 기록 통계 계산
+    const pastSessions = sessions.length;
+    const completedSessions = sessions.filter(s => !s.is_aborted).length;
+    const pastCompletionRate = Math.round((completedSessions / pastSessions) * 100);
+
+    // 연속 운동일 계산 (어제까지)
+    const consecutiveDays = calculateConsecutiveDaysUntilYesterday(sessions);
+
+    // 평균 저항 강도
+    const avgInhale = sessions.reduce((sum, s) => sum + s.inhale_resistance, 0) / sessions.length;
+    const avgExhale = sessions.reduce((sum, s) => sum + s.exhale_resistance, 0) / sessions.length;
+    const averageResistance = (avgInhale + avgExhale) / 2;
+
+    // 최근 트렌드
+    const recentTrend = analyzeRecentTrend(sessions);
+
+    return {
+      pastSessions,
+      pastCompletionRate,
+      consecutiveDays,
+      averageResistance: Math.round(averageResistance * 10) / 10,
+      recentTrend,
+    };
+
+  } catch (error) {
+    console.error('과거 기록 분석 오류:', error);
+    return getDefaultPastHistory();
+  }
+}
+
+// 🔄 과거 + 현재 세션 조합
+function combineHistoryWithCurrentSession(pastHistory: UserHistory, currentSession: ExerciseData): CombinedStats {
+  const currentResistance = (currentSession.resistanceSettings.inhale + currentSession.resistanceSettings.exhale) / 2;
+  
+  // 현재 세션을 포함한 전체 통계 계산
+  const totalSessions = pastHistory.pastSessions + 1; // 현재 세션 포함
+  
+  // 완료율 재계산 (현재 세션 포함)
+  const pastCompletedSessions = Math.round(pastHistory.pastSessions * pastHistory.pastCompletionRate / 100);
+  const currentCompleted = currentSession.isAborted ? 0 : 1;
+  const totalCompletedSessions = pastCompletedSessions + currentCompleted;
+  const completionRate = Math.round((totalCompletedSessions / totalSessions) * 100);
+
+  // 연속일 업데이트 (오늘 운동 완료 시 +1)
+  const consecutiveDays = currentSession.isAborted 
+    ? 0  // 중단 시 연속일 리셋
+    : pastHistory.consecutiveDays + 1; // 완료 시 +1
+
+  // 평균 저항 재계산 (현재 세션 포함)
+  const totalResistance = (pastHistory.averageResistance * pastHistory.pastSessions) + currentResistance;
+  const averageResistance = Math.round((totalResistance / totalSessions) * 10) / 10;
+
+  // 진전 방향 분석
+  const progressDirection = analyzeProgressDirection(pastHistory, currentSession);
+
+  return {
+    totalSessions,
+    completionRate,
+    consecutiveDays,
+    averageResistance,
+    recentTrend: pastHistory.recentTrend,
+    progressDirection,
+  };
+}
+
+// 📈 진전 방향 분석
+function analyzeProgressDirection(pastHistory: UserHistory, currentSession: ExerciseData): string {
+  const currentResistance = (currentSession.resistanceSettings.inhale + currentSession.resistanceSettings.exhale) / 2;
+  
+  if (pastHistory.pastSessions === 0) {
+    return 'first_session'; // 첫 세션
+  }
+  
+  if (currentSession.isAborted) {
+    return 'needs_adjustment'; // 중단됨 - 조정 필요
+  }
+  
+  if (currentResistance > pastHistory.averageResistance) {
+    return 'challenging_up'; // 강도 증가 도전
+  } else if (currentResistance < pastHistory.averageResistance) {
+    return 'stepped_down'; // 강도 감소
+  } else {
+    return 'maintaining'; // 현재 강도 유지
+  }
+}
+
+// 어제까지의 연속일 계산
+function calculateConsecutiveDaysUntilYesterday(sessions: any[]): number {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  
+  const uniqueDates = [...new Set(sessions.map(s => s.created_at.split('T')[0]))].sort().reverse();
+  
+  let consecutive = 0;
+  for (let i = 0; i < uniqueDates.length; i++) {
+    const checkDate = new Date(yesterday);
+    checkDate.setDate(checkDate.getDate() - i);
+    const checkDateStr = checkDate.toISOString().split('T')[0];
+    
+    if (uniqueDates.includes(checkDateStr)) {
+      consecutive++;
+    } else {
+      break;
+    }
+  }
+  
+  return consecutive;
+}
+
+// 최근 트렌드 분석
+function analyzeRecentTrend(sessions: any[]): string {
+  if (sessions.length < 3) return 'stable';
+  
+  const recent = sessions.slice(0, 7);
+  const completionRate = recent.filter(s => !s.is_aborted).length / recent.length;
+  
+  if (completionRate >= 0.9) return 'excellent';
+  if (completionRate >= 0.7) return 'good';
+  if (completionRate >= 0.5) return 'stable';
+  return 'needs_encouragement';
+}
+
+// 기본 과거 기록 (신규 사용자)
+function getDefaultPastHistory(): UserHistory {
+  return {
+    pastSessions: 0,
+    pastCompletionRate: 0,
+    consecutiveDays: 0,
+    averageResistance: 1.0,
+    recentTrend: 'stable',
+  };
+}
+
+// 🤖 조합된 데이터로 프롬프트 생성
+function generateCombinedPrompt(exerciseData: ExerciseData, combinedStats: CombinedStats): string {
   const { resistanceSettings, userFeedback, completedSets, completedBreaths, exerciseTime, isAborted } = exerciseData;
+  const { totalSessions, completionRate, consecutiveDays, averageResistance, progressDirection } = combinedStats;
 
-  return `당신은 숨트레이너 앱의 친근한 호흡운동 코치입니다.
+  return `당신은 숨트레이너 앱의 전문 호흡운동 코치입니다. 사용자의 오늘 운동과 과거 기록을 종합하여 개인화된 조언을 제공해주세요.
 
-📊 오늘 운동 데이터:
-- 저항 설정: 들숨${resistanceSettings.inhale}/날숨${resistanceSettings.exhale}
+## 📊 오늘 운동 결과:
+- 저항 설정: 들숨 ${resistanceSettings.inhale} / 날숨 ${resistanceSettings.exhale}
 - 운동 성과: ${completedSets}세트 ${completedBreaths}회, ${exerciseTime}
 - 완료 상태: ${isAborted ? '중단됨' : '완료'}
 - 체감 난이도: ${userFeedback || '미제공'} (easy=쉬웠음, perfect=적당함, hard=힘들었음)
 
-🎯 응답 요청:
-다음 내용을 포함한 2-3문장의 자연스러운 조언을 작성해주세요:
+## 📈 종합 운동 통계 (오늘 포함):
+- 총 운동 세션: ${totalSessions}회
+- 전체 완료율: ${completionRate}%
+- 연속 운동일: ${consecutiveDays}일
+- 평균 저항 강도: ${averageResistance}
+- 오늘의 진전: ${progressDirection}
 
-1. **저항 강도 조절**: 사용자 피드백과 운동 패턴을 고려한 구체적 조언
-   - easy & 완료 → 1단계 상향 제안
-   - perfect & 완료 → 현재 강도 유지
-   - hard 또는 중단 → 1단계 하향 제안
+## 🎯 개인화된 조언 요청:
+오늘 운동과 전체 기록을 바탕으로 다음을 포함한 2-3문장의 조언을 작성해주세요:
 
-2. **성과 인정 및 격려**: 
-   - 오늘 운동 성과 인정
-   - 꾸준한 호흡운동이 일상생활에 가져올 구체적 변화 (계단 오르기, 스트레스 관리, 수면 개선, 집중력 향상, 심호흡 습관 등)
-   - 따뜻한 격려 메시지
+1. **오늘 성과 인정**: 
+   - ${totalSessions}번째 운동의 의미
+   - ${isAborted ? '중단했지만' : '완주한'} 오늘의 노력 격려
 
-친근하고 간결하게, 태그나 구분자 없이 자연스러운 하나의 조언으로 작성해주세요.`;
+2. **개인 맞춤 강도 조절**: 
+   - 오늘 저항(${(resistanceSettings.inhale + resistanceSettings.exhale) / 2})과 평균(${averageResistance}) 비교
+   - 사용자 피드백(${userFeedback || '없음'})을 고려한 다음 단계 제안
+
+3. **성장 여정 격려**: 
+   - ${consecutiveDays}일 연속 기록과 ${completionRate}% 완료율 맥락
+   - 지속 가능한 다음 목표 제시
+
+친근하고 전문적인 톤으로, 사용자의 개별 여정을 인정하며 구체적이고 실용적인 조언을 작성해주세요.`;
 }
 
-// 🚀 동기부여(기록 탭)용 개인화 프롬프트 생성
-function generateMotivationPrompt(exerciseData: ExerciseData): string {
-  const totalSessions = exerciseData.totalSessions ?? 0;
-  const completionRate = exerciseData.completionRate ?? 0;
-  const consecutiveDays = exerciseData.consecutiveDays ?? 0;
-  const avgInhale = exerciseData.resistanceSettings?.inhale ?? 1;
-  const avgExhale = exerciseData.resistanceSettings?.exhale ?? 1;
-  const level = exerciseData.level ?? 'beginner';
-  const trend = exerciseData.trend ?? 'stable';
-  const recentSessions = exerciseData.recentSessions ?? 0;
-  const totalBreaths = exerciseData.completedBreaths ?? 0;
-
-  const motivationPrompt = `
-당신은 숨트 호흡운동기구 전용 AI 트레이너입니다. 사용자의 운동 데이터를 분석하여 개인화된 동기부여 메시지를 제공해주세요.
-
-## 사용자 운동 현황:
-- 🏃‍♀️ 총 운동 세션: ${totalSessions}회
-- 🎯 완료율: ${completionRate}%
-- 🔥 연속 운동일: ${consecutiveDays}일
-- 💪 평균 저항 강도: 들숨 ${avgInhale} / 날숨 ${avgExhale}
-- 📊 사용자 레벨: ${level}
-- 📈 최근 트렌드: ${trend}
-- 🗓️ 최근 7일 세션: ${recentSessions}회
-- 🫁 총 완료 호흡: ${totalBreaths}회
-
-## 레벨별 맞춤 접근:
-- **초급자(beginner)**: 격려와 기초 습관 형성, "첫 걸음이 가장 중요해요"
-- **중급자(intermediate)**: 성장 인정과 다음 단계 도전, "꾸준함의 힘이 보이기 시작해요"
-- **고급자(advanced)**: 전문성 인정과 새로운 목표, "이제 진짜 실력자가 되어가고 있어요"
-- **전문가(expert)**: 리더십과 영감, "다른 사람들에게도 영감을 주는 존재예요"
-
-## 트렌드별 메시지:
-- **excellent_progress**: 뛰어난 성과 축하 "정말 놀라운 발전이에요! 🚀"
-- **good_progress**: 꾸준한 발전 인정 "착실하게 성장하고 있어요! 📈"
-- **stable**: 안정성 칭찬 "꾸준함이 가장 큰 힘이에요! ⚖️"
-- **needs_encouragement**: 따뜻한 격려 "괜찮아요, 다시 시작하면 돼요! 💙"
-
-## 응답 가이드라인:
-1. **구체적 수치 언급**: 사용자의 실제 데이터를 활용하세요
-2. **감정적 연결**: 노력을 구체적으로 인정하고 격려하세요
-3. **실용적 제안**: 다음 단계나 개선 방향을 제시하세요
-4. **개인화**: 레벨과 트렌드에 맞는 맞춤 메시지
-5. **적절한 길이**: 2-3문장, 100-150자 내외
-6. **이모지 활용**: 감정을 표현하되 과하지 않게
-
-한국어로 친근하고 따뜻하면서도 전문적인 톤으로 응답해주세요.
-예시: "${totalSessions}번의 트레이닝으로 ${totalBreaths}회나 호흡하셨네요! 🎉 ${level === 'beginner' ? '첫 걸음부터 차근차근 잘 하고 계세요.' : '이제 확실한 실력자가 되어가고 있어요!'} ${consecutiveDays >= 7 ? '특히 일주일 연속 트레이닝은 정말 대단해요! 💪' : '조금씩이라도 꾸준히 하는 게 가장 중요해요! 🌱'}"
-`;
-
-  return motivationPrompt;
-}
-
-
-function generateDailySummaryPrompt(dailyAdvices: Array<{comprehensive_advice: string}>): string {
-  const list = dailyAdvices.map((a, i) => `${i+1}. ${a.comprehensive_advice}`).join('\n');
-  return `
-오늘 하루 호흡 트레이닝 AI 조언들:
-
-${list}
-
-이 조언들을 하루 요약으로 1~2문장으로 통합해 주세요.
-톤: 친근하고 동기부여.
-출력: 하루 요약 1문장
-`;
-}
-
-// 🎯 최적화된 Gemini API 호출 함수
+// 🤖 Gemini API 호출
 async function callGeminiAPI(apiKey: string, prompt: string): Promise<GeminiResponse> {
   const response = await fetch(
     `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${apiKey}`,
@@ -296,136 +399,50 @@ async function callGeminiAPI(apiKey: string, prompt: string): Promise<GeminiResp
         generationConfig: {
           temperature: 0.9,
           topP: 0.9,
-          maxOutputTokens: 256,
+          maxOutputTokens: 300,
         },
       }),
     },
   );
-  if (!response.ok) throw new Error(`API 오류: ${response.status}`);
+  
+  if (!response.ok) {
+    throw new Error(`Gemini API 오류: ${response.status}`);
+  }
+  
   return await response.json();
 }
 
-// 🔄 간소화된 응답 파싱 함수
-function parseResponse(geminiResponse: GeminiResponse, exerciseData: ExerciseData): AIAdviceResponse {
+// 🎯 AI 응답 파싱
+function parseAIResponse(geminiResponse: GeminiResponse): string | null {
   try {
-    const responseText = geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    
-    if (!responseText) {
-      throw new Error('Gemini API에서 빈 응답을 받았습니다.');
-    }
-
-    console.log('✨ Gemini 응답 텍스트:', responseText);
-    
-    // 태그 파싱
-    const intensityMatch = responseText.match(/###INTENSITY###\s*(.*?)\s*###INTENSITY###/s);
-    const comprehensiveMatch = responseText.match(/###COMPREHENSIVE###\s*(.*?)\s*###COMPREHENSIVE###/s);
-
-    if (intensityMatch && comprehensiveMatch) {
-      const intensityAdvice = intensityMatch[1].trim();
-      const comprehensiveAdvice = comprehensiveMatch[1].trim();
-      
-      console.log('✅ 태그 파싱 성공');
-      console.log('💭 파싱된 강도 분석:', intensityAdvice);
-      console.log('🌟 파싱된 종합 조언:', comprehensiveAdvice);
-      
-      return {
-        intensityAdvice,
-        comprehensiveAdvice,
-      };
-    }
-    
-    // 태그 파싱 실패 시 기본값 반환
-    console.log('⚠️ 태그 파싱 실패, 기본값 사용');
-    return getDefaultAdvice(exerciseData);
-
+    const text = geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    return text || null;
   } catch (error) {
-    console.error('응답 파싱 오류:', error);
-    return getDefaultAdvice(exerciseData);
+    console.error('AI 응답 파싱 오류:', error);
+    return null;
   }
 }
 
-// 📄 일반 텍스트 파싱 (motivation용)
-function parsePlainText(geminiResponse: GeminiResponse): string | null {
-  const text = geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || '';
-  return text || null;
-}
+// 🔄 기본 조언 (AI 실패 시)
+function getDefaultAdvice(exerciseData: ExerciseData, combinedStats: CombinedStats): string {
+  const { completedSets, isAborted, userFeedback } = exerciseData;
+  const { totalSessions, consecutiveDays } = combinedStats;
 
-function parseSummary(geminiResponse: GeminiResponse): string | null {
-  return geminiResponse.candidates?.[0]?.content?.parts?.[0]?.text?.trim() || null;
-}
-
-// 🔄 The Breather 원칙 기반 기본 조언 함수
-function getDefaultAdvice(exerciseData: ExerciseData | null): AIAdviceResponse {
-  if (!exerciseData) {
-    return {
-      intensityAdvice: "오늘도 숨트 트레이닝에 참여해주셔서 감사합니다! 컨디션에 맞게 강도를 조절하며 꾸준히 운동해보세요.",
-      comprehensiveAdvice: "꾸준한 호흡 트레이닝으로 건강한 습관을 만들고 계시네요! 매일 조금씩이라도 도전하는 것이 중요합니다.",
-    };
+  if (totalSessions === 1) {
+    return isAborted 
+      ? "첫 도전에서 중단하셨지만 용기내서 시작한 것이 대단해요! 다음에는 강도를 낮춰서 완주에 집중해보세요."
+      : "첫 번째 숨트 운동을 완주하셨네요! 정말 멋진 시작이에요. 꾸준히 하시면 더 큰 변화를 경험하실 거예요!";
   }
 
-  const { resistanceSettings, userFeedback, isAborted, completedSets } = exerciseData;
-  
-  // The Breather "IN THE ZONE" 원칙 적용
-  let intensityAdvice = "";
-  
-  if (!userFeedback) {
-    intensityAdvice = isAborted 
-      ? "중단하셨지만 괜찮아요! 다음엔 피드백을 남겨주시면 더 적절한 강도로 조절해드릴게요."
-      : "다음 트레이닝에서는 운동 후 피드백을 남겨주시면 더 정확한 강도 조절 분석을 드릴 수 있어요!";
-  } else if (!isAborted) {
-    // 완주한 경우 Progressive Overload 적용
-    switch (userFeedback) {
-      case 'easy':
-        intensityAdvice = "아직 여유가 있으시네요! 다음에는 들숨과 날숨을 각각 1단계씩 올려보세요. 점진적으로 올리는 게 안전해요.";
-        break;
-      case 'perfect':
-        intensityAdvice = "완벽한 강도예요! 현재 설정을 2주 정도 더 유지하시다가 익숙해지면 그때 한 단계씩 도전해봐요.";
-        break;
-      case 'hard':
-        intensityAdvice = "무리하지 마세요! 다음에는 들숨과 날숨을 각각 1단계씩 낮춰서 안전하게 운동해봐요.";
-        break;
-      default:
-        intensityAdvice = "현재 강도가 적당한 것 같아요! 꾸준히 하시면 더 큰 발전을 경험하실 거예요.";
-    }
-  } else {
-    // 중단한 경우 안전 우선
-    switch (userFeedback) {
-      case 'easy':
-        intensityAdvice = "중단하셨지만 여유가 있으셨다니 다행이에요! 다음에는 현재 강도를 유지하시고 완주에 집중해보세요.";
-        break;
-      case 'perfect':
-        intensityAdvice = "중단하셨지만 적당한 강도였다니 좋아요! 다음에는 같은 강도로 완주에 도전해보세요.";
-        break;
-      case 'hard':
-        intensityAdvice = "힘들어서 중단하셨군요! 다음에는 들숨과 날숨을 각각 1단계씩 낮춰서 안전하게 완주해보세요.";
-        break;
-      default:
-        intensityAdvice = "중단하셨지만 괜찮아요! 다음에는 더 낮은 강도로 시작해보세요.";
-    }
-  }
-
-  // 종합 격려 메시지
-  let comprehensiveAdvice = "";
   if (isAborted) {
-    if (completedSets === 0) {
-      comprehensiveAdvice = "첫 도전이었는데 중단하셨군요. 괜찮아요! 호흡 운동은 익숙해지는데 시간이 걸려요. 다음에는 더 짧은 시간으로 시작해보세요.";
-    } else if (completedSets === 1) {
-      comprehensiveAdvice = "1세트를 완료하셨네요! 중단하셨지만 도전한 것 자체가 대단해요. 다음에는 2세트 완주를 목표로 해보세요.";
-    } else {
-      comprehensiveAdvice = "거의 완주하셨네요! 중단하셨지만 도전한 것이 큰 성과예요. 다음에는 완주에 도전해보세요!";
-    }
-  } else {
-    if (completedSets === 2) {
-      comprehensiveAdvice = "완벽한 완주를 축하드려요! 꾸준히 하시면 더 큰 발전을 경험하실 거예요!";
-    } else if (completedSets === 1) {
-      comprehensiveAdvice = "1세트를 완료하셨네요! 다음에는 2세트 완주에 도전해보세요!";
-    } else {
-      comprehensiveAdvice = "트레이닝을 완료하셨네요! 꾸준히 하시면 더 큰 발전을 경험하실 거예요!";
-    }
+    return consecutiveDays > 0 
+      ? `${consecutiveDays}일 연속 기록이 있으신데 오늘은 중단하셨네요. 괜찮아요! 컨디션에 맞춰 강도를 조절해보세요.`
+      : `${totalSessions}번째 운동에서 중단하셨지만 도전하신 것만으로도 의미있어요. 다음엔 더 편안한 강도로 시작해보세요!`;
   }
 
-  return {
-    intensityAdvice,
-    comprehensiveAdvice,
-  };
+  if (consecutiveDays >= 7) {
+    return `${consecutiveDays}일 연속! 정말 대단한 의지력이에요. ${userFeedback === 'easy' ? '이제 강도를 올려볼 때가 된 것 같네요!' : '이 페이스를 잘 유지하고 계세요!'}`;
+  }
+
+  return `${totalSessions}번째 운동 완주! ${userFeedback ? (userFeedback === 'perfect' ? '완벽한 강도네요!' : userFeedback === 'easy' ? '다음엔 조금 더 도전해볼까요?' : '무리하지 마세요!') : '꾸준히 하시는 모습이 보기 좋아요!'} 계속 화이팅!`;
 }
