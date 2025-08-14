@@ -85,8 +85,8 @@ Deno.serve(async (req: Request) => {
     const { createClient } = await import("npm:@supabase/supabase-js@2.39.8");
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // 1단계: 최근 30일 운동 기록 조회
-    console.log('📈 최근 30일 운동 기록 조회...');
+    // 1단계: 최근 14일 운동 기록 조회
+    console.log('📈 최근 14일 운동 기록 조회...');
     const userStats = await analyzeUserExerciseData(supabase, userId);
     console.log('📊 분석 완료:', userStats);
 
@@ -117,8 +117,7 @@ Deno.serve(async (req: Request) => {
 
     console.log('🎯 생성된 동기부여 조언:', motivationMessage);
 
-    // 3단계: 인사이트 생성
-    const insight = generateDailyLifeInsight(userStats);
+
 
     // 4단계: 결과를 motivation_responses 테이블에 저장
     try {
@@ -132,7 +131,7 @@ Deno.serve(async (req: Request) => {
         average_resistance: userStats.averageResistance,
         progress_trend: userStats.progressTrend,
         motivation_message: motivationMessage,
-        lifestyle_insights: insight,
+
         ai_source: 'gemini',
         request_type: 'comprehensive_evaluation',
       };
@@ -157,7 +156,6 @@ Deno.serve(async (req: Request) => {
       success: true,
       evaluation: {
         motivationMessage: motivationMessage,
-        insight: insight,
         progressTrend: userStats.progressTrend
       },
       userStats: {
@@ -184,7 +182,7 @@ Deno.serve(async (req: Request) => {
       error: error.message,
       evaluation: {
         motivationMessage: '현재 분석을 불러올 수 없습니다. 꾸준히 운동하며 데이터를 쌓아가요!',
-        insight: '매일 조금씩 발전하는 모습이 보여요. 자신감을 가지세요!',
+
         progressTrend: 'stable'
       },
     };
@@ -201,15 +199,15 @@ Deno.serve(async (req: Request) => {
 // 📊 사용자 운동 데이터 분석
 async function analyzeUserExerciseData(supabase: any, userId: string): Promise<UserStats> {
   try {
-    // 최근 30일 운동 기록 조회
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    // 최근 14일 운동 기록 조회 (30일 → 14일로 변경)
+    const fourteenDaysAgo = new Date();
+    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
 
     const { data: sessions, error } = await supabase
       .from('exercise_sessions')
       .select('*')
       .eq('user_id', userId)
-      .gte('created_at', thirtyDaysAgo.toISOString())
+      .gte('created_at', fourteenDaysAgo.toISOString())
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -300,31 +298,29 @@ function getDefaultUserStats(): UserStats {
 function generateMotivationPrompt(userStats: UserStats): string {
   const { totalSessions, completionRate, consecutiveDays, averageResistance, progressTrend } = userStats;
 
-  return `당신은 숨트레이너 앱의 전문 호흡운동 코치입니다. 사용자의 운동 기록을 종합 분석하여 개인화된 동기부여 메시지를 제공해주세요.
+  return `당신은 숨트레이너 앱의 전문 호흡운동 코치입니다. 사용자의 최근 2주 운동 기록을 바탕으로 개인화된 동기부여 메시지를 작성해주세요.
 
-## 📊 사용자 운동 통계 (최근 30일):
+📊 사용자 운동 데이터 (최근 14일):
 - 총 운동 세션: ${totalSessions}회
 - 전체 완료율: ${completionRate}%
 - 연속 운동일: ${consecutiveDays}일
 - 평균 저항 강도: ${averageResistance}
 - 현재 트렌드: ${progressTrend}
 
-## 🎯 동기부여 메시지 요청:
-다음을 포함한 2-3문장의 따뜻하고 격려적인 메시지를 작성해주세요:
+🎯 4-5문장의 따뜻하고 개인화된 동기부여 메시지를 작성해주세요:
 
-1. **운동 성과 인정**: 
-   - ${totalSessions}회 운동과 ${consecutiveDays}일 연속 기록의 의미
-   - ${completionRate}% 완료율에 대한 격려
+1. **운동 패턴 인사이트**: 데이터를 바탕으로 사용자만의 운동 패턴이나 스타일을 발견해서 언급
+   - 예: "꾸준함 vs 집중형", "도전적 vs 안정적", "요일별 패턴" 등
 
-2. **실생활 변화 연결**: 
-   - 호흡근육 강화로 인한 일상생활 개선점
-   - 계단 오르기, 말하기, 수면 등 구체적 변화
+2. **습관/의식 변화**: 호흡운동을 통해 생겼을 법한 의식이나 습관 변화를 자연스럽게 언급
+   - 예: "호흡에 더 의식적이 되셨을 거예요", "깊게 숨쉬는 습관이 생겼을 거예요"
+   - ⚠️ 주의: 의학적 효과나 구체적 수치는 절대 언급하지 마세요
 
-3. **미래 전망 제시**: 
-   - 현재 ${progressTrend} 트렌드를 바탕으로 한 긍정적 전망
-   - 지속 가능한 다음 목표 제시
+3. **개인적 격려**: 실패나 중단도 긍정적으로 재해석하며 따뜻하게 격려
 
-친근하고 전문적인 톤으로, 사용자의 개별 여정을 인정하며 구체적이고 실용적인 조언을 작성해주세요.`;
+4. **다음 스텝 제안**: 개인 패턴에 맞는 구체적이고 실현 가능한 제안
+
+전문 코치의 따뜻한 분석 톤으로, 자연스러운 하나의 완성된 이야기로 작성해주세요.`;
 }
 
 // 🤖 Gemini API 호출
@@ -382,28 +378,4 @@ function getDefaultMotivation(userStats: UserStats): string {
   return `${totalSessions}번의 트레이닝으로 조금씩 변화가 쌓이고 있어요. 포기하지 않는 의지력이 정말 대단합니다!`;
 }
 
-// 💡 일상생활 연결 인사이트 생성
-function generateDailyLifeInsight(userStats: UserStats): string {
-  const { consecutiveDays, totalSessions, completionRate } = userStats;
 
-  // 연속일 기반 일상생활 변화 메시지
-  if (consecutiveDays >= 21) {
-    return "3주 연속! 지하철 계단도 숨차지 않고, 깊은 잠을 자고 계실 거예요 😴";
-  } else if (consecutiveDays >= 14) {
-    return "2주 연속! 말할 때 숨이 덜 차고, 스트레스 받을 때도 깊게 숨쉬게 됐죠? 🗣️";
-  } else if (consecutiveDays >= 10) {
-    return "10일 연속! 아침 일어나기가 한결 수월하고, 하루 종일 활력이 느껴져요 ☀️";
-  } else if (consecutiveDays >= 7) {
-    return "일주일 연속! 계단 오를 때 예전보다 덜 힘들고, 숨이 깊어졌어요 🚶‍♀️";
-  } else if (consecutiveDays >= 5) {
-    return "5일 연속! 운동할 때나 빨리 걸을 때 지구력이 늘어난 게 느껴져요 💪";
-  } else if (consecutiveDays >= 3) {
-    return "3일 연속! 깊게 숨쉬는 습관이 몸에 배기 시작했어요 🫁";
-  } else if (totalSessions >= 15) {
-    return "꾸준한 노력! 폐활량이 늘어나고 호흡이 깊어졌을 거예요 📈";
-  } else if (totalSessions >= 5) {
-    return "좋은 시작! 호흡근육이 조금씩 강해지고 있어요 💨";
-  } else {
-    return "연속 도전 시작! 조금씩 호흡이 편안해질 거예요 🌱";
-  }
-}
