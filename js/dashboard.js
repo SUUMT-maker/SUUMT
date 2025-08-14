@@ -619,31 +619,14 @@ class IntegratedRecordsDashboard {
         };
     }
 
-    // 🔥 showMotivationMessage 함수 개선 (userStats 표시 추가)
+    // 🔥 showMotivationMessage 함수 수정 (운동 현황 제거)
     showMotivationMessage(motivationData) {
         const contentEl = document.getElementById('aiEvaluationContent');
         const badgeEl = document.getElementById('aiEvaluationBadge');
         const actionsEl = document.getElementById('aiMotivationActions');
         
         if (contentEl) {
-            let statsHtml = '';
-            
-            // userStats가 있으면 표시
-            if (motivationData.userStats) {
-                const stats = motivationData.userStats;
-                statsHtml = `
-                    <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-top: 12px; border-left: 3px solid #667eea;">
-                        <div style="font-size: 11px; font-weight: 600; margin-bottom: 6px; color: #667eea;">📊 나의 운동 현황</div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color: #4b5563;">
-                            <div>총 운동: <strong>${stats.totalSessions}회</strong></div>
-                            <div>완료율: <strong>${stats.completionRate}%</strong></div>
-                            <div>연속일: <strong>${stats.consecutiveDays}일</strong></div>
-                            <div>평균저항: <strong>${stats.averageResistance}</strong></div>
-                        </div>
-                    </div>
-                `;
-            }
-            
+            // 🔥 statsHtml 섹션 완전 제거 - 깔끔하게!
             contentEl.innerHTML = `
                 <div style="margin-bottom: 16px;">
                     <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">
@@ -659,7 +642,6 @@ class IntegratedRecordsDashboard {
                     <div style="font-size: 13px; color: #4b5563;">${motivationData.insight}</div>
                 </div>
                 ` : ''}
-                ${statsHtml}
             `;
         }
         

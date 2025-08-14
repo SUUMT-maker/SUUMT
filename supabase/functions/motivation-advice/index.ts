@@ -25,32 +25,42 @@ interface UserStats {
   progressTrend: string;
 }
 
+// 🔥 CORS 헤더 상수로 정의
+const CORS_HEADERS = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, apikey, x-client-info',
+  'Access-Control-Max-Age': '86400',
+  'Content-Type': 'application/json',
+};
+
 Deno.serve(async (req: Request) => {
-  // CORS 헤더 설정
+  // 🔥 OPTIONS 요청 처리 (preflight)
   if (req.method === 'OPTIONS') {
+    console.log('🔄 CORS preflight request received');
     return new Response(null, {
       status: 200,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'POST, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      },
+      headers: CORS_HEADERS,
     });
   }
 
+  // 🔥 POST 요청만 허용
   if (req.method !== 'POST') {
-    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+    console.log(`❌ Method ${req.method} not allowed`);
+    return new Response(JSON.stringify({ 
+      success: false,
+      error: 'Method not allowed' 
+    }), {
       status: 405,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: CORS_HEADERS,
     });
   }
 
   try {
+    console.log('🧠 Motivation advice request started');
+    
     const requestBody = await req.json();
-    console.log('🧠 동기부여 요청 데이터:', requestBody);
+    console.log('📊 받은 요청 데이터:', requestBody);
 
     const { userId, requestType } = requestBody;
     
@@ -62,13 +72,18 @@ Deno.serve(async (req: Request) => {
       throw new Error('올바른 요청 타입이 아닙니다.');
     }
 
-    console.log('📊 사용자 운동 데이터 분석 시작:', userId);
+    console.log('📈 사용자 운동 데이터 분석 시작:', userId);
 
     // Supabase 클라이언트 초기화
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+    
+    if (!supabaseUrl || !supabaseKey) {
+      throw new Error('Supabase 환경 변수가 설정되지 않았습니다.');
+    }
+    
     const { createClient } = await import("npm:@supabase/supabase-js@2.39.8");
-    const supabase = createClient(supabaseUrl!, supabaseKey!);
+    const supabase = createClient(supabaseUrl, supabaseKey);
 
     // 1단계: 최근 30일 운동 기록 조회
     console.log('📈 최근 30일 운동 기록 조회...');
@@ -80,12 +95,25 @@ Deno.serve(async (req: Request) => {
     
     const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
     if (!geminiApiKey) {
-      throw new Error('Gemini API 키가 설정되지 않았습니다.');
+      console.warn('⚠️ Gemini API 키가 없어 기본 조언 사용');
     }
 
-    const motivationPrompt = generateMotivationPrompt(userStats);
-    const geminiResponse = await callGeminiAPI(geminiApiKey, motivationPrompt);
-    const motivationMessage = parseAIResponse(geminiResponse) || getDefaultMotivation(userStats);
+    let motivationMessage;
+    
+    if (geminiApiKey) {
+      try {
+        const motivationPrompt = generateMotivationPrompt(userStats);
+        const geminiResponse = await callGeminiAPI(geminiApiKey, motivationPrompt);
+        motivationMessage = parseAIResponse(geminiResponse);
+      } catch (aiError) {
+        console.warn('⚠️ AI 조언 생성 실패, 기본 조언 사용:', aiError);
+        motivationMessage = null;
+      }
+    }
+    
+    if (!motivationMessage) {
+      motivationMessage = getDefaultMotivation(userStats);
+    }
 
     console.log('🎯 생성된 동기부여 조언:', motivationMessage);
 
@@ -93,35 +121,39 @@ Deno.serve(async (req: Request) => {
     const insight = generateDailyLifeInsight(userStats);
 
     // 4단계: 결과를 motivation_responses 테이블에 저장
-    console.log('💾 동기부여 응답 저장 시작...');
-    
-    const motivationRecord = {
-      user_id: userId,
-      total_sessions: userStats.totalSessions,
-      completion_rate: userStats.completionRate,
-      consecutive_days: userStats.consecutiveDays,
-      average_resistance: userStats.averageResistance,
-      progress_trend: userStats.progressTrend,
-      motivation_message: motivationMessage,
-      lifestyle_insights: insight,
-      ai_source: 'gemini',
-      request_type: 'comprehensive_evaluation',
-    };
+    try {
+      console.log('💾 동기부여 응답 저장 시작...');
+      
+      const motivationRecord = {
+        user_id: userId,
+        total_sessions: userStats.totalSessions,
+        completion_rate: userStats.completionRate,
+        consecutive_days: userStats.consecutiveDays,
+        average_resistance: userStats.averageResistance,
+        progress_trend: userStats.progressTrend,
+        motivation_message: motivationMessage,
+        lifestyle_insights: insight,
+        ai_source: 'gemini',
+        request_type: 'comprehensive_evaluation',
+      };
 
-    const { data: savedResponse, error: saveError } = await supabase
-      .from('motivation_responses')
-      .insert(motivationRecord)
-      .select('id, created_at')
-      .single();
+      const { data: savedResponse, error: saveError } = await supabase
+        .from('motivation_responses')
+        .insert(motivationRecord)
+        .select('id, created_at')
+        .single();
 
-    if (saveError) {
-      console.warn('⚠️ 동기부여 응답 저장 실패 (기능에는 영향 없음):', saveError);
-    } else {
-      console.log('✅ 동기부여 응답 저장 완료:', savedResponse);
+      if (saveError) {
+        console.warn('⚠️ 동기부여 응답 저장 실패 (기능에는 영향 없음):', saveError);
+      } else {
+        console.log('✅ 동기부여 응답 저장 완료:', savedResponse);
+      }
+    } catch (saveError) {
+      console.warn('⚠️ 저장 중 오류 (기능 계속):', saveError);
     }
 
-    // 5단계: 클라이언트에 응답
-    return new Response(JSON.stringify({
+    // 5단계: 클라이언트에 성공 응답
+    const successResponse = {
       success: true,
       evaluation: {
         motivationMessage: motivationMessage,
@@ -135,18 +167,19 @@ Deno.serve(async (req: Request) => {
         averageResistance: userStats.averageResistance
       },
       timestamp: new Date().toISOString(),
-    }), {
+    };
+    
+    console.log('✅ 성공 응답 전송:', successResponse);
+    
+    return new Response(JSON.stringify(successResponse), {
       status: 200,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: CORS_HEADERS,
     });
 
   } catch (error) {
     console.error('❌ Motivation Advice Error:', error);
     
-    return new Response(JSON.stringify({
+    const errorResponse = {
       success: false,
       error: error.message,
       evaluation: {
@@ -154,12 +187,13 @@ Deno.serve(async (req: Request) => {
         insight: '매일 조금씩 발전하는 모습이 보여요. 자신감을 가지세요!',
         progressTrend: 'stable'
       },
-    }), {
+    };
+    
+    console.log('❌ 에러 응답 전송:', errorResponse);
+    
+    return new Response(JSON.stringify(errorResponse), {
       status: 500,
-      headers: {
-        'Content-Type': 'application/json',
-        'Access-Control-Allow-Origin': '*',
-      },
+      headers: CORS_HEADERS,
     });
   }
 });
