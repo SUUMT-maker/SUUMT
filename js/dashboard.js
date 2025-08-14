@@ -399,7 +399,7 @@ class IntegratedRecordsDashboard {
         return consecutive;
     }
 
-    // 🤖 AI 동기부여 메시지 로드 (CORS 문제 해결)
+    // 🔥 loadMotivationMessage 함수도 단순화
     async loadMotivationMessage() {
         console.log('🤖 AI 동기부여 메시지 요청 중...');
 
@@ -429,96 +429,60 @@ class IntegratedRecordsDashboard {
         if (actionsEl) actionsEl.style.display = 'none';
         
         try {
-            // 운동 데이터 분석
-            const analysisData = this.analyzeExerciseProgress();
-            
-            if (analysisData.isEmpty) {
-                this.showMotivationMessage({
-                    type: 'welcome',
-                    title: '🌟 첫 발걸음을 내디뎌 보세요!',
-                    message: '호흡근 강화 여정의 시작입니다.\n매일 조금씩 꾸준히 하는 것이 가장 큰 변화를 만들어요.',
-                    level: '신규 사용자'
-                });
-                return;
-            }
-            
-            // 🔧 운동 결과 화면과 동일한 방식으로 AI 조언 요청
-            const motivationAdvice = await this.getMotivationAdviceFromAI(analysisData);
+            // 🎯 단순화된 AI 조언 요청 (analysisData 필요 없음)
+            const motivationAdvice = await this.getMotivationAdviceFromAI(null);
 
             if (motivationAdvice) {
                 this.showMotivationMessage({
                     title: '🤖 AI 트레이너 실시간 분석',
-                    message: motivationAdvice.motivationMessage || motivationAdvice.comprehensiveAdvice,
+                    message: motivationAdvice.motivationMessage,
                     level: '실시간 분석 완료',
-                    insight: motivationAdvice.insight || this.generateLocalInsight(analysisData),
-                    source: motivationAdvice.source || 'ai_gemini',
-                    sessionId: motivationAdvice.sessionId
+                    insight: motivationAdvice.insight,
+                    source: motivationAdvice.source,
+                    userStats: motivationAdvice.userStats
                 });
                 this.motivationCache = motivationAdvice;
                 this.lastMotivationUpdate = new Date();
             } else {
                 // 폴백 메시지 사용
-                const fallbackMotivation = this.generateFallbackMotivation(analysisData);
-                this.showMotivationMessage({ ...fallbackMotivation, source: 'fallback' });
+                this.showMotivationMessage({
+                    title: '🤗 꾸준함이 가장 큰 힘이에요',
+                    message: '현재 분석을 불러올 수 없지만, 꾸준히 운동하며 데이터를 쌓아가는 모습이 정말 대단해요!',
+                    insight: '매일 조금씩 발전하는 모습이 보여요. 자신감을 가지세요!',
+                    source: 'fallback'
+                });
             }
             
         } catch (error) {
             console.error('❌ AI 동기부여 메시지 로드 실패:', error);
-            this.showMotivationError();
+            this.showMotivationError(`요청 실패: ${error.message}`);
         } finally {
             this.isMotivationLoading = false;
         }
     }
 
-    // 🔧 운동 결과 화면과 동일한 방식으로 AI 조언 요청 (+ DB 저장)
+    // 🔥 기존 복잡한 함수를 완전히 교체
     async getMotivationAdviceFromAI(analysisData) {
         try {
-            console.log('🤖 Supabase AI 동기부여 조언 요청 시작');
-            console.log('📊 전달할 분석 데이터:', analysisData);
+            console.log('🤖 새로운 motivation-advice 엔드포인트 호출 시작');
             
-            // 🔧 운동 결과 화면과 동일한 데이터 구조로 변환 + 동기부여 특화 데이터
+            if (!window.currentUserId) {
+                throw new Error('사용자 ID가 없습니다.');
+            }
+
+            // 🎯 단순한 요청 구조 (ai-advice 패턴)
             const requestBody = {
-                exerciseData: {
-                    // 기본 운동 데이터 (Edge Function이 기대하는 형태)
-                    resistanceSettings: {
-                        inhale: analysisData.avgResistance || 1,
-                        exhale: analysisData.avgResistance || 1
-                    },
-                    userFeedback: this.inferFeedbackFromTrend(analysisData.trend),
-                    completedSets: analysisData.totalSets || 0,
-                    completedBreaths: analysisData.totalBreaths || 0,
-                    exerciseTime: this.formatExerciseTime(analysisData.totalSessions),
-                    isAborted: false,
-                    
-                    // 🎯 동기부여 특화 데이터 (더 풍부한 컨텍스트 제공)
-                    totalSessions: analysisData.totalSessions,
-                    completionRate: analysisData.completionRate,
-                    consecutiveDays: analysisData.consecutiveDays,
-                    level: analysisData.level,
-                    trend: analysisData.trend,
-                    recentSessions: analysisData.recentSessions,
-                    lastExercise: analysisData.lastExercise,
-                    
-                    // 동기부여 요청임을 표시
-                    requestType: 'motivation',
-                    analysisType: 'comprehensive_progress',
-                    
-                    // 🔧 추가 컨텍스트 정보
-                    userTimezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
-                    requestTime: new Date().toISOString(),
-                    userLevel: analysisData.level,
-                    progressTrend: analysisData.trend
-                },
-                sessionId: 'motivation_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
+                userId: window.currentUserId,
+                requestType: 'comprehensive_evaluation'
             };
             
-            console.log('🌐 Supabase 요청 데이터:', requestBody);
+            console.log('🌐 요청 데이터:', requestBody);
             
-            // API 요청
+            // 새로운 엔드포인트로 요청
             const SUPABASE_URL = 'https://rfqbzibewzvqopqgovbc.supabase.co';
             const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmcWJ6aWJld3p2cW9wcWdvdmJjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNzIwNTMsImV4cCI6MjA2OTk0ODA1M30.nAXbnAFe4jM7F56QN4b42NhwNJG_iuSXOVM5zC72Bs4';
             
-            const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-advice`, {
+            const response = await fetch(`${SUPABASE_URL}/functions/v1/motivation-advice`, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
@@ -527,42 +491,38 @@ class IntegratedRecordsDashboard {
                 body: JSON.stringify(requestBody)
             });
             
+            // 상태 코드 체크
             if (!response.ok) {
-                throw new Error(`Supabase 연결 오류: ${response.status} - ${response.statusText}`);
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
             }
             
             const result = await response.json();
-            console.log('📦 Supabase 응답:', result);
+            console.log('📦 응답 데이터:', result);
             
-            if (result.success && result.advice) {
-                const motivationData = {
-                    motivationMessage: result.advice.comprehensiveAdvice || result.advice.intensityAdvice || result.advice,
-                    intensityAdvice: result.advice.intensityAdvice,
-                    comprehensiveAdvice: result.advice.comprehensiveAdvice,
-                    insight: this.extractInsightFromAdvice(result.advice),
-                    source: 'ai_gemini',
-                    sessionId: requestBody.sessionId,
-                    analysisData: analysisData,
-                    requestTime: new Date().toISOString()
-                };
-                
-                // 🔥 동기부여 답변을 데이터베이스에 저장
-                try {
-                    await this.saveMotivationToDatabase(motivationData, requestBody.sessionId);
-                    console.log('✅ 동기부여 답변 데이터베이스 저장 완료');
-                } catch (saveError) {
-                    console.error('❌ 동기부여 답변 저장 실패 (기능에는 영향 없음):', saveError);
-                }
-                
-                return motivationData;
+            // 응답 구조 검증
+            if (!result.success || !result.evaluation) {
+                throw new Error(`응답 구조 오류: ${JSON.stringify(result)}`);
             }
             
-            throw new Error(result.message || 'AI 동기부여 조언 생성 실패');
+            // 🎯 새로운 응답 구조에 맞춰 데이터 반환
+            const motivationData = {
+                motivationMessage: result.evaluation.motivationMessage,
+                insight: result.evaluation.insight,
+                progressTrend: result.evaluation.progressTrend,
+                source: 'motivation_advice_endpoint',
+                userStats: result.userStats,
+                requestTime: new Date().toISOString()
+            };
+            
+            console.log('✅ motivation-advice 요청 성공');
+            return motivationData;
             
         } catch (error) {
-            console.error('🚨 Supabase AI 동기부여 요청 오류:', error);
-            console.log('🔄 AI 요청 실패, 로컬 분석 기반 조언 생성');
-            return null; // 폴백 메시지로 처리
+            console.error('🚨 motivation-advice 요청 실패:', error);
+            
+            // 구체적인 에러 표시
+            this.showMotivationError(`연결 오류: ${error.message}`);
+            return null;
         }
     }
 
@@ -659,13 +619,31 @@ class IntegratedRecordsDashboard {
         };
     }
 
-    // 💬 동기부여 메시지 UI 표시 (불필요한 요소들 제거)
+    // 🔥 showMotivationMessage 함수 개선 (userStats 표시 추가)
     showMotivationMessage(motivationData) {
         const contentEl = document.getElementById('aiEvaluationContent');
         const badgeEl = document.getElementById('aiEvaluationBadge');
         const actionsEl = document.getElementById('aiMotivationActions');
         
         if (contentEl) {
+            let statsHtml = '';
+            
+            // userStats가 있으면 표시
+            if (motivationData.userStats) {
+                const stats = motivationData.userStats;
+                statsHtml = `
+                    <div style="background: #f8fafc; padding: 12px; border-radius: 8px; margin-top: 12px; border-left: 3px solid #667eea;">
+                        <div style="font-size: 11px; font-weight: 600; margin-bottom: 6px; color: #667eea;">📊 나의 운동 현황</div>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 12px; color: #4b5563;">
+                            <div>총 운동: <strong>${stats.totalSessions}회</strong></div>
+                            <div>완료율: <strong>${stats.completionRate}%</strong></div>
+                            <div>연속일: <strong>${stats.consecutiveDays}일</strong></div>
+                            <div>평균저항: <strong>${stats.averageResistance}</strong></div>
+                        </div>
+                    </div>
+                `;
+            }
+            
             contentEl.innerHTML = `
                 <div style="margin-bottom: 16px;">
                     <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">
@@ -681,6 +659,7 @@ class IntegratedRecordsDashboard {
                     <div style="font-size: 13px; color: #4b5563;">${motivationData.insight}</div>
                 </div>
                 ` : ''}
+                ${statsHtml}
             `;
         }
         
@@ -933,22 +912,26 @@ class IntegratedRecordsDashboard {
 
     // 함수 제거됨: rateMotivation (DB 컬럼 삭제로 더 이상 사용하지 않음)
 
-    // ❌ 에러 상태 표시
-    showMotivationError() {
+    // 🔥 에러 표시 함수 개선
+    showMotivationError(errorMessage) {
         const contentEl = document.getElementById('aiEvaluationContent');
         const badgeEl = document.getElementById('aiEvaluationBadge');
         const actionsEl = document.getElementById('aiMotivationActions');
         
         if (contentEl) {
             contentEl.innerHTML = `
-                <div style="text-align: center; padding: 20px; color: #6b7280;">
-                    <div style="margin-bottom: 8px; font-size: 24px;">🤗</div>
-                    <div style="font-size: 14px;">지금은 분석이 어려우니 꾸준히 운동하며 데이터를 쌓아가요!</div>
+                <div style="text-align: center; padding: 20px; color: #ef4444;">
+                    <div style="margin-bottom: 8px; font-size: 24px;">⚠️</div>
+                    <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">연결 문제가 발생했습니다</div>
+                    <div style="font-size: 12px; color: #6b7280; margin-bottom: 12px;">${errorMessage}</div>
+                    <button onclick="window.integratedDashboard.refreshMotivation()" style="background: #667eea; color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 12px; cursor: pointer;">
+                        다시 시도
+                    </button>
                 </div>
             `;
         }
         
-        if (badgeEl) badgeEl.textContent = '분석 대기';
+        if (badgeEl) badgeEl.textContent = '연결 오류';
         if (actionsEl) actionsEl.style.display = 'none';
     }
 
