@@ -208,54 +208,8 @@ function updateChart() {
     updateWeeklyAIInsight();
 }
 
-// 🎯 새로운 단순화된 AI 인사이트 로직
-// updateChart() 함수 바로 아래에 추가하세요
-
-// 💬 사용자 공감 메시지 배열
-const SIMPLE_INSIGHT_MESSAGES = [
-    // 1순위: 특별한 순간들
-    {
-        condition: (data) => data.isFirstWeek,
-        message: "첫 걸음이 가장 어려운 법이에요",
-        priority: 10
-    },
-    {
-        condition: (data) => data.workoutDays === 7,
-        message: "완벽한 일주일! 이 리듬만 유지하면 돼요",
-        priority: 10
-    },
-    
-    // 2순위: 습관 형성
-    {
-        condition: (data) => data.consecutiveDays >= 3,
-        message: `${data.consecutiveDays}일 연속! 이제 습관이 되어가고 있어요`,
-        priority: 8
-    },
-    
-    // 3순위: 주간 성취감
-    {
-        condition: (data) => data.workoutDays >= 5,
-        message: "매일 조금씩, 이게 진짜 실력이에요",
-        priority: 6
-    },
-    {
-        condition: (data) => data.workoutDays >= 3,
-        message: `바쁜 중에도 ${data.workoutDays}일이나 시간 내셨네요!`,
-        priority: 5
-    },
-    {
-        condition: (data) => data.workoutDays >= 1,
-        message: "완벽하지 않아도 꾸준히, 그게 답이에요",
-        priority: 4
-    },
-    
-    // 4순위: 양적 성과
-    {
-        condition: (data) => data.totalSets >= 3,
-        message: `${data.totalSets}세트 이상! 정말 열심히 하고 계시네요`,
-        priority: 3
-    }
-];
+// 🎯 새로운 단순화된 AI 인사이트 로직 (에러 수정 버전)
+// updateChart() 함수 바로 아래에 기존 코드를 완전히 교체하세요
 
 // 🎲 기본 격려 메시지 (랜덤)
 const FALLBACK_MESSAGES = [
@@ -330,25 +284,43 @@ function calculateSimpleConsecutiveDays(history) {
     return consecutiveDays;
 }
 
-// 🎯 메시지 선택 함수
+// 🎯 메시지 선택 함수 (동적 생성으로 변경)
 function selectInsightMessage(data) {
-    // 조건에 맞는 메시지들 찾기
-    const matchedMessages = SIMPLE_INSIGHT_MESSAGES.filter(item => 
-        item.condition(data)
-    );
-    
-    if (matchedMessages.length === 0) {
-        // 조건에 맞는 메시지가 없으면 랜덤 격려 메시지
-        const randomIndex = Math.floor(Math.random() * FALLBACK_MESSAGES.length);
-        return FALLBACK_MESSAGES[randomIndex];
+    // 1순위: 특별한 순간들
+    if (data.isFirstWeek) {
+        return "첫 걸음이 가장 어려운 법이에요";
     }
     
-    // 우선순위가 가장 높은 메시지 선택
-    const bestMessage = matchedMessages.reduce((best, current) => 
-        current.priority > best.priority ? current : best
-    );
+    if (data.workoutDays === 7) {
+        return "완벽한 일주일! 이 리듬만 유지하면 돼요";
+    }
     
-    return bestMessage.message;
+    // 2순위: 습관 형성
+    if (data.consecutiveDays >= 3) {
+        return `${data.consecutiveDays}일 연속! 이제 습관이 되어가고 있어요`;
+    }
+    
+    // 3순위: 주간 성취감
+    if (data.workoutDays >= 5) {
+        return "매일 조금씩, 이게 진짜 실력이에요";
+    }
+    
+    if (data.workoutDays >= 3) {
+        return `바쁜 중에도 ${data.workoutDays}일이나 시간 내셨네요!`;
+    }
+    
+    if (data.workoutDays >= 1) {
+        return "완벽하지 않아도 꾸준히, 그게 답이에요";
+    }
+    
+    // 4순위: 양적 성과
+    if (data.totalSets >= 3) {
+        return `${data.totalSets}세트 이상! 정말 열심히 하고 계시네요`;
+    }
+    
+    // 5순위: 기본 격려 (랜덤)
+    const randomIndex = Math.floor(Math.random() * FALLBACK_MESSAGES.length);
+    return FALLBACK_MESSAGES[randomIndex];
 }
 
 // 🚀 메인 AI 인사이트 업데이트 함수 (기존 함수 완전 교체)
@@ -373,6 +345,8 @@ function updateWeeklyAIInsight() {
         contentEl.innerHTML = `
             <div class="ai-insight-message encouragement">${message}</div>
         `;
+        
+        console.log('AI 인사이트 업데이트 성공:', message);
         
     } catch (error) {
         console.error('AI 인사이트 업데이트 실패:', error);
