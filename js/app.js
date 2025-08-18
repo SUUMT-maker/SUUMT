@@ -1854,19 +1854,52 @@ if (document.readyState === 'loading') {
   initAutoUpdateSystem();
 }
 
-// 🎯 새로운 기능: 인삿말 카드 업데이트 함수 (동기부여 시스템)
+// 🎯 단순화된 인삿말 시스템: 메시지 객체
+const SIMPLE_GREETINGS = {
+    first_time: "처음 오셨네요! 반가워요 😊",
+    
+    comeback: [
+        "며칠 쉬셨지만 다시 돌아오셨네요. 반가워요!",
+        "오늘은 어떠세요? 가볍게 시작해볼까요?",
+        "쉬었다가 다시 하는 것도 좋아요. 천천히 해봐요"
+    ],
+    
+    streak_2_3: [
+        "어제도 오늘도! 벌써 습관이 되어가네요 😊",
+        "{{days}}일째네요! 좋은 리듬이에요",
+        "연속 {{days}}일! 몸이 기억하고 있을 거예요"
+    ],
+    
+    streak_4_6: [
+        "{{days}}일째! 정말 꾸준하시네요 👏",
+        "벌써 {{days}}일! 확실히 달라지고 있어요",
+        "{{days}}일 연속! 이제 진짜 습관이네요"
+    ],
+    
+    streak_7_plus: [
+        "일주일째! 정말 대단해요 🌟",
+        "꾸준히 하고 계시네요! 멋져요",
+        "{{days}}일 연속! 이미 마스터 수준이에요"
+    ],
+    
+    default_morning: "좋은 아침이에요! 오늘도 화이팅 ☀️",
+    default_afternoon: "안녕하세요! 오늘도 건강하게 💪", 
+    default_evening: "수고하셨어요! 편안한 호흡으로 마무리해봐요 🌙"
+};
+
+// 🎯 단순화된 인삿말 카드 업데이트 함수
 async function updateGreetingCard() {
     try {
-        console.log('🔍 동기부여 인삿말 시스템 시작');
+        console.log('🎯 단순화된 인삿말 시스템 시작');
         
         const userInfo = await getUserInfo();
         console.log('👤 사용자 정보:', userInfo);
         
-        const motivationData = await getUserMotivationData();
-        console.log('📊 동기부여 데이터:', motivationData);
+        const motivationData = getSimpleLocalData();
+        console.log('📊 로컬 데이터:', motivationData);
         
-        const greeting = generateMotivationalGreeting(userInfo, motivationData);
-        console.log('💬 생성된 동기부여 인삿말:', greeting);
+        const greeting = generateSimpleGreeting(userInfo, motivationData);
+        console.log('💬 생성된 인삿말:', greeting);
         
         // UI 업데이트
         const prefixEl = document.getElementById('greetingPrefix');
@@ -1880,12 +1913,109 @@ async function updateGreetingCard() {
             messageEl.className = `greeting-message ${greeting.messageType || ''}`;
         }
         
-        console.log('✅ 동기부여 인삿말 카드 업데이트 완료');
+        console.log('✅ 인삿말 카드 업데이트 완료');
         
     } catch (error) {
-        console.error('❌ 동기부여 인삿말 업데이트 실패:', error);
+        console.error('⚠️ 인삿말 업데이트 실패:', error);
         setDefaultGreeting();
     }
+}
+
+// 🎯 단순화된 로컬 데이터 조회 함수
+function getSimpleLocalData() {
+    const history = getExerciseHistory();
+    const today = getCurrentUserTime();
+    
+    const totalSessions = history.length;
+    
+    // 연속 운동일 계산
+    let consecutiveDays = 0;
+    for (let i = 0; i < history.length; i++) {
+        const recordDate = new Date(history[i].date);
+        const daysDiff = Math.floor((today - recordDate) / (1000 * 60 * 60 * 24));
+        
+        if (daysDiff === i) {
+            consecutiveDays++;
+        } else {
+            break;
+        }
+    }
+    
+    // 마지막 운동일로부터 며칠 지났는지
+    const daysSinceLastExercise = history.length > 0 ? 
+        Math.floor((today - new Date(history[0].date)) / (1000 * 60 * 60 * 24)) : 999;
+    
+    return {
+        totalSessions,
+        consecutiveDays,
+        daysSinceLastExercise,
+        source: 'local_simple'
+    };
+}
+
+// 🎯 단순화된 인삿말 생성 함수
+function generateSimpleGreeting(userInfo, motivationData) {
+    const { nickname, isLoggedIn } = userInfo;
+    const { totalSessions, consecutiveDays, daysSinceLastExercise } = motivationData;
+    const currentHour = getCurrentUserTime().getHours();
+    
+    // 시간대별 인삿말 prefix
+    let timeBasedPrefix = '안녕하세요,';
+    if (currentHour >= 5 && currentHour < 12) {
+        timeBasedPrefix = '좋은 아침이에요,';
+    } else if (currentHour >= 18 && currentHour < 22) {
+        timeBasedPrefix = '수고하셨어요,';
+    }
+    
+    // 사용자명 설정
+    let displayName;
+    if (isLoggedIn && nickname && nickname !== '트레이너') {
+        displayName = `${nickname}님`;
+    } else {
+        displayName = 'AI 숨트레이너';
+    }
+    
+    // 메시지 선택 (4단계 로직)
+    let message;
+    
+    if (totalSessions === 0) {
+        message = SIMPLE_GREETINGS.first_time;
+    }
+    else if (daysSinceLastExercise >= 2) {
+        const comebackMessages = SIMPLE_GREETINGS.comeback;
+        message = comebackMessages[Math.floor(Math.random() * comebackMessages.length)];
+    }
+    else if (consecutiveDays >= 7) {
+        const streakMessages = SIMPLE_GREETINGS.streak_7_plus;
+        message = streakMessages[Math.floor(Math.random() * streakMessages.length)]
+            .replace('{{days}}', consecutiveDays);
+    }
+    else if (consecutiveDays >= 4) {
+        const streakMessages = SIMPLE_GREETINGS.streak_4_6;
+        message = streakMessages[Math.floor(Math.random() * streakMessages.length)]
+            .replace('{{days}}', consecutiveDays);
+    }
+    else if (consecutiveDays >= 2) {
+        const streakMessages = SIMPLE_GREETINGS.streak_2_3;
+        message = streakMessages[Math.floor(Math.random() * streakMessages.length)]
+            .replace('{{days}}', consecutiveDays);
+    }
+    else {
+        if (currentHour >= 5 && currentHour < 12) {
+            message = SIMPLE_GREETINGS.default_morning;
+        } else if (currentHour >= 18 && currentHour < 22) {
+            message = SIMPLE_GREETINGS.default_evening;
+        } else {
+            message = SIMPLE_GREETINGS.default_afternoon;
+        }
+    }
+    
+    return {
+        prefix: '',
+        userName: `${timeBasedPrefix} ${displayName}`,
+        message: message,
+        messageType: ''
+    };
 }
 
 // 🎯 사용자 정보 조회 함수
@@ -1963,44 +2093,7 @@ async function getExerciseContext() {
     };
 }
 
-// 🎯 동기부여 인삿말 생성 함수
-function generateMotivationalGreeting(userInfo, motivationData) {
-    const { nickname, isLoggedIn } = userInfo;
-    const currentHour = getCurrentUserTime().getHours();
-    
-    // 시간대별 인삿말 prefix
-    let timeBasedPrefix = '안녕하세요,';
-    if (currentHour >= 5 && currentHour < 12) {
-        timeBasedPrefix = '좋은 아침이에요,';
-    } else if (currentHour >= 12 && currentHour < 18) {
-        timeBasedPrefix = '안녕하세요,';
-    } else if (currentHour >= 18 && currentHour < 22) {
-        timeBasedPrefix = '수고하셨어요,';
-    } else {
-        timeBasedPrefix = '늦은 시간이네요,';
-    }
-    
-    // 사용자명 설정
-    let displayName;
-    if (isLoggedIn && nickname && nickname !== '트레이너') {
-        displayName = `${nickname}님`;
-    } else {
-        displayName = 'AI 숨트레이너';
-    }
-    
-    // 동기부여 메시지 선택
-    const motivationResult = selectMotivationalMessage(motivationData, userInfo);
-    
-    // 인삿말과 닉네임을 한 줄로 합치기
-    const fullGreeting = `${timeBasedPrefix} ${displayName}`;
-    
-    return {
-        prefix: '',
-        userName: fullGreeting,
-        message: motivationResult.message,
-        messageType: motivationResult.type
-    };
-}
+
 
 // 🎯 기본 인삿말 설정 (폴백용)
 function setDefaultGreeting() {
@@ -2008,127 +2101,11 @@ function setDefaultGreeting() {
     document.getElementById('greetingMessage').textContent = '오늘도 깊은 호흡으로 하루를 시작해보세요.';
 }
 
-// 🎯 Supabase 기반 사용자 운동 데이터 수집
-async function getUserMotivationData() {
-    try {
-        console.log('📊 동기부여 데이터 수집 시작');
-        
-        if (!window.supabaseClient || !window.currentUserId) {
-            console.log('⚠️ Supabase 또는 사용자 ID 없음, 로컬 데이터 사용');
-            return getLocalMotivationData();
-        }
-        
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-        
-        // 최근 30일 운동 데이터 조회
-        const { data: sessions, error } = await window.supabaseClient
-            .from('exercise_sessions')
-            .select('*')
-            .eq('user_id', window.currentUserId)
-            .gte('created_at', thirtyDaysAgo.toISOString())
-            .order('created_at', { ascending: false });
-        
-        if (error) {
-            console.error('❌ Supabase 데이터 조회 실패:', error);
-            return getLocalMotivationData();
-        }
-        
-        console.log(`✅ ${sessions?.length || 0}개 세션 조회 완료`);
-        return analyzeMotivationData(sessions || []);
-        
-    } catch (err) {
-        console.error('❌ 동기부여 데이터 수집 오류:', err);
-        return getLocalMotivationData();
-    }
-}
 
-// 🎯 로컬 데이터 기반 폴백
-function getLocalMotivationData() {
-    const history = getExerciseHistory();
-    const stats = getLocalStats();
-    
-    const today = getCurrentUserTime();
-    const todayStr = today.toDateString();
-    
-    // 연속 운동일 계산
-    const consecutiveDays = calculateConsecutiveDays();
-    
-    // 이번 주 운동 횟수
-    const weekStart = getWeekStartDate();
-    const thisWeekSessions = history.filter(record => {
-        const recordDate = new Date(record.date);
-        return recordDate >= weekStart;
-    }).length;
-    
-    // 마지막 운동일
-    const lastExerciseDate = history.length > 0 ? new Date(history[0].date) : null;
-    const daysSinceLastExercise = lastExerciseDate ? 
-        Math.floor((today - lastExerciseDate) / (1000 * 60 * 60 * 24)) : 999;
-    
-    return {
-        totalSessions: stats.totalExercises,
-        consecutiveDays: consecutiveDays,
-        thisWeekSessions: thisWeekSessions,
-        daysSinceLastExercise: daysSinceLastExercise,
-        completionRate: history.length > 0 ? 
-            (history.filter(r => !r.isAborted).length / history.length * 100) : 0,
-        averageResistance: history.length > 0 ?
-            history.reduce((sum, r) => sum + ((r.resistanceSettings?.inhale || 1) + (r.resistanceSettings?.exhale || 1)) / 2, 0) / history.length : 1,
-        source: 'local'
-    };
-}
 
-// 🎯 Supabase 데이터 분석
-function analyzeMotivationData(sessions) {
-    const today = new Date();
-    const todayStr = today.toISOString().split('T')[0];
-    
-    // 기본 통계
-    const totalSessions = sessions.length;
-    const completedSessions = sessions.filter(s => !s.is_aborted).length;
-    const completionRate = totalSessions > 0 ? (completedSessions / totalSessions * 100) : 0;
-    
-    // 연속 운동일 계산
-    const uniqueDates = [...new Set(sessions.map(s => s.created_at.split('T')[0]))].sort().reverse();
-    let consecutiveDays = 0;
-    
-    for (let i = 0; i < uniqueDates.length; i++) {
-        const checkDate = new Date();
-        checkDate.setDate(checkDate.getDate() - i);
-        const checkDateStr = checkDate.toISOString().split('T')[0];
-        
-        if (uniqueDates.includes(checkDateStr)) {
-            consecutiveDays++;
-        } else {
-            break;
-        }
-    }
-    
-    // 이번 주 세션 수
-    const weekStart = new Date();
-    weekStart.setDate(weekStart.getDate() - weekStart.getDay());
-    const thisWeekSessions = sessions.filter(s => new Date(s.created_at) >= weekStart).length;
-    
-    // 마지막 운동일
-    const lastExerciseDate = sessions.length > 0 ? new Date(sessions[0].created_at) : null;
-    const daysSinceLastExercise = lastExerciseDate ? 
-        Math.floor((today - lastExerciseDate) / (1000 * 60 * 60 * 24)) : 999;
-    
-    // 평균 저항 강도
-    const avgResistance = sessions.length > 0 ?
-        sessions.reduce((sum, s) => sum + ((s.inhale_resistance || 1) + (s.exhale_resistance || 1)) / 2, 0) / sessions.length : 1;
-    
-    return {
-        totalSessions,
-        consecutiveDays,
-        thisWeekSessions,
-        daysSinceLastExercise,
-        completionRate: Math.round(completionRate),
-        averageResistance: Math.round(avgResistance * 10) / 10,
-        source: 'supabase'
-    };
-}
+
+
+
 
 // 🎯 연속 운동일 계산 함수
 function calculateConsecutiveDays() {
@@ -2153,194 +2130,7 @@ function calculateConsecutiveDays() {
     return consecutiveDays;
 }
 
-// 🎯 동기부여 메시지 데이터베이스
-const MOTIVATION_MESSAGES = {
-    // 성취 강화형
-    achievement: {
-        streak_3_6: "{{days}}일 연속! 습관이 만들어지고 있어요 💪",
-        streak_7_13: "일주일 연속! 이미 상위 10% 사용자예요 🌟",
-        streak_14_plus: "{{days}}일 연속! 당신은 진짜 챔피언이에요 🏆",
-        
-        total_10: "벌써 {{count}}번째! 호흡근이 확실히 강해졌을 거예요",
-        total_25: "{{count}}번 달성! 이제 진짜 전문가 수준이네요",
-        total_50: "{{count}}번 완주! 숨트 마스터의 경지에 오르셨어요 👑",
-        
-        completion_high: "완주율 {{rate}}%! 의지력이 정말 대단해요",
-        perfect_week: "이번 주 {{count}}번! 완벽한 한 주였어요 🔥"
-    },
-    
-    // 도전 유도형
-    challenge: {
-        resistance_ready: "완주율이 높으니 저항을 올려볼 시간이에요 💪",
-        frequency_boost: "주 {{count}}회에서 한 번 더! 도전해볼까요?",
-        consistency_push: "이번 주 매일 도전해보는 건 어때요? 🎯",
-        milestone_approach: "{{target}}번까지 {{remaining}}번 남았어요! 파이팅!"
-    },
-    
-    // 복귀 유도형
-    comeback: {
-        short_break: "어제 쉬었으니 오늘은 가볍게 시작해볼까요?",
-        medium_break: "{{days}}일 쉬었지만 괜찮아요. 다시 시작이 중요해요 💙",
-        long_break: "오랜만이네요! 천천히 다시 시작해봐요. 여전히 응원해요",
-        gentle_return: "완벽하지 않아도 돼요. 오늘 한 번만 해봐요 🤗"
-    },
-    
-    // 기본 격려형
-    default: {
-        morning: "새로운 하루, 새로운 도전! 오늘도 화이팅 🌅",
-        afternoon: "오후에도 건강한 호흡으로 에너지 충전해요 ⚡",
-        evening: "하루 마무리 호흡 운동으로 릴랙스해봐요 🌙",
-        first_time: "첫 호흡 트레이닝을 시작해보세요! 🚀",
-        general: "오늘도 깊은 호흡으로 하루를 시작해보세요"
-    }
-};
 
-// 🎯 동기부여 메시지 선택 알고리즘
-function selectMotivationalMessage(motivationData, userInfo) {
-    console.log('🧠 동기부여 메시지 선택:', motivationData);
-    
-    const { totalSessions, consecutiveDays, thisWeekSessions, daysSinceLastExercise, completionRate } = motivationData;
-    const currentHour = getCurrentUserTime().getHours();
-    
-    // 1순위: 큰 마일스톤 축하
-    if (totalSessions > 0 && totalSessions % 25 === 0) {
-        return {
-            message: MOTIVATION_MESSAGES.achievement.total_25.replace('{{count}}', totalSessions),
-            type: 'celebrating'
-        };
-    }
-    
-    if (totalSessions === 10) {
-        return {
-            message: MOTIVATION_MESSAGES.achievement.total_10.replace('{{count}}', totalSessions),
-            type: 'celebrating'
-        };
-    }
-    
-    if (totalSessions >= 50) {
-        return {
-            message: MOTIVATION_MESSAGES.achievement.total_50.replace('{{count}}', totalSessions),
-            type: 'celebrating'
-        };
-    }
-    
-    // 2순위: 연속 기록 축하
-    if (consecutiveDays >= 14) {
-        return {
-            message: MOTIVATION_MESSAGES.achievement.streak_14_plus.replace('{{days}}', consecutiveDays),
-            type: 'celebrating'
-        };
-    }
-    
-    if (consecutiveDays >= 7) {
-        return {
-            message: MOTIVATION_MESSAGES.achievement.streak_7_13,
-            type: 'celebrating'
-        };
-    }
-    
-    if (consecutiveDays >= 3) {
-        return {
-            message: MOTIVATION_MESSAGES.achievement.streak_3_6.replace('{{days}}', consecutiveDays),
-            type: 'encouraging'
-        };
-    }
-    
-    // 3순위: 이번 주 성과 축하
-    if (thisWeekSessions >= 5) {
-        return {
-            message: MOTIVATION_MESSAGES.achievement.perfect_week.replace('{{count}}', thisWeekSessions),
-            type: 'celebrating'
-        };
-    }
-    
-    // 4순위: 완주율 축하
-    if (totalSessions >= 5 && completionRate >= 90) {
-        return {
-            message: MOTIVATION_MESSAGES.achievement.completion_high.replace('{{rate}}', completionRate),
-            type: 'encouraging'
-        };
-    }
-    
-    // 5순위: 복귀 유도
-    if (daysSinceLastExercise >= 7) {
-        return {
-            message: MOTIVATION_MESSAGES.comeback.long_break,
-            type: 'encouraging'
-        };
-    }
-    
-    if (daysSinceLastExercise >= 3) {
-        return {
-            message: MOTIVATION_MESSAGES.comeback.medium_break.replace('{{days}}', daysSinceLastExercise),
-            type: 'encouraging'
-        };
-    }
-    
-    if (daysSinceLastExercise === 1) {
-        return {
-            message: MOTIVATION_MESSAGES.comeback.short_break,
-            type: 'encouraging'
-        };
-    }
-    
-    // 6순위: 도전 유도
-    if (totalSessions >= 10 && completionRate >= 80) {
-        return {
-            message: MOTIVATION_MESSAGES.challenge.resistance_ready,
-            type: 'encouraging'
-        };
-    }
-    
-    if (thisWeekSessions >= 2 && thisWeekSessions < 5) {
-        return {
-            message: MOTIVATION_MESSAGES.challenge.frequency_boost.replace('{{count}}', thisWeekSessions),
-            type: 'encouraging'
-        };
-    }
-    
-    // 7순위: 마일스톤 접근
-    const nextMilestone = Math.ceil(totalSessions / 10) * 10;
-    if (totalSessions > 0 && (nextMilestone - totalSessions) <= 3) {
-        return {
-            message: MOTIVATION_MESSAGES.challenge.milestone_approach
-                .replace('{{target}}', nextMilestone)
-                .replace('{{remaining}}', nextMilestone - totalSessions),
-            type: 'encouraging'
-        };
-    }
-    
-    // 8순위: 시간대별 기본 메시지
-    if (totalSessions === 0) {
-        return {
-            message: MOTIVATION_MESSAGES.default.first_time,
-            type: 'encouraging'
-        };
-    }
-    
-    if (currentHour >= 5 && currentHour < 12) {
-        return {
-            message: MOTIVATION_MESSAGES.default.morning,
-            type: ''
-        };
-    } else if (currentHour >= 12 && currentHour < 18) {
-        return {
-            message: MOTIVATION_MESSAGES.default.afternoon,
-            type: ''
-        };
-    } else if (currentHour >= 18 && currentHour < 22) {
-        return {
-            message: MOTIVATION_MESSAGES.default.evening,
-            type: ''
-        };
-    }
-    
-    // 기본값
-    return {
-        message: MOTIVATION_MESSAGES.default.general,
-        type: ''
-    };
-}
 
 // 🎯 목표 카드 업데이트 함수
 async function updateGoalCard() {
