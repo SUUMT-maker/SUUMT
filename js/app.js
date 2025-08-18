@@ -40,6 +40,7 @@ window.supabaseClient.auth.onAuthStateChange((event, session) => {
     
     // 🎯 로그인 후 인삿말 업데이트
     setTimeout(() => {
+        clearGreetingCache(); // 사용자 변경시 캐시 클리어
         updateGreetingCard();
     }, 500);
   }
@@ -68,6 +69,7 @@ window.supabaseClient.auth.onAuthStateChange((event, session) => {
     
     // 🎯 세션 복구 후 인삿말 업데이트
     setTimeout(() => {
+        clearGreetingCache(); // 사용자 변경시 캐시 클리어
         updateGreetingCard();
     }, 500);
   }
@@ -1065,7 +1067,7 @@ function switchTab(tabName) {
     // 홈 탭으로 이동 시 인삿말 업데이트
     if (tabName === 'home') {
         setTimeout(() => {
-            updateGreetingCard();
+            updateGreetingCardSmart(); // 캐싱 기반 스마트 호출
         }, 300);
     }
 }
@@ -1088,7 +1090,7 @@ function loadUserData() {
     const stats = getLocalStats();
     updateChart();
     updateSocialProofData(); // 🔥 새로운 기능: 사회적 증명 데이터 업데이트
-    updateGreetingCard(); // 🎯 새로운 기능: 인삿말 카드 업데이트
+    updateGreetingCardSmart(); // 🎯 캐싱 기반 스마트 호출
     updateGoalCard(); // 🎯 새로운 기능: 목표 카드 업데이트
 }
 
@@ -1231,6 +1233,7 @@ async function showResultScreen() {
         
         // 🎯 결과 화면 표시 후 인사말 업데이트
         setTimeout(() => {
+            clearGreetingCache(); // 운동 데이터 변경으로 캐시 무효화
             updateGreetingCard();
         }, 500);
         
@@ -1324,6 +1327,7 @@ function handleExerciseResult(result) {
     
     // 🎯 운동 완료 후 인사말 업데이트
     setTimeout(() => {
+        clearGreetingCache(); // 운동 데이터 변경으로 캐시 무효화
         updateGreetingCard();
     }, 1000);
 }
@@ -1854,6 +1858,15 @@ if (document.readyState === 'loading') {
   initAutoUpdateSystem();
 }
 
+// 🚀 인삿말 캐싱 시스템
+let greetingCache = {
+    lastUpdate: null,
+    data: null,
+    validFor: 10 * 60 * 1000, // 10분
+    userInfo: null,
+    motivationData: null
+};
+
 // 🎯 단순화된 인삿말 시스템: 메시지 객체
 const SIMPLE_GREETINGS = {
     first_time: "처음 오셨네요! 반가워요 😊",
@@ -1882,10 +1895,71 @@ const SIMPLE_GREETINGS = {
         "{{days}}일 연속! 이미 마스터 수준이에요"
     ],
     
-    default_morning: "좋은 아침이에요! 오늘도 화이팅 ☀️",
-    default_afternoon: "안녕하세요! 오늘도 건강하게 💪", 
-    default_evening: "수고하셨어요! 편안한 호흡으로 마무리해봐요 🌙"
+    default_morning: "오늘도 화이팅 ☀️",
+    default_afternoon: "오늘도 건강하게 💪", 
+    default_evening: "편안한 호흡으로 마무리해봐요 🌙"
 };
+
+function shouldUpdateGreeting() {
+    // 캐시가 없으면 업데이트 필요
+    if (!greetingCache.lastUpdate || !greetingCache.data) {
+        console.log('🔄 캐시 없음 - 업데이트 필요');
+        return true;
+    }
+    
+    // 10분 경과시 업데이트 필요
+    const elapsed = Date.now() - greetingCache.lastUpdate;
+    if (elapsed > greetingCache.validFor) {
+        console.log('⏰ 캐시 만료 - 업데이트 필요');
+        return true;
+    }
+    
+    // 날짜가 바뀌었으면 업데이트 필요 (연속일 계산 변경)
+    const today = getCurrentUserTime().toDateString();
+    const cacheDate = greetingCache.lastUpdate ? new Date(greetingCache.lastUpdate).toDateString() : null;
+    if (today !== cacheDate) {
+        console.log('📅 날짜 변경 - 업데이트 필요');
+        return true;
+    }
+    
+    console.log('✅ 캐시 유효 - 업데이트 불필요');
+    return false;
+}
+
+function clearGreetingCache() {
+    console.log('🗑️ 인삿말 캐시 클리어');
+    greetingCache.lastUpdate = null;
+    greetingCache.data = null;
+    greetingCache.userInfo = null;
+    greetingCache.motivationData = null;
+}
+
+function updateGreetingCardSmart() {
+    console.log('🧠 스마트 인삿말 업데이트 호출');
+    
+    // 캐시가 유효하면 기존 데이터 사용
+    if (!shouldUpdateGreeting() && greetingCache.data) {
+        console.log('📋 캐시 데이터 사용');
+        
+        // UI 업데이트만 수행
+        const greeting = greetingCache.data;
+        const prefixEl = document.getElementById('greetingPrefix');
+        const userNameEl = document.getElementById('userName');
+        const messageEl = document.getElementById('greetingMessage');
+        
+        if (prefixEl) prefixEl.textContent = greeting.prefix;
+        if (userNameEl) userNameEl.textContent = greeting.userName;
+        if (messageEl) {
+            messageEl.textContent = greeting.message;
+            messageEl.className = `greeting-message ${greeting.messageType || ''}`;
+        }
+        
+        return;
+    }
+    
+    // 캐시가 무효하면 새로 계산
+    updateGreetingCard();
+}
 
 // 🎯 단순화된 인삿말 카드 업데이트 함수
 async function updateGreetingCard() {
@@ -1913,7 +1987,13 @@ async function updateGreetingCard() {
             messageEl.className = `greeting-message ${greeting.messageType || ''}`;
         }
         
-        console.log('✅ 인삿말 카드 업데이트 완료');
+        // 🚀 캐시에 결과 저장
+        greetingCache.lastUpdate = Date.now();
+        greetingCache.data = greeting;
+        greetingCache.userInfo = userInfo;
+        greetingCache.motivationData = motivationData;
+        
+        console.log('✅ 인삿말 카드 업데이트 완료 (캐시 저장됨)');
         
     } catch (error) {
         console.error('⚠️ 인삿말 업데이트 실패:', error);
