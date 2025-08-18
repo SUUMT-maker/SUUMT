@@ -382,6 +382,19 @@ function generateRecentPatternContext(combinedStats: CombinedStats): string {
   return "며칠만에 다시 하시는군요";
 }
 
+// 🔄 피드백 한국어 변환
+function translateFeedbackToKorean(feedback: string | null): string {
+  if (!feedback) return '미제공';
+  
+  const feedbackMap: { [key: string]: string } = {
+    'easy': '쉬웠음',
+    'perfect': '적당함', 
+    'hard': '힘들었음'
+  };
+  
+  return feedbackMap[feedback] || feedback;
+}
+
 // 🤖 조합된 데이터로 프롬프트 생성
 function generateCombinedPrompt(exerciseData: ExerciseData, combinedStats: CombinedStats): string {
   const { resistanceSettings, userFeedback, completedSets, completedBreaths, exerciseTime, isAborted } = exerciseData;
@@ -393,16 +406,16 @@ function generateCombinedPrompt(exerciseData: ExerciseData, combinedStats: Combi
 - 저항 설정: 들숨${resistanceSettings.inhale}/날숨${resistanceSettings.exhale}
 - 운동 성과: ${completedSets}세트 ${completedBreaths}회, ${exerciseTime}
 - 완료 상태: ${isAborted ? '중단됨' : '완료'}
-- 체감 난이도: ${userFeedback || '미제공'} (easy=쉬웠음, perfect=적당함, hard=힘들었음)
+- 체감 난이도: ${translateFeedbackToKorean(userFeedback)}
 
 📅 최근 패턴: ${recentPatternContext}
 
 🎯 응답 요청:
 다음 내용을 포함한 2-3문장의 자연스러운 조언을 작성해주세요:
 1. **저항 강도 조절**: 사용자 피드백을 고려한 구체적 조언
-   - easy & 완료 → 1단계 상향 제안
-   - perfect & 완료 → 현재 강도 유지
-   - hard 또는 중단 → 1단계 하향 제안
+   - 쉬웠음 & 완료 → 1단계 상향 제안
+   - 적당함 & 완료 → 현재 강도 유지
+   - 힘들었음 또는 중단 → 1단계 하향 제안
 2. **성과 인정 및 격려**: 오늘 성과 인정 + 따뜻한 격려와 동기부여
 
 친근하고 간결하게, 태그나 구분자 없이 자연스러운 하나의 조언으로 작성해주세요.`;
