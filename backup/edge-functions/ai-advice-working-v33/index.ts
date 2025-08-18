@@ -140,31 +140,17 @@ Deno.serve(async (req: Request) => {
       console.log('✅ 세션 저장 완료:', savedSession);
       
       // 📝 5단계: AI 조언 저장 (선택사항)
-      try {
-        console.log('💾 AI 조언 저장 시작...');
-        
-        const adviceRecord = {
-          session_id: savedSession?.id || null,
-          intensity_advice: '',               // 빈 문자열 (NOT NULL 제약조건 해결)
-          comprehensive_advice: aiAdvice,     // AI 응답을 여기에 저장 (프론트엔드에서 사용)
-          gemini_raw_response: null,          // 사용하지 않음
-        };
+      const { error: adviceError } = await supabase
+        .from('ai_advice')
+        .insert({
+          session_id: savedSession.id,
+          intensity_advice: null,
+          comprehensive_advice: null,
+          gemini_raw_response: aiAdvice,
+        });
 
-        const { data: savedAdvice, error: adviceError } = await supabase
-          .from('ai_advice')
-          .insert(adviceRecord)
-          .select('id, created_at')
-          .single();
-
-        if (adviceError) {
-          console.warn('⚠️ AI 조언 저장 실패 (기능에는 영향 없음):', adviceError);
-          console.warn('세션 ID:', savedSession?.id);
-          console.warn('AI 조언 내용:', aiAdvice);
-        } else {
-          console.log('✅ AI 조언 저장 완료:', savedAdvice);
-        }
-      } catch (saveError) {
-        console.warn('⚠️ AI 조언 저장 중 오류 (기능 계속):', saveError);
+      if (adviceError) {
+        console.warn('⚠️ AI 조언 저장 실패 (기능에는 영향 없음):', adviceError);
       }
     }
 
