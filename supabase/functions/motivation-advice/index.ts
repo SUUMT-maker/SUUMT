@@ -228,10 +228,10 @@ async function analyzeUserExerciseData(supabase: any, userId: string): Promise<U
     // 연속 운동일 계산
     const consecutiveDays = calculateConsecutiveDays(sessions);
 
-    // 평균 저항 강도
+    // 평균 저항 강도 (정수로 반올림)
     const avgInhale = sessions.reduce((sum, s) => sum + (s.inhale_resistance || 1), 0) / sessions.length;
     const avgExhale = sessions.reduce((sum, s) => sum + (s.exhale_resistance || 1), 0) / sessions.length;
-    const averageResistance = Math.round(((avgInhale + avgExhale) / 2) * 10) / 10;
+    const averageResistance = Math.round((avgInhale + avgExhale) / 2);
 
     // 진행 트렌드 분석
     const progressTrend = analyzeProgressTrend(sessions);
