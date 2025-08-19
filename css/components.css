@@ -2479,7 +2479,7 @@
     }
 }
 
-/* 🤖 기록탭 AI 평가 - 홈 스타일 통일 */
+/* 🤖 기록탭 AI 평가 - 홈 스타일 통일 (4단계 완성) */
 .records-ai-advice {
     background: white;
     border: 1px solid #E7E7E7;
@@ -2495,11 +2495,16 @@
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
+/* 🎯 4단계: 홈탭 완전 통일 */
+
+/* 헤더 영역 패딩 최적화 */
 .ai-advice-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 20px !important;
+    padding-bottom: 16px !important;
+    border-bottom: 2px solid #F1F5F9 !important;
 }
 
 .ai-advice-title {
@@ -2509,14 +2514,12 @@
     flex-grow: 1;
 }
 
+/* 텍스트 타이포그래피 홈탭 일치 */
 .ai-advice-title h3 {
-    margin: 0;
-    font-size: 18px;
-    font-weight: 600;
-    color: #1E1E1E;
-    display: flex;
-    align-items: center;
-    gap: 8px;
+    font-size: 18px !important;
+    font-weight: 600 !important;
+    color: #1E1E1E !important;
+    margin: 0 !important;
 }
 
 .ai-advice-badge {
@@ -2530,9 +2533,53 @@
     letter-spacing: 0.5px;
 }
 
+/* 내부 콘텐츠 영역 레이아웃 정리 */
 .ai-advice-content {
     position: relative;
     min-height: 60px;
+    padding: 20px !important;
+    line-height: 1.6 !important;
+}
+
+/* 버튼 스타일 미세 조정 */
+.ai-advice-content button {
+    background: #667eea !important;
+    color: white !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 12px 24px !important;
+    font-size: 14px !important;
+    font-weight: 600 !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3) !important;
+}
+
+.ai-advice-content button:hover {
+    background: #5a67d8 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4) !important;
+}
+
+/* 모바일 반응형 최적화 */
+@media (max-width: 480px) {
+    .records-ai-advice {
+        margin: 0 16px 24px !important;
+        padding: 16px !important;
+        border-radius: 20px !important;
+    }
+    
+    .ai-advice-header {
+        margin-bottom: 16px !important;
+        padding-bottom: 12px !important;
+    }
+    
+    .ai-advice-title h3 {
+        font-size: 16px !important;
+    }
+    
+    .ai-advice-content {
+        padding: 16px !important;
+    }
 }
 
 .ai-advice-loading {
