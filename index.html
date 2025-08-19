@@ -788,19 +788,19 @@
 
         <!-- 🫁 숨트레이닝 모드 화면 -->
         <div id="breathTrainingScreen" class="screen">
-            <div class="section-header">
-                <h2 class="section-title"><span class="section-icon">🫁</span> 숨트레이닝 모드</h2>
-                <p class="section-subtitle">호흡 가이드, 저항 설정, 트레이닝 시작</p>
+            <div class="section-header" style="margin: max(40px, env(safe-area-inset-top)) 20px 24px; text-align: center;">
+                <h2 class="section-title">숨트레이닝 모드</h2>
+                <p style="font-size: 14px; color: #6b7280; margin: 0;">호흡 가이드, 저항 설정, 트레이닝 시작</p>
             </div>
             
             <!-- 가이드 카드 -->
             <div class="guide-card">
                 <div class="guide-header">
-                    <div class="guide-title">📋 숨트 트레이닝 가이드</div>
+                    <div class="guide-title">트레이닝 가이드</div>
                 </div>
                 
                 <div class="important-notice">
-                    <span class="important-icon">💡</span>
+                    <span class="important-icon">ⓘ</span>
                     <span class="important-text">호흡할 때는 의식적으로 힘을 주어 깊게 호흡하세요!</span>
                 </div>
                 
@@ -812,7 +812,7 @@
             <!-- 저항 설정 -->
             <div class="resistance-card">
                 <div class="resistance-header">
-                    <div class="resistance-title">🎯 저항 강도 설정</div>
+                    <div class="resistance-title">저항 강도 설정</div>
                 </div>
                 
                 <div class="resistance-controls">
@@ -851,14 +851,13 @@
                 </div>
 
                 <div class="resistance-tip">
-                    💡 처음이시면 1단계 추천 • 적당히 힘든 강도가 최적이에요!
+                    처음이시면 1단계 추천 • 적당히 힘든 강도가 최적이에요!
                 </div>
             </div>
 
             <!-- 트레이닝 시작 -->
-            <div class="start-training-section">
+            <div class="start-training-section" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: center;">
                 <button class="start-button" onclick="startExercise()">
-                    <span>🚀</span>
                     <span>트레이닝 시작</span>
                 </button>
             </div>
