@@ -19,7 +19,7 @@ const INTEGRATED_RECORDS_HTML = `
             <div style="display: flex; align-items: center; gap: 8px; flex-grow: 1;">
                 <h3>AI 숨트레이너 종합 평가</h3>
             </div>
-            <div id="aiEvaluationBadge" style="background: #667eea; color: white; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 600;">분석 중...</div>
+            <div id="aiEvaluationBadge" style="background: rgba(102, 126, 234, 0.1); border: 1px solid #667eea; color: #667eea; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 600;">분석 중...</div>
         </div>
         
         <div id="aiEvaluationContent" style="background: #F8F9FA; padding: 20px; border-radius: 16px; border: 1px solid #E5E7EB; line-height: 1.6; font-size: 14px;">
