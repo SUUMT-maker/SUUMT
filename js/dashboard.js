@@ -6,7 +6,7 @@ const INTEGRATED_RECORDS_HTML = `
 <div class="integrated-records-screen">
 
     <!-- 🤖 AI 종합 평가 섹션 -->
-    <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+    <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: max(40px, env(safe-area-inset-top)) 20px 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
         <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
             <div style="display: flex; align-items: center; gap: 8px; flex-grow: 1;">
                 <h3>AI 숨트레이너 종합 평가</h3>
