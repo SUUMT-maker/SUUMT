@@ -37,10 +37,10 @@ const INTEGRATED_RECORDS_HTML = `
             <div id="statusState" style="font-size: 14px; font-weight: 600; color: #6b7280;">유지중</div>
         </div>
 
-        <!-- 카드 2: 행동 유도 -->
+        <!-- 카드 2: 행동 유도 - 보상을 크게, 행동을 작게 -->
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3); transition: all 0.3s ease; text-align: center;">
-            <div id="actionContent" style="font-size: 20px; font-weight: 700; color: white; line-height: 1.3; margin-bottom: 8px;">지금 운동하면</div>
-            <div id="actionReward" style="font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9);">+1일 ↗️</div>
+            <div id="actionContent" style="font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9); line-height: 1.3; margin-bottom: 8px;">지금 운동하면</div>
+            <div id="actionReward" style="font-size: 24px; font-weight: 700; color: white;">+1일 ↗️</div>
         </div>
 
     </div>
@@ -55,7 +55,6 @@ const INTEGRATED_RECORDS_HTML = `
             <div style="font-size: 20px; font-weight: 700; color: #1E1E1E; display: flex; align-items: center; gap: 8px;">
                 <span id="goalIcon">🔥</span>
                 <span id="goalTitle">꾸준히 챌린지</span>
-                <span id="weekIndicator" style="font-size: 14px; color: #6b7280; font-weight: 400;">(Week 1/4)</span>
             </div>
         </div>
         
@@ -75,8 +74,8 @@ const INTEGRATED_RECORDS_HTML = `
             </div>
         </div>
         
-        <!-- 목표 설명 -->
-        <div id="goalDescription" style="font-size: 16px; color: #374151; margin-bottom: 20px; line-height: 1.5;">
+        <!-- 목표 설명 (단순화로 숨김 처리) -->
+        <div id="goalDescription" style="display: none; font-size: 16px; color: #374151; margin-bottom: 20px; line-height: 1.5;">
             <span id="goalCurrent">0일</span> / <span id="goalTarget">4일</span> 완료
         </div>
         
@@ -963,42 +962,38 @@ class IntegratedRecordsDashboard {
         return (weeksSinceEpoch % 4) + 1; // 1-4 순환
     }
 
-    // 4주 목표 설정
+    // 4주 목표 설정 (제목 최종 확정)
     getWeeklyGoal(week) {
         const goals = {
             1: {
-                icon: '🔥',
-                title: '꾸준히 챌린지', 
-                label: '4일 연속 달성',
-                target: 4,
+                title: '시작해볼까 챌린지',
+                label: '3일 연속 달성',
+                target: 3,
                 type: 'consecutive'
             },
             2: {
-                icon: '💪',
-                title: '열심히 챌린지',
-                label: '주간 300호흡',
-                target: 300,
+                title: '파워업 챌린지',
+                label: '주간 200호흡',
+                target: 200,
                 type: 'total_breaths'
             },
             3: {
-                icon: '🎯', 
-                title: '끝까지 챌린지',
-                label: '완주율 85%',
-                target: 85,
-                type: 'completion_rate'
+                title: '꾸준함의 힘 챌린지',
+                label: '5일 연속 달성',
+                target: 5,
+                type: 'consecutive'
             },
             4: {
-                icon: '✨',
-                title: '완벽하게 챌린지',
-                label: '연속 3일 + 완주율 90%',
-                target: { consecutive: 3, completion: 90 },
+                title: '완벽 마스터 챌린지',
+                label: '7일 연속 + 300호흡',
+                target: { consecutive: 7, breaths: 300 },
                 type: 'hybrid'
             }
         };
         return goals[week];
     }
 
-    // 주간 목표 진행률 계산
+    // 주간 목표 진행률 계산 (수정)
     calculateWeekProgress(goal) {
         const thisWeekData = this.getThisWeekData();
         
@@ -1007,8 +1002,6 @@ class IntegratedRecordsDashboard {
                 return this.calculateConsecutiveDays(thisWeekData, goal.target);
             case 'total_breaths':
                 return this.calculateTotalBreaths(thisWeekData, goal.target);
-            case 'completion_rate':
-                return this.calculateCompletionRate(thisWeekData, goal.target);
             case 'hybrid':
                 return this.calculateHybridProgress(thisWeekData, goal.target);
         }
@@ -1029,30 +1022,27 @@ class IntegratedRecordsDashboard {
 
     // 🎯 2개 카드 시스템 함수들
     
-    // 주차별 카드 내용 설정 (확정 포맷 적용)
+    // 주차별 카드 내용 설정 (새로운 챌린지 시스템 적용)
     getWeeklyTwoCards(week, weekData, goalProgress) {
         const todayCompleted = this.isTodayCompleted(weekData);
         
         switch(week) {
-            case 1: // 꾸준히 챌린지 (연속성)
-                const currentDays = goalProgress.current;
-                const nextDays = currentDays + 1;
-                
+            case 1: // 3일 연속 챌린지
+                const currentDays1 = goalProgress.current;
                 return {
                     status: {
-                        content: `연속 ${currentDays}일째`,
-                        state: '유지중'
+                        content: `연속 ${currentDays1}일째`,
+                        state: '진행중'
                     },
                     action: {
                         content: '지금 운동하면',
-                        reward: todayCompleted ? '유지완료 ↗️' : `+1일 ↗️`
+                        reward: todayCompleted ? '달성완료 ↗️' : `+1일 ↗️`
                     }
                 };
                 
-            case 2: // 열심히 챌린지 (호흡량)
+            case 2: // 200호흡 챌린지
                 const currentBreaths = goalProgress.current;
-                const estimatedIncrease = 40; // 2세트 기본 호흡수
-                
+                const remaining = Math.max(0, 200 - currentBreaths);
                 return {
                     status: {
                         content: `총 ${currentBreaths}회`,
@@ -1060,68 +1050,54 @@ class IntegratedRecordsDashboard {
                     },
                     action: {
                         content: '지금 운동하면',
-                        reward: todayCompleted ? '완료 ↗️' : `+${estimatedIncrease} ↗️`
+                        reward: remaining === 0 ? '달성완료 ↗️' : `+40회 ↗️`
                     }
                 };
                 
-            case 3: // 끝까지 챌린지 (완주율)
-                const currentRate = goalProgress.current;
-                const totalSessions = weekData.length;
-                const completedSessions = weekData.filter(session => !session.is_aborted).length;
-                
-                // 완주 시 완주율 증가 계산
-                const newCompleted = completedSessions + 1;
-                const newTotal = todayCompleted ? totalSessions : totalSessions + 1;
-                const newRate = Math.round((newCompleted / newTotal) * 100);
-                const rateIncrease = newRate - currentRate;
-                
+            case 3: // 5일 연속 챌린지
+                const currentDays3 = goalProgress.current;
                 return {
                     status: {
-                        content: `완료율 ${currentRate}%`,
-                        state: '달성중'
+                        content: `연속 ${currentDays3}일째`,
+                        state: '도전중'
                     },
                     action: {
                         content: '지금 운동하면',
-                        reward: todayCompleted ? '완료 ↗️' : `+${Math.max(rateIncrease, 1)}% ↗️`
+                        reward: todayCompleted ? '달성완료 ↗️' : `+1일 ↗️`
                     }
                 };
                 
-            case 4: // 완벽하게 챌린지 (복합)
+            case 4: // 완벽 챌린지 (7일 연속 + 300호흡)
                 const consecutiveResult = goalProgress.details?.consecutive || { current: 0 };
-                const completionResult = goalProgress.details?.completion || { current: 0 };
+                const breathsResult = goalProgress.details?.breaths || { current: 0 };
                 
-                const currentConsecutive = consecutiveResult.current;
-                const currentCompletion = completionResult.current;
-                
-                // 두 조건 중 더 부족한 것에 따라 메시지 변경
-                const consecutiveNeeded = Math.max(0, 3 - currentConsecutive);
-                const completionNeeded = Math.max(0, 90 - currentCompletion);
+                const consecutiveNeeded = Math.max(0, 7 - consecutiveResult.current);
+                const breathsNeeded = Math.max(0, 300 - breathsResult.current);
                 
                 let statusContent, reward;
-                
                 if (consecutiveNeeded > 0) {
-                    statusContent = `연속 ${currentConsecutive}일째`;
+                    statusContent = `연속 ${consecutiveResult.current}일째`;
                     reward = `+1일 ↗️`;
                 } else {
-                    statusContent = `완주율 ${currentCompletion}%`;
-                    reward = `+3% ↗️`;
+                    statusContent = `총 ${breathsResult.current}회`;
+                    reward = `+40회 ↗️`;
                 }
                 
                 return {
                     status: {
                         content: statusContent,
-                        state: '완벽함'
+                        state: '완벽도전'
                     },
                     action: {
                         content: '지금 운동하면',
-                        reward: todayCompleted ? '완벽 ↗️' : reward
+                        reward: todayCompleted ? '완벽달성 ↗️' : reward
                     }
                 };
                 
             default:
                 return {
                     status: { content: '준비 중', state: '' },
-                    action: { content: '지금 운동하면', reward: '목표 ↗️' }
+                    action: { content: '지금 운동하면', reward: '시작 ↗️' }
                 };
         }
     }
@@ -1251,12 +1227,13 @@ class IntegratedRecordsDashboard {
         };
     }
 
-    // 하이브리드 진행률 계산
+    // 하이브리드 진행률 계산 (4주차용 - 수정)
     calculateHybridProgress(weekData, target) {
         const consecutiveResult = this.calculateConsecutiveDays(weekData, target.consecutive);
-        const completionResult = this.calculateCompletionRate(weekData, target.completion);
+        const breathsResult = this.calculateTotalBreaths(weekData, target.breaths);
         
-        const minProgress = Math.min(consecutiveResult.percentage, completionResult.percentage);
+        // 두 조건의 최소값으로 진행률 계산
+        const minProgress = Math.min(consecutiveResult.percentage, breathsResult.percentage);
         
         return {
             current: minProgress,
@@ -1264,7 +1241,7 @@ class IntegratedRecordsDashboard {
             percentage: minProgress,
             details: {
                 consecutive: consecutiveResult,
-                completion: completionResult
+                breaths: breathsResult
             }
         };
     }
@@ -1296,7 +1273,7 @@ class IntegratedRecordsDashboard {
         }
     }
 
-    // 주간 목표 UI 업데이트
+    // 주간 목표 UI 업데이트 (단순화)
     updateWeeklyGoal() {
         const currentWeek = this.getCurrentWeek();
         const goal = this.getWeeklyGoal(currentWeek);
@@ -1311,9 +1288,8 @@ class IntegratedRecordsDashboard {
         });
         
         // UI 요소 업데이트
-        document.getElementById('goalIcon').textContent = goal.icon;
         document.getElementById('goalTitle').textContent = goal.title;
-        document.getElementById('weekIndicator').textContent = `(Week ${currentWeek}/4)`;
+        // document.getElementById('weekIndicator').textContent = `(Week ${currentWeek}/4)`; // Week 표시 제거
         document.getElementById('goalLabel').textContent = goal.label;
         
         // 프로그레스 업데이트
@@ -1322,20 +1298,12 @@ class IntegratedRecordsDashboard {
         
         // 원형 프로그레스 업데이트
         const progressStroke = document.getElementById('goalProgressStroke');
-        const circumference = 628; // 2 * π * 100
+        const circumference = 628;
         const offset = circumference - (percentage / 100) * circumference;
         progressStroke.style.strokeDashoffset = offset;
         
-        // 목표 설명 업데이트
-        if (goal.type === 'hybrid') {
-            document.getElementById('goalDescription').innerHTML = 
-                `연속 ${progress.details.consecutive.current}/${progress.details.consecutive.target}일, 완주율 ${progress.details.completion.current}/${progress.details.completion.target}%`;
-        } else {
-            document.getElementById('goalCurrent').textContent = 
-                goal.type === 'completion_rate' ? `${progress.current}%` : progress.current;
-            document.getElementById('goalTarget').textContent = 
-                goal.type === 'completion_rate' ? `${progress.target}%` : progress.target;
-        }
+        // 목표 설명 단순화 - 복잡한 분수 제거
+        document.getElementById('goalDescription').style.display = 'none'; // 숨김
         
         // 메시지 업데이트
         const message = this.generateGoalMessage(progress, goal, false); // 개인 최고 기록 로직은 나중에 추가
