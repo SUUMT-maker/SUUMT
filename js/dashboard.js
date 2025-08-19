@@ -14,15 +14,15 @@ const INTEGRATED_RECORDS_HTML = `
     </div>
 
     <!-- ✨ AI 트레이너 종합 평가 (핵심 가치) -->
-    <div class="ai-coach-evaluation" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; margin: 0 20px 24px; padding: 24px; color: white; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);">
+    <div class="records-ai-advice" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; margin: 0 20px 24px; padding: 24px; color: white; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);">
         <!-- 배경 장식 -->
         <div style="position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); animation: shimmer 6s ease-in-out infinite;"></div>
         
         <div style="position: relative; z-index: 1;">
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+            <div class="ai-advice-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
                 <div style="font-size: 28px;">🧠</div>
                 <div>
-                    <h3 style="margin: 0; font-size: 18px; font-weight: 600;">AI 트레이너 종합 평가</h3>
+                    <h3 class="ai-advice-title" style="margin: 0; font-size: 18px; font-weight: 600;">🤖 AI 숨트레이너 종합 분석</h3>
                     <p style="margin: 0; font-size: 13px; opacity: 0.9;">당신의 호흡 여정을 분석한 개인화된 조언</p>
                 </div>
                 <div style="margin-left: auto;">
