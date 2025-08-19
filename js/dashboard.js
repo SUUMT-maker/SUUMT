@@ -611,27 +611,30 @@ class IntegratedRecordsDashboard {
         const actionsEl = document.getElementById('aiMotivationActions');
         
         if (contentEl) {
-            // 🔥 statsHtml 섹션 완전 제거 - 깔끔하게!
+            // 🔥 AI 분석 결과 레이아웃 완성 (3단계)
             contentEl.innerHTML = `
-                <div style="margin-bottom: 16px;">
-                    <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">
-                        ${motivationData.title || '🤖 AI 숨트레이너'}
+                <div style="text-align: center; padding: 20px;">
+                    <img src="icons/coach-avatar.png" style="width: 32px; height: 32px; border-radius: 50%; margin-bottom: 12px;" alt="AI">
+                    <h4 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1f2937; text-align: center;">
+                        ${motivationData.title || 'AI 숨트레이너'}
                     </h4>
-                    <p style="margin: 0; font-size: 14px; line-height: 1.6; color: #4b5563;">
-                        ${(motivationData.message || '계속 화이팅하세요!').replace(/\n/g, '<br>')}
-                    </p>
+                    <div style="background: #F8F9FA; padding: 20px; border-radius: 16px; border: 1px solid #E5E7EB; text-align: left; line-height: 1.6;">
+                        <p style="margin: 0 0 16px 0; font-size: 14px; color: #374151;">
+                            ${(motivationData.message || '계속 화이팅하세요!').replace(/\n/g, '<br>')}
+                        </p>
+                        ${motivationData.insight ? `
+                        <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; margin-top: 16px;">
+                            <div style="font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #6b7280;">💡 트레이너 인사이트</div>
+                            <div style="font-size: 13px; color: #4b5563; line-height: 1.5;">${motivationData.insight}</div>
+                        </div>
+                        ` : ''}
+                    </div>
                 </div>
-                ${motivationData.insight ? `
-                <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; margin-top: 12px;">
-                    <div style="font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #6b7280;">💡 트레이너 인사이트</div>
-                    <div style="font-size: 13px; color: #4b5563;">${motivationData.insight}</div>
-                </div>
-                ` : ''}
             `;
         }
         
         if (badgeEl) {
-            badgeEl.textContent = motivationData.level || '분석 완료';
+            badgeEl.textContent = '실시간 분석 완료';
         }
         
         if (actionsEl) {
