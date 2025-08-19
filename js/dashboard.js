@@ -24,17 +24,15 @@ const INTEGRATED_RECORDS_HTML = `
         </div>
         
         <div id="aiEvaluationContent" class="ai-advice-content">
-            <div style="text-align: center; margin-bottom: 20px;">
-                <img src="icons/coach-avatar.png" style="width: 32px; height: 32px; border-radius: 50%; margin-bottom: 12px;" alt="AI">
-                <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">AI 숨트레이너 종합 평가</h4>
-                <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280; line-height: 1.5;">당신의 호흡 운동 데이터를 분석해서 개인화된 조언을 받아보세요</p>
-                <button onclick="window.integratedDashboard.requestAIEvaluation()" style="background: #667eea; color: white; border: none; border-radius: 12px; padding: 12px 24px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">
+            <div style="text-align: center; padding: 20px;">
+                <img src="icons/coach-avatar.png" style="width: 32px; height: 32px; border-radius: 50%; margin-bottom: 16px;" alt="AI">
+                <h4 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1f2937;">AI 숨트레이너 종합 평가</h4>
+                <p style="margin: 0 0 24px 0; font-size: 14px; color: #6b7280; line-height: 1.6;">당신의 호흡 운동 데이터를 분석해서 개인화된 조언을 받아보세요</p>
+                <button onclick="window.integratedDashboard.requestAIEvaluation()" style="background: #667eea; color: white; border: none; border-radius: 12px; padding: 14px 28px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 4px 12px rgba(102, 126, 234, 0.25);">
                     AI 종합 평가 받기
                 </button>
             </div>
         </div>
-        
-
     </div>
 
     <!-- 주요 지표 카드 그리드 -->
