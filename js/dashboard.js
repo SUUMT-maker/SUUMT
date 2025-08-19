@@ -29,48 +29,44 @@ const INTEGRATED_RECORDS_HTML = `
     </div>
 
     <!-- 주요 지표 카드 그리드 -->
-    <div class="dashboard-stats-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 20px; margin-bottom: 24px;">
-        <div class="stat-card dashboard-stat-card">
-            <div class="stat-card-header">
-                <div class="stat-card-title">총 호흡수</div>
-                <div class="stat-card-icon">🫁</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 20px; margin-bottom: 24px;">
+        <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: center;">
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">총 호흡수</div>
             </div>
-            <div class="stat-card-value">
-                <div class="stat-number" id="dashboardTotalBreaths">0</div>
-                <div class="stat-unit">회</div>
-            </div>
-        </div>
-
-        <div class="stat-card dashboard-stat-card">
-            <div class="stat-card-header">
-                <div class="stat-card-title">평균 호흡수</div>
-                <div class="stat-card-icon">📈</div>
-            </div>
-            <div class="stat-card-value">
-                <div class="stat-number" id="dashboardAvgBreaths">0</div>
-                <div class="stat-unit">회</div>
+            <div style="display: flex; align-items: baseline; justify-content: center; gap: 4px;">
+                <div style="font-size: 24px; font-weight: 700; color: #1f2937;" id="dashboardTotalBreaths">0</div>
+                <div style="font-size: 14px; color: #6b7280;">회</div>
             </div>
         </div>
 
-        <div class="stat-card dashboard-stat-card">
-            <div class="stat-card-header">
-                <div class="stat-card-title">완료율</div>
-                <div class="stat-card-icon">🎯</div>
+        <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: center;">
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">평균 호흡수</div>
             </div>
-            <div class="stat-card-value">
-                <div class="stat-number" id="dashboardCompletionRate">0</div>
-                <div class="stat-unit">%</div>
+            <div style="display: flex; align-items: baseline; justify-content: center; gap: 4px;">
+                <div style="font-size: 24px; font-weight: 700; color: #1f2937;" id="dashboardAvgBreaths">0</div>
+                <div style="font-size: 14px; color: #6b7280;">회</div>
             </div>
         </div>
 
-        <div class="stat-card dashboard-stat-card">
-            <div class="stat-card-header">
-                <div class="stat-card-title">평균 저항</div>
-                <div class="stat-card-icon">💪</div>
+        <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: center;">
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">완료율</div>
             </div>
-            <div class="stat-card-value">
-                <div class="stat-number" id="dashboardAvgResistance">0</div>
-                <div class="stat-unit">단계</div>
+            <div style="display: flex; align-items: baseline; justify-content: center; gap: 4px;">
+                <div style="font-size: 24px; font-weight: 700; color: #1f2937;" id="dashboardCompletionRate">0</div>
+                <div style="font-size: 14px; color: #6b7280;">%</div>
+            </div>
+        </div>
+
+        <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: center;">
+            <div style="margin-bottom: 8px;">
+                <div style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">평균 저항</div>
+            </div>
+            <div style="display: flex; align-items: baseline; justify-content: center; gap: 4px;">
+                <div style="font-size: 24px; font-weight: 700; color: #1f2937;" id="dashboardAvgResistance">0</div>
+                <div style="font-size: 14px; color: #6b7280;">단계</div>
             </div>
         </div>
     </div>
