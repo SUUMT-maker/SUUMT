@@ -2485,8 +2485,8 @@
 }
 
 .trainer-avatar {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     border-radius: 50%;
     border: 1px solid #E5E7EB;
     flex-shrink: 0;
@@ -2616,8 +2616,8 @@
     }
     
     .trainer-avatar {
-        width: 20px;
-        height: 20px;
+        width: 24px;
+        height: 24px;
     }
     
     .trainer-name {
