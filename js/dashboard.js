@@ -610,22 +610,20 @@ class IntegratedRecordsDashboard {
         const actionsEl = document.getElementById('aiMotivationActions');
         
         if (contentEl) {
-            // 🔥 AI 분석 결과 가독성 개선 (4단계)
+            // 🔥 AI 분석 결과 공간 최대 활용 (5단계)
             contentEl.innerHTML = `
-                <div style="text-align: center; padding: 20px;">
-                    <img src="icons/coach-avatar.png" style="width: 32px; height: 32px; border-radius: 50%; margin-bottom: 16px;" alt="AI">
-                    <div style="background: #F8F9FA; padding: 24px; border-radius: 16px; border: 1px solid #E5E7EB; line-height: 1.7; font-size: 15px; text-align: left; margin-top: 0;">
-                        <p style="margin: 0 0 16px 0; color: #374151;">
-                            ${(motivationData.message || '계속 화이팅하세요!').replace(/\n/g, '</p><p style="margin: 16px 0; line-height: 1.7;">')}
-                        </p>
-                        ${motivationData.insight ? `
-                        <div style="background: #f3f4f6; padding: 16px; border-radius: 12px; margin-top: 20px;">
-                            <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #6b7280;">💡 트레이너 인사이트</div>
-                            <div style="font-size: 14px; color: #4b5563; line-height: 1.6;">${motivationData.insight}</div>
-                        </div>
-                        ` : ''}
-                    </div>
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <img src="icons/coach-avatar.png" style="width: 32px; height: 32px; border-radius: 50%; margin-bottom: 12px;" alt="AI">
                 </div>
+                <div style="line-height: 1.7; font-size: 15px; color: #374151;">
+                    ${(motivationData.message || '계속 화이팅하세요!').replace(/\n/g, '<br>')}
+                </div>
+                ${motivationData.insight ? `
+                <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; margin-top: 20px; border-left: 4px solid #667eea;">
+                    <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #667eea;">트레이너 인사이트</div>
+                    <div style="font-size: 14px; color: #4b5563; line-height: 1.6;">${motivationData.insight}</div>
+                </div>
+                ` : ''}
             `;
         }
         
