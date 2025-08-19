@@ -13,42 +13,30 @@ const INTEGRATED_RECORDS_HTML = `
         <div class="section-subtitle">개인화된 트레이닝 인사이트와 상세 기록</div>
     </div>
 
-    <!-- ✨ AI 트레이너 종합 평가 (핵심 가치) -->
-    <div class="records-ai-advice" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; margin: 0 20px 24px; padding: 24px; color: white; position: relative; overflow: hidden; box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);">
-        <!-- 배경 장식 -->
-        <div style="position: absolute; top: -50%; right: -50%; width: 200%; height: 200%; background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%); animation: shimmer 6s ease-in-out infinite;"></div>
+    <!-- 🤖 AI 종합 평가 섹션 -->
+    <div class="records-ai-advice">
+        <div class="ai-advice-header">
+            <div class="ai-advice-title">
+                <h3>🤖 AI 숨트레이너 종합 분석</h3>
+            </div>
+            <div id="aiEvaluationBadge" class="ai-advice-badge">분석 중...</div>
+        </div>
         
-        <div style="position: relative; z-index: 1;">
-            <div class="ai-advice-header" style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
-                <div style="font-size: 28px;">🧠</div>
-                <div>
-                    <h3 class="ai-advice-title" style="margin: 0; font-size: 18px; font-weight: 600;">🤖 AI 숨트레이너 종합 분석</h3>
-                    <p style="margin: 0; font-size: 13px; opacity: 0.9;">당신의 호흡 여정을 분석한 개인화된 조언</p>
-                </div>
-                <div style="margin-left: auto;">
-                    <div id="aiEvaluationBadge" style="background: rgba(255,255,255,0.2); padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 600; backdrop-filter: blur(10px);">
-                        분석 중...
-                    </div>
-                </div>
+        <div id="aiEvaluationContent" class="ai-advice-content">
+            <div style="margin-bottom: 16px;">
+                <div style="font-size: 24px; margin-bottom: 8px;">🤖</div>
+                <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">AI 숨트레이너 종합 평가</h4>
+                <p style="margin: 0 0 16px 0; font-size: 14px; color: #6b7280;">당신의 호흡 운동 데이터를 분석해서 개인화된 조언을 받아보세요</p>
             </div>
-            
-            <div id="aiEvaluationContent" style="background: rgba(255,255,255,0.95); color: #374151; padding: 20px; border-radius: 16px; line-height: 1.6; font-size: 15px; backdrop-filter: blur(10px); text-align: center;">
-                <div style="margin-bottom: 16px;">
-                    <div style="font-size: 24px; margin-bottom: 8px;">🤖</div>
-                    <h4 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600; color: #1f2937;">AI 숨트레이너 종합 평가</h4>
-                    <p style="margin: 0 0 16px 0; font-size: 14px; color: #6b7280;">당신의 호흡 운동 데이터를 분석해서 개인화된 조언을 받아보세요</p>
-                </div>
-                <button onclick="window.integratedDashboard.requestAIEvaluation()" style="background: #667eea; color: white; border: none; border-radius: 12px; padding: 12px 24px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">
-                    🧠 AI 종합 평가 받기
-                </button>
-            </div>
-            
-            <!-- AI 동기부여 액션 버튼들 (단순화) -->
-            <div id="aiMotivationActions" style="margin-top: 16px; display: flex; gap: 12px;">
-                <button onclick="window.integratedDashboard.startQuickWorkout()" style="flex: 1; background: rgba(255, 255, 255, 0.2); border: none; border-radius: 12px; padding: 10px 16px; color: white; font-size: 14px; font-weight: 600; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease;">
-                    💪 지금 운동하기
-                </button>
-            </div>
+            <button onclick="window.integratedDashboard.requestAIEvaluation()" style="background: #667eea; color: white; border: none; border-radius: 12px; padding: 12px 24px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);">
+                🧠 AI 종합 평가 받기
+            </button>
+        </div>
+        
+        <div id="aiMotivationActions" style="margin-top: 16px; display: flex; gap: 12px;">
+            <button onclick="window.integratedDashboard.startQuickWorkout()" style="flex: 1; background: rgba(102, 126, 234, 0.1); border: 1px solid #667eea; border-radius: 12px; padding: 10px 16px; color: #667eea; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                💪 지금 운동하기
+            </button>
         </div>
     </div>
 
