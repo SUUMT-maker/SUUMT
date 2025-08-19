@@ -14,15 +14,15 @@ const INTEGRATED_RECORDS_HTML = `
     </div>
 
     <!-- 🤖 AI 종합 평가 섹션 -->
-    <div class="records-ai-advice">
-        <div class="ai-advice-header">
-            <div class="ai-advice-title">
+    <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-grow: 1;">
                 <h3>AI 숨트레이너 종합 평가</h3>
             </div>
-            <div id="aiEvaluationBadge" class="ai-advice-badge">분석 중...</div>
+            <div id="aiEvaluationBadge" style="background: #667eea; color: white; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 600;">분석 중...</div>
         </div>
         
-        <div id="aiEvaluationContent" class="ai-advice-content">
+        <div id="aiEvaluationContent" style="background: #F8F9FA; padding: 20px; border-radius: 16px; border: 1px solid #E5E7EB; line-height: 1.6; font-size: 14px;">
             <div style="text-align: center; padding: 20px;">
                 <img src="icons/coach-avatar.png" style="width: 32px; height: 32px; border-radius: 50%; margin-bottom: 16px;" alt="AI">
                 <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280; line-height: 1.5; text-align: center;">
