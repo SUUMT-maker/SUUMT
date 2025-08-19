@@ -434,7 +434,7 @@ class IntegratedRecordsDashboard {
 
             if (motivationAdvice) {
                 this.showMotivationMessage({
-                    title: '🤖 AI 트레이너 실시간 분석',
+                    title: '🤖 AI 숨트레이너 실시간 분석',
                     message: motivationAdvice.motivationMessage,
                     level: '실시간 분석 완료',
                     insight: motivationAdvice.insight,
