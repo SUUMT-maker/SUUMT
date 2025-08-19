@@ -615,8 +615,10 @@ class IntegratedRecordsDashboard {
                 <div style="text-align: center; margin-bottom: 20px;">
                     <img src="icons/coach-avatar.png" style="width: 32px; height: 32px; border-radius: 50%; margin-bottom: 12px;" alt="AI">
                 </div>
-                <div style="line-height: 1.7; font-size: 15px; color: #374151;">
-                    ${(motivationData.message || '계속 화이팅하세요!').replace(/\n/g, '<br>')}
+                <div style="line-height: 1.6; font-size: 15px; color: #374151;">
+                    ${(motivationData.message || '계속 화이팅하세요!')
+                      .replace(/\n\n/g, '</p><p style="margin: 12px 0; line-height: 1.6;">')
+                      .replace(/\n/g, '<br style="margin-bottom: 4px;">')}
                 </div>
                 ${motivationData.insight ? `
                 <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; margin-top: 20px; border-left: 4px solid #667eea;">
