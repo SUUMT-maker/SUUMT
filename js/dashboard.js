@@ -2,16 +2,8 @@
 
 // 기존 HTML 구조는 동일하게 유지
 const INTEGRATED_RECORDS_HTML = `
-<!-- 📊 나의 호흡 분석 대시보드 -->
+<!-- 기록탭 대시보드 -->
 <div class="integrated-records-screen">
-    <!-- 대시보드 헤더 -->
-    <div class="section-header">
-        <h2 class="section-title">
-            <span class="section-icon">📊</span>
-            <span>나의 호흡 분석</span>
-        </h2>
-        <div class="section-subtitle">개인화된 트레이닝 인사이트와 상세 기록</div>
-    </div>
 
     <!-- 🤖 AI 종합 평가 섹션 -->
     <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
