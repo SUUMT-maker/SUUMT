@@ -72,7 +72,7 @@ const INTEGRATED_RECORDS_HTML = `
     </div>
 
     <!-- 내 호흡 기록 차트 -->
-    <div class="breathing-chart-container" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px;">
+    <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
             <h3 style="font-size: 18px; font-weight: 600; color: #1E1E1E; margin: 0;">내 호흡 기록</h3>
             <select id="chartTimeRange" style="padding: 8px 12px; border: 1px solid #E7E7E7; border-radius: 8px; font-size: 14px;">
