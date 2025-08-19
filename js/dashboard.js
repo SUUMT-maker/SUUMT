@@ -610,21 +610,18 @@ class IntegratedRecordsDashboard {
         const actionsEl = document.getElementById('aiMotivationActions');
         
         if (contentEl) {
-            // 🔥 AI 분석 결과 레이아웃 완성 (3단계)
+            // 🔥 AI 분석 결과 가독성 개선 (4단계)
             contentEl.innerHTML = `
                 <div style="text-align: center; padding: 20px;">
-                    <img src="icons/coach-avatar.png" style="width: 32px; height: 32px; border-radius: 50%; margin-bottom: 12px;" alt="AI">
-                    <h4 style="margin: 0 0 12px 0; font-size: 16px; font-weight: 600; color: #1f2937; text-align: center;">
-                        ${motivationData.title || 'AI 숨트레이너'}
-                    </h4>
-                    <div style="background: #F8F9FA; padding: 20px; border-radius: 16px; border: 1px solid #E5E7EB; text-align: left; line-height: 1.6;">
-                        <p style="margin: 0 0 16px 0; font-size: 14px; color: #374151;">
-                            ${(motivationData.message || '계속 화이팅하세요!').replace(/\n/g, '<br>')}
+                    <img src="icons/coach-avatar.png" style="width: 32px; height: 32px; border-radius: 50%; margin-bottom: 16px;" alt="AI">
+                    <div style="background: #F8F9FA; padding: 24px; border-radius: 16px; border: 1px solid #E5E7EB; line-height: 1.7; font-size: 15px; text-align: left; margin-top: 0;">
+                        <p style="margin: 0 0 16px 0; color: #374151;">
+                            ${(motivationData.message || '계속 화이팅하세요!').replace(/\n/g, '</p><p style="margin: 16px 0; line-height: 1.7;">')}
                         </p>
                         ${motivationData.insight ? `
-                        <div style="background: #f3f4f6; padding: 12px; border-radius: 8px; margin-top: 16px;">
-                            <div style="font-size: 12px; font-weight: 600; margin-bottom: 4px; color: #6b7280;">💡 트레이너 인사이트</div>
-                            <div style="font-size: 13px; color: #4b5563; line-height: 1.5;">${motivationData.insight}</div>
+                        <div style="background: #f3f4f6; padding: 16px; border-radius: 12px; margin-top: 20px;">
+                            <div style="font-size: 13px; font-weight: 600; margin-bottom: 8px; color: #6b7280;">💡 트레이너 인사이트</div>
+                            <div style="font-size: 14px; color: #4b5563; line-height: 1.6;">${motivationData.insight}</div>
                         </div>
                         ` : ''}
                     </div>
