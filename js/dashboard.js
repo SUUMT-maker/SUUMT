@@ -71,19 +71,47 @@ const INTEGRATED_RECORDS_HTML = `
         </div>
     </div>
 
-    <!-- 내 호흡 기록 차트 -->
-    <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <h3 style="font-size: 18px; font-weight: 600; color: #1E1E1E; margin: 0;">내 호흡 기록</h3>
-            <select id="chartTimeRange" style="padding: 8px 12px; border: 1px solid #E7E7E7; border-radius: 8px; font-size: 14px;">
-                <option value="weekly">최근 7일</option>
-                <option value="monthly">최근 30일</option>
-            </select>
+
+
+    <!-- 4주 순환 목표 시스템 -->
+    <div id="weeklyGoalCard" style="background: white; border: 1px solid #E7E7E7; border-radius: 32px; padding: 32px 24px 28px 24px; margin: 0 20px 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+        
+        <!-- 카드 헤더 -->
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
+            <div style="font-size: 20px; font-weight: 700; color: #1E1E1E; display: flex; align-items: center; gap: 8px;">
+                <span id="goalIcon">🔥</span>
+                <span id="goalTitle">꾸준히 챌린지</span>
+                <span id="weekIndicator" style="font-size: 14px; color: #6b7280; font-weight: 400;">(Week 1/4)</span>
+            </div>
         </div>
         
-        <div id="breathingChart" style="height: 200px; width: 100%;">
-            <!-- 차트가 여기에 렌더링됩니다 -->
+        <!-- 원형 프로그레스 -->
+        <div style="position: relative; display: inline-block; margin-bottom: 32px;">
+            <svg id="goalProgress" width="240" height="240" style="transform: rotate(0deg); filter: drop-shadow(0 8px 24px rgba(102, 126, 234, 0.25)); transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);">
+                <circle cx="120" cy="120" r="100" stroke="#f0f0f0" stroke-width="12" fill="transparent"/>
+                <circle id="goalProgressStroke" cx="120" cy="120" r="100" stroke="#667eea" stroke-width="12" fill="transparent" 
+                        stroke-linecap="round" stroke-dasharray="628" stroke-dashoffset="628" 
+                        style="transition: stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1), stroke 0.4s ease;"/>
+            </svg>
+            
+            <!-- 중앙 텍스트 -->
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                <div id="goalPercentage" style="font-size: 48px; font-weight: 800; color: #1f2937; margin-bottom: 6px; line-height: 1; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);">0%</div>
+                <div id="goalLabel" style="font-size: 16px; color: #6b7280; font-weight: 600; transition: all 0.3s ease;">4일 연속 달성</div>
+            </div>
         </div>
+        
+        <!-- 목표 설명 -->
+        <div id="goalDescription" style="font-size: 16px; color: #374151; margin-bottom: 20px; line-height: 1.5;">
+            <span id="goalCurrent">0일</span> / <span id="goalTarget">4일</span> 완료
+        </div>
+        
+        <!-- AI 메시지 -->
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; color: #6b7280;">
+            <img src="icons/coach-avatar.png" style="width: 24px; height: 24px; border-radius: 50%;" alt="AI">
+            <span id="goalMessage">😊 새로운 도전의 시작! 화이팅! 💪</span>
+        </div>
+        
     </div>
 
     <!-- 달력 섹션 -->
@@ -129,7 +157,7 @@ class IntegratedRecordsDashboard {
         this.supabaseClient = null;
         this.exerciseData = [];
         this.aiAdviceData = [];
-        this.timeRange = 'weekly';
+
         this.currentCalendarYear = new Date().getFullYear();
         this.currentCalendarMonth = new Date().getMonth();
         this.selectedDate = null;
@@ -954,10 +982,10 @@ class IntegratedRecordsDashboard {
         };
     }
 
-    // 🗓️ 시간 범위에 따른 데이터 필터링
+    // 🗓️ 시간 범위에 따른 데이터 필터링 (기본값: 최근 7일)
     getFilteredData() {
         const now = new Date();
-        const daysBack = this.timeRange === 'weekly' ? 7 : 30;
+        const daysBack = 7; // 기본값으로 7일 설정
         const cutoffDate = new Date(now.getTime() - daysBack * 24 * 60 * 60 * 1000);
         
         return this.exerciseData.filter(item => {
@@ -966,30 +994,7 @@ class IntegratedRecordsDashboard {
         }).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
     }
 
-    // 📈 차트 데이터 준비 (KST 기준)
-    prepareChartData() {
-        const filtered = this.getFilteredData();
-        
-        // 일별로 그룹화 (KST 기준)
-        const dailyData = {};
-        filtered.forEach(item => {
-            const kstDateStr = this.getKstDateString(item.created_at);
-            if (!dailyData[kstDateStr]) {
-                dailyData[kstDateStr] = { breaths: 0, count: 0 };
-            }
-            dailyData[kstDateStr].breaths += item.completed_breaths || 0;
-            dailyData[kstDateStr].count += 1;
-        });
 
-        // 차트용 데이터 변환
-        const chartData = Object.entries(dailyData).map(([date, data]) => ({
-            date: new Date(date).toLocaleDateString('ko-KR', { month: 'short', day: 'numeric' }),
-            호흡수: data.breaths,
-            목표: 20
-        }));
-
-        return chartData;
-    }
 
     // 🎨 UI 업데이트 (AI 자동 분석 제거)
     updateUI() {
@@ -1001,8 +1006,8 @@ class IntegratedRecordsDashboard {
         document.getElementById('dashboardCompletionRate').textContent = stats.completionRate;
         document.getElementById('dashboardAvgResistance').textContent = stats.avgResistance;
 
-        // 차트 렌더링
-        this.renderBreathingChart();
+        // 주간 목표 업데이트
+        this.updateWeeklyGoal();
         
         // 달력 렌더링
         this.renderCalendar();
@@ -1011,61 +1016,228 @@ class IntegratedRecordsDashboard {
         // this.loadMotivationMessage(); // 제거됨
     }
 
-    // 📈 내 호흡 기록 차트 렌더링
-    renderBreathingChart() {
-        const chartData = this.prepareChartData();
-        const container = document.getElementById('breathingChart');
-        
-        if (!container || !chartData.length) {
-            container.innerHTML = '<div style="text-align: center; color: #666; padding: 80px 0;">데이터가 없습니다</div>';
-            return;
-        }
 
-        const maxBreaths = Math.max(...chartData.map(d => d.호흡수), 20);
-        const width = container.clientWidth - 40;
-        const height = 160;
+
+    // 🎯 4주 순환 목표 시스템 함수들
+    
+    // 현재 주차 계산 (일요일 기준)
+    getCurrentWeek() {
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay()); // 이번 주 일요일
         
-        let svg = `<svg width="${width}" height="${height}" style="margin: 20px;">`;
+        const weeksSinceEpoch = Math.floor(startOfWeek.getTime() / (7 * 24 * 60 * 60 * 1000));
+        return (weeksSinceEpoch % 4) + 1; // 1-4 순환
+    }
+
+    // 4주 목표 설정
+    getWeeklyGoal(week) {
+        const goals = {
+            1: {
+                icon: '🔥',
+                title: '꾸준히 챌린지', 
+                label: '4일 연속 달성',
+                target: 4,
+                type: 'consecutive'
+            },
+            2: {
+                icon: '💪',
+                title: '열심히 챌린지',
+                label: '주간 300호흡',
+                target: 300,
+                type: 'total_breaths'
+            },
+            3: {
+                icon: '🎯', 
+                title: '끝까지 챌린지',
+                label: '완주율 85%',
+                target: 85,
+                type: 'completion_rate'
+            },
+            4: {
+                icon: '✨',
+                title: '완벽하게 챌린지',
+                label: '연속 3일 + 완주율 90%',
+                target: { consecutive: 3, completion: 90 },
+                type: 'hybrid'
+            }
+        };
+        return goals[week];
+    }
+
+    // 주간 목표 진행률 계산
+    calculateWeekProgress(goal) {
+        const thisWeekData = this.getThisWeekData();
         
-        // Y축 라벨
-        for (let i = 0; i <= 4; i++) {
-            const y = (height - 40) * i / 4 + 20;
-            const value = Math.round((maxBreaths * (4 - i)) / 4);
-            svg += `<line x1="40" y1="${y}" x2="${width - 20}" y2="${y}" stroke="#f0f0f0" stroke-width="1"/>`;
-            svg += `<text x="35" y="${y + 4}" text-anchor="end" font-size="11" fill="#9CA3AF">${value}</text>`;
+        switch(goal.type) {
+            case 'consecutive':
+                return this.calculateConsecutiveDays(thisWeekData, goal.target);
+            case 'total_breaths':
+                return this.calculateTotalBreaths(thisWeekData, goal.target);
+            case 'completion_rate':
+                return this.calculateCompletionRate(thisWeekData, goal.target);
+            case 'hybrid':
+                return this.calculateHybridProgress(thisWeekData, goal.target);
         }
+    }
+
+    // 이번 주 데이터 가져오기
+    getThisWeekData() {
+        const now = new Date();
+        const startOfWeek = new Date(now);
+        startOfWeek.setDate(now.getDate() - now.getDay()); // 일요일
+        startOfWeek.setHours(0, 0, 0, 0);
         
-        // 데이터 포인트와 선
-        const stepX = (width - 80) / Math.max(chartData.length - 1, 1);
-        let path = '';
+        return this.exerciseData.filter(session => {
+            const sessionDate = new Date(session.created_at);
+            return sessionDate >= startOfWeek;
+        });
+    }
+
+    // 연속일 계산
+    calculateConsecutiveDays(weekData, target) {
+        // 구현: 연속 달성 일수 계산
+        const dailyGoal = 40; // 2세트 40호흡
+        const daysWithGoal = new Set();
         
-        chartData.forEach((d, i) => {
-            const x = 40 + i * stepX;
-            const y = height - 40 - (d.호흡수 / maxBreaths) * (height - 60);
-            
-            if (i === 0) path += `M ${x} ${y}`;
-            else path += ` L ${x} ${y}`;
-            
-            // 데이터 포인트
-            svg += `<circle cx="${x}" cy="${y}" r="5" fill="#3B82F6" stroke="white" stroke-width="2"/>`;
-            
-            // 날짜 라벨
-            svg += `<text x="${x}" y="${height - 5}" text-anchor="middle" font-size="11" fill="#6B7280">${d.date}</text>`;
+        weekData.forEach(session => {
+            if (session.completed_breaths >= dailyGoal) {
+                const date = new Date(session.created_at).toDateString();
+                daysWithGoal.add(date);
+            }
         });
         
-        // 트렌드 라인
-        svg += `<path d="${path}" stroke="#3B82F6" stroke-width="3" fill="none"/>`;
+        // 연속일 계산 로직
+        let consecutive = 0;
+        const today = new Date();
         
-        // 목표 라인
-        const targetY = height - 40 - (20 / maxBreaths) * (height - 60);
-        svg += `<line x1="40" y1="${targetY}" x2="${width - 20}" y2="${targetY}" stroke="#22C55E" stroke-width="2" stroke-dasharray="5,5"/>`;
+        for (let i = 0; i < 7; i++) {
+            const checkDate = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+            const dateStr = checkDate.toDateString();
+            
+            if (daysWithGoal.has(dateStr)) {
+                consecutive++;
+            } else {
+                break;
+            }
+        }
         
-        // 범례
-        svg += `<text x="${width - 100}" y="35" font-size="11" fill="#3B82F6">● 실제 호흡수</text>`;
-        svg += `<text x="${width - 100}" y="50" font-size="11" fill="#22C55E">--- 목표 (20회)</text>`;
+        return {
+            current: Math.min(consecutive, target),
+            target: target,
+            percentage: Math.min((consecutive / target) * 100, 100)
+        };
+    }
+
+    // 총 호흡수 계산
+    calculateTotalBreaths(weekData, target) {
+        const totalBreaths = weekData.reduce((sum, session) => 
+            sum + (session.completed_breaths || 0), 0);
         
-        svg += '</svg>';
-        container.innerHTML = svg;
+        return {
+            current: totalBreaths,
+            target: target,
+            percentage: Math.min((totalBreaths / target) * 100, 100)
+        };
+    }
+
+    // 완주율 계산
+    calculateCompletionRate(weekData, target) {
+        if (weekData.length === 0) {
+            return { current: 0, target: target, percentage: 0 };
+        }
+        
+        const completedSessions = weekData.filter(session => !session.is_aborted).length;
+        const completionRate = (completedSessions / weekData.length) * 100;
+        
+        return {
+            current: Math.round(completionRate),
+            target: target,
+            percentage: Math.min((completionRate / target) * 100, 100)
+        };
+    }
+
+    // 하이브리드 진행률 계산
+    calculateHybridProgress(weekData, target) {
+        const consecutiveResult = this.calculateConsecutiveDays(weekData, target.consecutive);
+        const completionResult = this.calculateCompletionRate(weekData, target.completion);
+        
+        const minProgress = Math.min(consecutiveResult.percentage, completionResult.percentage);
+        
+        return {
+            current: minProgress,
+            target: 100,
+            percentage: minProgress,
+            details: {
+                consecutive: consecutiveResult,
+                completion: completionResult
+            }
+        };
+    }
+
+    // 목표 메시지 생성
+    generateGoalMessage(progress, goal, isPersonalBest) {
+        if (progress.percentage >= 100) {
+            const messages = {
+                1: "🔥 4일 연속 완료! 꾸준함의 힘! 👏",
+                2: "💪 주간 300호흡 달성! 대단해요! 🎉",
+                3: "🎯 높은 완주율 달성! 끝까지 최고! ✨", 
+                4: "✨ 모든 조건 완료! 완벽해요! 🏆"
+            };
+            return messages[this.getCurrentWeek()];
+        }
+        
+        if (isPersonalBest) {
+            return "😊 개인 최고 기록 경신 중! 🔥";
+        }
+        
+        if (progress.percentage >= 80) {
+            return "😊 거의 다 왔어요! 마지막 스퍼트! 🏃‍♂️";
+        } else if (progress.percentage >= 50) {
+            return "😊 절반 넘었네요! 좋은 페이스! 👍";
+        } else if (progress.percentage >= 25) {
+            return "😊 좋은 시작이에요! 계속 가봐요! 🌱";
+        } else {
+            return "😊 새로운 도전의 시작! 화이팅! 💪";
+        }
+    }
+
+    // 주간 목표 UI 업데이트
+    updateWeeklyGoal() {
+        const currentWeek = this.getCurrentWeek();
+        const goal = this.getWeeklyGoal(currentWeek);
+        const progress = this.calculateWeekProgress(goal);
+        
+        // UI 요소 업데이트
+        document.getElementById('goalIcon').textContent = goal.icon;
+        document.getElementById('goalTitle').textContent = goal.title;
+        document.getElementById('weekIndicator').textContent = `(Week ${currentWeek}/4)`;
+        document.getElementById('goalLabel').textContent = goal.label;
+        
+        // 프로그레스 업데이트
+        const percentage = Math.round(progress.percentage);
+        document.getElementById('goalPercentage').textContent = `${percentage}%`;
+        
+        // 원형 프로그레스 업데이트
+        const progressStroke = document.getElementById('goalProgressStroke');
+        const circumference = 628; // 2 * π * 100
+        const offset = circumference - (percentage / 100) * circumference;
+        progressStroke.style.strokeDashoffset = offset;
+        
+        // 목표 설명 업데이트
+        if (goal.type === 'hybrid') {
+            document.getElementById('goalDescription').innerHTML = 
+                `연속 ${progress.details.consecutive.current}/${progress.details.consecutive.target}일, 완주율 ${progress.details.completion.current}/${progress.details.completion.target}%`;
+        } else {
+            document.getElementById('goalCurrent').textContent = 
+                goal.type === 'completion_rate' ? `${progress.current}%` : progress.current;
+            document.getElementById('goalTarget').textContent = 
+                goal.type === 'completion_rate' ? `${progress.target}%` : progress.target;
+        }
+        
+        // 메시지 업데이트
+        const message = this.generateGoalMessage(progress, goal, false); // 개인 최고 기록 로직은 나중에 추가
+        document.getElementById('goalMessage').textContent = message;
     }
 
     // 📅 달력 렌더링
@@ -1291,13 +1463,7 @@ async function initIntegratedRecordsDashboard() {
     await dashboard.fetchAIAdviceData();
     dashboard.updateUI();
 
-    const timeRangeSelect = document.getElementById('chartTimeRange');
-    if (timeRangeSelect) {
-        timeRangeSelect.addEventListener('change', (e) => {
-            dashboard.timeRange = e.target.value;
-            dashboard.updateUI();
-        });
-    }
+
 
     const prevBtn = document.getElementById('prevMonthBtn');
     const nextBtn = document.getElementById('nextMonthBtn');
