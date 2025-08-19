@@ -2499,11 +2499,7 @@
     flex-grow: 1;
 }
 
-.chat-time {
-    font-size: 11px;
-    color: #9CA3AF;
-    font-weight: 500;
-}
+
 
 .chat-bubble {
     background: #F3F4F6;
