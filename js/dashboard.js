@@ -88,7 +88,7 @@ const INTEGRATED_RECORDS_HTML = `
     <!-- 달력 섹션 -->
     <div class="calendar-section" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px;">
         <div class="calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="font-size: 18px; font-weight: 600; color: #1E1E1E; margin: 0;">나의 기록</h3>
+            <h3 style="font-size: 18px; font-weight: 600; color: #1E1E1E; margin: 0;">운동 일지</h3>
             <div style="display: flex; align-items: center; gap: 12px;">
                 <button id="prevMonthBtn" style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #6b7280; cursor: pointer; transition: all 0.2s ease;">‹</button>
                 <span id="calendarTitle" style="font-size: 16px; font-weight: 600; color: #1f2937; min-width: 120px; text-align: center;">2025년 8월</span>
@@ -1434,7 +1434,10 @@ class IntegratedRecordsDashboard {
                     
                     <!-- AI 조언 -->
                     <div style="background: white; padding: 12px; border-radius: 8px; margin-bottom: 12px;">
-                        <div style="font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">🤖 AI 숨트레이너 조언</div>
+                        <div style="font-size: 14px; font-weight: 600; color: #374151; margin-bottom: 8px;">
+                            <img src="icons/coach-avatar.png" style="width: 16px; height: 16px; border-radius: 50%; margin-right: 6px; vertical-align: middle;" alt="">
+                            숨트레이너
+                        </div>
                         <div style="font-size: 13px; color: #6B7280; line-height: 1.5;">
                             ${aiAdvice?.comprehensive_advice || '이 세션에 대한 AI 조언이 없습니다.'}
                         </div>
