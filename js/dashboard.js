@@ -5,50 +5,8 @@ const INTEGRATED_RECORDS_HTML = `
 <!-- 기록탭 대시보드 -->
 <div class="integrated-records-screen">
 
-    <!-- 🤖 AI 종합 평가 섹션 -->
-    <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: max(40px, env(safe-area-inset-top)) 20px 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
-            <div style="display: flex; align-items: center; gap: 8px; flex-grow: 1;">
-                <h3>AI 숨트레이너 종합 평가</h3>
-            </div>
-            <div id="aiEvaluationBadge" style="background: rgba(102, 126, 234, 0.1); border: 1px solid #667eea; color: #667eea; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 600;">분석 중...</div>
-        </div>
-        
-        <div id="aiEvaluationContent" style="background: #F8F9FA; padding: 20px; border-radius: 16px; border: 1px solid #E5E7EB; line-height: 1.6; font-size: 14px;">
-            <div style="text-align: center; padding: 20px;">
-                <img src="icons/coach-avatar.png" style="width: 32px; height: 32px; border-radius: 50%; margin-bottom: 16px;" alt="AI">
-                <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280; line-height: 1.5; text-align: center;">
-                    당신의 호흡 운동 데이터를 분석해서<br>
-                    개인화된 조언을 받아보세요
-                </p>
-                <button onclick="window.integratedDashboard.requestAIEvaluation()" style="background: rgba(102, 126, 234, 0.1); border: 1px solid #667eea; border-radius: 12px; padding: 12px 24px; color: #667eea; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
-                    AI 종합 평가 받기
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 핵심 2개 카드: 현재 상태 + 행동 유도 -->
-    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 20px; margin-bottom: 24px;">
-        
-        <!-- 카드 1: 현재 상태 -->
-        <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: center;">
-            <div id="statusContent" style="font-size: 20px; font-weight: 700; color: #1f2937; line-height: 1.3; margin-bottom: 8px;">연속 2일째</div>
-            <div id="statusState" style="font-size: 14px; font-weight: 600; color: #6b7280;">유지중</div>
-        </div>
-
-        <!-- 카드 2: 행동 유도 - 보상을 크게, 행동을 작게 -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3); transition: all 0.3s ease; text-align: center;">
-            <div id="actionContent" style="font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9); line-height: 1.3; margin-bottom: 8px;">지금 운동하면</div>
-            <div id="actionReward" style="font-size: 24px; font-weight: 700; color: white;">+1일 ↗️</div>
-        </div>
-
-    </div>
-
-
-
-    <!-- 4주 순환 목표 시스템 -->
-    <div id="weeklyGoalCard" style="background: white; border: 1px solid #E7E7E7; border-radius: 32px; padding: 32px 24px 28px 24px; margin: 0 20px 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+    <!-- 1. 4주 순환 목표 시스템 (맨 위로 이동, 노치 여백 포함) -->
+    <div id="weeklyGoalCard" style="background: white; border: 1px solid #E7E7E7; border-radius: 32px; padding: 32px 24px 28px 24px; margin: max(40px, env(safe-area-inset-top)) 20px 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
         
         <!-- 카드 헤더 -->
         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
@@ -85,6 +43,46 @@ const INTEGRATED_RECORDS_HTML = `
             <span id="goalMessage">😊 새로운 도전의 시작! 화이팅! 💪</span>
         </div>
         
+    </div>
+
+    <!-- 2. 2개 가이드 카드 (챌린지 바로 아래) -->
+    <div id="guidanceCards" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 20px; margin-bottom: 24px;">
+        
+        <!-- 카드 1: 현재 상태 -->
+        <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: center;">
+            <div id="statusContent" style="font-size: 20px; font-weight: 700; color: #1f2937; line-height: 1.3; margin-bottom: 8px;">연속 2일째</div>
+            <div id="statusState" style="font-size: 14px; font-weight: 600; color: #6b7280;">유지중</div>
+        </div>
+
+        <!-- 카드 2: 행동 유도 - 보상을 크게, 행동을 작게 -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3); transition: all 0.3s ease; text-align: center;">
+            <div id="actionContent" style="font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9); line-height: 1.3; margin-bottom: 8px;">지금 운동하면</div>
+            <div id="actionReward" style="font-size: 24px; font-weight: 700; color: white;">+1일 ↗️</div>
+        </div>
+
+    </div>
+
+    <!-- 3. AI 종합 평가 (기존 노치 여백 제거, 일반 마진으로) -->
+    <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-grow: 1;">
+                <h3>AI 숨트레이너 종합 평가</h3>
+            </div>
+            <div id="aiEvaluationBadge" style="background: rgba(102, 126, 234, 0.1); border: 1px solid #667eea; color: #667eea; padding: 6px 12px; border-radius: 12px; font-size: 11px; font-weight: 600;">분석 중...</div>
+        </div>
+        
+        <div id="aiEvaluationContent" style="background: #F8F9FA; padding: 20px; border-radius: 16px; border: 1px solid #E5E7EB; line-height: 1.6; font-size: 14px;">
+            <div style="text-align: center; padding: 20px;">
+                <img src="icons/coach-avatar.png" style="width: 32px; height: 32px; border-radius: 50%; margin-bottom: 16px;" alt="AI">
+                <p style="margin: 0 0 20px 0; font-size: 14px; color: #6b7280; line-height: 1.5; text-align: center;">
+                    당신의 호흡 운동 데이터를 분석해서<br>
+                    개인화된 조언을 받아보세요
+                </p>
+                <button onclick="window.integratedDashboard.requestAIEvaluation()" style="background: rgba(102, 126, 234, 0.1); border: 1px solid #667eea; border-radius: 12px; padding: 12px 24px; color: #667eea; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                    AI 종합 평가 받기
+                </button>
+            </div>
+        </div>
     </div>
 
     <!-- 달력 섹션 -->
