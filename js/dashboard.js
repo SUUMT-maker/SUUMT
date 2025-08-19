@@ -87,13 +87,10 @@ const INTEGRATED_RECORDS_HTML = `
 
     <!-- 달력 섹션 -->
     <div class="calendar-section" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px;">
-        <div class="calendar-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="font-size: 18px; font-weight: 600; color: #1E1E1E; margin: 0;">운동 일지</h3>
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <button id="prevMonthBtn" style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #6b7280; cursor: pointer; transition: all 0.2s ease;">‹</button>
-                <span id="calendarTitle" style="font-size: 16px; font-weight: 600; color: #1f2937; min-width: 120px; text-align: center;">2025년 8월</span>
-                <button id="nextMonthBtn" style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #6b7280; cursor: pointer; transition: all 0.2s ease;">›</button>
-            </div>
+        <div class="calendar-header" style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
+            <button id="prevMonthBtn" style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #6b7280; cursor: pointer; transition: all 0.2s ease;">‹</button>
+            <span id="calendarTitle" style="font-size: 16px; font-weight: 600; color: #1f2937; min-width: 120px; text-align: center; margin: 0 12px;">2025년 8월</span>
+            <button id="nextMonthBtn" style="background: #f3f4f6; border: 1px solid #e5e7eb; border-radius: 8px; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #6b7280; cursor: pointer; transition: all 0.2s ease;">›</button>
         </div>
         
         <table class="calendar-table" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
@@ -1348,7 +1345,7 @@ class IntegratedRecordsDashboard {
                 styles.push('background: #1D4ED8', 'color: white', 'transform: scale(1.05)');
             }
             
-            currentWeek += `<td class="${classes.join(' ')}" style="${styles.join('; ')}" data-date="${dateStr}" onclick="window.integratedDashboard.onDateClick('${dateStr}')">${day}</td>`;
+            currentWeek += `<td class="${classes.join(' ')}" style="${styles.join('; ')}; color: #374151;" data-date="${dateStr}" onclick="window.integratedDashboard.onDateClick('${dateStr}')">${day}</td>`;
             
             if ((firstDay.getDay() + day - 1) % 7 === 6) {
                 html += `<tr>${currentWeek}</tr>`;
@@ -1374,8 +1371,17 @@ class IntegratedRecordsDashboard {
         const prevSelected = document.querySelector('.calendar-day.selected');
         if (prevSelected) {
             prevSelected.classList.remove('selected');
-            prevSelected.style.background = prevSelected.classList.contains('has-record') ? '#3B82F6' : 
-                                           prevSelected.classList.contains('today') ? '#ddd6fe' : '';
+            // 기존 스타일 복원 시 텍스트 유지 확인
+            if (prevSelected.classList.contains('has-record')) {
+                prevSelected.style.background = '#dcfce7';
+                prevSelected.style.color = '#16a34a';
+            } else if (prevSelected.classList.contains('today')) {
+                prevSelected.style.background = '#ddd6fe';
+                prevSelected.style.color = '#6366f1';
+            } else {
+                prevSelected.style.background = '';
+                prevSelected.style.color = '#374151'; // 기본 텍스트 색상 명시적 설정
+            }
             prevSelected.style.transform = '';
         }
         
@@ -1383,7 +1389,7 @@ class IntegratedRecordsDashboard {
         if (newSelected) {
             newSelected.classList.add('selected');
             newSelected.style.background = '#1D4ED8';
-            newSelected.style.color = 'white';
+            newSelected.style.color = 'white'; // 선택 시 텍스트 색상 명시적 설정
             newSelected.style.transform = 'scale(1.05)';
         }
         
