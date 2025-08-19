@@ -323,40 +323,43 @@ function selectInsightMessage(data) {
     return FALLBACK_MESSAGES[randomIndex];
 }
 
-// 🚀 메인 AI 인사이트 업데이트 함수 (기존 함수 완전 교체)
+// 🚀 메신저 스타일 AI 인사이트 업데이트 함수 (기존 함수 완전 교체)
 function updateWeeklyAIInsight() {
-    const badgeEl = document.getElementById('aiInsightBadge');
-    const contentEl = document.getElementById('aiInsightContent');
+    const chatBubble = document.getElementById('chatBubble');
     
-    if (!badgeEl || !contentEl) return;
+    if (!chatBubble) return;
     
     try {
-        // 즉시 "완료" 상태로 변경 (로딩 없음)
-        badgeEl.textContent = '완료';
-        badgeEl.className = 'ai-insight-badge ready';
-        
-        // 주간 데이터 추출
-        const weeklyData = getSimpleWeeklyData();
-        
-        // 메시지 선택
-        const message = selectInsightMessage(weeklyData);
-        
-        // 메시지 표시
-        contentEl.innerHTML = `
-            <div class="ai-insight-message encouragement">${message}</div>
-        `;
-        
-        console.log('AI 인사이트 업데이트 성공:', message);
+        // 1초 후 타이핑 애니메이션을 메시지로 변경
+        setTimeout(() => {
+            // 주간 데이터 추출
+            const weeklyData = getSimpleWeeklyData();
+            
+            // 메시지 선택
+            const message = selectInsightMessage(weeklyData);
+            
+            // 메시지 카테고리 결정 (간단한 키워드 기반)
+            let messageCategory = 'encouragement';
+            if (message.includes('연속') || message.includes('완벽') || message.includes('세트') || message.includes('챔피언')) {
+                messageCategory = 'achievement';
+            }
+            
+            // 메시지 표시 (로딩 애니메이션 제거하고 메시지 표시)
+            chatBubble.innerHTML = message;
+            chatBubble.className = `chat-bubble ${messageCategory}`;
+            
+            console.log('메신저 스타일 인사이트 업데이트 성공:', message);
+            
+        }, 1000); // 1초 타이핑 애니메이션 후 메시지 표시
         
     } catch (error) {
-        console.error('AI 인사이트 업데이트 실패:', error);
+        console.error('메신저 스타일 인사이트 업데이트 실패:', error);
         
-        // 에러 시 기본 메시지
-        badgeEl.textContent = '완료';
-        badgeEl.className = 'ai-insight-badge ready';
-        contentEl.innerHTML = `
-            <div class="ai-insight-message encouragement">오늘도 건강한 하루를 만들어가고 계시네요!</div>
-        `;
+        // 에러 시 기본 메시지 (1초 후)
+        setTimeout(() => {
+            chatBubble.innerHTML = '오늘도 건강한 하루를 만들어가고 계시네요!';
+            chatBubble.className = 'chat-bubble encouragement';
+        }, 1000);
     }
 }
 

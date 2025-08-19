@@ -734,156 +734,7 @@
 
 /* 🎴 카드 컴포넌트 스타일 */
 
-/* AI 인사이트 영역 */
-.weekly-ai-insight {
-    padding-top: 20px;
-    border-top: 2px solid #F1F5F9;
-}
 
-.ai-insight-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-}
-
-.ai-insight-icon {
-    font-size: 18px;
-    margin-right: 8px;
-    animation: sparkle 2s ease-in-out infinite;
-}
-
-@keyframes sparkle {
-    0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
-    50% { transform: scale(1.1) rotate(5deg); opacity: 0.8; }
-}
-
-.ai-insight-title {
-    font-size: 14px;
-    font-weight: 600;
-    color: #374151;
-    flex-grow: 1;
-}
-
-.ai-insight-badge {
-    background: linear-gradient(135deg, #667eea, #764ba2);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-size: 10px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.ai-insight-badge.analyzing {
-    background: linear-gradient(135deg, #f59e0b, #f97316);
-    animation: pulse 1.5s ease-in-out infinite;
-}
-
-.ai-insight-badge.ready {
-    background: linear-gradient(135deg, #059669, #10b981);
-}
-
-@keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.8; transform: scale(1.05); }
-}
-
-.ai-insight-content {
-    background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-    border: 1px solid #e2e8f0;
-    border-radius: 12px;
-    padding: 14px;
-    font-size: 14px;
-    line-height: 1.5;
-    color: #374151;
-    position: relative;
-    overflow: hidden;
-    min-height: 48px;
-    display: flex;
-    align-items: center;
-    transition: all 0.3s ease;
-}
-
-.ai-insight-content:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-}
-
-.ai-insight-content::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 2px;
-    background: linear-gradient(90deg, #667eea, #764ba2);
-    border-radius: 12px 12px 0 0;
-}
-
-/* 로딩 애니메이션 */
-.insight-loading {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    width: 100%;
-}
-
-.loading-dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: #667eea;
-    animation: loadingDots 1.4s ease-in-out infinite both;
-}
-
-.loading-dot:nth-child(1) { animation-delay: -0.32s; }
-.loading-dot:nth-child(2) { animation-delay: -0.16s; }
-.loading-dot:nth-child(3) { animation-delay: 0s; }
-
-@keyframes loadingDots {
-    0%, 80%, 100% {
-        transform: scale(0);
-        opacity: 0.5;
-    }
-    40% {
-        transform: scale(1);
-        opacity: 1;
-    }
-}
-
-/* 인사이트 메시지 스타일링 */
-.ai-insight-message {
-    font-weight: 500;
-    width: 100%;
-}
-
-.ai-insight-message.achievement {
-    color: #059669;
-}
-
-.ai-insight-message.challenge {
-    color: #dc2626;
-}
-
-.ai-insight-message.pattern {
-    color: #7c3aed;
-}
-
-.ai-insight-message.growth {
-    color: #ea580c;
-}
-
-.ai-insight-message.recovery {
-    color: #0891b2;
-}
-
-.ai-insight-message.milestone {
-    color: #db2777;
-    font-weight: 600;
-}
 
 /* 통계 카드 */
 .stat-card {
@@ -1211,98 +1062,6 @@
     box-shadow: 0 12px 40px rgba(102, 126, 234, 0.25);
 }
 
-.ai-insight-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 16px;
-    position: relative;
-    z-index: 1;
-}
-
-.ai-insight-title {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    color: white;
-    font-size: 16px;
-    font-weight: 600;
-    font-family: 'Space Grotesk', sans-serif;
-}
-
-.ai-icon {
-    font-size: 18px;
-    animation: float 3s ease-in-out infinite;
-}
-
-.refresh-insight-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 12px;
-    width: 32px;
-    height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: white;
-}
-
-.refresh-insight-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: rotate(180deg);
-}
-
-.refresh-insight-btn svg {
-    transition: all 0.3s ease;
-}
-
-.ai-insight-content {
-    position: relative;
-    z-index: 1;
-    min-height: 80px;
-}
-
-.insight-loading {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 12px;
-    color: white;
-}
-
-.loading-spinner {
-    width: 24px;
-    height: 24px;
-    border: 2px solid rgba(255, 255, 255, 0.3);
-    border-top: 2px solid white;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-}
-
-.loading-text {
-    font-size: 14px;
-    text-align: center;
-    opacity: 0.9;
-    line-height: 1.4;
-}
-
-.insight-text {
-    color: white;
-    font-size: 14px;
-    line-height: 1.6;
-    text-align: center;
-    animation: fadeIn 0.5s ease-out;
-}
-
-.insight-text.positive {
-    background: rgba(5, 150, 105, 0.2);
-    border-radius: 12px;
-    padding: 12px;
-    border-left: 4px solid #10b981;
-}
-
 .insight-text.negative {
     background: rgba(220, 38, 38, 0.2);
     border-radius: 12px;
@@ -1331,42 +1090,9 @@
     border-left: 4px solid #a855f7;
 }
 
-.ai-insight-footer {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-top: 16px;
-    position: relative;
-    z-index: 1;
-}
 
-.insight-category {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 12px;
-}
 
-.category-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: currentColor;
-    animation: pulse 2s ease-in-out infinite;
-}
 
-.insight-timestamp {
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 11px;
-    font-weight: 500;
-}
-
-/* AI 인사이트 애니메이션 */
-@keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(1.1); }
-}
 
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(10px); }
@@ -2740,5 +2466,180 @@
     
     .goal-stat-card .stat-label {
         font-size: 13px;
+    }
+}
+
+/* 🎬 메신저 스타일 AI 인사이트 */
+.trainer-chat {
+    padding-top: 20px;
+    border-top: 2px solid #F1F5F9;
+    margin-top: 20px;
+}
+
+.chat-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    padding: 0 4px;
+}
+
+.trainer-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: 1px solid #E5E7EB;
+    flex-shrink: 0;
+}
+
+.trainer-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #374151;
+    flex-grow: 1;
+}
+
+.chat-time {
+    font-size: 11px;
+    color: #9CA3AF;
+    font-weight: 500;
+}
+
+.chat-bubble {
+    background: #F3F4F6;
+    border: 1px solid #E5E7EB;
+    border-radius: 16px 16px 16px 4px;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    color: #374151;
+    position: relative;
+    max-width: 85%;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+}
+
+.chat-bubble:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* 메신저 말풍선 꼬리 */
+.chat-bubble::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: -8px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 8px 8px 0;
+    border-color: transparent #F3F4F6 transparent transparent;
+}
+
+.chat-bubble::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: -9px;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 9px 9px 0;
+    border-color: transparent #E5E7EB transparent transparent;
+}
+
+/* 타이핑 로딩 애니메이션 */
+.chat-loading {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.typing-dots {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+}
+
+.typing-dots span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #9CA3AF;
+    display: inline-block;
+    animation: typingAnimation 1.4s ease-in-out infinite;
+}
+
+.typing-dots span:nth-child(1) { animation-delay: 0s; }
+.typing-dots span:nth-child(2) { animation-delay: 0.2s; }
+.typing-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes typingAnimation {
+    0%, 60%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+    30% {
+        transform: translateY(-8px);
+        opacity: 1;
+    }
+}
+
+/* 메시지 카테고리별 스타일 */
+.chat-bubble.achievement {
+    background: linear-gradient(135deg, #ECFDF5 0%, #D1FAE5 100%);
+    border-color: #10B981;
+    color: #047857;
+}
+
+.chat-bubble.achievement::before {
+    border-color: transparent #D1FAE5 transparent transparent;
+}
+
+.chat-bubble.encouragement {
+    background: linear-gradient(135deg, #EFF6FF 0%, #DBEAFE 100%);
+    border-color: #3B82F6;
+    color: #1E40AF;
+}
+
+.chat-bubble.encouragement::before {
+    border-color: transparent #DBEAFE transparent transparent;
+}
+
+/* 모바일 최적화 */
+@media (max-width: 480px) {
+    .trainer-chat {
+        padding-top: 16px;
+        margin-top: 16px;
+    }
+    
+    .chat-header {
+        gap: 6px;
+        margin-bottom: 6px;
+    }
+    
+    .trainer-avatar {
+        width: 20px;
+        height: 20px;
+    }
+    
+    .trainer-name {
+        font-size: 12px;
+    }
+    
+    .chat-time {
+        font-size: 10px;
+    }
+    
+    .chat-bubble {
+        padding: 10px 12px;
+        font-size: 13px;
+        border-radius: 14px 14px 14px 3px;
+    }
+    
+    .typing-dots span {
+        width: 5px;
+        height: 5px;
     }
 }
