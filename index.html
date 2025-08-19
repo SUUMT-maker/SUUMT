@@ -730,14 +730,14 @@
 
         <!-- 💪 운동모드 선택 화면 -->
         <div id="workoutModeScreen" class="screen">
-            <div class="workout-mode-header">
-                <h2>💪 운동모드 선택</h2>
-                <p>오늘은 어떤 호흡 운동을 하시겠어요?</p>
+            <div class="workout-mode-header" style="text-align: center; margin: max(40px, env(safe-area-inset-top)) 20px 24px; padding: 0;">
+                <h2 style="font-size: 24px; font-weight: 700; color: #1E1E1E; margin-bottom: 8px;">운동모드 선택</h2>
+                <p style="font-size: 14px; color: #6b7280; margin: 0;">오늘은 어떤 호흡 운동을 하시겠어요?</p>
             </div>
             
-            <div class="workout-modes-container">
+            <div class="workout-modes-container" style="padding: 0; margin: 0;">
                 <!-- 웜업 모드 (비활성화) -->
-                <div class="workout-mode-card disabled">
+                <div class="workout-mode-card disabled" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px; margin: 0 20px 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; position: relative; opacity: 0.6;">
                     <div class="mode-illustration">
                         <div class="mode-avatar">
                             <div class="avatar-bg warmup"></div>
@@ -753,7 +753,7 @@
                 </div>
                 
                 <!-- 숨트레이닝 모드 (활성화) -->
-                <div class="workout-mode-card active" onclick="selectWorkoutMode('breathtraining')">
+                <div class="workout-mode-card active" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px; margin: 0 20px 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; cursor: pointer; position: relative;" onclick="selectWorkoutMode('breathtraining')">
                     <div class="mode-illustration">
                         <div class="mode-avatar">
                             <div class="avatar-bg breathtraining"></div>
@@ -769,7 +769,7 @@
                 </div>
                 
                 <!-- 잠들기전 모드 (비활성화) -->
-                <div class="workout-mode-card disabled">
+                <div class="workout-mode-card disabled" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px; margin: 0 20px 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; position: relative; opacity: 0.6;">
                     <div class="mode-illustration">
                         <div class="mode-avatar">
                             <div class="avatar-bg sleep"></div>
@@ -1128,35 +1128,22 @@
         gap: 16px;
     }
 
+    /* 기존 .workout-mode-card 스타일 제거하고 인라인으로 통일 */
     .workout-mode-card {
-        background: white;
-        border-radius: 16px;
-        padding: 20px;
+        /* 기존 스타일 제거 - 인라인 스타일로 대체됨 */
         display: flex;
         align-items: center;
         gap: 16px;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
-        border: 2px solid transparent;
-        transition: all 0.3s ease;
-        cursor: pointer;
-        position: relative;
     }
 
-    .workout-mode-card.active {
-        border-color: #667eea;
-        box-shadow: 0 4px 20px rgba(102, 126, 234, 0.15);
-        transform: translateY(-2px);
-    }
-
+    /* 호버 효과만 유지하되 기록탭과 통일 */
     .workout-mode-card.active:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 6px 25px rgba(102, 126, 234, 0.2);
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12) !important;
     }
 
-    .workout-mode-card.disabled {
-        opacity: 0.6;
-        cursor: not-allowed;
-        background: #f9fafb;
+    .workout-mode-card.disabled:hover {
+        transform: none !important;
     }
 
     .mode-illustration {
@@ -1253,8 +1240,13 @@
     /* 모바일 최적화 - 운동모드 화면 */
     @media (max-width: 480px) {
         .workout-mode-card {
-            padding: 16px;
+            margin: 0 16px 24px !important;
+            padding: 16px !important;
             gap: 12px;
+        }
+        
+        .workout-mode-header {
+            margin: max(40px, env(safe-area-inset-top)) 16px 24px !important;
         }
         
         .mode-avatar {
