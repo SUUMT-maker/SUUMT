@@ -893,7 +893,7 @@ class IntegratedRecordsDashboard {
                     <div style="margin-bottom: 8px; font-size: 24px;">⚠️</div>
                     <div style="font-size: 14px; font-weight: 600; margin-bottom: 4px;">연결 문제가 발생했습니다</div>
                     <div style="font-size: 12px; color: #6b7280; margin-bottom: 12px;">${errorMessage}</div>
-                    <button onclick="window.integratedDashboard.refreshMotivation()" style="background: #667eea; color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 12px; cursor: pointer;">
+                    <button onclick="window.integratedDashboard.refreshMotivation()" style="background: rgba(102, 126, 234, 0.1); border: 1px solid #667eea; border-radius: 8px; padding: 8px 16px; font-size: 12px; color: #667eea; cursor: pointer;">
                         다시 시도
                     </button>
                 </div>
