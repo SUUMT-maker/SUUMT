@@ -28,47 +28,23 @@ const INTEGRATED_RECORDS_HTML = `
         </div>
     </div>
 
-    <!-- 주요 지표 카드 그리드 -->
+    <!-- 핵심 2개 카드: 현재 상태 + 행동 유도 -->
     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 20px; margin-bottom: 24px;">
-        <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: center;">
-            <div style="margin-bottom: 8px;">
-                <div style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">총 호흡수</div>
-            </div>
-            <div style="display: flex; align-items: baseline; justify-content: center; gap: 4px;">
-                <div style="font-size: 24px; font-weight: 700; color: #1f2937;" id="dashboardTotalBreaths">0</div>
-                <div style="font-size: 14px; color: #6b7280;">회</div>
-            </div>
+        
+        <!-- 카드 1: 현재 상태 -->
+        <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: center;">
+            <div id="statusTitle" style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 12px;">연속 운동</div>
+            <div id="statusContent" style="font-size: 28px; font-weight: 700; color: #1f2937; line-height: 1.2; margin-bottom: 4px;">2일째</div>
+            <div id="statusDetail" style="font-size: 12px; color: #9ca3af;">현재 기록</div>
         </div>
 
-        <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: center;">
-            <div style="margin-bottom: 8px;">
-                <div style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">평균 호흡수</div>
-            </div>
-            <div style="display: flex; align-items: baseline; justify-content: center; gap: 4px;">
-                <div style="font-size: 24px; font-weight: 700; color: #1f2937;" id="dashboardAvgBreaths">0</div>
-                <div style="font-size: 14px; color: #6b7280;">회</div>
-            </div>
+        <!-- 카드 2: 행동 유도 -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3); transition: all 0.3s ease; text-align: center;">
+            <div id="actionTitle" style="font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9); margin-bottom: 12px;">오늘 하면</div>
+            <div id="actionContent" style="font-size: 28px; font-weight: 700; color: white; line-height: 1.2; margin-bottom: 4px;">3일 연속!</div>
+            <div id="actionDetail" style="font-size: 12px; color: rgba(255,255,255,0.8);">목표 달성</div>
         </div>
 
-        <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: center;">
-            <div style="margin-bottom: 8px;">
-                <div style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">완료율</div>
-            </div>
-            <div style="display: flex; align-items: baseline; justify-content: center; gap: 4px;">
-                <div style="font-size: 24px; font-weight: 700; color: #1f2937;" id="dashboardCompletionRate">0</div>
-                <div style="font-size: 14px; color: #6b7280;">%</div>
-            </div>
-        </div>
-
-        <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 16px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: center;">
-            <div style="margin-bottom: 8px;">
-                <div style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 4px;">평균 저항</div>
-            </div>
-            <div style="display: flex; align-items: baseline; justify-content: center; gap: 4px;">
-                <div style="font-size: 24px; font-weight: 700; color: #1f2937;" id="dashboardAvgResistance">0</div>
-                <div style="font-size: 14px; color: #6b7280;">단계</div>
-            </div>
-        </div>
     </div>
 
 
@@ -950,62 +926,21 @@ class IntegratedRecordsDashboard {
         }
     }
 
-    // 📊 주요 통계 계산
-    calculateStats() {
-        if (!this.exerciseData.length) {
-            return {
-                totalBreaths: 0,
-                avgBreaths: 0,
-                completionRate: 0,
-                avgResistance: 0,
-                totalSessions: 0
-            };
-        }
-
-        const filtered = this.getFilteredData();
-        const totalBreaths = filtered.reduce((sum, item) => sum + (item.completed_breaths || 0), 0);
-        const avgBreaths = Math.round(totalBreaths / Math.max(filtered.length, 1));
-        const completedSessions = filtered.filter(item => !item.is_aborted).length;
-        const completionRate = Math.round((completedSessions / Math.max(filtered.length, 1)) * 100);
-        const avgResistance = Math.round(
-            filtered.reduce((sum, item) => 
-                sum + ((item.inhale_resistance || 0) + (item.exhale_resistance || 0)) / 2, 0
-            ) / Math.max(filtered.length, 1) * 10
-        ) / 10;
-
-        return {
-            totalBreaths,
-            avgBreaths,
-            completionRate,
-            avgResistance,
-            totalSessions: filtered.length
-        };
-    }
-
-    // 🗓️ 시간 범위에 따른 데이터 필터링 (기본값: 최근 7일)
-    getFilteredData() {
-        const now = new Date();
-        const daysBack = 7; // 기본값으로 7일 설정
-        const cutoffDate = new Date(now.getTime() - daysBack * 24 * 60 * 60 * 1000);
-        
-        return this.exerciseData.filter(item => {
-            const itemDate = new Date(item.created_at);
-            return itemDate >= cutoffDate;
-        }).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-    }
 
 
 
-    // 🎨 UI 업데이트 (AI 자동 분석 제거)
+
+    // 🎨 UI 업데이트 (2개 카드 시스템)
     updateUI() {
-        const stats = this.calculateStats();
-        
-        // 주요 지표 업데이트
-        document.getElementById('dashboardTotalBreaths').textContent = stats.totalBreaths;
-        document.getElementById('dashboardAvgBreaths').textContent = stats.avgBreaths;
-        document.getElementById('dashboardCompletionRate').textContent = stats.completionRate;
-        document.getElementById('dashboardAvgResistance').textContent = stats.avgResistance;
+        // 기존 calculateStats() 관련 코드 제거
+        // document.getElementById('dashboardTotalBreaths').textContent = stats.totalBreaths; // 삭제
+        // document.getElementById('dashboardAvgBreaths').textContent = stats.avgBreaths; // 삭제
+        // document.getElementById('dashboardCompletionRate').textContent = stats.completionRate; // 삭제
+        // document.getElementById('dashboardAvgResistance').textContent = stats.avgResistance; // 삭제
 
+        // 새로운 2개 카드 업데이트 추가
+        this.updateTwoCards();
+        
         // 주간 목표 업데이트
         this.updateWeeklyGoal();
         
@@ -1092,6 +1027,153 @@ class IntegratedRecordsDashboard {
             const sessionDate = new Date(session.created_at);
             return sessionDate >= startOfWeek;
         });
+    }
+
+    // 🎯 2개 카드 시스템 함수들
+    
+    // 주차별 카드 내용 설정
+    getWeeklyTwoCards(week, weekData, goalProgress) {
+        const todayCompleted = this.isTodayCompleted(weekData);
+        
+        switch(week) {
+            case 1: // 꾸준히 챌린지 (연속성)
+                const consecutive = this.getCurrentConsecutiveDays();
+                return {
+                    status: {
+                        title: '연속 운동',
+                        content: `${consecutive}일째`,
+                        detail: '현재 기록'
+                    },
+                    action: {
+                        title: todayCompleted ? '오늘 완료' : '오늘 하면',
+                        content: todayCompleted ? '연속 유지!' : `${consecutive + 1}일 연속!`,
+                        detail: todayCompleted ? '목표 달성' : '목표 달성'
+                    }
+                };
+                
+            case 2: // 열심히 챌린지 (호흡량)
+                const totalBreaths = weekData.reduce((sum, session) => 
+                    sum + (session.completed_breaths || 0), 0);
+                const remaining = Math.max(0, 300 - totalBreaths);
+                
+                return {
+                    status: {
+                        title: '주간 호흡',
+                        content: `${totalBreaths}회`,
+                        detail: '300회 목표'
+                    },
+                    action: {
+                        title: remaining === 0 ? '목표 달성' : '조금 더',
+                        content: remaining === 0 ? '완료!' : `${remaining}회 남음`,
+                        detail: remaining === 0 ? '훌륭해요' : '목표까지'
+                    }
+                };
+                
+            case 3: // 끝까지 챌린지 (완주율)
+                const completionData = this.calculateCompletionRate(weekData, 85);
+                const currentRate = completionData.current;
+                
+                return {
+                    status: {
+                        title: '완주율',
+                        content: `${currentRate}%`,
+                        detail: '85% 목표'
+                    },
+                    action: {
+                        title: currentRate >= 85 ? '목표 달성' : '완주하면',
+                        content: currentRate >= 85 ? '완료!' : '기록 향상!',
+                        detail: currentRate >= 85 ? '훌륭해요' : '목표 달성'
+                    }
+                };
+                
+            case 4: // 완벽하게 챌린지 (복합)
+                const consecutiveResult = this.calculateConsecutiveDays(weekData, 3);
+                const completionResult = this.calculateCompletionRate(weekData, 90);
+                
+                const bothComplete = consecutiveResult.current >= 3 && completionResult.current >= 90;
+                const consecutiveNeeded = Math.max(0, 3 - consecutiveResult.current);
+                const completionNeeded = Math.max(0, 90 - completionResult.current);
+                
+                return {
+                    status: {
+                        title: '완벽 챌린지',
+                        content: bothComplete ? '완성!' : `${consecutiveResult.current}/3일`,
+                        detail: bothComplete ? '모든 조건' : '연속 + 완주율'
+                    },
+                    action: {
+                        title: bothComplete ? '완벽 달성' : '조금 더',
+                        content: bothComplete ? '완료!' : 
+                                consecutiveNeeded > 0 ? `${consecutiveNeeded}일 더` : `${completionNeeded}% 더`,
+                        detail: bothComplete ? '훌륭해요' : '완벽까지'
+                    }
+                };
+                
+            default:
+                return {
+                    status: { title: '준비 중', content: '...', detail: '' },
+                    action: { title: '준비 중', content: '...', detail: '' }
+                };
+        }
+    }
+
+    // 2개 카드 UI 업데이트
+    updateTwoCards() {
+        const currentWeek = this.getCurrentWeek();
+        const weekData = this.getThisWeekData();
+        const goal = this.getWeeklyGoal(currentWeek);
+        const goalProgress = this.calculateWeekProgress(goal);
+        
+        const cardData = this.getWeeklyTwoCards(currentWeek, weekData, goalProgress);
+        
+        // 카드 1: 현재 상태
+        document.getElementById('statusTitle').textContent = cardData.status.title;
+        document.getElementById('statusContent').textContent = cardData.status.content;
+        document.getElementById('statusDetail').textContent = cardData.status.detail;
+        
+        // 카드 2: 행동 유도
+        document.getElementById('actionTitle').textContent = cardData.action.title;
+        document.getElementById('actionContent').textContent = cardData.action.content;
+        document.getElementById('actionDetail').textContent = cardData.action.detail;
+    }
+
+    // 오늘 운동 완료 여부 확인
+    isTodayCompleted(weekData) {
+        const today = this.getKstDateString(new Date().toISOString());
+        const todayData = weekData.filter(session => 
+            this.getKstDateString(session.created_at) === today
+        );
+        
+        const todayBreaths = todayData.reduce((sum, session) => 
+            sum + (session.completed_breaths || 0), 0);
+        
+        return todayBreaths >= 40; // 일일 목표 달성 여부
+    }
+
+    // 연속 일수 계산
+    getCurrentConsecutiveDays() {
+        const dailyGoal = 40;
+        let consecutive = 0;
+        const today = new Date();
+        
+        for (let i = 0; i < 30; i++) {
+            const checkDate = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
+            const dateStr = this.getKstDateString(checkDate.toISOString());
+            
+            const dayData = this.exerciseData.filter(session => 
+                this.getKstDateString(session.created_at) === dateStr
+            );
+            
+            const dayBreaths = dayData.reduce((sum, session) => 
+                sum + (session.completed_breaths || 0), 0);
+        
+            if (dayBreaths >= dailyGoal) {
+                consecutive++;
+            } else {
+                break;
+            }
+        }
+        
+        return consecutive;
     }
 
     // 연속일 계산
