@@ -33,16 +33,14 @@ const INTEGRATED_RECORDS_HTML = `
         
         <!-- 카드 1: 현재 상태 -->
         <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: center;">
-            <div id="statusTitle" style="font-size: 14px; font-weight: 600; color: #6b7280; margin-bottom: 12px;">연속 운동</div>
-            <div id="statusContent" style="font-size: 28px; font-weight: 700; color: #1f2937; line-height: 1.2; margin-bottom: 4px;">2일째</div>
-            <div id="statusDetail" style="font-size: 12px; color: #9ca3af;">현재 기록</div>
+            <div id="statusContent" style="font-size: 20px; font-weight: 700; color: #1f2937; line-height: 1.3; margin-bottom: 8px;">연속 2일째</div>
+            <div id="statusState" style="font-size: 14px; font-weight: 600; color: #6b7280;">유지중</div>
         </div>
 
         <!-- 카드 2: 행동 유도 -->
         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3); transition: all 0.3s ease; text-align: center;">
-            <div id="actionTitle" style="font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9); margin-bottom: 12px;">오늘 하면</div>
-            <div id="actionContent" style="font-size: 28px; font-weight: 700; color: white; line-height: 1.2; margin-bottom: 4px;">3일 연속!</div>
-            <div id="actionDetail" style="font-size: 12px; color: rgba(255,255,255,0.8);">목표 달성</div>
+            <div id="actionContent" style="font-size: 20px; font-weight: 700; color: white; line-height: 1.3; margin-bottom: 8px;">지금 운동하면</div>
+            <div id="actionReward" style="font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9);">+1일 ↗️</div>
         </div>
 
     </div>
@@ -1031,109 +1029,123 @@ class IntegratedRecordsDashboard {
 
     // 🎯 2개 카드 시스템 함수들
     
-    // 주차별 카드 내용 설정
+    // 주차별 카드 내용 설정 (확정 포맷 적용)
     getWeeklyTwoCards(week, weekData, goalProgress) {
         const todayCompleted = this.isTodayCompleted(weekData);
         
         switch(week) {
             case 1: // 꾸준히 챌린지 (연속성)
-                const consecutive = this.getCurrentConsecutiveDays();
+                const currentDays = goalProgress.current;
+                const nextDays = currentDays + 1;
+                
                 return {
                     status: {
-                        title: '연속 운동',
-                        content: `${consecutive}일째`,
-                        detail: '현재 기록'
+                        content: `연속 ${currentDays}일째`,
+                        state: '유지중'
                     },
                     action: {
-                        title: todayCompleted ? '오늘 완료' : '오늘 하면',
-                        content: todayCompleted ? '연속 유지!' : `${consecutive + 1}일 연속!`,
-                        detail: todayCompleted ? '목표 달성' : '목표 달성'
+                        content: '지금 운동하면',
+                        reward: todayCompleted ? '유지완료 ↗️' : `+1일 ↗️`
                     }
                 };
                 
             case 2: // 열심히 챌린지 (호흡량)
-                const totalBreaths = weekData.reduce((sum, session) => 
-                    sum + (session.completed_breaths || 0), 0);
-                const remaining = Math.max(0, 300 - totalBreaths);
+                const currentBreaths = goalProgress.current;
+                const estimatedIncrease = 40; // 2세트 기본 호흡수
                 
                 return {
                     status: {
-                        title: '주간 호흡',
-                        content: `${totalBreaths}회`,
-                        detail: '300회 목표'
+                        content: `총 ${currentBreaths}회`,
+                        state: '호흡중'
                     },
                     action: {
-                        title: remaining === 0 ? '목표 달성' : '조금 더',
-                        content: remaining === 0 ? '완료!' : `${remaining}회 남음`,
-                        detail: remaining === 0 ? '훌륭해요' : '목표까지'
+                        content: '지금 운동하면',
+                        reward: todayCompleted ? '완료 ↗️' : `+${estimatedIncrease} ↗️`
                     }
                 };
                 
             case 3: // 끝까지 챌린지 (완주율)
-                const completionData = this.calculateCompletionRate(weekData, 85);
-                const currentRate = completionData.current;
+                const currentRate = goalProgress.current;
+                const totalSessions = weekData.length;
+                const completedSessions = weekData.filter(session => !session.is_aborted).length;
+                
+                // 완주 시 완주율 증가 계산
+                const newCompleted = completedSessions + 1;
+                const newTotal = todayCompleted ? totalSessions : totalSessions + 1;
+                const newRate = Math.round((newCompleted / newTotal) * 100);
+                const rateIncrease = newRate - currentRate;
                 
                 return {
                     status: {
-                        title: '완주율',
-                        content: `${currentRate}%`,
-                        detail: '85% 목표'
+                        content: `완료율 ${currentRate}%`,
+                        state: '달성중'
                     },
                     action: {
-                        title: currentRate >= 85 ? '목표 달성' : '완주하면',
-                        content: currentRate >= 85 ? '완료!' : '기록 향상!',
-                        detail: currentRate >= 85 ? '훌륭해요' : '목표 달성'
+                        content: '지금 운동하면',
+                        reward: todayCompleted ? '완료 ↗️' : `+${Math.max(rateIncrease, 1)}% ↗️`
                     }
                 };
                 
             case 4: // 완벽하게 챌린지 (복합)
-                const consecutiveResult = this.calculateConsecutiveDays(weekData, 3);
-                const completionResult = this.calculateCompletionRate(weekData, 90);
+                const consecutiveResult = goalProgress.details?.consecutive || { current: 0 };
+                const completionResult = goalProgress.details?.completion || { current: 0 };
                 
-                const bothComplete = consecutiveResult.current >= 3 && completionResult.current >= 90;
-                const consecutiveNeeded = Math.max(0, 3 - consecutiveResult.current);
-                const completionNeeded = Math.max(0, 90 - completionResult.current);
+                const currentConsecutive = consecutiveResult.current;
+                const currentCompletion = completionResult.current;
+                
+                // 두 조건 중 더 부족한 것에 따라 메시지 변경
+                const consecutiveNeeded = Math.max(0, 3 - currentConsecutive);
+                const completionNeeded = Math.max(0, 90 - currentCompletion);
+                
+                let statusContent, reward;
+                
+                if (consecutiveNeeded > 0) {
+                    statusContent = `연속 ${currentConsecutive}일째`;
+                    reward = `+1일 ↗️`;
+                } else {
+                    statusContent = `완주율 ${currentCompletion}%`;
+                    reward = `+3% ↗️`;
+                }
                 
                 return {
                     status: {
-                        title: '완벽 챌린지',
-                        content: bothComplete ? '완성!' : `${consecutiveResult.current}/3일`,
-                        detail: bothComplete ? '모든 조건' : '연속 + 완주율'
+                        content: statusContent,
+                        state: '완벽함'
                     },
                     action: {
-                        title: bothComplete ? '완벽 달성' : '조금 더',
-                        content: bothComplete ? '완료!' : 
-                                consecutiveNeeded > 0 ? `${consecutiveNeeded}일 더` : `${completionNeeded}% 더`,
-                        detail: bothComplete ? '훌륭해요' : '완벽까지'
+                        content: '지금 운동하면',
+                        reward: todayCompleted ? '완벽 ↗️' : reward
                     }
                 };
                 
             default:
                 return {
-                    status: { title: '준비 중', content: '...', detail: '' },
-                    action: { title: '준비 중', content: '...', detail: '' }
+                    status: { content: '준비 중', state: '' },
+                    action: { content: '지금 운동하면', reward: '목표 ↗️' }
                 };
         }
     }
 
-    // 2개 카드 UI 업데이트
+    // 2개 카드 UI 업데이트 (수정된 요소명 사용)
     updateTwoCards() {
         const currentWeek = this.getCurrentWeek();
         const weekData = this.getThisWeekData();
         const goal = this.getWeeklyGoal(currentWeek);
         const goalProgress = this.calculateWeekProgress(goal);
         
+        console.log(`[카드 업데이트] Week ${currentWeek}, Progress:`, goalProgress);
+        
         const cardData = this.getWeeklyTwoCards(currentWeek, weekData, goalProgress);
         
         // 카드 1: 현재 상태
-        document.getElementById('statusTitle').textContent = cardData.status.title;
         document.getElementById('statusContent').textContent = cardData.status.content;
-        document.getElementById('statusDetail').textContent = cardData.status.detail;
+        document.getElementById('statusState').textContent = cardData.status.state;
         
         // 카드 2: 행동 유도
-        document.getElementById('actionTitle').textContent = cardData.action.title;
         document.getElementById('actionContent').textContent = cardData.action.content;
-        document.getElementById('actionDetail').textContent = cardData.action.detail;
+        document.getElementById('actionReward').textContent = cardData.action.reward;
+        
+        console.log('[카드 데이터]', cardData);
     }
 
     // 오늘 운동 완료 여부 확인
@@ -1289,6 +1301,14 @@ class IntegratedRecordsDashboard {
         const currentWeek = this.getCurrentWeek();
         const goal = this.getWeeklyGoal(currentWeek);
         const progress = this.calculateWeekProgress(goal);
+        
+        // 🔍 데이터 일관성 디버깅 로그
+        console.log('🎯 updateWeeklyGoal - 데이터 일관성 체크:', {
+            week: currentWeek,
+            goalType: goal.type,
+            progress: progress,
+            percentage: Math.round(progress.percentage)
+        });
         
         // UI 요소 업데이트
         document.getElementById('goalIcon').textContent = goal.icon;
