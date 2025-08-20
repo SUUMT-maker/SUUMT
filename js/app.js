@@ -1186,12 +1186,6 @@ function selectFeedback(feedback) {
     
     // 2. AI 조언 표시
     showAIAdvice(feedback);
-    
-    // 3. 3초 후 다음 단계로 진행
-    setTimeout(() => {
-        // 기존 다음 단계 로직 실행 (그대로 유지)
-        proceedToNextStep();
-    }, 3000);
 }
 
 // AI 조언 표시 함수
@@ -1216,6 +1210,38 @@ function showAIAdvice(feedback) {
     
     document.getElementById('aiAdviceText').textContent = adviceText;
     document.getElementById('aiAdviceSection').style.display = 'block';
+    
+    // 대화형 반응 버튼 2개 추가
+    const buttonTexts = getResponseButtons(feedback);
+    
+    const buttonsHTML = `
+        <div id="aiResponseButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
+            <button onclick="proceedToNextStep()" style="background: rgba(102, 126, 234, 0.1); border: 1px solid #667eea; border-radius: 16px; padding: 12px 16px; color: #667eea; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">${buttonTexts[0]}</button>
+            <button onclick="proceedToNextStep()" style="background: rgba(102, 126, 234, 0.1); border: 1px solid #667eea; border-radius: 16px; padding: 12px 16px; color: #667eea; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">${buttonTexts[1]}</button>
+        </div>
+    `;
+    
+    document.getElementById('aiAdviceCard').insertAdjacentHTML('afterend', buttonsHTML);
+}
+
+// 상황별 버튼 텍스트 반환 함수
+function getResponseButtons(feedback) {
+    const situation = isAborted ? 'aborted' : 'completed';
+    
+    const buttonTexts = {
+        completed: {
+            easy: ["네, 다음엔 더 도전할게요!", "알겠어요!"],
+            perfect: ["정말요? 좋네요!", "계속 이렇게 할게요!"],
+            hard: ["네, 천천히 할게요!", "조심할게요!"]
+        },
+        aborted: {
+            easy: ["네, 다음엔 더 도전할게요!", "알겠어요!"],
+            perfect: ["네, 알겠어요!", "고마워요!"],
+            hard: ["네, 무리하지 않을게요!", "고마워요!"]
+        }
+    };
+    
+    return buttonTexts[situation][feedback];
 }
 
 // 다음 단계 진행 함수 (기존 로직 유지)

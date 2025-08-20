@@ -1615,6 +1615,13 @@
     to { transform: translateY(0); opacity: 1; }
 }
 
+/* AI 반응 버튼 호버 효과 */
+.ai-response-btn:hover {
+    background: #667eea !important;
+    color: white !important;
+    transform: translateY(-2px);
+}
+
 /* 📒 Records 화면 스타일 */
 .records-calendar {
     background: white;
