@@ -1153,8 +1153,55 @@ function updateResistanceButtons() {
 
 // 피드백 화면 관련 함수들
 function showFeedbackScreen() {
+    // 피드백 화면 초기화
+    resetFeedbackScreen();
+    
     updateFeedbackScreenContent();
     showScreen('feedbackScreen');
+}
+
+// 피드백 화면 초기화 함수
+function resetFeedbackScreen() {
+    try {
+        console.log('🔧 피드백 화면 초기화 시작');
+        
+        // 1. userFeedback 변수 초기화
+        userFeedback = null;
+        console.log('🔧 userFeedback 초기화됨:', userFeedback);
+        
+        // 2. 모든 피드백 옵션의 CSS 클래스 초기화
+        const feedbackOptions = document.querySelectorAll('.feedback-option');
+        if (feedbackOptions.length > 0) {
+            feedbackOptions.forEach(option => {
+                option.classList.remove('selected', 'dimmed');
+            });
+            console.log('🔧 피드백 옵션 CSS 클래스 초기화 완료:', feedbackOptions.length, '개');
+        } else {
+            console.warn('⚠️ 피드백 옵션을 찾을 수 없습니다');
+        }
+        
+        // 3. AI 조언 섹션 숨기기
+        const aiAdviceSection = document.getElementById('aiAdviceSection');
+        if (aiAdviceSection) {
+            aiAdviceSection.style.display = 'none';
+            console.log('🔧 AI 조언 섹션 숨김 완료');
+        } else {
+            console.warn('⚠️ aiAdviceSection 요소를 찾을 수 없습니다');
+        }
+        
+        // 4. 기존 반응 버튼들 제거
+        const existingButtons = document.getElementById('aiResponseButtons');
+        if (existingButtons) {
+            existingButtons.remove();
+            console.log('🔧 기존 반응 버튼 제거 완료');
+        } else {
+            console.log('🔧 제거할 반응 버튼이 없습니다');
+        }
+        
+        console.log('🔧 피드백 화면 초기화 완료');
+    } catch (error) {
+        console.error('❌ 피드백 화면 초기화 중 오류 발생:', error);
+    }
 }
 
 function updateFeedbackScreenContent() {
@@ -1171,8 +1218,11 @@ function updateFeedbackScreenContent() {
 }
 
 function selectFeedback(feedback) {
+    console.log('🔧 selectFeedback 호출됨:', feedback);
+    
     // 기존 userFeedback 설정 유지
     userFeedback = feedback;
+    console.log('🔧 userFeedback 설정됨:', userFeedback);
     
     // 1. 선택된 카드 스타일 적용
     document.querySelectorAll('.feedback-option').forEach(option => {
@@ -1184,12 +1234,16 @@ function selectFeedback(feedback) {
     selectedOption.classList.remove('dimmed');
     selectedOption.classList.add('selected');
     
+    console.log('🔧 피드백 옵션 스타일 적용 완료:', feedback);
+    
     // 2. AI 조언 표시
     showAIAdvice(feedback);
 }
 
 // AI 조언 표시 함수
 function showAIAdvice(feedback) {
+    console.log('🔧 showAIAdvice 호출됨:', feedback);
+    
     const adviceTexts = {
         // 운동 완료 시
         completed: {
@@ -1208,6 +1262,9 @@ function showAIAdvice(feedback) {
     const situation = isAborted ? 'aborted' : 'completed';
     const adviceText = adviceTexts[situation][feedback];
     
+    console.log('🔧 AI 조언 상황:', situation, '피드백:', feedback);
+    console.log('🔧 AI 조언 텍스트:', adviceText);
+    
     document.getElementById('aiAdviceText').textContent = adviceText;
     document.getElementById('aiAdviceSection').style.display = 'block';
     
@@ -1217,11 +1274,13 @@ function showAIAdvice(feedback) {
     const buttonsHTML = `
         <div id="aiResponseButtons" style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
             <button onclick="proceedToNextStep()" style="background: rgba(102, 126, 234, 0.1); border: 1px solid #667eea; border-radius: 16px; padding: 12px 16px; color: #667eea; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">${buttonTexts[0]}</button>
-            <button onclick="proceedToNextStep()" style="background: rgba(102, 126, 234, 0.1); border: 1px solid #667eea; border-radius: 16px; padding: 12px 16px; color: #667eea; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">${buttonTexts[1]}</button>
+            <button onclick="proceedToNextStep()" style="background: rgba(102, 126, 234, 0.1); border: #667eea; border-radius: 16px; padding: 12px 16px; color: #667eea; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">${buttonTexts[1]}</button>
         </div>
     `;
     
     document.getElementById('aiAdviceCard').insertAdjacentHTML('afterend', buttonsHTML);
+    
+    console.log('🔧 AI 조언 및 반응 버튼 표시 완료');
 }
 
 // 상황별 버튼 텍스트 반환 함수
