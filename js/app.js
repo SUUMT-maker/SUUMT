@@ -1343,7 +1343,11 @@ async function showResultScreen() {
             
             if (savedData) {
                 console.log('✅ 운동 데이터 백엔드 저장 완료');
-                window.exerciseData.sessionId = savedData.id;
+                window.exerciseData.sessionId = savedData.id; // ✅ 이미 있음
+                
+                // 새로 추가: 전역 변수에도 저장
+                window.currentSessionId = savedData.id;
+                console.log('💾 [디버그] 저장된 sessionId:', window.currentSessionId);
             } else {
                 console.warn('⚠️ 백엔드 저장 실패, 로컬 저장으로 백업');
             }
@@ -1768,27 +1772,31 @@ async function getTrainerAdvice(exerciseData) {
         console.log('🤖 Supabase AI 조언 요청 시작');
         console.log('📊 전달할 운동 데이터:', exerciseData);
         
+        const requestData = {
+            exerciseData: {
+                resistanceSettings: {
+                    inhale: exerciseData.resistanceSettings ? exerciseData.resistanceSettings.inhale : 1,
+                    exhale: exerciseData.resistanceSettings ? exerciseData.resistanceSettings.exhale : 1
+                },
+                userFeedback: exerciseData.userFeedback || null,
+                completedSets: exerciseData.completedSets || 0,
+                completedBreaths: exerciseData.completedBreaths || 0,
+                exerciseTime: exerciseData.exerciseTime || '0:00',
+                isAborted: exerciseData.isAborted || false,
+                userId: window.currentUserId || null
+            },
+            sessionId: window.currentSessionId || null
+        };
+        
+        console.log('🤖 [디버그] Edge Function에 전달할 데이터:', requestData);
+        
         const response = await fetch(`${SUPABASE_URL}/functions/v1/ai-advice`, {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({
-                exerciseData: {
-                    resistanceSettings: {
-                        inhale: exerciseData.resistanceSettings ? exerciseData.resistanceSettings.inhale : 1,
-                        exhale: exerciseData.resistanceSettings ? exerciseData.resistanceSettings.exhale : 1
-                    },
-                    userFeedback: exerciseData.userFeedback || null,
-                    completedSets: exerciseData.completedSets || 0,
-                    completedBreaths: exerciseData.completedBreaths || 0,
-                    exerciseTime: exerciseData.exerciseTime || '0:00',
-                    isAborted: exerciseData.isAborted || false,
-                    userId: window.currentUserId || null  // 사용자 ID 추가
-                },
-                sessionId: 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9)
-            })
+            body: JSON.stringify(requestData)
         });
         
         if (!response.ok) {
