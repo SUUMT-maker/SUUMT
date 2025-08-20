@@ -1171,10 +1171,57 @@ function updateFeedbackScreenContent() {
 }
 
 function selectFeedback(feedback) {
+    // 기존 userFeedback 설정 유지
     userFeedback = feedback;
     
+    // 1. 선택된 카드 스타일 적용
+    document.querySelectorAll('.feedback-option').forEach(option => {
+        option.classList.remove('selected');
+        option.classList.add('dimmed');
+    });
+    
+    const selectedOption = document.querySelector(`.feedback-option.${feedback}`);
+    selectedOption.classList.remove('dimmed');
+    selectedOption.classList.add('selected');
+    
+    // 2. AI 조언 표시
+    showAIAdvice(feedback);
+    
+    // 3. 3초 후 다음 단계로 진행
+    setTimeout(() => {
+        // 기존 다음 단계 로직 실행 (그대로 유지)
+        proceedToNextStep();
+    }, 3000);
+}
+
+// AI 조언 표시 함수
+function showAIAdvice(feedback) {
+    const adviceTexts = {
+        // 운동 완료 시
+        completed: {
+            easy: "저항을 거의 못 느꼈다면 다음엔 조금 더 도전해봐요!",
+            perfect: "이 정도 저항감이 근육 성장에 가장 효과적이에요! 👍",
+            hard: "무리하지 마세요. 천천히 강도를 높여가는 게 중요해요!"
+        },
+        // 운동 중단 시  
+        aborted: {
+            easy: "저항이 부족해서 지루하셨나요? 다음엔 조금 더 도전적으로 해봐요!",
+            perfect: "강도는 좋았는데 다른 이유가 있으셨군요. 괜찮아요, 무리하지 마세요!",
+            hard: "너무 힘드셨군요. 무리하지 않고 중단한 게 현명한 판단이에요!"
+        }
+    };
+    
+    const situation = isAborted ? 'aborted' : 'completed';
+    const adviceText = adviceTexts[situation][feedback];
+    
+    document.getElementById('aiAdviceText').textContent = adviceText;
+    document.getElementById('aiAdviceSection').style.display = 'block';
+}
+
+// 다음 단계 진행 함수 (기존 로직 유지)
+function proceedToNextStep() {
     gtag('event', 'feedback_selected', {
-        feedback_type: feedback,
+        feedback_type: userFeedback,
         completed_sets: window.exerciseData ? window.exerciseData.completedSets : 0,
         is_aborted: isAborted
     });

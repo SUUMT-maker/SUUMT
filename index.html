@@ -597,28 +597,32 @@
         <!-- 피드백 페이지 -->
         <div id="feedbackScreen" class="screen">
             <div class="container">
-                <div class="celebration">🤖</div>
                 <h2 id="feedbackTitle">지금 호흡하는 느낌이 어떠세요?</h2>
                 <p class="subtitle" id="feedbackDescription">방금 완료한 트레이닝의 강도는 어떠셨나요?</p>
                 
                 <div class="feedback-options">
                     <button class="feedback-option easy" onclick="selectFeedback('easy')">
-                        <div class="feedback-emoji">😌</div>
                         <div class="feedback-text">너무 편해요</div>
-                        <div class="feedback-desc">더 강한 강도로 도전할 수 있어요</div>
+                        <div class="feedback-desc" style="display: none;">더 강한 강도로 도전할 수 있어요</div>
                     </button>
                     
                     <button class="feedback-option perfect" onclick="selectFeedback('perfect')">
-                        <div class="feedback-emoji">💪</div>
                         <div class="feedback-text">딱 좋아요</div>
-                        <div class="feedback-desc">적당히 힘들면서 완주할 수 있었어요</div>
+                        <div class="feedback-desc" style="display: none;">적당히 힘들면서 완주할 수 있었어요</div>
                     </button>
                     
                     <button class="feedback-option hard" onclick="selectFeedback('hard')">
-                        <div class="feedback-emoji">😤</div>
                         <div class="feedback-text">너무 힘들어요</div>
-                        <div class="feedback-desc">강도를 낮춰서 안전하게 운동하고 싶어요</div>
+                        <div class="feedback-desc" style="display: none;">강도를 낮춰서 안전하게 운동하고 싶어요</div>
                     </button>
+                </div>
+                
+                <!-- AI 조언 영역 -->
+                <div id="aiAdviceSection" style="display: none;">
+                    <div id="aiAdviceCard">
+                        <img src="icons/coach-avatar.png" alt="AI 트레이너" style="width: 32px; height: 32px; border-radius: 50%;">
+                        <div id="aiAdviceText"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -763,7 +767,7 @@
                     <div class="mode-content">
                         <h3>숨트레이닝</h3>
                         <p>호흡근육을 강화하고 폐활량을 늘려보세요.</p>
-                        <div class="mode-pattern">4 - 4 - 4 호흡</div>
+                        <div class="mode-pattern">3 - 1 - 3 - 1 호흡</div>
                     </div>
                     <div class="mode-status">선택 가능</div>
                 </div>
