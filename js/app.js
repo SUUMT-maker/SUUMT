@@ -1325,10 +1325,10 @@ async function showResultScreen() {
         // 2. 통계 데이터 업데이트 (유지)
         updateResultStats();
         
-        // 3. AI 평가는 자동 요청하지 않음 (사용자 버튼 클릭 시에만)
-        // requestAIAdvice(); // 이 줄 제거
+        // 3. AI 분석 섹션 초기화 (새로 추가)
+        resetAIAnalysisSection();
         
-        console.log('✅ 결과 화면 로드 완료 (AI 분석은 사용자 요청 대기)');
+        console.log('✅ 결과 화면 로드 완료 (AI 분석 초기화됨)');
         
     } catch (error) {
         console.error('❌ 결과 화면 표시 중 오류 발생:', error);
@@ -1422,7 +1422,7 @@ function requestResultAIAnalysis() {
     
     if (contentEl) {
         contentEl.innerHTML = `
-            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; color: #6B7280;">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; color: #6B7280; padding: 32px 0;">
                 <div style="width: 24px; height: 24px; border: 3px solid #667eea; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
                 <span>AI가 방금 운동을 분석하고 있습니다...</span>
             </div>
@@ -1437,6 +1437,37 @@ function requestResultAIAnalysis() {
     requestAIAdvice();
 }
 
+// 🎯 AI 분석 섹션 초기화 함수
+function resetAIAnalysisSection() {
+    console.log('🔄 AI 분석 섹션 초기화');
+    
+    const contentEl = document.getElementById('aiAnalysisContent');
+    const badgeEl = document.getElementById('aiAnalysisBadge');
+    
+    // 배지 초기화
+    if (badgeEl) {
+        badgeEl.textContent = '분석 대기';
+    }
+    
+    // 콘텐츠를 초기 버튼 상태로 리셋
+    if (contentEl) {
+        contentEl.innerHTML = `
+            <div style="text-align: center; padding: 32px 0;">
+                <img src="icons/coach-avatar.png" style="width: 32px; height: 32px; border-radius: 50%; margin-bottom: 16px;" alt="AI">
+                <p style="margin: 0 0 24px 0; font-size: 14px; color: #6b7280; line-height: 1.5;">
+                    방금 완료한 운동을 AI가 분석해서<br>
+                    개인화된 조언을 받아보세요
+                </p>
+                <button onclick="requestResultAIAnalysis()" style="background: rgba(102, 126, 234, 0.1); border: 1px solid #667eea; border-radius: 12px; padding: 12px 24px; color: #667eea; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
+                    AI 운동 분석 받기
+                </button>
+            </div>
+        `;
+    }
+    
+    console.log('✅ AI 분석 섹션 초기화 완료');
+}
+
 // 🎯 AI 분석 결과 표시 함수
 function showAIAnalysisResult(analysisData) {
     const contentEl = document.getElementById('aiAnalysisContent');
@@ -1444,10 +1475,11 @@ function showAIAnalysisResult(analysisData) {
     
     if (contentEl) {
         contentEl.innerHTML = `
-            <div style="text-align: center; margin-bottom: 16px;">
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
                 <img src="icons/coach-avatar.png" style="width: 32px; height: 32px; border-radius: 50%;" alt="AI">
+                <div style="font-size: 14px; font-weight: 600; color: #374151;">AI 숨트레이너</div>
             </div>
-            <div style="color: #374151; line-height: 1.6;">
+            <div style="color: #374151; line-height: 1.6; font-size: 15px;">
                 ${analysisData.advice || '훌륭한 운동이었어요! 계속 이런 식으로 꾸준히 해보세요.'}
             </div>
         `;

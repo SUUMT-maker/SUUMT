@@ -546,6 +546,30 @@
     line-height: 1.6;
 }
 
+/* AI 분석 섹션 단일 카드 스타일 */
+.ai-analysis-section {
+    background: white;
+    border: 1px solid #E7E7E7;
+    border-radius: 24px;
+    padding: 20px;
+    margin: 0 20px 24px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: all 0.3s ease;
+}
+
+.ai-analysis-section h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1E1E1E;
+    margin: 0;
+}
+
+/* 이중 카드 스타일 제거 */
+#aiAnalysisContent {
+    line-height: 1.6;
+    font-size: 14px;
+}
+
 .result-section strong {
     color: #333;
     font-weight: 600;
