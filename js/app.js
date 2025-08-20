@@ -1218,11 +1218,14 @@ function updateFeedbackScreenContent() {
 }
 
 function selectFeedback(feedback) {
-    console.log('🔧 selectFeedback 호출됨:', feedback);
+    console.log('🎯 [디버그] selectFeedback 호출됨 - feedback:', feedback);
+    console.log('🎯 [디버그] 호출 전 userFeedback:', userFeedback);
     
     // 기존 userFeedback 설정 유지
     userFeedback = feedback;
-    console.log('🔧 userFeedback 설정됨:', userFeedback);
+    
+    console.log('🎯 [디버그] 설정 후 userFeedback:', userFeedback);
+    console.log('🎯 [디버그] typeof userFeedback:', typeof userFeedback);
     
     // 1. 선택된 카드 스타일 적용
     document.querySelectorAll('.feedback-option').forEach(option => {
@@ -1325,7 +1328,18 @@ async function showResultScreen() {
         // 2. 통계 데이터 업데이트 (유지)
         updateResultStats();
         
-        // 3. AI 분석 섹션 초기화 (새로 추가)
+        // 3. userFeedback을 exerciseData에 포함 (새로 추가)
+        if (window.exerciseData) {
+            console.log('💾 [디버그] 저장 전 userFeedback:', userFeedback);
+            console.log('💾 [디버그] 저장 전 window.exerciseData.userFeedback:', window.exerciseData.userFeedback);
+            
+            window.exerciseData.userFeedback = userFeedback;
+            
+            console.log('💾 [디버그] 설정 후 window.exerciseData.userFeedback:', window.exerciseData.userFeedback);
+            console.log('💾 [디버그] 전체 exerciseData:', window.exerciseData);
+        }
+        
+        // 4. AI 분석 섹션 초기화 (새로 추가)
         resetAIAnalysisSection();
         
         console.log('✅ 결과 화면 로드 완료 (AI 분석 초기화됨)');

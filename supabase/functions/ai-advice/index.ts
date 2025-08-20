@@ -81,6 +81,8 @@ Deno.serve(async (req: Request) => {
     }
 
     console.log('🏃‍♀️ 현재 세션 데이터:', exerciseData);
+    console.log('🔍 [Edge Function] 받은 exerciseData:', exerciseData);
+    console.log('🔍 [Edge Function] userFeedback 값:', exerciseData.userFeedback);
 
     // Supabase 클라이언트 초기화
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
@@ -93,26 +95,7 @@ Deno.serve(async (req: Request) => {
     const pastHistory = await getPastExerciseHistory(supabase, exerciseData.userId);
     console.log('📊 과거 기록:', pastHistory);
 
-    // 🔄 2단계: 과거 + 현재 세션 조합해서 통계 계산
-    console.log('🔄 과거 + 현재 세션 조합 중...');
-    const combinedStats = combineHistoryWithCurrentSession(pastHistory, exerciseData);
-    console.log('📈 조합된 통계:', combinedStats);
-
-    // 🤖 3단계: 조합된 데이터로 개인화된 AI 조언 생성
-    console.log('🤖 개인화된 AI 조언 생성 시작...');
-    
-    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
-    if (!geminiApiKey) {
-      throw new Error('Gemini API 키가 설정되지 않았습니다.');
-    }
-
-    const personalizedPrompt = generateCombinedPrompt(exerciseData, combinedStats);
-    const geminiResponse = await callGeminiAPI(geminiApiKey, personalizedPrompt);
-    const aiAdvice = parseAIResponse(geminiResponse) || getDefaultAdvice(exerciseData, combinedStats);
-
-    console.log('🎯 생성된 AI 조언:', aiAdvice);
-
-    // 💾 4단계: 현재 세션을 exercise_sessions에 저장
+    // 💾 2단계: 현재 세션을 exercise_sessions에 저장 (AI 조언 생성 전)
     console.log('💾 현재 세션 저장 시작...');
     
     const sessionData = {
@@ -127,6 +110,9 @@ Deno.serve(async (req: Request) => {
       inhale_resistance: exerciseData.resistanceSettings?.inhale || 1,
       exhale_resistance: exerciseData.resistanceSettings?.exhale || 1,
     };
+    
+    console.log('🔍 [Edge Function] 생성된 sessionData:', sessionData);
+    console.log('🔍 [Edge Function] sessionData.user_feedback:', sessionData.user_feedback);
 
     const { data: savedSession, error: sessionError } = await supabase
       .from('exercise_sessions')
@@ -138,13 +124,34 @@ Deno.serve(async (req: Request) => {
       console.warn('⚠️ 세션 저장 실패 (AI 조언에는 영향 없음):', sessionError);
     } else {
       console.log('✅ 세션 저장 완료:', savedSession);
-      
-      // 📝 5단계: AI 조언 저장 (선택사항)
+    }
+
+    // 🔄 3단계: 과거 + 현재 세션 조합해서 통계 계산
+    console.log('🔄 과거 + 현재 세션 조합 중...');
+    const combinedStats = combineHistoryWithCurrentSession(pastHistory, exerciseData);
+    console.log('📈 조합된 통계:', combinedStats);
+
+    // 🤖 4단계: 조합된 데이터로 개인화된 AI 조언 생성
+    console.log('🤖 개인화된 AI 조언 생성 시작...');
+    
+    const geminiApiKey = Deno.env.get('GEMINI_API_KEY');
+    if (!geminiApiKey) {
+      throw new Error('Gemini API 키가 설정되지 않았습니다.');
+    }
+
+    const personalizedPrompt = generateCombinedPrompt(exerciseData, combinedStats);
+    const geminiResponse = await callGeminiAPI(geminiApiKey, personalizedPrompt);
+    const aiAdvice = parseAIResponse(geminiResponse) || getDefaultAdvice(exerciseData, combinedStats);
+
+    console.log('🎯 생성된 AI 조언:', aiAdvice);
+
+    // 📝 5단계: AI 조언 저장 (선택사항)
+    if (savedSession) {
       try {
         console.log('💾 AI 조언 저장 시작...');
         
         const adviceRecord = {
-          session_id: savedSession?.id || null,
+          session_id: savedSession.id,
           intensity_advice: '',               // 빈 문자열 (NOT NULL 제약조건 해결)
           comprehensive_advice: aiAdvice,     // AI 응답을 여기에 저장 (프론트엔드에서 사용)
           gemini_raw_response: null,          // 사용하지 않음
@@ -158,7 +165,7 @@ Deno.serve(async (req: Request) => {
 
         if (adviceError) {
           console.warn('⚠️ AI 조언 저장 실패 (기능에는 영향 없음):', adviceError);
-          console.warn('세션 ID:', savedSession?.id);
+          console.warn('세션 ID:', savedSession.id);
           console.warn('AI 조언 내용:', aiAdvice);
         } else {
           console.log('✅ AI 조언 저장 완료:', savedAdvice);
