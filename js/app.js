@@ -1441,15 +1441,19 @@ async function saveExerciseToSupabase(exerciseData) {
             throw new Error('사용자 ID가 없습니다.');
         }
         
-        // exercise_sessions 테이블에 INSERT할 데이터 구성
+        // exercise_sessions 테이블에 INSERT할 데이터 구성 (실제 컬럼명 사용)
         const exerciseRecord = {
             user_id: window.currentUserId,
-            inhale_resistance: exerciseData.inhaleResistance || 0,
-            exhale_resistance: exerciseData.exhaleResistance || 0,
-            target_sets: exerciseData.targetSets || 2,
+            started_at: new Date().toISOString(),
+            exercise_duration: convertTimeToSeconds(exerciseData.exerciseTime),
             completed_sets: exerciseData.completedSets || 0,
             completed_breaths: exerciseData.completedBreaths || 0,
+            target_sets: exerciseData.targetSets || 2,
+            target_breaths_per_set: 10, // 기본값
             is_aborted: exerciseData.isAborted || false,
+            inhale_resistance: exerciseData.resistanceSettings?.inhale || 1,
+            exhale_resistance: exerciseData.resistanceSettings?.exhale || 1,
+            user_feedback: exerciseData.userFeedback || null,
             created_at: new Date().toISOString()
         };
         
@@ -1474,6 +1478,24 @@ async function saveExerciseToSupabase(exerciseData) {
         // 에러가 발생해도 로컬 저장은 시도
         console.log('🔄 로컬 저장으로 백업 시도');
         return null;
+    }
+}
+
+// 🔧 시간 문자열을 초 단위로 변환하는 함수
+function convertTimeToSeconds(timeString) {
+    if (!timeString) return 0;
+    
+    try {
+        const parts = timeString.split(':');
+        if (parts.length === 2) {
+            const minutes = parseInt(parts[0]) || 0;
+            const seconds = parseInt(parts[1]) || 0;
+            return minutes * 60 + seconds;
+        }
+        return 0;
+    } catch (error) {
+        console.warn('⚠️ 시간 변환 실패:', timeString, error);
+        return 0;
     }
 }
 
