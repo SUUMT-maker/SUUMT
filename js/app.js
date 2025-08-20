@@ -1337,6 +1337,16 @@ async function showResultScreen() {
             
             console.log('💾 [디버그] 설정 후 window.exerciseData.userFeedback:', window.exerciseData.userFeedback);
             console.log('💾 [디버그] 전체 exerciseData:', window.exerciseData);
+            
+            // 🚨 운동 데이터 즉시 Supabase 저장 (새로 추가)
+            const savedData = await saveExerciseToSupabase(window.exerciseData);
+            
+            if (savedData) {
+                console.log('✅ 운동 데이터 백엔드 저장 완료');
+                window.exerciseData.sessionId = savedData.id;
+            } else {
+                console.warn('⚠️ 백엔드 저장 실패, 로컬 저장으로 백업');
+            }
         }
         
         // 4. AI 분석 섹션 초기화
