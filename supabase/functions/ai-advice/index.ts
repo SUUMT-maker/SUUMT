@@ -95,35 +95,51 @@ Deno.serve(async (req: Request) => {
     const pastHistory = await getPastExerciseHistory(supabase, exerciseData.userId);
     console.log('📊 과거 기록:', pastHistory);
 
-    // 💾 2단계: 현재 세션을 exercise_sessions에 저장 (AI 조언 생성 전)
-    console.log('💾 현재 세션 저장 시작...');
-    
-    const sessionData = {
-      user_id: exerciseData.userId,
-      exercise_date: new Date().toISOString().split('T')[0],
-      exercise_time: exerciseData.exerciseTime || '0:00',
-      completed_sets: exerciseData.completedSets || 0,
-      completed_breaths: exerciseData.completedBreaths || 0,
-      total_target_breaths: 20,
-      is_aborted: exerciseData.isAborted || false,
-      user_feedback: exerciseData.userFeedback || null,
-      inhale_resistance: exerciseData.resistanceSettings?.inhale || 1,
-      exhale_resistance: exerciseData.resistanceSettings?.exhale || 1,
-    };
-    
-    console.log('🔍 [Edge Function] 생성된 sessionData:', sessionData);
-    console.log('🔍 [Edge Function] sessionData.user_feedback:', sessionData.user_feedback);
+    // 💾 2단계: 세션 ID 처리 (중복 저장 방지)
+    let savedSession;
+    let sessionError = null;
 
-    const { data: savedSession, error: sessionError } = await supabase
-      .from('exercise_sessions')
-      .insert(sessionData)
-      .select('id, created_at')
-      .single();
-
-    if (sessionError) {
-      console.warn('⚠️ 세션 저장 실패 (AI 조언에는 영향 없음):', sessionError);
+    if (sessionId) {
+      // sessionId가 전달되면 기존 세션 사용 (중복 저장 방지)
+      console.log('🔄 기존 sessionId 사용:', sessionId);
+      savedSession = { 
+        id: sessionId, 
+        created_at: new Date().toISOString() 
+      };
     } else {
-      console.log('✅ 세션 저장 완료:', savedSession);
+      // sessionId가 없으면 새로 저장 (backward compatibility)
+      console.log('💾 새로운 세션 저장 시작...');
+      
+      const sessionData = {
+        user_id: exerciseData.userId,
+        exercise_date: new Date().toISOString().split('T')[0],
+        exercise_time: exerciseData.exerciseTime || '0:00',
+        completed_sets: exerciseData.completedSets || 0,
+        completed_breaths: exerciseData.completedBreaths || 0,
+        total_target_breaths: 20,
+        is_aborted: exerciseData.isAborted || false,
+        user_feedback: exerciseData.userFeedback || null,
+        inhale_resistance: exerciseData.resistanceSettings?.inhale || 1,
+        exhale_resistance: exerciseData.resistanceSettings?.exhale || 1,
+      };
+      
+      console.log('🔍 [Edge Function] 생성된 sessionData:', sessionData);
+      console.log('🔍 [Edge Function] sessionData.user_feedback:', sessionData.user_feedback);
+
+      const { data, error } = await supabase
+        .from('exercise_sessions')
+        .insert(sessionData)
+        .select('id, created_at')
+        .single();
+      
+      savedSession = data;
+      sessionError = error;
+      
+      if (sessionError) {
+        console.warn('⚠️ 세션 저장 실패 (AI 조언에는 영향 없음):', sessionError);
+      } else {
+        console.log('✅ 세션 저장 완료:', savedSession);
+      }
     }
 
     // 🔄 3단계: 과거 + 현재 세션 조합해서 통계 계산
