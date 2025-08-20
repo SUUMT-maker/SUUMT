@@ -1427,33 +1427,28 @@ async function requestAIAdvice() {
     }
 }
 
-// 💾 운동 데이터를 Supabase에 저장하는 함수
+// 💾 운동 데이터를 Supabase에 저장하는 함수 (실제 테이블 구조 반영)
 async function saveExerciseToSupabase(exerciseData) {
     try {
         console.log('💾 Supabase에 운동 데이터 저장 시작:', exerciseData);
         
-        // Supabase 클라이언트 확인
-        if (!window.supabaseClient) {
-            throw new Error('Supabase 클라이언트가 없습니다.');
+        // Supabase 클라이언트 및 사용자 ID 확인
+        if (!window.supabaseClient || !window.currentUserId) {
+            throw new Error('Supabase 클라이언트 또는 사용자 ID가 없습니다.');
         }
         
-        if (!window.currentUserId) {
-            throw new Error('사용자 ID가 없습니다.');
-        }
-        
-        // exercise_sessions 테이블에 INSERT할 데이터 구성 (실제 컬럼명 사용)
+        // ✅ 실제 테이블 컬럼명에 맞춘 데이터 구성
         const exerciseRecord = {
             user_id: window.currentUserId,
-            started_at: new Date().toISOString(),
-            exercise_duration: convertTimeToSeconds(exerciseData.exerciseTime),
+            exercise_date: new Date().toISOString().split('T')[0],  // YYYY-MM-DD 형식
+            exercise_time: exerciseData.exerciseTime || '0:00',     // MM:SS 형식 그대로
             completed_sets: exerciseData.completedSets || 0,
             completed_breaths: exerciseData.completedBreaths || 0,
-            target_sets: exerciseData.targetSets || 2,
-            target_breaths_per_set: 10, // 기본값
+            total_target_breaths: 20,  // 기본값 (2세트 × 10호흡)
             is_aborted: exerciseData.isAborted || false,
+            user_feedback: exerciseData.userFeedback || null,
             inhale_resistance: exerciseData.resistanceSettings?.inhale || 1,
             exhale_resistance: exerciseData.resistanceSettings?.exhale || 1,
-            user_feedback: exerciseData.userFeedback || null,
             created_at: new Date().toISOString()
         };
         
@@ -1481,23 +1476,7 @@ async function saveExerciseToSupabase(exerciseData) {
     }
 }
 
-// 🔧 시간 문자열을 초 단위로 변환하는 함수
-function convertTimeToSeconds(timeString) {
-    if (!timeString) return 0;
-    
-    try {
-        const parts = timeString.split(':');
-        if (parts.length === 2) {
-            const minutes = parseInt(parts[0]) || 0;
-            const seconds = parseInt(parts[1]) || 0;
-            return minutes * 60 + seconds;
-        }
-        return 0;
-    } catch (error) {
-        console.warn('⚠️ 시간 변환 실패:', timeString, error);
-        return 0;
-    }
-}
+
 
 // 🎯 결과 화면 AI 분석 요청 함수
 function requestResultAIAnalysis() {
