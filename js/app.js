@@ -1314,10 +1314,10 @@ function proceedToNextStep() {
     showResultScreen();
 }
 
-// 🔥 정리된 showResultScreen 함수 - 단순화된 버전
+// 🔥 정리된 showResultScreen 함수 - 사용자 요청 방식
 async function showResultScreen() {
     try {
-        console.log('🎯 결과 화면 표시 (단순화된 버전)');
+        console.log('🎯 결과 화면 표시 (사용자 요청 방식)');
         
         // 1. 화면 전환
         showScreen('resultScreen');
@@ -1325,16 +1325,10 @@ async function showResultScreen() {
         // 2. 통계 데이터 업데이트 (유지)
         updateResultStats();
         
-        // 3. AI 평가 요청 (유지)
-        requestAIAdvice();
+        // 3. AI 평가는 자동 요청하지 않음 (사용자 버튼 클릭 시에만)
+        // requestAIAdvice(); // 이 줄 제거
         
-        // 4. 배지/커뮤니티 관련 함수 호출 제거 (프로필 탭에서 사용 예정)
-        // updateBadgesDisplay(); // 주석 처리
-        // checkNewBadges(); // 주석 처리
-        // updateSocialProofData(); // 주석 처리
-        // initReviewsCarousel(); // 주석 처리
-        
-        console.log('✅ 단순화된 결과 화면 로드 완료');
+        console.log('✅ 결과 화면 로드 완료 (AI 분석은 사용자 요청 대기)');
         
     } catch (error) {
         console.error('❌ 결과 화면 표시 중 오류 발생:', error);
@@ -1353,9 +1347,6 @@ function updateResultStats() {
         document.getElementById('totalTime').textContent = `${minutes}분 ${seconds}초`;
         document.getElementById('completedSets').textContent = `${window.exerciseData.completedSets}/2`;
         document.getElementById('totalBreathsResult').textContent = `${window.exerciseData.completedBreaths}회`;
-        
-        document.getElementById('intensityAdvice').textContent = '강도 조절 분석을 진행하고 있습니다...';
-        document.getElementById('comprehensiveAdvice').textContent = 'AI 숨트레이너가 당신의 트레이닝을 분석하고 있습니다...';
         
         console.log('✅ 통계 데이터 업데이트 완료');
         
@@ -1422,6 +1413,51 @@ async function requestAIAdvice() {
     }
 }
 
+// 🎯 결과 화면 AI 분석 요청 함수
+function requestResultAIAnalysis() {
+    console.log('🤖 결과 화면에서 AI 분석 요청');
+    
+    const contentEl = document.getElementById('aiAnalysisContent');
+    const badgeEl = document.getElementById('aiAnalysisBadge');
+    
+    if (contentEl) {
+        contentEl.innerHTML = `
+            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; color: #6B7280;">
+                <div style="width: 24px; height: 24px; border: 3px solid #667eea; border-top: 3px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                <span>AI가 방금 운동을 분석하고 있습니다...</span>
+            </div>
+        `;
+    }
+    
+    if (badgeEl) {
+        badgeEl.textContent = '분석 중...';
+    }
+    
+    // 기존 AI 요청 로직 실행
+    requestAIAdvice();
+}
+
+// 🎯 AI 분석 결과 표시 함수
+function showAIAnalysisResult(analysisData) {
+    const contentEl = document.getElementById('aiAnalysisContent');
+    const badgeEl = document.getElementById('aiAnalysisBadge');
+    
+    if (contentEl) {
+        contentEl.innerHTML = `
+            <div style="text-align: center; margin-bottom: 16px;">
+                <img src="icons/coach-avatar.png" style="width: 32px; height: 32px; border-radius: 50%;" alt="AI">
+            </div>
+            <div style="color: #374151; line-height: 1.6;">
+                ${analysisData.advice || '훌륭한 운동이었어요! 계속 이런 식으로 꾸준히 해보세요.'}
+            </div>
+        `;
+    }
+    
+    if (badgeEl) {
+        badgeEl.textContent = '분석 완료';
+    }
+}
+
 
 
 
@@ -1440,13 +1476,10 @@ function handleExerciseResult(result) {
         finalComprehensiveAdvice += additionalAdvice;
     }
     
-    // intensityAdvice 카드 숨김
-    const intensityCard = document.getElementById('intensityAdvice');
-    if (intensityCard && intensityCard.parentElement) {
-        intensityCard.parentElement.style.display = 'none';
-    }
-    
-    document.getElementById('comprehensiveAdvice').innerHTML = finalComprehensiveAdvice.replace(/\n/g, '<br>');
+    // 🎯 결과 화면 AI 분석 결과 표시
+    showAIAnalysisResult({
+        advice: finalComprehensiveAdvice
+    });
     
     // 🎯 운동 완료 후 인사말 업데이트
     setTimeout(() => {

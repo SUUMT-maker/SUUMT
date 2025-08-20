@@ -588,3 +588,15 @@
     border-color: #5a67d8;
     box-shadow: 0 8px 32px rgba(102, 126, 234, 0.3);
 }
+
+/* AI 분석 섹션 애니메이션 */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.ai-analysis-section button:hover {
+    background: #667eea !important;
+    color: white !important;
+    transform: translateY(-2px);
+}
