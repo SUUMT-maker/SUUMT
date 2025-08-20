@@ -1319,16 +1319,16 @@ function proceedToNextStep() {
 
 // 🔥 정리된 showResultScreen 함수 - 사용자 요청 방식
 async function showResultScreen() {
+    console.log('🎯 결과 화면 표시 시작');
+    
     try {
-        console.log('🎯 결과 화면 표시 (사용자 요청 방식)');
-        
         // 1. 화면 전환
         showScreen('resultScreen');
         
-        // 2. 통계 데이터 업데이트 (유지)
+        // 2. 통계 데이터 업데이트 (UI)
         updateResultStats();
         
-        // 3. userFeedback을 exerciseData에 포함 (새로 추가)
+        // 3. userFeedback을 exerciseData에 포함 (디버깅용)
         if (window.exerciseData) {
             console.log('💾 [디버그] 저장 전 userFeedback:', userFeedback);
             console.log('💾 [디버그] 저장 전 window.exerciseData.userFeedback:', window.exerciseData.userFeedback);
@@ -1339,13 +1339,13 @@ async function showResultScreen() {
             console.log('💾 [디버그] 전체 exerciseData:', window.exerciseData);
         }
         
-        // 4. AI 분석 섹션 초기화 (새로 추가)
+        // 4. AI 분석 섹션 초기화
         resetAIAnalysisSection();
         
-        console.log('✅ 결과 화면 로드 완료 (AI 분석 초기화됨)');
+        console.log('✅ 결과 화면 로드 완료');
         
     } catch (error) {
-        console.error('❌ 결과 화면 표시 중 오류 발생:', error);
+        console.error('❌ 결과 화면 로드 중 오류:', error);
     }
 }
 
@@ -1389,11 +1389,7 @@ async function requestAIAdvice() {
             exhale_resistance: exerciseDataWithFeedback.resistanceSettings.exhale
         });
         
-        // 🎮 통계 업데이트 및 배지 체크 (로컬 기능 유지)
-        const updatedStats = updateLocalStats(window.exerciseData);
-        addExerciseHistory(exerciseDataWithFeedback);
-        
-        // 🔥 백엔드에서 AI 조언 요청
+        // 🔥 백엔드에서 AI 조언 요청 (데이터는 이미 showResultScreen()에서 저장됨)
         console.log('🤖 백엔드 AI 조언 요청 시작');
         
         const aiAdvice = await getTrainerAdvice(exerciseDataWithFeedback);
@@ -1404,13 +1400,13 @@ async function requestAIAdvice() {
             handleExerciseResult({
                 success: true,
                 comprehensiveAdvice: aiAdvice.comprehensiveAdvice,
-                stats: updatedStats
+                stats: null // 이미 저장된 통계 사용
             });
         } else if (typeof aiAdvice === 'string') {
             handleExerciseResult({
                 success: true,
                 comprehensiveAdvice: aiAdvice,
-                stats: updatedStats
+                stats: null // 이미 저장된 통계 사용
             });
         } else {
             throw new Error('AI 조언 형식 오류');
@@ -1426,6 +1422,57 @@ async function requestAIAdvice() {
         console.log('⚠️ AI 조언 실패로 기본 메시지 표시');
     }
 }
+
+// 💾 운동 데이터를 Supabase에 저장하는 함수 (실제 테이블 구조 반영)
+async function saveExerciseToSupabase(exerciseData) {
+    try {
+        console.log('💾 Supabase에 운동 데이터 저장 시작:', exerciseData);
+        
+        // Supabase 클라이언트 및 사용자 ID 확인
+        if (!window.supabaseClient || !window.currentUserId) {
+            throw new Error('Supabase 클라이언트 또는 사용자 ID가 없습니다.');
+        }
+        
+        // ✅ 실제 테이블 컬럼명에 맞춘 데이터 구성
+        const exerciseRecord = {
+            user_id: window.currentUserId,
+            exercise_date: new Date().toISOString().split('T')[0],  // YYYY-MM-DD 형식
+            exercise_time: exerciseData.exerciseTime || '0:00',     // MM:SS 형식 그대로
+            completed_sets: exerciseData.completedSets || 0,
+            completed_breaths: exerciseData.completedBreaths || 0,
+            total_target_breaths: 20,  // 기본값 (2세트 × 10호흡)
+            is_aborted: exerciseData.isAborted || false,
+            user_feedback: exerciseData.userFeedback || null,
+            inhale_resistance: exerciseData.resistanceSettings?.inhale || 1,
+            exhale_resistance: exerciseData.resistanceSettings?.exhale || 1,
+            created_at: new Date().toISOString()
+        };
+        
+        console.log('📝 저장할 데이터:', exerciseRecord);
+        
+        // Supabase에 INSERT
+        const { data, error } = await window.supabaseClient
+            .from('exercise_sessions')
+            .insert([exerciseRecord])
+            .select();
+        
+        if (error) {
+            throw error;
+        }
+        
+        console.log('✅ Supabase 저장 성공:', data[0]);
+        return data[0];
+        
+    } catch (error) {
+        console.error('❌ Supabase 저장 실패:', error);
+        
+        // 에러가 발생해도 로컬 저장은 시도
+        console.log('🔄 로컬 저장으로 백업 시도');
+        return null;
+    }
+}
+
+
 
 // 🎯 결과 화면 AI 분석 요청 함수
 function requestResultAIAnalysis() {
@@ -2585,4 +2632,29 @@ function setDefaultGoalCard() {
     if (targetEl) targetEl.textContent = '40';
     if (completedEl) completedEl.textContent = '0';
     if (setsEl) setsEl.textContent = '0';
+}
+
+// 🚨 전역 에러 핸들러 추가
+window.addEventListener('unhandledrejection', function(event) {
+    console.error('🚨 처리되지 않은 Promise 에러:', event.reason);
+    
+    // 운동 데이터가 있다면 로컬에라도 저장
+    if (window.exerciseData && !window.exerciseDataSaved) {
+        console.log('🔄 긴급 로컬 저장 실행');
+        addExerciseHistory(window.exerciseData);
+        window.exerciseDataSaved = true;
+    }
+});
+
+// 🔄 기록탭에서 Supabase 데이터 다시 불러오기
+async function refreshExerciseRecords() {
+    console.log('🔄 운동 기록 새로고침');
+    
+    try {
+        await fetchExerciseSessions();
+        renderCalendar();
+        console.log('✅ 기록 새로고침 완료');
+    } catch (error) {
+        console.error('❌ 기록 새로고침 실패:', error);
+    }
 }
