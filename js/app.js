@@ -1314,13 +1314,36 @@ function proceedToNextStep() {
     showResultScreen();
 }
 
-// 🔥 정리된 showResultScreen 함수 - 데이터베이스 저장 로직 제거
+// 🔥 정리된 showResultScreen 함수 - 단순화된 버전
 async function showResultScreen() {
     try {
-        console.log('📋 결과 화면 표시 시작');
+        console.log('🎯 결과 화면 표시 (단순화된 버전)');
         
+        // 1. 화면 전환
         showScreen('resultScreen');
         
+        // 2. 통계 데이터 업데이트 (유지)
+        updateResultStats();
+        
+        // 3. AI 평가 요청 (유지)
+        requestAIAdvice();
+        
+        // 4. 배지/커뮤니티 관련 함수 호출 제거 (프로필 탭에서 사용 예정)
+        // updateBadgesDisplay(); // 주석 처리
+        // checkNewBadges(); // 주석 처리
+        // updateSocialProofData(); // 주석 처리
+        // initReviewsCarousel(); // 주석 처리
+        
+        console.log('✅ 단순화된 결과 화면 로드 완료');
+        
+    } catch (error) {
+        console.error('❌ 결과 화면 표시 중 오류 발생:', error);
+    }
+}
+
+// 통계 데이터 업데이트 함수
+function updateResultStats() {
+    try {
         const timeData = window.exerciseData.exerciseTime.split(':');
         const minutes = parseInt(timeData[0]);
         const seconds = parseInt(timeData[1]);
@@ -1334,6 +1357,16 @@ async function showResultScreen() {
         document.getElementById('intensityAdvice').textContent = '강도 조절 분석을 진행하고 있습니다...';
         document.getElementById('comprehensiveAdvice').textContent = 'AI 숨트레이너가 당신의 트레이닝을 분석하고 있습니다...';
         
+        console.log('✅ 통계 데이터 업데이트 완료');
+        
+    } catch (error) {
+        console.error('❌ 통계 데이터 업데이트 중 오류 발생:', error);
+    }
+}
+
+// AI 평가 요청 함수
+async function requestAIAdvice() {
+    try {
         const exerciseDataWithFeedback = {
             ...window.exerciseData,
             userFeedback: userFeedback
@@ -1351,83 +1384,41 @@ async function showResultScreen() {
             exhale_resistance: exerciseDataWithFeedback.resistanceSettings.exhale
         });
         
-        // 🎮 통계 업데이트 및 배지 체크
+        // 🎮 통계 업데이트 및 배지 체크 (로컬 기능 유지)
         const updatedStats = updateLocalStats(window.exerciseData);
         addExerciseHistory(exerciseDataWithFeedback);
         
-        // 🎮 새 배지 체크 및 표시
-        const newBadges = checkNewBadges(updatedStats);
-        updateBadgesDisplay();
-        
-        // 🔥 새로운 기능: 사회적 증명 UI 초기화
-        updateSocialProofData();
-        initReviewsCarousel();
-        
-        // 🎯 결과 화면 표시 후 인사말 업데이트
-        setTimeout(() => {
-            clearGreetingCache(); // 운동 데이터 변경으로 캐시 무효화
-            updateGreetingCard();
-        }, 500);
-        
-        if (newBadges.length > 0) {
-            // 첫 번째 새 배지만 팝업으로 표시 (여러 개면 순차적으로)
-            setTimeout(() => {
-                showBadgePopup(newBadges[0]);
-            }, 1000);
-        }
-        
-        // 🔥 백엔드에서 AI 조언 요청 (운동 기록 저장 + AI 생성)
+        // 🔥 백엔드에서 AI 조언 요청
         console.log('🤖 백엔드 AI 조언 요청 시작');
         
-        try {
-            const aiAdvice = await getTrainerAdvice(exerciseDataWithFeedback);
-            
-            console.log('🤖 AI 조언 응답:', aiAdvice);
-            
-            if (typeof aiAdvice === 'object' && aiAdvice.comprehensiveAdvice) {
-                handleExerciseResult({
-                    success: true,
-                    comprehensiveAdvice: aiAdvice.comprehensiveAdvice,
-                    stats: updatedStats
-                });
-            } else if (typeof aiAdvice === 'string') {
-                handleExerciseResult({
-                    success: true,
-                    comprehensiveAdvice: aiAdvice,
-                    stats: updatedStats
-                });
-            } else {
-                throw new Error('AI 조언 형식 오류');
-            }
-            
-        } catch (aiError) {
-            console.error('❌ AI 조언 요청 실패:', aiError);
-            
-            // AI 조언 실패 시 기본 메시지 표시
-            document.getElementById('intensityAdvice').textContent = '분석을 불러오는 중 문제가 발생했습니다.';
-            document.getElementById('comprehensiveAdvice').textContent = '네트워크 연결을 확인하고 다시 시도해주세요.';
-            
-            // 로컬 기능은 계속 작동
-            const updatedStats = updateLocalStats(window.exerciseData);
-            addExerciseHistory(window.exerciseData);
-            updateBadgesDisplay();
-            updateSocialProofData();
-            initReviewsCarousel();
+        const aiAdvice = await getTrainerAdvice(exerciseDataWithFeedback);
+        
+        console.log('🤖 AI 조언 응답:', aiAdvice);
+        
+        if (typeof aiAdvice === 'object' && aiAdvice.comprehensiveAdvice) {
+            handleExerciseResult({
+                success: true,
+                comprehensiveAdvice: aiAdvice.comprehensiveAdvice,
+                stats: updatedStats
+            });
+        } else if (typeof aiAdvice === 'string') {
+            handleExerciseResult({
+                success: true,
+                comprehensiveAdvice: aiAdvice,
+                stats: updatedStats
+            });
+        } else {
+            throw new Error('AI 조언 형식 오류');
         }
         
-        console.log('✅ 결과 화면 처리 완료');
+    } catch (aiError) {
+        console.error('❌ AI 조언 요청 실패:', aiError);
         
-    } catch (error) {
-        console.error('❌ showResultScreen 오류:', error);
-        
+        // AI 조언 실패 시 기본 메시지 표시
         document.getElementById('intensityAdvice').textContent = '분석을 불러오는 중 문제가 발생했습니다.';
         document.getElementById('comprehensiveAdvice').textContent = '네트워크 연결을 확인하고 다시 시도해주세요.';
         
-        const updatedStats = updateLocalStats(window.exerciseData);
-        addExerciseHistory(window.exerciseData);
-        updateBadgesDisplay();
-        updateSocialProofData();
-        initReviewsCarousel();
+        console.log('⚠️ AI 조언 실패로 기본 메시지 표시');
     }
 }
 

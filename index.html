@@ -631,46 +631,33 @@
         <div id="resultScreen" class="screen">
             <div class="container">
                 <div class="result-header">
-                    <div class="celebration">🎉</div>
                     <h2>트레이닝 완료!</h2>
                 </div>
                 
                 <div class="result-stats-grid">
                     <div class="result-stat-card">
-                        <div class="result-stat-header">
-                            <span class="result-stat-title">저항 강도</span>
-                            <span class="result-stat-icon">🎯</span>
-                        </div>
-                        <div class="result-stat-value" id="resistanceInfo">1/1</div>
+                        <div class="stat-label">저항 강도</div>
+                        <div class="stat-value" id="resistanceInfo">1/1</div>
                     </div>
                     
                     <div class="result-stat-card">
-                        <div class="result-stat-header">
-                            <span class="result-stat-title">총 시간</span>
-                            <span class="result-stat-icon">⏱️</span>
-                        </div>
-                        <div class="result-stat-value" id="totalTime">0분</div>
+                        <div class="stat-label">총 시간</div>
+                        <div class="stat-value" id="totalTime">0분</div>
                     </div>
                     
                     <div class="result-stat-card">
-                        <div class="result-stat-header">
-                            <span class="result-stat-title">완료 세트</span>
-                            <span class="result-stat-icon">✅</span>
-                        </div>
-                        <div class="result-stat-value" id="completedSets">0/2</div>
+                        <div class="stat-label">완료 세트</div>
+                        <div class="stat-value" id="completedSets">0/2</div>
                     </div>
                     
                     <div class="result-stat-card">
-                        <div class="result-stat-header">
-                            <span class="result-stat-title">총 호흡횟수</span>
-                            <span class="result-stat-icon">🫁</span>
-                        </div>
-                        <div class="result-stat-value" id="totalBreathsResult">0회</div>
+                        <div class="stat-label">총 호흡횟수</div>
+                        <div class="stat-value" id="totalBreathsResult">0회</div>
                     </div>
                 </div>
 
-                <!-- 🎮 배지 시스템 -->
-                <div class="badges-system">
+                <!-- 🎮 배지 시스템 (프로필 탭에서 재사용 예정 - 숨김 처리) -->
+                <div class="badges-system" style="display: none;">
                     <div class="badges-header">
                         <span class="section-icon">🏆</span>
                         <span class="badges-title">배지 컬렉션</span>
@@ -681,8 +668,8 @@
                     </div>
                 </div>
 
-                <!-- 🔥 새로운 기능: 사회적 증명 섹션 -->
-                <div class="social-proof-section">
+                <!-- 🔥 새로운 기능: 사회적 증명 섹션 (프로필 탭에서 재사용 예정 - 숨김 처리) -->
+                <div class="social-proof-section" style="display: none;">
                     <div class="social-proof-card">
                         <div class="social-proof-header">
                             <span class="section-icon">👥</span>
@@ -693,7 +680,7 @@
                             <div class="live-stat">
                                 <div class="live-stat-number" id="liveUsersCount">1,247</div>
                                 <div class="live-stat-label">오늘 활동 중</div>
-                            </div>
+                                </div>
                             <div class="live-stat">
                                 <div class="live-stat-number" id="totalUsersCount">12,543</div>
                                 <div class="live-stat-label">전체 사용자</div>
@@ -715,12 +702,12 @@
 
                 <div class="result-content">
                     <div class="result-section">
-                        <h4>💪 저항 강도 분석</h4>
+                        <h4>저항 강도 분석</h4>
                         <p id="intensityAdvice">강도 조절 분석을 진행하고 있습니다...</p>
                     </div>
 
                     <div class="result-section">
-                        <h4>🏆 AI 숨트레이너 종합평가</h4>
+                        <h4>AI 숨트레이너 종합평가</h4>
                         <p id="comprehensiveAdvice">AI 숨트레이너가 당신의 트레이닝을 분석하고 있습니다...</p>
                     </div>
                 </div>
