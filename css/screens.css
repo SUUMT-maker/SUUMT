@@ -562,14 +562,16 @@
 .control-buttons .btn {
     background: white;
     border: 1px solid #E7E7E7;
-    border-radius: 24px;
-    padding: 16px 20px;
-    font-size: 16px;
+    border-radius: 16px;
+    padding: 12px 16px;
+    font-size: 14px;
     font-weight: 600;
     color: #1f2937;
     cursor: pointer;
     transition: all 0.3s ease;
     text-align: center;
+    height: auto;
+    min-height: 44px;
 }
 
 .control-buttons .btn:hover {
