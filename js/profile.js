@@ -190,18 +190,21 @@ const PROFILE_CSS = `
     display: flex;
     flex-direction: column;
     justify-content: center;
+    overflow: hidden;
 }
 
 .review-text {
     font-size: 13px;
     color: #333;
-    line-height: 1.4;
+    line-height: 1.5;
     margin-bottom: 8px;
     text-align: center;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+    white-space: normal;
+    word-break: keep-all;
 }
 
 .review-author {
