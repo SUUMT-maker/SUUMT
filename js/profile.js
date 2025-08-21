@@ -63,7 +63,15 @@ const PROFILE_HTML = `
         <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
             <h3 style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0;">배지 컬렉션</h3>
         </div>
-        <div id="profileBadgesProgress" style="font-size: 12px; color: #6b7280; background: #F3F4F6; padding: 6px 12px; border-radius: 12px; font-weight: 600;">수집한 배지: 0/15</div>
+        <div style="margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 12px; color: #6b7280; font-weight: 600;">배지 수집 진행률</span>
+                <span id="profileBadgesCount" style="font-size: 12px; color: #6b7280; font-weight: 600;">0/15</span>
+            </div>
+            <div style="background: #f3f4f6; border-radius: 8px; height: 8px; overflow: hidden;">
+                <div id="profileBadgesBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s ease; border-radius: 8px;"></div>
+            </div>
+        </div>
         <div id="profileBadgesGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
             <!-- 15개 배지들이 JavaScript로 생성됨 (5x3 그리드) -->
         </div>
@@ -82,7 +90,7 @@ const PROFILE_HTML = `
                 <div style="font-size: 12px; color: #6B7280;">오늘 활동 중</div>
             </div>
             <div style="text-align: center;">
-                <div id="profileTotalUsers" style="font-size: 24px; font-weight: 700; color: #22C55E;">12,543</div>
+                <div id="profileTotalUsers" style="font-size: 24px; font-weight: 700; color: #1f2937;">12,543</div>
                 <div style="font-size: 12px; color: #6B7280;">전체 사용자</div>
             </div>
         </div>
@@ -629,8 +637,7 @@ class ProfileDashboard {
             reviewCard.className = 'review-card';
             reviewCard.innerHTML = `
                 <div class="review-content">
-                    <div class="review-header-center">
-                        <div class="review-avatar-icon"></div>
+                    <div class="review-header-center" style="display: flex; align-items: center; gap: 6px; justify-content: center; margin-bottom: 8px;">
                         <span class="review-name">${this.generateAnonymousId(review.author, review.text)}</span>
                         <span class="review-rating">${review.rating}</span>
                     </div>
@@ -815,10 +822,17 @@ class ProfileDashboard {
         const badgesConfig = this.getBadgesConfig();
         const earnedBadges = this.getEarnedBadges();
 
-        // 진행률 업데이트
-        const progressEl = document.getElementById('profileBadgesProgress');
-        if (progressEl) {
-            progressEl.textContent = `수집한 배지: ${earnedBadges.length}/${badgesConfig.length}`;
+        // 배지 수집 진행률 업데이트
+        const badgesCountEl = document.getElementById('profileBadgesCount');
+        const badgesBarEl = document.getElementById('profileBadgesBar');
+
+        if (badgesCountEl) {
+            badgesCountEl.textContent = `${earnedBadges.length}/${badgesConfig.length}`;
+        }
+
+        if (badgesBarEl) {
+            const percentage = badgesConfig.length > 0 ? (earnedBadges.length / badgesConfig.length) * 100 : 0;
+            badgesBarEl.style.width = `${percentage}%`;
         }
 
         // 배지 그리드 업데이트 (5x3 그리드로 15개 표시)
