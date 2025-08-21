@@ -1,11 +1,11 @@
-// 🎮 레벨 시스템 전용 모듈
+// 🎮 단순화된 레벨 시스템 (복잡한 로직 제거)
 class LevelSystem {
     constructor() {
         this.expData = this.loadExpData();
         this.levelConfig = this.getLevelConfig();
     }
 
-    // 레벨 구간 설정
+    // 레벨 구간 설정 (기존 유지)
     getLevelConfig() {
         return [
             { level: 1, minExp: 0, maxExp: 166, title: '뉴비' },
@@ -37,30 +37,28 @@ class LevelSystem {
         ];
     }
 
-    // EXP 데이터 로드
+    // 📁 EXP 데이터 로드 (기존 유지)
     loadExpData() {
         try {
             const saved = localStorage.getItem('userLevelData');
             return saved ? JSON.parse(saved) : {
                 totalExp: 0,
                 currentLevel: 1,
-                lastExpGain: [],
-                consecutiveDays: 0,
-                lastExerciseDate: null
+                dailyGoalsCompleted: 0,
+                weeklyChallengesCompleted: 0
             };
         } catch (error) {
             console.error('레벨 데이터 로드 실패:', error);
             return {
                 totalExp: 0,
                 currentLevel: 1,
-                lastExpGain: [],
-                consecutiveDays: 0,
-                lastExerciseDate: null
+                dailyGoalsCompleted: 0,
+                weeklyChallengesCompleted: 0
             };
         }
     }
 
-    // EXP 데이터 저장
+    // 💾 EXP 데이터 저장 (기존 유지)
     saveExpData() {
         try {
             localStorage.setItem('userLevelData', JSON.stringify(this.expData));
@@ -69,62 +67,44 @@ class LevelSystem {
         }
     }
 
-    // 운동 데이터 기반 EXP 계산
+    // 🧮 단순화된 EXP 계산 (핵심!)
     calculateExpFromExerciseData(exerciseData) {
-        if (!exerciseData || !exerciseData.length) return 0;
+        if (!exerciseData || !exerciseData.length) {
+            return 0;
+        }
 
-        // 일별 운동 완료 여부 체크 (2세트 40호흡 = 100 EXP)
+        // 일일 목표 달성 계산 (40호흡 이상인 날 수)
         const dailyGoal = 40;
-        const dailyCompletions = new Set();
+        const completedDays = new Set();
         
         exerciseData.forEach(session => {
             const dateStr = new Date(session.created_at).toISOString().split('T')[0];
+            
+            // 같은 날 세션들의 총 호흡수 계산
             const dayData = exerciseData.filter(s => 
                 new Date(s.created_at).toISOString().split('T')[0] === dateStr
             );
-            
             const dayBreaths = dayData.reduce((sum, s) => sum + (s.completed_breaths || 0), 0);
+            
             if (dayBreaths >= dailyGoal) {
-                dailyCompletions.add(dateStr);
+                completedDays.add(dateStr);
             }
         });
 
-        // 기본 EXP (일일 목표 달성)
-        let totalExp = dailyCompletions.size * 100;
-
-        // 연속 달성 보너스 계산 (간단히)
-        const consecutiveDays = this.calculateConsecutiveDays(Array.from(dailyCompletions));
-        if (consecutiveDays >= 30) totalExp += 1000;
-        else if (consecutiveDays >= 7) totalExp += 200;
-        else if (consecutiveDays >= 3) totalExp += 50;
-
+        const dailyGoalsCompleted = completedDays.size;
+        
+        // 주간 챌린지 완료 수 (임시로 0, 나중에 기록탭과 연계)
+        const weeklyChallengesCompleted = 0;
+        
+        // 단순한 계산: 일일 목표 * 100 + 주간 챌린지 * 300
+        const totalExp = (dailyGoalsCompleted * 100) + (weeklyChallengesCompleted * 300);
+        
+        console.log(`💯 EXP 계산: ${dailyGoalsCompleted}일 × 100 + ${weeklyChallengesCompleted}주 × 300 = ${totalExp} EXP`);
+        
         return totalExp;
     }
 
-    // 연속 일수 계산
-    calculateConsecutiveDays(completedDates) {
-        if (!completedDates.length) return 0;
-        
-        const sortedDates = completedDates.sort((a, b) => new Date(b) - new Date(a));
-        let consecutive = 0;
-        const today = new Date().toISOString().split('T')[0];
-        
-        for (let i = 0; i < 30; i++) {
-            const checkDate = new Date();
-            checkDate.setDate(checkDate.getDate() - i);
-            const dateStr = checkDate.toISOString().split('T')[0];
-            
-            if (sortedDates.includes(dateStr)) {
-                consecutive++;
-            } else {
-                break;
-            }
-        }
-        
-        return consecutive;
-    }
-
-    // 레벨 계산
+    // 📊 레벨 계산 (기존 유지)
     calculateLevel(totalExp) {
         for (let i = this.levelConfig.length - 1; i >= 0; i--) {
             const config = this.levelConfig[i];
@@ -150,7 +130,7 @@ class LevelSystem {
         };
     }
 
-    // 운동 데이터로 레벨 업데이트
+    // 🔄 운동 데이터로 레벨 업데이트 (단순화)
     updateFromExerciseData(exerciseData) {
         const newTotalExp = this.calculateExpFromExerciseData(exerciseData);
         const oldLevel = this.expData.currentLevel;
@@ -168,22 +148,17 @@ class LevelSystem {
         };
     }
 
-    // 현재 레벨 데이터 반환
+    // 📋 현재 레벨 데이터 반환
     getLevelData() {
         return this.calculateLevel(this.expData.totalExp);
     }
 
-    // 주간 챌린지 완료 보너스 (나중에 사용)
+    // 🏆 주간 챌린지 보너스 (나중에 기록탭과 연계용)
     addChallengeBonus(challengeType) {
-        const bonusMap = {
-            'week1': 300,
-            'week2': 300, 
-            'week3': 300,
-            'week4': 500
-        };
+        const bonusExp = 300; // 모든 주간 챌린지는 300 EXP
         
-        const bonus = bonusMap[challengeType] || 300;
-        this.expData.totalExp += bonus;
+        this.expData.totalExp += bonusExp;
+        this.expData.weeklyChallengesCompleted += 1;
         
         const levelData = this.calculateLevel(this.expData.totalExp);
         const isLevelUp = levelData.level > this.expData.currentLevel;
@@ -191,8 +166,10 @@ class LevelSystem {
         
         this.saveExpData();
         
+        console.log(`🎉 주간 챌린지 완료! +${bonusExp} EXP`);
+        
         return {
-            bonus: bonus,
+            bonus: bonusExp,
             isLevelUp: isLevelUp,
             newLevel: levelData
         };
@@ -202,4 +179,4 @@ class LevelSystem {
 // 전역 인스턴스 생성
 window.levelSystem = new LevelSystem();
 
-console.log('🎮 레벨 시스템 로드 완료');
+console.log('🎮 단순화된 레벨 시스템 로드 완료');
