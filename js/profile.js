@@ -199,11 +199,6 @@ const PROFILE_CSS = `
     line-height: 1.5;
     margin-bottom: 8px;
     text-align: center;
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    white-space: normal;
     word-break: keep-all;
 }
 
@@ -497,31 +492,31 @@ class ProfileDashboard {
         // 없으면 기본 리뷰 데이터 제공
         return [
             {
-                text: "숨트로 폐활량이 정말 늘었어요! 계단 오를 때 숨이 덜 차요 👍",
+                text: "숨트로 폐활량이 정말 늘었어요!<br>계단 오를 때 숨이 덜 차요 👍",
                 author: "김상우",
                 rating: "⭐⭐⭐⭐⭐",
                 avatar: "김"
             },
             {
-                text: "운동 후 호흡이 훨씬 편해졌습니다. 꾸준히 하니까 확실히 달라져요!",
+                text: "운동 후 호흡이 훨씬 편해졌습니다.<br>꾸준히 하니까 확실히 달라져요!",
                 author: "박영희", 
                 rating: "⭐⭐⭐⭐⭐",
                 avatar: "박"
             },
             {
-                text: "처음엔 힘들었는데 이제 2단계까지 할 수 있어요. 성취감 최고!",
+                text: "처음엔 힘들었는데 이제 2단계까지!<br>성취감 최고예요!",
                 author: "이민수",
                 rating: "⭐⭐⭐⭐⭐", 
                 avatar: "이"
             },
             {
-                text: "숨트 앱 덕분에 매일 꾸준히 하게 되네요. UI도 예쁘고 재미있어요!",
+                text: "숨트 앱 덕분에 매일 꾸준히 하게 되네요.<br>UI도 예쁘고 재미있어요!",
                 author: "정하나",
                 rating: "⭐⭐⭐⭐⭐",
                 avatar: "정"
             },
             {
-                text: "호흡근 운동이 이렇게 중요한 줄 몰랐어요. 숨트 강력 추천합니다!",
+                text: "호흡근 운동이 이렇게 중요한 줄 몰랐어요.<br>숨트 강력 추천합니다!",
                 author: "최준호",
                 rating: "⭐⭐⭐⭐⭐",
                 avatar: "최"
@@ -877,4 +872,36 @@ async function initProfileDashboard() {
 window.initProfileTab = initProfileDashboard;
 window.onProfileTabClick = initProfileDashboard;
 
-console.log('�� 프로필탭 모듈 로드 완료');
+console.log('🙋‍♂️ 프로필탭 모듈 로드 완료');
+
+// 🌐 전역 커뮤니티 데이터 제공 함수
+window.getCommunityStats = function() {
+    // profile.js의 데이터 생성 로직 활용
+    if (window.profileDashboard && typeof window.profileDashboard.generateFallbackCommunityData === 'function') {
+        return window.profileDashboard.generateFallbackCommunityData();
+    }
+    
+    // 폴백 데이터 (profile.js와 동일한 로직)
+    const now = new Date();
+    const hour = now.getHours();
+    const day = now.getDay();
+    
+    let hourMultiplier = 1.0;
+    if (hour >= 6 && hour <= 9) hourMultiplier = 1.8;
+    else if (hour >= 18 && hour <= 22) hourMultiplier = 2.2;
+    else if (hour >= 0 && hour <= 5) hourMultiplier = 0.3;
+    
+    let dayMultiplier = 1.0;
+    if (day === 0 || day === 6) dayMultiplier = 0.7;
+    
+    const daysSinceStart = Math.floor((now - new Date('2024-01-01')) / (1000 * 60 * 60 * 24));
+    const baseUsers = 8500 + (daysSinceStart * 12);
+    
+    const todayActive = Math.floor(baseUsers * hourMultiplier * dayMultiplier * (0.85 + Math.random() * 0.3));
+    const totalUsers = Math.floor(baseUsers * 1.4);
+    
+    return {
+        todayActive: Math.max(150, todayActive),
+        totalUsers: Math.max(8000, totalUsers)
+    };
+};

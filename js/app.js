@@ -106,39 +106,7 @@ function checkMigrationStatus() {
     };
 }
 
-// 🔥 새로운 기능: 사회적 증명 데이터
-const SOCIAL_PROOF_REVIEWS = [
-    {
-        text: "숨트로 폐활량이 정말 늘었어요! 계단 오를 때 숨이 덜 차요 👍",
-        author: "김상우",
-        rating: "⭐⭐⭐⭐⭐",
-        avatar: "김"
-    },
-    {
-        text: "운동 후 호흡이 훨씬 편해졌습니다. 꾸준히 하니까 확실히 달라져요!",
-        author: "박영희",
-        rating: "⭐⭐⭐⭐⭐",
-        avatar: "박"
-    },
-    {
-        text: "처음엔 힘들었는데 이제 2단계까지 할 수 있어요. 성취감 최고!",
-        author: "이민수",
-        rating: "⭐⭐⭐⭐⭐",
-        avatar: "이"
-    },
-    {
-        text: "숨트 앱 덕분에 매일 꾸준히 하게 되네요. UI도 예쁘고 재미있어요!",
-        author: "정하나",
-        rating: "⭐⭐⭐⭐⭐",
-        avatar: "정"
-    },
-    {
-        text: "호흡근 운동이 이렇게 중요한 줄 몰랐어요. 숨트 강력 추천합니다!",
-        author: "최준호",
-        rating: "⭐⭐⭐⭐⭐",
-        avatar: "최"
-    }
-];
+
 
 // 🎮 배지 시스템 데이터
 const BADGES_CONFIG = [
@@ -291,9 +259,7 @@ let selectedQuestions = []; // 선택된 2문제
 let solvedQuestions = []; // 지금까지 푼 문제들 (배지용)
 let quizStartTime = null;
 
-// 🔥 리뷰 캐러셀 전역 변수
-let reviewCarouselInterval;
-let currentReviewIndex = 0;
+
 
 // 🔧 전역 휴식 타이머
 let globalRestTimer = null;
@@ -1665,15 +1631,16 @@ function generateSmartLiveData() {
 
 // 🔥 새로운 기능: 사회적 증명 UI 업데이트
 function updateSocialProofData() {
-    const liveData = generateSmartLiveData();
+    // profile.js 데이터 시스템 활용
+    const liveData = window.getCommunityStats ? window.getCommunityStats() : generateSmartLiveData();
     
-    // 메인화면 실시간 현황 업데이트
+    // 홈 화면 메인 텍스트 업데이트 (기존 디자인 유지)
     const mainLiveUsersText = document.getElementById('mainLiveUsersText');
     if (mainLiveUsersText) {
-        mainLiveUsersText.textContent = `오늘 ${liveData.todayActive.toLocaleString()}명 트레이닝 중`;
+        mainLiveUsersText.textContent = `지금 ${liveData.todayActive.toLocaleString()}명 트레이닝 중`;
     }
     
-    // 결과화면 상세 현황 업데이트
+    // 결과화면 상세 현황 업데이트 (기존 기능 유지)
     const liveUsersCount = document.getElementById('liveUsersCount');
     const totalUsersCount = document.getElementById('totalUsersCount');
     
@@ -1685,89 +1652,7 @@ function updateSocialProofData() {
     }
 }
 
-// 🔥 새로운 기능: 리뷰 슬라이더 생성
-function initReviewsCarousel() {
-    const reviewsSlider = document.getElementById('reviewsSlider');
-    const carouselDots = document.getElementById('carouselDots');
-    
-    if (!reviewsSlider || !carouselDots) return;
-    
-    // 리뷰 카드들 생성
-    reviewsSlider.innerHTML = '';
-    SOCIAL_PROOF_REVIEWS.forEach((review, index) => {
-        const reviewCard = document.createElement('div');
-        reviewCard.className = 'review-card';
-        reviewCard.innerHTML = `
-            <div class="review-text">"${review.text}"</div>
-            <div class="review-author">
-                <div class="review-avatar">${review.avatar}</div>
-                <div class="review-info">
-                    <div class="review-name">${review.author}</div>
-                    <div class="review-rating">${review.rating}</div>
-                </div>
-            </div>
-        `;
-        reviewsSlider.appendChild(reviewCard);
-    });
-    
-    // 캐러셀 점들 생성
-    carouselDots.innerHTML = '';
-    SOCIAL_PROOF_REVIEWS.forEach((_, index) => {
-        const dot = document.createElement('div');
-        dot.className = `carousel-dot ${index === 0 ? 'active' : ''}`;
-        dot.addEventListener('click', () => goToReview(index));
-        carouselDots.appendChild(dot);
-    });
-    
-    // 자동 슬라이드 시작
-    startReviewCarousel();
-    
-    // GA 이벤트: 사회적 증명 노출
-    gtag('event', 'social_proof_impression', {
-        total_reviews: SOCIAL_PROOF_REVIEWS.length,
-        current_live_users: generateSmartLiveData().todayActive
-    });
-}
 
-// 🔥 새로운 기능: 리뷰 캐러셀 자동 재생
-function startReviewCarousel() {
-    if (reviewCarouselInterval) {
-        clearInterval(reviewCarouselInterval);
-    }
-    
-    reviewCarouselInterval = setInterval(() => {
-        currentReviewIndex = (currentReviewIndex + 1) % SOCIAL_PROOF_REVIEWS.length;
-        goToReview(currentReviewIndex);
-    }, 4000); // 4초마다 변경
-}
-
-// 🔥 새로운 기능: 특정 리뷰로 이동
-function goToReview(index) {
-    const reviewsSlider = document.getElementById('reviewsSlider');
-    const carouselDots = document.getElementById('carouselDots');
-    
-    if (!reviewsSlider || !carouselDots) return;
-    
-    currentReviewIndex = index;
-    
-    // 슬라이더 이동
-    reviewsSlider.style.transform = `translateX(-${index * 100}%)`;
-    
-    // 점 활성화 상태 업데이트
-    carouselDots.querySelectorAll('.carousel-dot').forEach((dot, i) => {
-        if (i === index) {
-            dot.classList.add('active');
-        } else {
-            dot.classList.remove('active');
-        }
-    });
-    
-    // GA 이벤트: 리뷰 조회
-    gtag('event', 'review_view', {
-        review_index: index,
-        review_author: SOCIAL_PROOF_REVIEWS[index].author
-    });
-}
 
 // 🎯 스마트 조언 생성
 function generateLocalAdviceAddition(analysis, currentFeedback, isAborted) {
