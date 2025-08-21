@@ -5,16 +5,22 @@
 const PROFILE_HTML = `
 <div class="profile-screen-container" style="padding-top: max(40px, env(safe-area-inset-top));">
     
-    <!-- 1. 프로필 헤더 (사용자 요구사항에 맞게 수정) -->
+    <!-- 1. 프로필 헤더 (레벨 시스템 포함) -->
     <div class="main-header" style="padding: 20px; margin-bottom: 24px;">
         <div class="user-greeting">
             <div class="user-info" style="display: flex; align-items: center; gap: 12px;">
                 <div class="user-avatar" style="width: 48px; height: 48px; background: #EEF1F3; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                     <img src="images/suumt-logo.png" alt="숨트레이너" style="width: 32px; height: 32px; border-radius: 50%;" onerror="this.parentNode.innerHTML='🤖';">
                 </div>
-                <div class="user-text">
-                    <h3 id="profileNickname" style="font-size: 16px; font-weight: 500; color: #1f2937; margin: 0 0 4px 0;">AI 숨트레이너 님</h3>
-                    <p class="greeting-message" style="font-size: 14px; font-weight: 400; color: #1f2937; margin: 0;">나의 호흡 운동 여정을 확인해보세요</p>
+                <div class="user-text" style="flex: 1;">
+                    <h3 id="profileNickname" style="font-size: 16px; font-weight: 600; color: #1f2937; margin: 0 0 4px 0;">AI 숨트레이너 님</h3>
+                    <p class="greeting-message" style="font-size: 14px; font-weight: 400; color: #1f2937; margin: 0 0 8px 0;">나의 호흡 운동 여정을 확인해보세요</p>
+                    
+                    <!-- 레벨 진행률 바 -->
+                    <div id="levelProgressContainer" style="background: #f3f4f6; border-radius: 8px; height: 6px; overflow: hidden; margin-top: 8px;">
+                        <div id="levelProgressBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s ease; border-radius: 8px;"></div>
+                    </div>
+                    <div id="levelInfo" style="font-size: 11px; color: #6b7280; margin-top: 4px;">Lv.1 뉴비 (0/166 EXP)</div>
                 </div>
             </div>
         </div>
@@ -802,6 +808,9 @@ class ProfileDashboard {
 
         // 커뮤니티 리뷰 캐러셀 초기화 (실제 리뷰 시스템)
         this.initCommunityCarousel();
+
+        // 레벨 시스템 업데이트
+        this.updateLevelDisplay();
     }
 
     // 🏆 배지 표시 업데이트 (프로필탭용 - 표시만, 획득 로직 제거)
@@ -878,6 +887,38 @@ class ProfileDashboard {
             console.error('❌ 로그아웃 처리 중 오류:', error);
             alert('데이터 삭제 중 오류가 발생했습니다.\n다시 시도해 주세요.');
         }
+    }
+
+    // 🎮 레벨 표시 업데이트
+    updateLevelDisplay() {
+        if (typeof window.levelSystem === 'undefined') {
+            console.warn('레벨 시스템이 로드되지 않았습니다.');
+            return;
+        }
+        
+        // 운동 데이터로 레벨 업데이트
+        const levelData = window.levelSystem.updateFromExerciseData(this.exerciseData);
+        
+        // 닉네임에 레벨 표시
+        const nicknameEl = document.getElementById('profileNickname');
+        if (nicknameEl && this.userInfo) {
+            nicknameEl.textContent = `${this.userInfo.nickname} Lv.${levelData.level} ${levelData.title}`;
+        }
+        
+        // 진행률 바 업데이트
+        const progressBar = document.getElementById('levelProgressBar');
+        if (progressBar) {
+            progressBar.style.width = `${levelData.progress}%`;
+        }
+        
+        // 레벨 정보 업데이트
+        const levelInfo = document.getElementById('levelInfo');
+        if (levelInfo) {
+            const nextLevelExp = levelData.maxExp === 999999 ? '최고레벨' : levelData.maxExp;
+            levelInfo.textContent = `Lv.${levelData.level} ${levelData.title} (${levelData.currentExp}/${nextLevelExp} EXP)`;
+        }
+        
+        console.log('🎮 레벨 업데이트:', levelData);
     }
 
     // 🧹 정리
