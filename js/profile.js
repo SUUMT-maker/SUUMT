@@ -1,5 +1,5 @@
 // 🙋‍♂️ 프로필탭 인라인 구현 (dashboard.js 패턴)
-// ✨ 실시간 커뮤니티 데이터, 배지 시스템, 성장 통계 포함
+// ✨ 실시간 리뷰 캐러셀, 배지 시스템, 성장 통계 포함
 
 // 📱 프로필탭 HTML 구조
 const PROFILE_HTML = `
@@ -60,28 +60,32 @@ const PROFILE_HTML = `
         </div>
     </div>
 
-    <!-- 4. 숨트 커뮤니티 -->
+    <!-- 4. 숨트 커뮤니티 (리뷰 캐러셀 시스템) -->
     <div id="profileCommunitySection" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
         <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
             <span style="font-size: 24px;">🫁</span>
             <span style="font-size: 18px; font-weight: 600; color: #1E1E1E;">함께하는 숨트 커뮤니티</span>
         </div>
         
+        <!-- 실시간 통계 -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
             <div style="text-align: center;">
-                <div style="font-size: 24px; font-weight: 700; color: #3B82F6;">1,247</div>
+                <div id="profileTodayActive" style="font-size: 24px; font-weight: 700; color: #3B82F6;">1,247</div>
                 <div style="font-size: 12px; color: #6B7280;">오늘 활동 중</div>
             </div>
             <div style="text-align: center;">
-                <div style="font-size: 24px; font-weight: 700; color: #22C55E;">12,543</div>
+                <div id="profileTotalUsers" style="font-size: 24px; font-weight: 700; color: #22C55E;">12,543</div>
                 <div style="font-size: 12px; color: #6B7280;">전체 사용자</div>
             </div>
         </div>
         
-        <div style="background: #F8F9FA; padding: 16px; border-radius: 12px; text-align: center;">
-            <div style="font-size: 14px; color: #6B7280; line-height: 1.5;">
-                "매일 조금씩 발전하는 우리의 호흡 여정,<br>
-                함께 해서 더욱 의미있어요! 💪"
+        <!-- 리뷰 캐러셀 -->
+        <div class="reviews-carousel" style="background: #F8F9FA; border-radius: 16px; padding: 16px; overflow: hidden; position: relative; height: 140px;">
+            <div class="reviews-slider" id="profileReviewsSlider" style="display: flex; transition: transform 0.5s ease; height: 100%;">
+                <!-- 리뷰 카드들이 JavaScript로 생성됨 -->
+            </div>
+            <div class="carousel-dots" id="profileCarouselDots" style="display: flex; justify-content: center; gap: 6px; margin-top: 12px;">
+                <!-- 점들이 JavaScript로 생성됨 -->
             </div>
         </div>
     </div>
@@ -164,6 +168,95 @@ const PROFILE_CSS = `
     word-break: keep-all;
 }
 
+/* 리뷰 캐러셀 스타일 */
+.reviews-carousel {
+    background: #F8F9FA;
+    border-radius: 16px;
+    padding: 16px;
+    overflow: hidden;
+    position: relative;
+    height: 140px;
+}
+
+.reviews-slider {
+    display: flex;
+    transition: transform 0.5s ease;
+    height: 100%;
+}
+
+.review-card {
+    min-width: 100%;
+    padding: 0 8px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.review-text {
+    font-size: 14px;
+    color: #333;
+    line-height: 1.5;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.review-author {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.review-avatar {
+    width: 32px;
+    height: 32px;
+    background: linear-gradient(45deg, #667eea, #764ba2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 12px;
+}
+
+.review-info {
+    text-align: left;
+}
+
+.review-name {
+    font-size: 12px;
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 2px;
+}
+
+.review-rating {
+    font-size: 10px;
+    color: #666;
+}
+
+.carousel-dots {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 12px;
+}
+
+.carousel-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #ccc;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.carousel-dot.active {
+    background: #4facfe;
+    transform: scale(1.2);
+}
+
 @media (max-width: 480px) {
     .profile-screen-container {
         padding-bottom: 100px;
@@ -191,6 +284,14 @@ const PROFILE_CSS = `
     #profileBadgesGrid {
         gap: 6px !important;
     }
+    
+    .reviews-carousel {
+        height: 120px !important;
+    }
+    
+    .review-text {
+        font-size: 12px !important;
+    }
 }
 </style>
 `;
@@ -202,7 +303,8 @@ class ProfileDashboard {
         this.supabaseClient = null;
         this.exerciseData = [];
         this.userInfo = null;
-        this.communityUpdateInterval = null;
+        this.reviewCarouselInterval = null;
+        this.currentReviewIndex = 0;
     }
 
     // 🔧 초기화
@@ -360,36 +462,85 @@ class ProfileDashboard {
         return [];
     }
 
-    // 🫁 커뮤니티 데이터 업데이트 (기존 스마트 생성 함수 활용)
-    updateCommunityData() {
-        // 기존 generateSmartLiveData 함수 활용
-        if (typeof window.generateSmartLiveData === 'function') {
-            const liveData = window.generateSmartLiveData();
-            
-            // 프로필탭 커뮤니티 섹션 업데이트
-            const communitySection = document.getElementById('profileCommunitySection');
-            if (communitySection) {
-                // 실시간 통계 업데이트
-                const todayActiveEl = communitySection.querySelector('[style*="color: #3B82F6"]');
-                const totalUsersEl = communitySection.querySelector('[style*="color: #22C55E"]');
-                
-                if (todayActiveEl) {
-                    todayActiveEl.textContent = liveData.todayActive.toLocaleString();
-                }
-                if (totalUsersEl) {
-                    totalUsersEl.textContent = liveData.totalUsers.toLocaleString();
-                }
-                
-                console.log('🫁 커뮤니티 데이터 업데이트:', liveData);
+    // 🫁 커뮤니티 리뷰 캐러셀 초기화 (기존 시스템 활용)
+    initCommunityCarousel() {
+        // 기존 SOCIAL_PROOF_REVIEWS 데이터 활용
+        const reviewsData = this.getReviewsData();
+        
+        // 실시간 통계 업데이트
+        this.updateCommunityStats();
+        
+        // 리뷰 캐러셀 초기화
+        this.setupReviewCarousel(reviewsData);
+        
+        console.log('🫁 커뮤니티 리뷰 캐러셀 초기화 완료');
+    }
+
+    // 🫁 리뷰 데이터 가져오기 (기존 SOCIAL_PROOF_REVIEWS 활용)
+    getReviewsData() {
+        // 기존 SOCIAL_PROOF_REVIEWS가 있으면 사용
+        if (typeof window.SOCIAL_PROOF_REVIEWS !== 'undefined') {
+            return window.SOCIAL_PROOF_REVIEWS;
+        }
+        
+        // 없으면 기본 리뷰 데이터 제공
+        return [
+            {
+                text: "숨트로 폐활량이 정말 늘었어요! 계단 오를 때 숨이 덜 차요 👍",
+                author: "김상우",
+                rating: "⭐⭐⭐⭐⭐",
+                avatar: "김"
+            },
+            {
+                text: "운동 후 호흡이 훨씬 편해졌습니다. 꾸준히 하니까 확실히 달라져요!",
+                author: "박영희", 
+                rating: "⭐⭐⭐⭐⭐",
+                avatar: "박"
+            },
+            {
+                text: "처음엔 힘들었는데 이제 2단계까지 할 수 있어요. 성취감 최고!",
+                author: "이민수",
+                rating: "⭐⭐⭐⭐⭐", 
+                avatar: "이"
+            },
+            {
+                text: "숨트 앱 덕분에 매일 꾸준히 하게 되네요. UI도 예쁘고 재미있어요!",
+                author: "정하나",
+                rating: "⭐⭐⭐⭐⭐",
+                avatar: "정"
+            },
+            {
+                text: "호흡근 운동이 이렇게 중요한 줄 몰랐어요. 숨트 강력 추천합니다!",
+                author: "최준호",
+                rating: "⭐⭐⭐⭐⭐",
+                avatar: "최"
             }
+        ];
+    }
+
+    // 🫁 실시간 통계 업데이트 
+    updateCommunityStats() {
+        // 기존 generateSmartLiveData 함수 활용
+        let liveData;
+        if (typeof window.generateSmartLiveData === 'function') {
+            liveData = window.generateSmartLiveData();
         } else {
-            // 기존 함수가 없으면 자체 생성
-            const liveData = this.generateFallbackCommunityData();
-            this.applyCommunityData(liveData);
+            liveData = this.generateFallbackCommunityData();
+        }
+        
+        // 통계 숫자 업데이트
+        const todayActiveEl = document.getElementById('profileTodayActive');
+        const totalUsersEl = document.getElementById('profileTotalUsers');
+        
+        if (todayActiveEl) {
+            todayActiveEl.textContent = liveData.todayActive.toLocaleString();
+        }
+        if (totalUsersEl) {
+            totalUsersEl.textContent = liveData.totalUsers.toLocaleString();
         }
     }
 
-    // 🫁 자체 커뮤니티 데이터 생성 (폴백용)
+    // 🫁 폴백용 커뮤니티 데이터 생성
     generateFallbackCommunityData() {
         const now = new Date();
         const hour = now.getHours();
@@ -419,51 +570,81 @@ class ProfileDashboard {
         };
     }
 
-    // 🫁 커뮤니티 데이터 적용
-    applyCommunityData(data) {
-        const communitySection = document.getElementById('profileCommunitySection');
-        if (!communitySection) return;
+    // 🫁 리뷰 캐러셀 설정
+    setupReviewCarousel(reviewsData) {
+        const reviewsSlider = document.getElementById('profileReviewsSlider');
+        const carouselDots = document.getElementById('profileCarouselDots');
         
-        // 동적 HTML 업데이트 (하드코딩 제거)
-        const updatedHTML = `
-            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-                <span style="font-size: 24px;">🫁</span>
-                <span style="font-size: 18px; font-weight: 600; color: #1E1E1E;">함께하는 숨트 커뮤니티</span>
-            </div>
-            
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
-                <div style="text-align: center;">
-                    <div style="font-size: 24px; font-weight: 700; color: #3B82F6;">${data.todayActive.toLocaleString()}</div>
-                    <div style="font-size: 12px; color: #6B7280;">오늘 활동 중</div>
-                </div>
-                <div style="text-align: center;">
-                    <div style="font-size: 24px; font-weight: 700; color: #22C55E;">${data.totalUsers.toLocaleString()}</div>
-                    <div style="font-size: 12px; color: #6B7280;">전체 사용자</div>
-                </div>
-            </div>
-            
-            <div style="background: #F8F9FA; padding: 16px; border-radius: 12px; text-align: center;">
-                <div style="font-size: 14px; color: #6B7280; line-height: 1.5;">
-                    ${this.getRandomMotivationMessage()}
-                </div>
-            </div>
-        `;
+        if (!reviewsSlider || !carouselDots) return;
         
-        communitySection.innerHTML = updatedHTML;
-        console.log('🫁 커뮤니티 섹션 업데이트 완료');
+        // 리뷰 카드들 생성
+        reviewsSlider.innerHTML = '';
+        reviewsData.forEach((review, index) => {
+            const reviewCard = document.createElement('div');
+            reviewCard.className = 'review-card';
+            reviewCard.innerHTML = `
+                <div class="review-text">"${review.text}"</div>
+                <div class="review-author">
+                    <div class="review-avatar">${review.avatar}</div>
+                    <div class="review-info">
+                        <div class="review-name">${review.author}</div>
+                        <div class="review-rating">${review.rating}</div>
+                    </div>
+                </div>
+            `;
+            reviewsSlider.appendChild(reviewCard);
+        });
+        
+        // 캐러셀 점들 생성
+        carouselDots.innerHTML = '';
+        reviewsData.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.className = `carousel-dot ${index === 0 ? 'active' : ''}`;
+            dot.addEventListener('click', () => this.goToReview(index));
+            carouselDots.appendChild(dot);
+        });
+        
+        // 자동 슬라이드 시작
+        this.startReviewAutoSlide(reviewsData.length);
+        this.currentReviewIndex = 0;
     }
 
-    // 🫁 랜덤 동기부여 메시지
-    getRandomMotivationMessage() {
-        const messages = [
-            '"매일 조금씩 발전하는 우리의 호흡 여정,<br>함께 해서 더욱 의미있어요! 💪"',
-            '"숨쉬는 것만으로도 건강해지고 있어요,<br>우리 모두 화이팅! 🌟"',
-            '"호흡 하나하나가 모여 큰 변화를 만들어요,<br>꾸준히 함께해요! 🚀"',
-            '"깊은 호흡으로 마음도 몸도 건강하게,<br>오늘도 좋은 하루 보내세요! 😊"',
-            '"작은 습관이 큰 변화를 만듭니다,<br>호흡 트레이닝과 함께 성장해요! 🌱"'
-        ];
+    // 🫁 특정 리뷰로 이동
+    goToReview(index) {
+        const reviewsSlider = document.getElementById('profileReviewsSlider');
+        const carouselDots = document.getElementById('profileCarouselDots');
         
-        return messages[Math.floor(Math.random() * messages.length)];
+        if (!reviewsSlider || !carouselDots) return;
+        
+        this.currentReviewIndex = index;
+        
+        // 슬라이더 이동 (기존 시스템과 동일)
+        reviewsSlider.style.transform = `translateX(-${index * 100}%)`;
+        
+        // 점 활성화 상태 업데이트
+        carouselDots.querySelectorAll('.carousel-dot').forEach((dot, i) => {
+            if (i === index) {
+                dot.classList.add('active');
+            } else {
+                dot.classList.remove('active');
+            }
+        });
+    }
+
+    // 🫁 자동 슬라이드 시작
+    startReviewAutoSlide(totalReviews) {
+        // 기존 인터벌 정리
+        if (this.reviewCarouselInterval) {
+            clearInterval(this.reviewCarouselInterval);
+        }
+        
+        // 4초마다 자동 전환 (기존 시스템과 동일)
+        this.reviewCarouselInterval = setInterval(() => {
+            this.currentReviewIndex = (this.currentReviewIndex + 1) % totalReviews;
+            this.goToReview(this.currentReviewIndex);
+        }, 4000);
+        
+        console.log('🫁 리뷰 자동 슬라이드 시작 (4초 간격)');
     }
 
     // 📈 오늘 운동 횟수 계산
@@ -546,26 +727,8 @@ class ProfileDashboard {
         // 배지 시스템 업데이트 (표시만, 자동 획득 안함)
         this.updateBadgesDisplay();
 
-        // 커뮤니티 데이터 업데이트 (동적 데이터)
-        this.updateCommunityData();
-
-        // 🫁 커뮤니티 데이터 자동 새로고침 (30초마다)
-        this.startCommunityAutoRefresh();
-    }
-
-    // 🫁 커뮤니티 자동 새로고침 시작
-    startCommunityAutoRefresh() {
-        // 기존 인터벌 정리
-        if (this.communityUpdateInterval) {
-            clearInterval(this.communityUpdateInterval);
-        }
-        
-        // 30초마다 커뮤니티 데이터 업데이트
-        this.communityUpdateInterval = setInterval(() => {
-            this.updateCommunityData();
-        }, 30000); // 30초
-        
-        console.log('🫁 커뮤니티 자동 새로고침 시작 (30초 간격)');
+        // 커뮤니티 리뷰 캐러셀 초기화 (실제 리뷰 시스템)
+        this.initCommunityCarousel();
     }
 
     // 🏆 배지 표시 업데이트 (프로필탭용 - 표시만, 획득 로직 제거)
@@ -652,11 +815,11 @@ class ProfileDashboard {
             logoutBtn.removeEventListener('click', this.handleLogout);
         }
         
-        // 커뮤니티 자동 새로고침 정리
-        if (this.communityUpdateInterval) {
-            clearInterval(this.communityUpdateInterval);
-            this.communityUpdateInterval = null;
-            console.log('🫁 커뮤니티 자동 새로고침 정리');
+        // 리뷰 캐러셀 인터벌 정리
+        if (this.reviewCarouselInterval) {
+            clearInterval(this.reviewCarouselInterval);
+            this.reviewCarouselInterval = null;
+            console.log('🫁 리뷰 캐러셀 자동 슬라이드 정리');
         }
     }
 }
@@ -696,7 +859,7 @@ async function initProfileDashboard() {
     // 전역 변수 등록
     window.profileDashboard = dashboard;
     
-    console.log('✅ 프로필 대시보드 초기화 완료 (배지 + 커뮤니티 연동)');
+    console.log('✅ 프로필 대시보드 초기화 완료 (배지 + 리뷰 캐러셀 연동)');
 }
 
 // 🔧 전역 함수 등록
