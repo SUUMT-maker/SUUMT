@@ -548,32 +548,7 @@ class ProfileDashboard {
 
     // 🫁 폴백용 커뮤니티 데이터 생성
     generateFallbackCommunityData() {
-        const now = new Date();
-        const hour = now.getHours();
-        const day = now.getDay();
-        
-        // 시간대별 활성도 패턴
-        let hourMultiplier = 1.0;
-        if (hour >= 6 && hour <= 9) hourMultiplier = 1.8; // 아침 피크
-        else if (hour >= 18 && hour <= 22) hourMultiplier = 2.2; // 저녁 피크
-        else if (hour >= 0 && hour <= 5) hourMultiplier = 0.3; // 새벽
-        
-        // 요일별 패턴
-        let dayMultiplier = 1.0;
-        if (day === 0 || day === 6) dayMultiplier = 0.7; // 주말 70%
-        
-        // 기본 데이터 + 성장 패턴
-        const daysSinceStart = Math.floor((now - new Date('2024-01-01')) / (1000 * 60 * 60 * 24));
-        const baseUsers = 8500 + (daysSinceStart * 12); // 하루 12명씩 성장
-        
-        const todayActive = Math.floor(baseUsers * hourMultiplier * dayMultiplier * (0.85 + Math.random() * 0.3));
-        const totalUsers = Math.floor(baseUsers * 1.4);
-        
-        return {
-            todayActive: Math.max(150, todayActive),
-            totalUsers: Math.max(8000, totalUsers),
-            isGrowing: true
-        };
+        return window.communityDataCache.getData();
     }
 
     // 🫁 리뷰 캐러셀 설정
@@ -874,34 +849,66 @@ window.onProfileTabClick = initProfileDashboard;
 
 console.log('🙋‍♂️ 프로필탭 모듈 로드 완료');
 
+// 🔄 커뮤니티 데이터 캐싱 시스템
+window.communityDataCache = {
+    data: null,
+    timestamp: null,
+    cacheTime: 30 * 1000, // 30초 캐시
+    
+    getData: function() {
+        const now = Date.now();
+        
+        // 캐시가 없거나 만료되었으면 새로 생성
+        if (!this.data || !this.timestamp || (now - this.timestamp) > this.cacheTime) {
+            this.data = this.generateData();
+            this.timestamp = now;
+            console.log('🔄 새로운 커뮤니티 데이터 생성:', this.data);
+        }
+        
+        return this.data;
+    },
+    
+    generateData: function() {
+        const now = new Date();
+        const hour = now.getHours();
+        const day = now.getDay();
+        
+        // 기준 데이터 (현실적 범위)
+        const daysSinceStart = Math.floor((now - new Date('2024-01-01')) / (1000 * 60 * 60 * 24));
+        const baseUsers = 5200 + (daysSinceStart * 14);
+        const totalUsers = Math.min(baseUsers, 7500);
+        
+        // 시간대별 활성도 패턴
+        let hourMultiplier = 1.0;
+        if (hour >= 6 && hour <= 8) hourMultiplier = 1.2;
+        else if (hour >= 19 && hour <= 21) hourMultiplier = 1.5;
+        else if (hour >= 9 && hour <= 17) hourMultiplier = 0.8;
+        else if (hour >= 0 && hour <= 5) hourMultiplier = 0.3;
+        else hourMultiplier = 0.9;
+        
+        // 요일별 패턴
+        let dayMultiplier = 1.0;
+        if (day === 0) dayMultiplier = 0.7;
+        else if (day === 6) dayMultiplier = 0.8;
+        else if (day >= 1 && day <= 5) dayMultiplier = 1.0;
+        
+        // 일일 활성 사용자 계산
+        const baseDailyActive = Math.floor(totalUsers * 0.18);
+        const todayActive = Math.floor(baseDailyActive * hourMultiplier * dayMultiplier);
+        
+        // 최종 범위 제한
+        const finalTodayActive = Math.max(300, Math.min(todayActive, Math.floor(totalUsers * 0.25)));
+        const finalTotalUsers = Math.max(5000, totalUsers);
+        
+        return {
+            todayActive: finalTodayActive,
+            totalUsers: finalTotalUsers,
+            isGrowing: true
+        };
+    }
+};
+
 // 🌐 전역 커뮤니티 데이터 제공 함수
 window.getCommunityStats = function() {
-    // profile.js의 데이터 생성 로직 활용
-    if (window.profileDashboard && typeof window.profileDashboard.generateFallbackCommunityData === 'function') {
-        return window.profileDashboard.generateFallbackCommunityData();
-    }
-    
-    // 폴백 데이터 (profile.js와 동일한 로직)
-    const now = new Date();
-    const hour = now.getHours();
-    const day = now.getDay();
-    
-    let hourMultiplier = 1.0;
-    if (hour >= 6 && hour <= 9) hourMultiplier = 1.8;
-    else if (hour >= 18 && hour <= 22) hourMultiplier = 2.2;
-    else if (hour >= 0 && hour <= 5) hourMultiplier = 0.3;
-    
-    let dayMultiplier = 1.0;
-    if (day === 0 || day === 6) dayMultiplier = 0.7;
-    
-    const daysSinceStart = Math.floor((now - new Date('2024-01-01')) / (1000 * 60 * 60 * 24));
-    const baseUsers = 8500 + (daysSinceStart * 12);
-    
-    const todayActive = Math.floor(baseUsers * hourMultiplier * dayMultiplier * (0.85 + Math.random() * 0.3));
-    const totalUsers = Math.floor(baseUsers * 1.4);
-    
-    return {
-        todayActive: Math.max(150, todayActive),
-        totalUsers: Math.max(8000, totalUsers)
-    };
+    return window.communityDataCache.getData();
 };
