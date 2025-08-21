@@ -219,22 +219,24 @@ const PROFILE_CSS = `
 }
 
 .review-avatar-icon {
-    width: 28px;
-    height: 28px;
+    width: 24px; /* 28px → 24px */
+    height: 24px;
     background: linear-gradient(45deg, #667eea, #764ba2);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 12px; /* 14px → 12px */
     color: white;
     flex-shrink: 0;
+    text-align: center; /* 완벽한 중앙 정렬 */
 }
 
 .review-name {
-    font-size: 12px;
+    font-size: 10px; /* 마스킹된 아이디가 더 길어져서 폰트 조정 */
     font-weight: 600;
-    color: #333;
+    color: #666; /* 약간 더 연한 색으로 익명성 강조 */
+    font-family: 'Courier New', monospace; /* 고정폭 폰트로 * 정렬 */
 }
 
 .review-rating {
@@ -249,6 +251,7 @@ const PROFILE_CSS = `
     text-align: center;
     word-break: keep-all;
     max-width: 90%;
+    margin-bottom: 20px; /* 인디케이터와 여백 증가 */
 }
 
 .carousel-dots {
@@ -580,14 +583,16 @@ class ProfileDashboard {
                 <div class="review-content">
                     <div class="review-header-center">
                         <div class="review-avatar-icon">👤</div>
-                        <span class="review-name">${review.author.replace(/^[김이박정최]+/, '')}</span>
+                        <span class="review-name">${this.generateAnonymousId(review.author, review.text)}</span>
                         <span class="review-rating">${review.rating}</span>
                     </div>
-                    <div class="review-text">"${review.text}"</div>
+                    <div class="review-text">${review.text}</div>
                 </div>
             `;
             reviewsSlider.appendChild(reviewCard);
         });
+        
+
         
         // 캐러셀 점들 생성
         carouselDots.innerHTML = '';
@@ -696,6 +701,34 @@ class ProfileDashboard {
         
         return [];
         */
+    }
+
+    // 🆔 익명 아이디 생성 함수
+    generateAnonymousId(originalName, reviewText) {
+        const prefixes = ['breath', 'healthy', 'active', 'fresh', 'strong'];
+        const suffixes = ['lover', 'life', 'user', 'fan', 'pro'];
+        
+        // 리뷰 내용에 따른 나이대 설정
+        let ageGroup;
+        if (reviewText.includes('계단') || reviewText.includes('운동')) ageGroup = '30대';
+        else if (reviewText.includes('폐활량') || reviewText.includes('확실히')) ageGroup = '40대'; 
+        else if (reviewText.includes('처음') || reviewText.includes('성취감')) ageGroup = '30대';
+        else if (reviewText.includes('UI') || reviewText.includes('앱')) ageGroup = '20대';
+        else ageGroup = '50대';
+        
+        const nameHash = originalName.charCodeAt(0) % prefixes.length;
+        const textHash = reviewText.length % suffixes.length;
+        
+        // 전체 아이디 생성
+        const fullId = `${prefixes[nameHash]}${suffixes[textHash]}`;
+        
+        // 마스킹 처리: 앞 3-4글자만 표시, 나머지는 *
+        const visibleLength = Math.min(4, Math.max(3, fullId.length - 3));
+        const visiblePart = fullId.substring(0, visibleLength);
+        const maskLength = fullId.length - visibleLength;
+        const maskedPart = '*'.repeat(maskLength);
+        
+        return `${visiblePart}${maskedPart}(${ageGroup})`;
     }
 
     // 🎨 UI 업데이트
