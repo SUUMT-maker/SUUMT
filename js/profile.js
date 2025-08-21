@@ -202,45 +202,49 @@ const PROFILE_CSS = `
     word-break: keep-all;
 }
 
-.review-author-line {
+.review-layout {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
     margin-bottom: 12px;
 }
 
-.review-avatar {
-    width: 32px;
-    height: 32px;
+.review-avatar-icon {
+    width: 24px;
+    height: 24px;
     background: linear-gradient(45deg, #667eea, #764ba2);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: white;
-    font-weight: bold;
     font-size: 12px;
+    flex-shrink: 0;
 }
 
-.review-text {
-    font-size: 13px;
-    color: #333;
-    line-height: 1.5;
-    margin-bottom: 16px; /* 인디케이터와 여백 */
-    text-align: center;
-    word-break: keep-all;
+.review-name-rating {
+    display: flex;
+    align-items: center;
+    gap: 4px; /* 이름과 별점 바로 붙이기 */
 }
 
 .review-name {
     font-size: 12px;
     font-weight: 600;
     color: #333;
-    flex: 1; /* 이름이 남은 공간 차지 */
 }
 
 .review-rating {
     font-size: 10px;
     color: #666;
+}
+
+.review-text {
+    font-size: 13px;
+    color: #333;
+    line-height: 1.5;
+    margin-bottom: 24px; /* 인디케이터와 여백 증가 */
+    text-align: center;
+    word-break: keep-all;
 }
 
 .carousel-dots {
@@ -569,10 +573,14 @@ class ProfileDashboard {
             const reviewCard = document.createElement('div');
             reviewCard.className = 'review-card';
             reviewCard.innerHTML = `
-                <div class="review-author-line" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
-                    <div class="review-avatar">${review.avatar}</div>
-                    <div class="review-name">${review.author}</div>
-                    <div class="review-rating">${review.rating}</div>
+                <div class="review-layout">
+                    <div class="review-avatar-icon">👤</div>
+                    <div class="review-info-group">
+                        <div class="review-name-rating">
+                            <span class="review-name">${review.author.replace(/^[김이박정최]+/, '')}</span>
+                            <span class="review-rating">${review.rating}</span>
+                        </div>
+                    </div>
                 </div>
                 <div class="review-text">"${review.text}"</div>
             `;
