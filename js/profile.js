@@ -172,16 +172,16 @@ const PROFILE_CSS = `
 .reviews-carousel {
     background: #F8F9FA;
     border-radius: 16px;
-    padding: 16px;
+    padding: 16px 16px 24px 16px;
     overflow: hidden;
     position: relative;
-    height: 140px;
+    height: 160px;
 }
 
 .reviews-slider {
     display: flex;
     transition: transform 0.5s ease;
-    height: 100%;
+    height: calc(100% - 24px);
 }
 
 .review-card {
@@ -193,11 +193,15 @@ const PROFILE_CSS = `
 }
 
 .review-text {
-    font-size: 14px;
+    font-size: 13px;
     color: #333;
-    line-height: 1.5;
-    margin-bottom: 12px;
+    line-height: 1.4;
+    margin-bottom: 8px;
     text-align: center;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
 }
 
 .review-author {
@@ -237,10 +241,14 @@ const PROFILE_CSS = `
 }
 
 .carousel-dots {
+    position: absolute;
+    bottom: 8px;
+    left: 50%;
+    transform: translateX(-50%);
     display: flex;
     justify-content: center;
     gap: 6px;
-    margin-top: 12px;
+    margin-top: 0;
 }
 
 .carousel-dot {
