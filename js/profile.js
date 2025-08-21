@@ -80,7 +80,7 @@ const PROFILE_HTML = `
         </div>
         
         <!-- 리뷰 캐러셀 -->
-        <div class="reviews-carousel" style="background: #F8F9FA; border-radius: 16px; padding: 16px; overflow: hidden; position: relative; height: 140px;">
+        <div class="reviews-carousel" style="background: #F8F9FA; border-radius: 16px; padding: 16px; overflow: hidden; position: relative; height: 160px;">
             <div class="reviews-slider" id="profileReviewsSlider" style="display: flex; transition: transform 0.5s ease; height: 100%;">
                 <!-- 리뷰 카드들이 JavaScript로 생성됨 -->
             </div>
@@ -175,7 +175,7 @@ const PROFILE_CSS = `
     padding: 16px 16px 24px 16px;
     overflow: hidden;
     position: relative;
-    height: 140px; /* 카드 높이에 맞춰 전체 높이 증가 */
+    height: 160px; /* 카드 높이 140px에 맞춰 전체 높이 증가 */
 }
 
 .reviews-slider {
@@ -207,36 +207,47 @@ const PROFILE_CSS = `
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 16px;
-    height: 120px; /* 충분한 높이 보장 */
+    padding: 20px 16px 16px 16px; /* 상단 패딩 증가로 잘림 방지 */
+    height: 140px;
 }
 
 .review-header-center {
     display: flex;
     align-items: center;
     gap: 6px;
-    margin-bottom: 12px;
+    margin-bottom: 8px; /* 12px → 8px 여백 줄여서 라인 아래로 */
 }
 
 .review-avatar-icon {
-    width: 24px; /* 28px → 24px */
-    height: 24px;
+    width: 22px; /* 24px → 22px 약간 줄이기 */
+    height: 22px;
     background: linear-gradient(45deg, #667eea, #764ba2);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px; /* 14px → 12px */
     color: white;
     flex-shrink: 0;
-    text-align: center; /* 완벽한 중앙 정렬 */
+    font-size: 11px; /* 12px → 11px */
+    /* 완벽한 중앙 정렬 */
+    text-align: center;
+    line-height: 1;
+    position: relative;
+}
+
+.review-avatar-icon::before {
+    content: "👤";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
 }
 
 .review-name {
-    font-size: 10px; /* 마스킹된 아이디가 더 길어져서 폰트 조정 */
+    font-size: 10px;
     font-weight: 600;
-    color: #666; /* 약간 더 연한 색으로 익명성 강조 */
-    font-family: 'Courier New', monospace; /* 고정폭 폰트로 * 정렬 */
+    color: #666;
+    /* Courier New 제거 - 시스템 폰트로 통일 */
 }
 
 .review-rating {
@@ -251,7 +262,7 @@ const PROFILE_CSS = `
     text-align: center;
     word-break: keep-all;
     max-width: 90%;
-    margin-bottom: 20px; /* 인디케이터와 여백 증가 */
+    margin-bottom: 20px;
 }
 
 .carousel-dots {
@@ -582,7 +593,7 @@ class ProfileDashboard {
             reviewCard.innerHTML = `
                 <div class="review-content">
                     <div class="review-header-center">
-                        <div class="review-avatar-icon">👤</div>
+                        <div class="review-avatar-icon"></div>
                         <span class="review-name">${this.generateAnonymousId(review.author, review.text)}</span>
                         <span class="review-rating">${review.rating}</span>
                     </div>
