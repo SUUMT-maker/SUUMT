@@ -1363,6 +1363,28 @@ async function showResultScreen() {
             }
         }
         
+        // 🏆 운동 완료 배지 처리 (퀴즈와 동일한 방식)
+        try {
+            // 통계 데이터 업데이트
+            const updatedStats = updateLocalStats(window.exerciseData);
+            addExerciseHistory(window.exerciseData);
+            
+            // 새로운 배지 체크
+            const newBadges = checkNewBadges(updatedStats);
+            updateBadgesDisplay();
+            
+            // 새로운 배지가 있으면 즉시 팝업 표시
+            if (newBadges && newBadges.length > 0) {
+                setTimeout(() => {
+                    showBadgePopup(newBadges[0]);
+                }, 1000);
+            }
+            
+            console.log('🏆 운동 완료 배지 체크 완료, 새 배지:', newBadges?.length || 0);
+        } catch (error) {
+            console.error('❌ 운동 배지 체크 중 오류:', error);
+        }
+        
         // 4. AI 분석 섹션 초기화
         resetAIAnalysisSection();
         
