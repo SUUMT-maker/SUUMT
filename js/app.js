@@ -1065,6 +1065,15 @@ function switchTab(tabName) {
         onRecordsTabClick();
     }
     
+    // 프로필 탭으로 이동 시 초기화
+    if (tabName === 'profile') {
+        setTimeout(() => {
+            if (typeof window.initProfileTab === 'function') {
+                window.initProfileTab();
+            }
+        }, 300);
+    }
+    
     // 홈 탭으로 이동 시 인삿말 업데이트
     if (tabName === 'home') {
         setTimeout(() => {
