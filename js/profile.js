@@ -175,7 +175,7 @@ const PROFILE_CSS = `
     padding: 16px 16px 24px 16px;
     overflow: hidden;
     position: relative;
-    height: 160px;
+    height: 140px; /* 카드 높이에 맞춰 전체 높이 증가 */
 }
 
 .reviews-slider {
@@ -202,29 +202,33 @@ const PROFILE_CSS = `
     word-break: keep-all;
 }
 
-.review-layout {
+.review-content {
     display: flex;
-    align-items: flex-start;
-    gap: 8px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    height: 120px; /* 충분한 높이 보장 */
+}
+
+.review-header-center {
+    display: flex;
+    align-items: center;
+    gap: 6px;
     margin-bottom: 12px;
 }
 
 .review-avatar-icon {
-    width: 24px;
-    height: 24px;
+    width: 28px;
+    height: 28px;
     background: linear-gradient(45deg, #667eea, #764ba2);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 14px;
+    color: white;
     flex-shrink: 0;
-}
-
-.review-name-rating {
-    display: flex;
-    align-items: center;
-    gap: 4px; /* 이름과 별점 바로 붙이기 */
 }
 
 .review-name {
@@ -234,17 +238,17 @@ const PROFILE_CSS = `
 }
 
 .review-rating {
-    font-size: 10px;
-    color: #666;
+    font-size: 12px;
+    color: #FFD700;
 }
 
 .review-text {
     font-size: 13px;
     color: #333;
-    line-height: 1.5;
-    margin-bottom: 24px; /* 인디케이터와 여백 증가 */
+    line-height: 1.4;
     text-align: center;
     word-break: keep-all;
+    max-width: 90%;
 }
 
 .carousel-dots {
@@ -573,16 +577,14 @@ class ProfileDashboard {
             const reviewCard = document.createElement('div');
             reviewCard.className = 'review-card';
             reviewCard.innerHTML = `
-                <div class="review-layout">
-                    <div class="review-avatar-icon">👤</div>
-                    <div class="review-info-group">
-                        <div class="review-name-rating">
-                            <span class="review-name">${review.author.replace(/^[김이박정최]+/, '')}</span>
-                            <span class="review-rating">${review.rating}</span>
-                        </div>
+                <div class="review-content">
+                    <div class="review-header-center">
+                        <div class="review-avatar-icon">👤</div>
+                        <span class="review-name">${review.author.replace(/^[김이박정최]+/, '')}</span>
+                        <span class="review-rating">${review.rating}</span>
                     </div>
+                    <div class="review-text">"${review.text}"</div>
                 </div>
-                <div class="review-text">"${review.text}"</div>
             `;
             reviewsSlider.appendChild(reviewCard);
         });
