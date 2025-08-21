@@ -21,6 +21,10 @@ const PROFILE_HTML = `
                         <div id="levelProgressBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s ease; border-radius: 8px;"></div>
                     </div>
                     <div id="levelInfo" style="font-size: 11px; color: #6b7280; margin-top: 4px;">Lv.1 뉴비 (0/166 EXP)</div>
+                    <div style="font-size: 11px; color: #6b7280; margin-top: 6px; line-height: 1.4; text-align: center;">
+                        하루 40회 호흡 달성시 100 EXP, 주간 챌린지 완료시 300 EXP를 획득합니다.<br>
+                        꾸준한 운동과 챌린지 도전으로 레벨업하세요!
+                    </div>
                 </div>
             </div>
         </div>
