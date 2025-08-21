@@ -106,17 +106,11 @@ const PROFILE_HTML = `
         </div>
     </div>
 
-    <!-- 5. 계정 관리 -->
-    <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 60px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
-        <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
-            <h3 style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0;">계정 관리</h3>
-        </div>
-        
-        <div style="text-align: center; padding: 16px 0;">
-            <button id="logoutButton" style="background: none; border: none; color: #9ca3af; font-size: 13px; font-weight: 400; cursor: pointer; text-decoration: underline; transition: color 0.3s ease; padding: 8px;">
-                계정 및 데이터 완전 삭제
-            </button>
-        </div>
+    <!-- 5. 계정 관리 (단순화) -->
+    <div style="margin: 0 20px 60px; padding: 20px; text-align: center;">
+        <button id="logoutButton" style="background: none; border: none; color: #9ca3af; font-size: 13px; font-weight: 400; cursor: pointer; text-decoration: underline; transition: color 0.3s ease; padding: 8px;">
+            계정 및 데이터 완전 삭제
+        </button>
         
         <div style="font-size: 11px; color: #9ca3af; text-align: center; margin-top: 8px; line-height: 1.4; max-width: 280px; margin-left: auto; margin-right: auto;">
             이 작업은 되돌릴 수 없습니다. 모든 운동 기록, 배지, AI 조언 등 개인 데이터가 영구적으로 삭제됩니다.
