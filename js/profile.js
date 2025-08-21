@@ -394,31 +394,6 @@ class ProfileDashboard {
         }
     }
 
-    // 🏆 새로운 배지 체크 (기존 로직 재사용)
-    checkAndShowNewBadges() {
-        // 기존 checkNewBadges 함수 재사용
-        if (typeof window.checkNewBadges === 'function') {
-            const stats = {
-                totalExercises: this.exerciseData.length,
-                totalBreaths: this.exerciseData.reduce((sum, s) => sum + (s.completed_breaths || 0), 0),
-                consecutiveDays: this.calculateConsecutiveDays()
-            };
-            
-            const newBadges = window.checkNewBadges(stats);
-            
-            // 새로운 배지가 있으면 팝업 표시 (기존 함수 재사용)
-            if (newBadges.length > 0 && typeof window.showBadgePopup === 'function') {
-                setTimeout(() => {
-                    window.showBadgePopup(newBadges[0]);
-                }, 500);
-            }
-            
-            return newBadges;
-        }
-        
-        return [];
-    }
-
     // 🎨 UI 업데이트
     async updateUI() {
         // 사용자 정보 업데이트
@@ -439,11 +414,11 @@ class ProfileDashboard {
         document.getElementById('consecutiveDays').textContent = stats.consecutiveDays;
         document.getElementById('currentIntensity').textContent = stats.currentIntensity;
 
-        // 배지 시스템 업데이트 (기존 시스템 활용)
+        // 배지 시스템 업데이트 (표시만, 새로운 배지 체크 안함)
         this.updateBadgesDisplay();
     }
 
-    // 🏆 배지 표시 업데이트 (프로필탭용으로 수정)
+    // 🏆 배지 표시 업데이트 (프로필탭용으로 수정 - 새로운 배지 체크 제거)
     updateBadgesDisplay() {
         const badgesConfig = this.getBadgesConfig();
         const earnedBadges = this.getEarnedBadges();
@@ -487,8 +462,8 @@ class ProfileDashboard {
             `;
         }).join('');
 
-        // 새로운 배지 체크 및 팝업 표시
-        this.checkAndShowNewBadges();
+        // 🚫 새로운 배지 체크 및 팝업 표시 제거 (버그 수정)
+        // this.checkAndShowNewBadges(); // 이 줄 제거
     }
 
     // 🚪 로그아웃/데이터 삭제
