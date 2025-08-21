@@ -547,6 +547,36 @@ class ProfileDashboard {
                 author: "최준호",
                 rating: "⭐⭐⭐⭐⭐",
                 avatar: "최"
+            },
+            {
+                text: "40대 되니까 체력 관리가 정말 중요하더라고요.<br>숨트로 꾸준히 하니까 몸이 가벼워졌어요!",
+                author: "이민수",
+                rating: "⭐⭐⭐⭐⭐",
+                avatar: "이"
+            },
+            {
+                text: "나이 들어서도 건강하게 살려면 호흡이 기본.<br>매일 10분씩이라도 하니까 확실히 달라져요.",
+                author: "김영호", 
+                rating: "⭐⭐⭐⭐⭐",
+                avatar: "김"
+            },
+            {
+                text: "손자들과 놀아줄 체력을 위해 시작했는데<br>생각보다 재미있고 효과도 좋네요!",
+                author: "박순자",
+                rating: "⭐⭐⭐⭐⭐", 
+                avatar: "박"
+            },
+            {
+                text: "복잡한 운동은 힘든데 숨트는 간단해서 좋아요.<br>집에서 편하게 할 수 있어서 만족합니다.",
+                author: "최광수",
+                rating: "⭐⭐⭐⭐⭐",
+                avatar: "최"
+            },
+            {
+                text: "40년 넘게 살면서 호흡 운동이 이렇게 중요한 줄<br>이제야 알았네요. 늦었지만 열심히 하고 있어요!",
+                author: "정혜숙",
+                rating: "⭐⭐⭐⭐⭐",
+                avatar: "정"
             }
         ];
     }
@@ -648,13 +678,13 @@ class ProfileDashboard {
             clearInterval(this.reviewCarouselInterval);
         }
         
-        // 4초마다 자동 전환 (기존 시스템과 동일)
+        // 6초마다 자동 전환 (여유로운 속도로 변경)
         this.reviewCarouselInterval = setInterval(() => {
             this.currentReviewIndex = (this.currentReviewIndex + 1) % totalReviews;
             this.goToReview(this.currentReviewIndex);
-        }, 4000);
+        }, 6000); // 4000 → 6000
         
-        console.log('🫁 리뷰 자동 슬라이드 시작 (4초 간격)');
+        console.log('🫁 리뷰 자동 슬라이드 시작 (6초 간격)');
     }
 
     // 📈 오늘 운동 횟수 계산
@@ -716,16 +746,17 @@ class ProfileDashboard {
 
     // 🆔 익명 아이디 생성 함수
     generateAnonymousId(originalName, reviewText) {
-        const prefixes = ['breath', 'healthy', 'active', 'fresh', 'strong'];
-        const suffixes = ['lover', 'life', 'user', 'fan', 'pro'];
+        const prefixes = ['breath', 'healthy', 'active', 'fresh', 'strong', 'vital'];
+        const suffixes = ['lover', 'life', 'user', 'fan', 'pro', 'master'];
         
-        // 리뷰 내용에 따른 나이대 설정
+        // 리뷰 내용에 따른 나이대 설정 (더 정확하게)
         let ageGroup;
-        if (reviewText.includes('계단') || reviewText.includes('운동')) ageGroup = '30대';
-        else if (reviewText.includes('폐활량') || reviewText.includes('확실히')) ageGroup = '40대'; 
-        else if (reviewText.includes('처음') || reviewText.includes('성취감')) ageGroup = '30대';
+        if (reviewText.includes('체력') || reviewText.includes('40대')) ageGroup = '40대';
+        else if (reviewText.includes('나이') || reviewText.includes('건강하게')) ageGroup = '50대';
+        else if (reviewText.includes('손자') || reviewText.includes('40년')) ageGroup = '60대';
+        else if (reviewText.includes('계단') || reviewText.includes('운동')) ageGroup = '30대';
         else if (reviewText.includes('UI') || reviewText.includes('앱')) ageGroup = '20대';
-        else ageGroup = '50대';
+        else ageGroup = '30대';
         
         const nameHash = originalName.charCodeAt(0) % prefixes.length;
         const textHash = reviewText.length % suffixes.length;
