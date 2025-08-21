@@ -6,27 +6,37 @@ const PROFILE_HTML = `
 <div class="profile-screen-container" style="padding-top: max(40px, env(safe-area-inset-top));">
     
     <!-- 1. 프로필 헤더 (레벨 시스템 포함) -->
-    <div class="main-header" style="padding: 20px; margin-bottom: 24px;">
-        <div class="user-greeting">
-            <div class="user-info" style="display: flex; align-items: center; gap: 12px;">
-                <div class="user-avatar" style="width: 48px; height: 48px; background: #EEF1F3; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+    <div class="main-header" style="padding: 0 20px; margin-bottom: 24px;">
+        <!-- 레벨 카드 형태 헤더 -->
+        <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 24px; margin-top: max(40px, env(safe-area-inset-top)); box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+            
+            <!-- 사용자 정보 -->
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                <div style="width: 48px; height: 48px; background: #EEF1F3; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                     <img src="images/suumt-logo.png" alt="숨트레이너" style="width: 32px; height: 32px; border-radius: 50%;" onerror="this.parentNode.innerHTML='🤖';">
                 </div>
-                <div class="user-text" style="flex: 1;">
-                    <h3 id="profileNickname" style="font-size: 16px; font-weight: 600; color: #1f2937; margin: 0 0 4px 0;">AI 숨트레이너 님</h3>
-                    <p class="greeting-message" style="font-size: 14px; font-weight: 400; color: #1f2937; margin: 0 0 8px 0;">꾸준한 운동과 챌린지 도전으로 레벨업하세요!</p>
-                    
-                    <!-- 레벨 진행률 바 -->
-                    <div id="levelProgressContainer" style="background: #f3f4f6; border-radius: 8px; height: 6px; overflow: hidden; margin-top: 8px;">
-                        <div id="levelProgressBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s ease; border-radius: 8px;"></div>
-                    </div>
-                    <div id="levelInfo" style="font-size: 11px; color: #6b7280; margin-top: 4px;">Lv.1 뉴비 (0/166 EXP)</div>
-                    <div style="font-size: 11px; color: #6b7280; margin-top: 6px; line-height: 1.4; text-align: center;">
-                        하루 40회 호흡 달성시 100 EXP<br>
-                        주간 챌린지 완료시 300 EXP를 획득합니다
+                <div style="flex: 1;">
+                    <h3 id="profileNickname" style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0;">박학재 뉴비님</h3>
+                    <p style="font-size: 14px; font-weight: 400; color: #6b7280; margin: 0;">꾸준한 운동과 챌린지 도전으로 레벨업하세요!</p>
+                </div>
+            </div>
+            
+            <!-- 대형 프로그래스 바 -->
+            <div style="background: #f3f4f6; border-radius: 16px; height: 24px; overflow: hidden; margin-bottom: 12px; position: relative;">
+                <div id="levelProgressBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 90%; transition: width 0.3s ease; border-radius: 16px; display: flex; align-items: center; justify-content: center; position: relative;">
+                    <!-- 바 안의 레벨 정보 -->
+                    <div id="levelProgressText" style="position: absolute; font-size: 12px; font-weight: 700; color: white; text-shadow: 0 1px 2px rgba(0,0,0,0.3);">
+                        Lv.2 (300/333 EXP)
                     </div>
                 </div>
             </div>
+            
+            <!-- EXP 획득 안내 -->
+            <div style="text-align: center; font-size: 11px; color: #6b7280; line-height: 1.4;">
+                하루 40회 호흡 달성시 100 EXP<br>
+                주간 챌린지 완료시 300 EXP를 획득합니다
+            </div>
+            
         </div>
     </div>
 
@@ -831,9 +841,8 @@ class ProfileDashboard {
 
     // 현재 레벨 카드 업데이트  
     updateLevelCard() {
-        if (typeof window.levelSystem !== 'undefined') {
-            // 운동 데이터로 레벨을 다시 계산해서 최신 상태로 업데이트
-            const levelData = window.levelSystem.updateFromExerciseData(this.exerciseData);
+        if (window.currentLevelData) {
+            const levelData = window.currentLevelData;
             
             const levelEl = document.getElementById('currentLevel');
             const titleEl = levelEl?.nextElementSibling;
@@ -841,7 +850,7 @@ class ProfileDashboard {
             if (levelEl) levelEl.textContent = `Lv.${levelData.level}`;
             if (titleEl) titleEl.textContent = levelData.title;
             
-            console.log('레벨 카드 업데이트:', levelData);
+            console.log('📊 카드 레벨 동기화:', levelData.level, levelData.title);
         }
     }
 
@@ -1112,29 +1121,32 @@ class ProfileDashboard {
             return;
         }
         
-        // 운동 데이터로 레벨 업데이트
+        // 운동 데이터로 레벨 업데이트 (한 번만 계산)
         const levelData = window.levelSystem.updateFromExerciseData(this.exerciseData);
         
-        // 닉네임에 레벨 표시
+        // 닉네임 업데이트 (박학재 뉴비님)
         const nicknameEl = document.getElementById('profileNickname');
         if (nicknameEl && this.userInfo) {
-            nicknameEl.textContent = `${this.userInfo.nickname} Lv.${levelData.level} ${levelData.title}`;
+            nicknameEl.textContent = `${this.userInfo.nickname} ${levelData.title}님`;
         }
         
-        // 진행률 바 업데이트
+        // 프로그래스 바 업데이트
         const progressBar = document.getElementById('levelProgressBar');
         if (progressBar) {
             progressBar.style.width = `${levelData.progress}%`;
         }
         
-        // 레벨 정보 업데이트
-        const levelInfo = document.getElementById('levelInfo');
-        if (levelInfo) {
+        // 바 안의 레벨 텍스트 업데이트
+        const progressText = document.getElementById('levelProgressText');
+        if (progressText) {
             const nextLevelExp = levelData.maxExp === 999999 ? '최고레벨' : levelData.maxExp;
-            levelInfo.textContent = `Lv.${levelData.level} ${levelData.title} (${levelData.currentExp}/${nextLevelExp} EXP)`;
+            progressText.textContent = `Lv.${levelData.level} (${levelData.currentExp}/${nextLevelExp} EXP)`;
         }
         
-        console.log('🎮 레벨 업데이트:', levelData);
+        // 전역 변수에 레벨 정보 저장 (카드에서 참조용)
+        window.currentLevelData = levelData;
+        
+        console.log('🎮 헤더 레벨 업데이트:', levelData);
     }
 
     // 🧹 정리
