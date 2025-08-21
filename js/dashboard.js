@@ -1290,6 +1290,75 @@ class IntegratedRecordsDashboard {
         // 메시지 업데이트
         const message = this.generateGoalMessage(progress, goal, false); // 개인 최고 기록 로직은 나중에 추가
         document.getElementById('goalMessage').textContent = message;
+        
+        // 🎉 주간 챌린지 EXP 지급 로직 추가
+        this.checkAndAwardWeeklyEXP(currentWeek, progress);
+    }
+
+    // 🎉 주간 챌린지 EXP 지급 체크
+    checkAndAwardWeeklyEXP(week, progress) {
+        // 완료 조건 체크 (100% 달성)
+        if (progress.percentage >= 100) {
+            
+            // 중복 방지: 이미 완료한 주차인지 확인
+            const completedWeeks = JSON.parse(localStorage.getItem('completedWeeks') || '{}');
+            const weekKey = `${new Date().getFullYear()}-W${week}`;
+            
+            if (!completedWeeks[weekKey]) {
+                // 첫 완료시만 EXP 지급
+                completedWeeks[weekKey] = {
+                    date: new Date().toISOString(),
+                    week: week,
+                    exp: 300
+                };
+                
+                localStorage.setItem('completedWeeks', JSON.stringify(completedWeeks));
+                
+                // 레벨 시스템에 EXP 지급
+                if (typeof window.levelSystem !== 'undefined') {
+                    const result = window.levelSystem.addChallengeBonus('weekly');
+                    
+                    // 성공 로그
+                    console.log(`🎉 Week ${week} 완료! +300 EXP 지급`);
+                    console.log(`📊 레벨 변화:`, result);
+                    
+                    // 토스트 알림
+                    this.showEXPToast(week, result);
+                }
+            } else {
+                console.log(`⚠️ Week ${week} 이미 완료됨 (중복 방지)`);
+            }
+        }
+    }
+
+    // 토스트 알림
+    showEXPToast(week, result) {
+        const toastHTML = `
+            <div id="expToast" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                        color: white; padding: 20px 30px; border-radius: 16px; 
+                        font-weight: 600; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                        text-align: center; font-size: 16px; animation: fadeInScale 0.3s ease-out;">
+                🎉 Week ${week} 완료! +300 EXP
+                ${result.isLevelUp ? `<br><span style="color: #FFD700;">🆙 레벨업! Lv.${result.newLevel.level} ${result.newLevel.title}</span>` : ''}
+            </div>
+            <style>
+            @keyframes fadeInScale {
+                0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            }
+            </style>
+        `;
+        
+        // 기존 토스트 제거
+        document.getElementById('expToast')?.remove();
+        
+        document.body.insertAdjacentHTML('beforeend', toastHTML);
+        
+        // 3초 후 제거
+        setTimeout(() => {
+            document.getElementById('expToast')?.remove();
+        }, 3000);
     }
 
     // 📅 달력 렌더링
