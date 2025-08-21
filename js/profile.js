@@ -5,7 +5,7 @@
 const PROFILE_HTML = `
 <div class="profile-screen-container" style="padding-top: max(40px, env(safe-area-inset-top));">
     
-    <!-- 1. 프로필 헤더 (홈탭과 통일) -->
+    <!-- 1. 프로필 헤더 (사용자 요구사항에 맞게 수정) -->
     <div class="main-header" style="padding: 20px; margin-bottom: 24px;">
         <div class="user-greeting">
             <div class="user-info" style="display: flex; align-items: center; gap: 12px;">
@@ -13,8 +13,8 @@ const PROFILE_HTML = `
                     <img src="images/suumt-logo.png" alt="숨트레이너" style="width: 32px; height: 32px; border-radius: 50%;" onerror="this.parentNode.innerHTML='🤖';">
                 </div>
                 <div class="user-text">
-                    <h3 id="profileNickname" style="font-size: 14px; font-weight: 400; color: #9ca3af; margin: 0 0 4px 0;">AI 숨트레이너 님</h3>
-                    <p class="greeting-message" style="font-size: 16px; font-weight: 500; color: #1f2937; margin: 0;">나의 호흡 운동 여정을 확인해보세요</p>
+                    <h3 id="profileNickname" style="font-size: 16px; font-weight: 500; color: #1f2937; margin: 0 0 4px 0;">AI 숨트레이너 님</h3>
+                    <p class="greeting-message" style="font-size: 14px; font-weight: 400; color: #1f2937; margin: 0;">나의 호흡 운동 여정을 확인해보세요</p>
                 </div>
             </div>
         </div>
@@ -783,7 +783,7 @@ class ProfileDashboard {
         await this.fetchUserInfo();
         const nicknameEl = document.getElementById('profileNickname');
         if (nicknameEl && this.userInfo) {
-            nicknameEl.textContent = this.userInfo.nickname;
+            nicknameEl.textContent = this.userInfo.nickname + ' 님';  // "님" 추가
         }
 
         // 운동 데이터 가져오기
