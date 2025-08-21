@@ -112,13 +112,14 @@ const PROFILE_HTML = `
             <h3 style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0;">계정 관리</h3>
         </div>
         
-        <button id="logoutButton" style="width: 100%; background: #EF4444; color: white; border: none; border-radius: 12px; padding: 16px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
-            모든 데이터 삭제 (로그아웃)
-        </button>
+        <div style="text-align: center; padding: 16px 0;">
+            <button id="logoutButton" style="background: none; border: none; color: #9ca3af; font-size: 13px; font-weight: 400; cursor: pointer; text-decoration: underline; transition: color 0.3s ease; padding: 8px;">
+                계정 및 데이터 완전 삭제
+            </button>
+        </div>
         
-        <div style="font-size: 12px; color: #6B7280; text-align: center; margin-top: 12px; line-height: 1.4;">
-            ⚠️ 이 작업은 되돌릴 수 없습니다.<br>
-            모든 운동 기록과 배지가 삭제됩니다.
+        <div style="font-size: 11px; color: #9ca3af; text-align: center; margin-top: 8px; line-height: 1.4; max-width: 280px; margin-left: auto; margin-right: auto;">
+            이 작업은 되돌릴 수 없습니다. 모든 운동 기록, 배지, AI 조언 등 개인 데이터가 영구적으로 삭제됩니다.
         </div>
     </div>
 
@@ -135,9 +136,10 @@ const PROFILE_CSS = `
 }
 
 #logoutButton:hover {
-    background: #DC2626 !important;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(239, 68, 68, 0.3);
+    color: #6b7280 !important;
+    background: none !important;
+    transform: none !important;
+    box-shadow: none !important;
 }
 
 .badge-item {
