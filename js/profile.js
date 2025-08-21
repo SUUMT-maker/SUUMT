@@ -849,11 +849,11 @@ window.onProfileTabClick = initProfileDashboard;
 
 console.log('🙋‍♂️ 프로필탭 모듈 로드 완료');
 
-// 🔄 커뮤니티 데이터 캐싱 시스템
+// 🔄 커뮤니티 데이터 캐싱 시스템 (마스터)
 window.communityDataCache = {
     data: null,
     timestamp: null,
-    cacheTime: 30 * 1000, // 30초 캐시
+    cacheTime: 5 * 60 * 1000, // 5분 캐시
     
     getData: function() {
         const now = Date.now();
@@ -862,7 +862,7 @@ window.communityDataCache = {
         if (!this.data || !this.timestamp || (now - this.timestamp) > this.cacheTime) {
             this.data = this.generateData();
             this.timestamp = now;
-            console.log('🔄 새로운 커뮤니티 데이터 생성:', this.data);
+            console.log('🔄 새로운 커뮤니티 데이터 생성 (5분 캐시):', this.data);
         }
         
         return this.data;

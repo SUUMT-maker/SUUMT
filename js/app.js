@@ -1065,7 +1065,33 @@ function selectWorkoutMode(mode) {
 function loadUserData() {
     const stats = getLocalStats();
     updateChart();
-    updateSocialProofData(); // 🔥 새로운 기능: 사회적 증명 데이터 업데이트
+    
+    // 🔄 profile.js 의존성 체크 및 커뮤니티 데이터 업데이트
+    if (typeof window.getCommunityStats === 'function') {
+        updateSocialProofData(); // profile.js 로드됨
+    } else {
+        console.log('⏳ profile.js 로드 대기 중...');
+        // 기본값 표시 후 profile.js 로드 대기
+        const element = document.getElementById('mainLiveUsersText');
+        if (element) {
+            element.textContent = '오늘 1,247명 트레이닝 중';
+        }
+        
+        // profile.js 로드 체크 (최대 10초)
+        let checkCount = 0;
+        const checkInterval = setInterval(() => {
+            checkCount++;
+            if (typeof window.getCommunityStats === 'function') {
+                clearInterval(checkInterval);
+                console.log('✅ profile.js 로드 완료, 커뮤니티 데이터 업데이트');
+                updateSocialProofData();
+            } else if (checkCount >= 20) { // 10초 후 타임아웃
+                clearInterval(checkInterval);
+                console.warn('⚠️ profile.js 로드 타임아웃');
+            }
+        }, 500);
+    }
+    
     updateGreetingCardSmart(); // 🎯 캐싱 기반 스마트 호출
     updateGoalCard(); // 🎯 새로운 기능: 목표 카드 업데이트
 }
@@ -1593,62 +1619,20 @@ function handleExerciseResult(result) {
     }, 1000);
 }
 
-// 🔥 새로운 기능: 스마트 실시간 데이터 생성
-function generateSmartLiveData() {
-    const now = getCurrentUserTime();
-    const hour = now.getHours();
-    const day = now.getDay(); // 0=일요일
-    const baseDate = new Date('2024-01-01'); // 앱 시작일
-    const daysSinceStart = Math.floor((now - baseDate) / (1000 * 60 * 60 * 24));
-    
-    // 기본 사용자 수 (시간이 지날수록 증가)
-    let baseUsers = 8500 + (daysSinceStart * 15); // 하루에 15명씩 증가
-    
-    // 시간대별 활동 패턴
-    let hourMultiplier = 1.0;
-    if (hour >= 6 && hour <= 9) hourMultiplier = 1.8; // 아침 피크
-    else if (hour >= 12 && hour <= 14) hourMultiplier = 1.3; // 점심 시간
-    else if (hour >= 18 && hour <= 22) hourMultiplier = 2.2; // 저녁 피크
-    else if (hour >= 23 || hour <= 5) hourMultiplier = 0.4; // 새벽
-    
-    // 요일별 패턴
-    let dayMultiplier = 1.0;
-    if (day === 0 || day === 6) dayMultiplier = 0.7; // 주말은 70%
-    else if (day >= 1 && day <= 5) dayMultiplier = 1.0; // 평일
-    
-    // 랜덤 변동 (±10%)
-    const randomFactor = 0.9 + (Math.random() * 0.2);
-    
-    const todayActiveUsers = Math.floor(baseUsers * hourMultiplier * dayMultiplier * randomFactor);
-    const totalUsers = Math.floor(baseUsers * 1.5); // 전체 사용자는 더 많음
-    
-    return {
-        todayActive: Math.max(200, todayActiveUsers), // 최소 200명
-        totalUsers: Math.max(8000, totalUsers), // 최소 8000명
-        isGrowing: daysSinceStart > 0
-    };
-}
+
 
 // 🔥 새로운 기능: 사회적 증명 UI 업데이트
 function updateSocialProofData() {
-    // profile.js 데이터 시스템 활용
-    const liveData = window.getCommunityStats ? window.getCommunityStats() : generateSmartLiveData();
-    
-    // 홈 화면 메인 텍스트 업데이트 (기존 디자인 유지)
-    const mainLiveUsersText = document.getElementById('mainLiveUsersText');
-    if (mainLiveUsersText) {
-        mainLiveUsersText.textContent = `지금 ${liveData.todayActive.toLocaleString()}명 트레이닝 중`;
+    // profile.js 의존성 체크
+    if (typeof window.getCommunityStats !== 'function') {
+        console.warn('profile.js가 로드되지 않음');
+        return;
     }
     
-    // 결과화면 상세 현황 업데이트 (기존 기능 유지)
-    const liveUsersCount = document.getElementById('liveUsersCount');
-    const totalUsersCount = document.getElementById('totalUsersCount');
-    
-    if (liveUsersCount) {
-        liveUsersCount.textContent = liveData.todayActive.toLocaleString();
-    }
-    if (totalUsersCount) {
-        totalUsersCount.textContent = liveData.totalUsers.toLocaleString();
+    const stats = window.getCommunityStats();
+    const element = document.getElementById('mainLiveUsersText');
+    if (element) {
+        element.textContent = `오늘 ${stats.todayActive.toLocaleString()}명 트레이닝 중`;
     }
 }
 
@@ -1945,16 +1929,21 @@ window.onload = function() {
     loadResistanceSettings();
     updateBadgesDisplay();
     
-    // 🔥 새로운 기능: 페이지 로드시 사회적 증명 데이터 업데이트
-    updateSocialProofData();
-    
-    // 🔥 새로운 기능: 메인화면 실시간 현황 주기적 업데이트 (2분마다)
-    setInterval(() => {
-        updateSocialProofData();
-    }, 120000);
-    
     // 🔥 새로운 기능: 온보딩 스와이프 초기화
     initializeOnboardingSwipe();
+    
+    // 🔄 profile.js 로드 후 주기적 업데이트 시스템 초기화
+    setTimeout(() => {
+        if (typeof window.getCommunityStats === 'function') {
+            console.log('✅ profile.js 로드 완료, 주기적 업데이트 시스템 시작');
+            // 메인화면 실시간 현황 주기적 업데이트 (2분마다)
+            setInterval(() => {
+                updateSocialProofData();
+            }, 120000);
+        } else {
+            console.warn('⚠️ profile.js 로드 실패, 주기적 업데이트 시스템 비활성화');
+        }
+    }, 2000); // 2초 후 체크
 };
 
 // 🔄 자동 업데이트 시스템 초기화
