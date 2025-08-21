@@ -1,5 +1,8 @@
 // 🏃‍♂️ 운동 관련 함수들
 
+// 🔧 전역 변수들
+let reviewCarouselInterval = null;
+
 function startExercise() {
     resetExercise();
     showScreen('exerciseScreen');
