@@ -1044,7 +1044,8 @@ function switchTab(tabName) {
     const newScreen = document.getElementById(
         tabName === 'home' ? 'mainScreen' :
         tabName === 'workout' ? 'workoutModeScreen' :
-        tabName === 'records' ? 'recordsScreen' : null
+        tabName === 'records' ? 'recordsScreen' :
+        tabName === 'profile' ? 'profileScreen' : null
     );
     if (!newScreen) return;
 
