@@ -14,16 +14,16 @@ const PROFILE_HTML = `
             <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
                 <div style="width: 48px; height: 48px; background: #EEF1F3; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
                     <img src="images/suumt-logo.png" alt="숨트레이너" style="width: 32px; height: 32px; border-radius: 50%;" onerror="this.parentNode.innerHTML='🤖';">
-                </div>
+            </div>
                 <div style="flex: 1;">
                     <!-- 닉네임 (여백 증가) -->
                     <h3 id="profileNickname" style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0 0 6px 0;">박학재 뉴비님</h3>
                     
                     <!-- 설명 문구 (여백 증가 + 줄간격 개선) -->
                     <p style="font-size: 14px; font-weight: 400; color: #6b7280; margin: 0; line-height: 1.5;">꾸준한 운동과 챌린지 도전으로 레벨업하세요!</p>
-                </div>
-            </div>
-            
+        </div>
+    </div>
+
             <!-- 대형 프로그래스 바 -->
             <div style="background: #f3f4f6; border-radius: 16px; height: 24px; overflow: hidden; margin-bottom: 12px; position: relative;">
                 <div id="levelProgressBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 90%; transition: width 0.3s ease; border-radius: 16px; display: flex; align-items: center; justify-content: center; position: relative;">
@@ -810,19 +810,19 @@ class ProfileDashboard {
     // 🎨 UI 업데이트
     async updateUI() {
         try {
-            // 사용자 정보 업데이트
-            await this.fetchUserInfo();
-            const nicknameEl = document.getElementById('profileNickname');
-            if (nicknameEl && this.userInfo) {
+        // 사용자 정보 업데이트
+        await this.fetchUserInfo();
+        const nicknameEl = document.getElementById('profileNickname');
+        if (nicknameEl && this.userInfo) {
                 nicknameEl.textContent = this.userInfo.nickname + ' 님';  // "님" 추가
-            }
+        }
 
-            // 운동 데이터 가져오기
-            await this.fetchExerciseData();
-            
-            // 성장 통계 업데이트
-            const stats = this.calculateGrowthStats();
-            
+        // 운동 데이터 가져오기
+        await this.fetchExerciseData();
+        
+        // 성장 통계 업데이트
+        const stats = this.calculateGrowthStats();
+        
             // 1. 먼저 레벨 업데이트 (헤더)
             this.updateLevelDisplay();
             
@@ -837,12 +837,12 @@ class ProfileDashboard {
             // 3. 새로운 카드들 업데이트
             this.updateMaxConsecutiveCard();
             this.updateLevelCard(); // 헤더 이후에 호출해서 동기화
-            
-            // 배지 시스템 업데이트 (표시만, 자동 획득 안함)
-            this.updateBadgesDisplay();
 
-            // 커뮤니티 리뷰 캐러셀 초기화 (실제 리뷰 시스템)
-            this.initCommunityCarousel();
+        // 배지 시스템 업데이트 (표시만, 자동 획득 안함)
+        this.updateBadgesDisplay();
+
+        // 커뮤니티 리뷰 캐러셀 초기화 (실제 리뷰 시스템)
+        this.initCommunityCarousel();
             
             console.log('📊 프로필 UI 업데이트 완료:', stats);
         } catch (error) {
@@ -1020,7 +1020,7 @@ class ProfileDashboard {
             if (typeof window.switchTab === 'function') {
                 window.switchTab('home');
             }
-            
+
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
