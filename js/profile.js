@@ -202,11 +202,11 @@ const PROFILE_CSS = `
     word-break: keep-all;
 }
 
-.review-author {
+.review-author-line {
     display: flex;
     align-items: center;
-    justify-content: center;
     gap: 8px;
+    margin-bottom: 12px;
 }
 
 .review-avatar {
@@ -222,15 +222,20 @@ const PROFILE_CSS = `
     font-size: 12px;
 }
 
-.review-info {
-    text-align: left;
+.review-text {
+    font-size: 13px;
+    color: #333;
+    line-height: 1.5;
+    margin-bottom: 16px; /* 인디케이터와 여백 */
+    text-align: center;
+    word-break: keep-all;
 }
 
 .review-name {
     font-size: 12px;
     font-weight: 600;
     color: #333;
-    margin-bottom: 2px;
+    flex: 1; /* 이름이 남은 공간 차지 */
 }
 
 .review-rating {
@@ -564,14 +569,12 @@ class ProfileDashboard {
             const reviewCard = document.createElement('div');
             reviewCard.className = 'review-card';
             reviewCard.innerHTML = `
-                <div class="review-text">"${review.text}"</div>
-                <div class="review-author">
+                <div class="review-author-line" style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px;">
                     <div class="review-avatar">${review.avatar}</div>
-                    <div class="review-info">
-                        <div class="review-name">${review.author}</div>
-                        <div class="review-rating">${review.rating}</div>
-                    </div>
+                    <div class="review-name">${review.author}</div>
+                    <div class="review-rating">${review.rating}</div>
                 </div>
+                <div class="review-text">"${review.text}"</div>
             `;
             reviewsSlider.appendChild(reviewCard);
         });
