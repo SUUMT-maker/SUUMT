@@ -851,48 +851,193 @@ class ProfileDashboard {
         console.log('🏆 프로필탭 배지 표시 완료 (금색/회색만 표시)');
     }
 
-    // 🚪 로그아웃/데이터 삭제
+    // 🚪 완전한 데이터 삭제 시스템
     async handleLogout() {
+        // 1단계: 사용자 확인
         const confirmed = confirm(
-            '정말로 모든 데이터를 삭제하시겠습니까?\n\n' +
+            '정말로 모든 데이터를 영구적으로 삭제하시겠습니까?\n\n' +
             '⚠️ 이 작업은 되돌릴 수 없습니다.\n' +
-            '- 모든 운동 기록\n' +
-            '- 획득한 배지\n' +
-            '- 계정 정보\n\n' +
-            '모든 데이터가 영구적으로 삭제됩니다.'
+            '다음 데이터가 완전히 삭제됩니다:\n\n' +
+            '• 모든 운동 기록 (로컬 + 서버)\n' +
+            '• AI 조언 및 분석 데이터\n' +
+            '• 동기부여 메시지 기록\n' +
+            '• 획득한 배지 및 레벨 정보\n' +
+            '• 계정 설정 정보\n\n' +
+            '계속하시겠습니까?'
         );
 
         if (!confirmed) return;
 
+        // 2단계: 추가 확인 (텍스트 입력)
+        const deleteConfirmText = prompt(
+            '데이터 삭제를 확실히 하시려면 아래 텍스트를 정확히 입력해주세요:\n\n' +
+            '"모든 데이터 삭제"\n\n' +
+            '입력:'
+        );
+
+        if (deleteConfirmText !== '모든 데이터 삭제') {
+            alert('입력이 일치하지 않습니다. 삭제가 취소되었습니다.');
+            return;
+        }
+
+        // 3단계: 로딩 표시
+        const originalButton = document.getElementById('logoutButton');
+        const originalText = originalButton ? originalButton.textContent : '';
+        
+        if (originalButton) {
+            originalButton.textContent = '삭제 진행 중...';
+            originalButton.style.pointerEvents = 'none';
+            originalButton.style.opacity = '0.5';
+        }
+
         try {
-            // 1. 로컬 데이터 삭제
-            localStorage.clear();
-
-            // 2. Supabase 로그아웃 (있다면)
-            if (this.supabaseClient) {
-                await this.supabaseClient.auth.signOut();
-            }
-
-            // 3. 전역 변수 초기화
-            window.currentUserId = null;
-            window.currentUserInfo = null;
-
-            // 4. 홈 탭으로 이동
+            // 4단계: 백엔드 데이터 삭제 (트랜잭션)
+            await this.deleteAllUserDataFromBackend();
+            
+            // 5단계: 로컬 데이터 삭제
+            this.deleteAllLocalData();
+            
+            // 6단계: 세션 종료
+            await this.signOutUser();
+            
+            // 7단계: 성공 메시지 및 홈으로 이동
+            alert('모든 데이터가 성공적으로 삭제되었습니다.\n새로운 시작을 응원합니다! 🌱');
+            
+            // 8단계: 홈 탭으로 이동 및 새로고침
             if (typeof window.switchTab === 'function') {
                 window.switchTab('home');
             }
-
-            // 5. 성공 메시지
-            alert('모든 데이터가 삭제되었습니다.\n새로운 시작을 응원합니다! 🌱');
             
-            // 6. 페이지 새로고침 (완전 초기화)
             setTimeout(() => {
                 window.location.reload();
             }, 1000);
 
         } catch (error) {
-            console.error('❌ 로그아웃 처리 중 오류:', error);
-            alert('데이터 삭제 중 오류가 발생했습니다.\n다시 시도해 주세요.');
+            console.error('⌨ 데이터 삭제 중 오류:', error);
+            
+            // 에러 처리
+            if (originalButton) {
+                originalButton.textContent = originalText;
+                originalButton.style.pointerEvents = 'auto';
+                originalButton.style.opacity = '1';
+            }
+            
+            const errorMessage = error.message || '알 수 없는 오류';
+            alert(
+                `데이터 삭제 중 오류가 발생했습니다:\n${errorMessage}\n\n` +
+                '일부 데이터가 삭제되지 않았을 수 있습니다.\n' +
+                '네트워크 연결을 확인한 후 다시 시도해주세요.'
+            );
+        }
+    }
+
+    // 백엔드 데이터 삭제 함수 (새로 추가)
+    async deleteAllUserDataFromBackend() {
+        if (!this.userId || !this.supabaseClient) {
+            console.warn('사용자 ID 또는 Supabase 클라이언트가 없습니다.');
+            return;
+        }
+
+        console.log('🗑️ 백엔드 데이터 삭제 시작:', this.userId);
+
+        try {
+            // 트랜잭션으로 안전한 삭제 (순서 중요!)
+            
+            // 1단계: AI 조언 데이터 삭제 (외래키 제약으로 먼저)
+            console.log('1단계: AI 조언 데이터 삭제 중...');
+            const { error: aiError } = await this.supabaseClient
+                .from('ai_advice')
+                .delete()
+                .in('session_id', 
+                    this.supabaseClient
+                        .from('exercise_sessions')
+                        .select('id')
+                        .eq('user_id', this.userId)
+                );
+            
+            if (aiError) {
+                console.error('AI 조언 삭제 실패:', aiError);
+                throw new Error(`AI 조언 삭제 실패: ${aiError.message}`);
+            }
+            
+            // 2단계: 동기부여 응답 삭제
+            console.log('2단계: 동기부여 응답 삭제 중...');
+            const { error: motivationError } = await this.supabaseClient
+                .from('motivation_responses')
+                .delete()
+                .eq('user_id', this.userId);
+            
+            if (motivationError) {
+                console.error('동기부여 응답 삭제 실패:', motivationError);
+                throw new Error(`동기부여 응답 삭제 실패: ${motivationError.message}`);
+            }
+            
+            // 3단계: 운동 세션 삭제 (마지막)
+            console.log('3단계: 운동 세션 삭제 중...');
+            const { error: exerciseError } = await this.supabaseClient
+                .from('exercise_sessions')
+                .delete()
+                .eq('user_id', this.userId);
+            
+            if (exerciseError) {
+                console.error('운동 세션 삭제 실패:', exerciseError);
+                throw new Error(`운동 세션 삭제 실패: ${exerciseError.message}`);
+            }
+            
+            console.log('✅ 모든 백엔드 데이터 삭제 완료');
+            
+        } catch (error) {
+            console.error('❌ 백엔드 데이터 삭제 중 오류:', error);
+            throw error;
+        }
+    }
+
+    // 로컬 데이터 삭제 함수 (새로 추가)
+    deleteAllLocalData() {
+        console.log('🗑️ 로컬 데이터 삭제 시작');
+        
+        try {
+            // localStorage 완전 초기화
+            localStorage.clear();
+            
+            // 전역 변수 초기화
+            window.currentUserId = null;
+            window.currentUserInfo = null;
+            
+            // 레벨 시스템 초기화
+            if (window.levelSystem) {
+                window.levelSystem.expData = {
+                    totalExp: 0,
+                    currentLevel: 1,
+                    lastExpGain: [],
+                    consecutiveDays: 0,
+                    lastExerciseDate: null
+                };
+                window.levelSystem.saveExpData();
+            }
+            
+            console.log('✅ 로컬 데이터 삭제 완료');
+            
+        } catch (error) {
+            console.error('❌ 로컬 데이터 삭제 중 오류:', error);
+            throw error;
+        }
+    }
+
+    // 사용자 로그아웃 함수 (새로 추가)
+    async signOutUser() {
+        console.log('🚪 사용자 로그아웃 시작');
+        
+        try {
+            if (this.supabaseClient) {
+                await this.supabaseClient.auth.signOut();
+            }
+            
+            console.log('✅ 사용자 로그아웃 완료');
+            
+        } catch (error) {
+            console.error('❌ 로그아웃 중 오류:', error);
+            // 로그아웃 실패는 치명적이지 않으므로 에러를 던지지 않음
         }
     }
 
