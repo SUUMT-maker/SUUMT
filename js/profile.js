@@ -140,13 +140,6 @@ const PROFILE_CSS = `
     box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
 }
 
-.badge-item.available {
-    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
-    color: #1976D2;
-    border: 2px solid #2196F3;
-    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
-}
-
 .badge-item.locked {
     background: #F3F4F6;
     color: #9CA3AF;
@@ -156,11 +149,6 @@ const PROFILE_CSS = `
 .badge-item:hover.earned {
     transform: scale(1.05);
     box-shadow: 0 8px 24px rgba(255, 215, 0, 0.5);
-}
-
-.badge-item:hover.available {
-    transform: scale(1.05);
-    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
 }
 
 .badge-icon {
@@ -443,21 +431,12 @@ class ProfileDashboard {
         gridEl.innerHTML = badgesConfig.map(badge => {
             const isEarned = earnedBadges.includes(badge.id);
             
-            // 조건 체크 (획득 가능한지)
-            let canEarn = false;
-            try {
-                canEarn = badge.condition && badge.condition(stats);
-            } catch (error) {
-                // 일부 조건 함수가 없을 수 있음 (퀴즈, 새벽운동 등)
-                canEarn = false;
-            }
-            
             return `
-                <div class="badge-item ${isEarned ? 'earned' : canEarn ? 'available' : 'locked'}" 
+                <div class="badge-item ${isEarned ? 'earned' : 'locked'}" 
                      title="${badge.description}" 
                      data-badge-id="${badge.id}">
-                    <div class="badge-icon">${isEarned ? badge.icon : (canEarn ? badge.icon : '?')}</div>
-                    <div class="badge-name">${isEarned ? badge.name : badge.hint || badge.name}</div>
+                    <div class="badge-icon">${isEarned ? badge.icon : '?'}</div>
+                    <div class="badge-name">${isEarned ? badge.name : (badge.hint || badge.name)}</div>
                 </div>
             `;
         }).join('');
