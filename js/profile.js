@@ -43,8 +43,11 @@ const PROFILE_HTML = `
     <!-- 2. 나의 성장 (카드화) -->
     <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 24px; margin: 0 20px 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
         
-        <!-- 섹션 제목 -->
-        <h2 style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0 0 20px 0;">나의 성장</h2>
+        <!-- 섹션 제목 + 밑줄 -->
+        <h2 style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0 0 12px 0;">나의 성장</h2>
+        
+        <!-- 다른 카드들과 동일한 밑줄 추가 -->
+        <div style="height: 1px; background: #e5e7eb; margin-bottom: 20px;"></div>
         
         <!-- 2x2 그리드 -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
