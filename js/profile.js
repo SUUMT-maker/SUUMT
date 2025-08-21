@@ -28,43 +28,42 @@ const PROFILE_HTML = `
 
     <!-- 2. 나의 성장 (2x2 그리드) -->
     <div style="margin: 0 20px 24px;">
-        <div style="font-size: 18px; font-weight: 600; color: #1E1E1E; margin-bottom: 16px; padding-left: 4px;">📈 나의 성장</div>
+        <div style="font-size: 18px; font-weight: 700; color: #1f2937; margin-bottom: 20px; padding-left: 0px;">나의 성장</div>
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
             
             <!-- 운동한 날 -->
-            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 16px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);">
-                <div id="totalWorkoutDays" style="font-size: 28px; font-weight: 800; color: #3B82F6; margin-bottom: 8px;">0</div>
-                <div style="font-size: 12px; color: #6B7280; font-weight: 500;">운동한 날</div>
+            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+                <div id="totalWorkoutDays" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">0</div>
+                <div style="font-size: 13px; color: #6b7280; font-weight: 600;">운동한 날</div>
             </div>
             
             <!-- 누적 호흡 -->
-            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 16px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);">
-                <div id="totalBreaths" style="font-size: 28px; font-weight: 800; color: #22C55E; margin-bottom: 8px;">0</div>
-                <div style="font-size: 12px; color: #6B7280; font-weight: 500;">누적 호흡</div>
+            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+                <div id="totalBreaths" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">0</div>
+                <div style="font-size: 13px; color: #6b7280; font-weight: 600;">누적 호흡</div>
             </div>
             
             <!-- 연속 일수 -->
-            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 16px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);">
-                <div id="consecutiveDays" style="font-size: 28px; font-weight: 800; color: #F59E0B; margin-bottom: 8px;">0</div>
-                <div style="font-size: 12px; color: #6B7280; font-weight: 500;">연속 일수</div>
+            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+                <div id="consecutiveDays" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">0</div>
+                <div style="font-size: 12px; color: #6b7280; font-weight: 600;">연속 일수</div>
             </div>
             
             <!-- 현재 강도 -->
-            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 16px; padding: 20px; text-align: center; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);">
-                <div id="currentIntensity" style="font-size: 28px; font-weight: 800; color: #8B5CF6; margin-bottom: 8px;">1.0</div>
-                <div style="font-size: 12px; color: #6B7280; font-weight: 500;">현재 강도</div>
+            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+                <div id="currentIntensity" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">1.0</div>
+                <div style="font-size: 12px; color: #6b7280; font-weight: 600;">현재 강도</div>
             </div>
             
         </div>
     </div>
 
     <!-- 3. 배지 컬렉션 -->
-    <div id="profileBadgesSection" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-            <span style="font-size: 24px;">🏆</span>
-            <span style="font-size: 18px; font-weight: 600; color: #1E1E1E;">배지 컬렉션</span>
+    <div id="profileBadgesSection" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 32px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+        <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
+            <h3 style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0;">배지 컬렉션</h3>
         </div>
-        <div id="profileBadgesProgress" style="font-size: 14px; color: #6B7280; margin-bottom: 16px;">수집한 배지: 0/15</div>
+        <div id="profileBadgesProgress" style="font-size: 12px; color: #6b7280; background: #F3F4F6; padding: 6px 12px; border-radius: 12px; font-weight: 600;">수집한 배지: 0/15</div>
         <div id="profileBadgesGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
             <!-- 15개 배지들이 JavaScript로 생성됨 (5x3 그리드) -->
         </div>
@@ -72,9 +71,8 @@ const PROFILE_HTML = `
 
     <!-- 4. 숨트 커뮤니티 (리뷰 캐러셀 시스템) -->
     <div id="profileCommunitySection" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-            <span style="font-size: 24px;">🫁</span>
-            <span style="font-size: 18px; font-weight: 600; color: #1E1E1E;">함께하는 숨트 커뮤니티</span>
+        <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
+            <h3 style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0;">함께하는 숨트 커뮤니티</h3>
         </div>
         
         <!-- 실시간 통계 -->
@@ -102,9 +100,8 @@ const PROFILE_HTML = `
 
     <!-- 5. 계정 관리 -->
     <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 60px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
-        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
-            <span style="font-size: 24px;">⚙️</span>
-            <span style="font-size: 18px; font-weight: 600; color: #1E1E1E;">계정 관리</span>
+        <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
+            <h3 style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0;">계정 관리</h3>
         </div>
         
         <button id="logoutButton" style="width: 100%; background: #EF4444; color: white; border: none; border-radius: 12px; padding: 16px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.3s ease;">
