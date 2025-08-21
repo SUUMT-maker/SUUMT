@@ -3,17 +3,15 @@
 
 // 📱 프로필탭 HTML 구조
 const PROFILE_HTML = `
-<div class="profile-screen-container">
+<div class="profile-screen-container" style="padding-top: max(40px, env(safe-area-inset-top));">
     
     <!-- 1. 프로필 헤더 -->
-    <div id="profileHeader" style="background: white; border: 1px solid #E7E7E7; border-radius: 32px; padding: 32px 24px; margin: max(40px, env(safe-area-inset-top)) 20px 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 16px; margin-bottom: 16px;">
-            <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px; color: white;">👤</div>
-            <div>
-                <div id="profileNickname" style="font-size: 24px; font-weight: 700; color: #1E1E1E; margin-bottom: 4px;">AI 숨트레이너</div>
-                <div style="font-size: 14px; color: #6B7280;">환영합니다!</div>
-            </div>
+    <div id="profileHeader" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px 24px; margin: 20px 20px 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
+        <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+            <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: white;">👤</div>
+            <div id="profileNickname" style="font-size: 18px; font-weight: 700; color: #1E1E1E;">AI 숨트레이너 님</div>
         </div>
+        <div style="font-size: 13px; color: #6B7280; padding-left: 52px;">나의 호흡 운동 여정을 확인해보세요</div>
     </div>
 
     <!-- 2. 나의 성장 (2x2 그리드) -->
