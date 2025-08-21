@@ -40,33 +40,37 @@ const PROFILE_HTML = `
         </div>
     </div>
 
-    <!-- 2. 나의 성장 (2x2 그리드) -->
-    <div style="margin: 0 20px 24px;">
-        <div style="font-size: 18px; font-weight: 700; color: #1f2937; margin-bottom: 20px; padding-left: 0px;">나의 성장</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+    <!-- 2. 나의 성장 (카드화) -->
+    <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 24px; margin: 0 20px 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);">
+        
+        <!-- 섹션 제목 -->
+        <h2 style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0 0 20px 0;">나의 성장</h2>
+        
+        <!-- 2x2 그리드 -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             
             <!-- 운동한 날 -->
-            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-                <div id="totalWorkoutDays" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">0</div>
-                <div style="font-size: 13px; color: #6b7280; font-weight: 600;">운동한 날</div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; text-align: center;">
+                <div id="totalWorkoutDays" style="font-size: 28px; font-weight: 800; color: #1f2937; margin-bottom: 4px;">0</div>
+                <div style="font-size: 12px; color: #6b7280; font-weight: 600;">운동한 날</div>
             </div>
             
             <!-- 누적 호흡 -->
-            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-                <div id="totalBreaths" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">0</div>
-                <div style="font-size: 13px; color: #6b7280; font-weight: 600;">누적 호흡</div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; text-align: center;">
+                <div id="totalBreaths" style="font-size: 28px; font-weight: 800; color: #1f2937; margin-bottom: 4px;">0</div>
+                <div style="font-size: 12px; color: #6b7280; font-weight: 600;">누적 호흡</div>
             </div>
             
             <!-- 최장 연속일 -->
-            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-                <div id="maxConsecutiveDays" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">0</div>
-                <div style="font-size: 13px; color: #6b7280; font-weight: 600;">최장 연속일</div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; text-align: center;">
+                <div id="maxConsecutiveDays" style="font-size: 28px; font-weight: 800; color: #1f2937; margin-bottom: 4px;">0</div>
+                <div style="font-size: 12px; color: #6b7280; font-weight: 600;">최장 연속일</div>
             </div>
             
             <!-- 현재 레벨 -->
-            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-                <div id="currentLevel" style="font-size: 32px; font-weight: 800; color: #667eea; margin-bottom: 8px;">Lv.1</div>
-                <div style="font-size: 13px; color: #6b7280; font-weight: 600;">뉴비</div>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; text-align: center;">
+                <div id="currentLevel" style="font-size: 28px; font-weight: 800; color: #667eea; margin-bottom: 4px;">Lv.1</div>
+                <div style="font-size: 12px; color: #6b7280; font-weight: 600;">뉴비</div>
             </div>
             
         </div>
