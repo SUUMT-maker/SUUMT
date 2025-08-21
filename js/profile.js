@@ -14,7 +14,7 @@ const PROFILE_HTML = `
                 </div>
                 <div class="user-text" style="flex: 1;">
                     <h3 id="profileNickname" style="font-size: 16px; font-weight: 600; color: #1f2937; margin: 0 0 4px 0;">AI 숨트레이너 님</h3>
-                    <p class="greeting-message" style="font-size: 14px; font-weight: 400; color: #1f2937; margin: 0 0 8px 0;">나의 호흡 운동 여정을 확인해보세요</p>
+                    <p class="greeting-message" style="font-size: 14px; font-weight: 400; color: #1f2937; margin: 0 0 8px 0;">꾸준한 운동과 챌린지 도전으로 레벨업하세요!</p>
                     
                     <!-- 레벨 진행률 바 -->
                     <div id="levelProgressContainer" style="background: #f3f4f6; border-radius: 8px; height: 6px; overflow: hidden; margin-top: 8px;">
@@ -22,8 +22,8 @@ const PROFILE_HTML = `
                     </div>
                     <div id="levelInfo" style="font-size: 11px; color: #6b7280; margin-top: 4px;">Lv.1 뉴비 (0/166 EXP)</div>
                     <div style="font-size: 11px; color: #6b7280; margin-top: 6px; line-height: 1.4; text-align: center;">
-                        하루 40회 호흡 달성시 100 EXP, 주간 챌린지 완료시 300 EXP를 획득합니다.<br>
-                        꾸준한 운동과 챌린지 도전으로 레벨업하세요!
+                        하루 40회 호흡 달성시 100 EXP<br>
+                        주간 챌린지 완료시 300 EXP를 획득합니다
                     </div>
                 </div>
             </div>
@@ -802,8 +802,8 @@ class ProfileDashboard {
         // 성장 통계 업데이트
         const stats = this.calculateGrowthStats();
         
-        document.getElementById('totalWorkoutDays').textContent = stats.totalWorkoutDays;
-        document.getElementById('totalBreaths').textContent = stats.totalBreaths.toLocaleString();
+        document.getElementById('totalWorkoutDays').textContent = stats.totalWorkoutDays + '일';
+        document.getElementById('totalBreaths').textContent = stats.totalBreaths + '번';
         // consecutiveDays와 currentIntensity는 새로운 카드로 교체됨
         
         // 새로운 카드들 업데이트
@@ -825,20 +825,23 @@ class ProfileDashboard {
         const maxConsecutive = this.calculateMaxConsecutiveDays();
         const maxConsecutiveEl = document.getElementById('maxConsecutiveDays');
         if (maxConsecutiveEl) {
-            maxConsecutiveEl.textContent = maxConsecutive;
+            maxConsecutiveEl.textContent = maxConsecutive + '일';
         }
     }
 
     // 현재 레벨 카드 업데이트  
     updateLevelCard() {
         if (typeof window.levelSystem !== 'undefined') {
-            const levelData = window.levelSystem.getLevelData();
+            // 운동 데이터로 레벨을 다시 계산해서 최신 상태로 업데이트
+            const levelData = window.levelSystem.updateFromExerciseData(this.exerciseData);
             
             const levelEl = document.getElementById('currentLevel');
             const titleEl = levelEl?.nextElementSibling;
             
             if (levelEl) levelEl.textContent = `Lv.${levelData.level}`;
             if (titleEl) titleEl.textContent = levelData.title;
+            
+            console.log('레벨 카드 업데이트:', levelData);
         }
     }
 
