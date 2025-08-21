@@ -799,35 +799,45 @@ class ProfileDashboard {
 
     // 🎨 UI 업데이트
     async updateUI() {
-        // 사용자 정보 업데이트
-        await this.fetchUserInfo();
-        const nicknameEl = document.getElementById('profileNickname');
-        if (nicknameEl && this.userInfo) {
-            nicknameEl.textContent = this.userInfo.nickname + ' 님';  // "님" 추가
+        try {
+            // 사용자 정보 업데이트
+            await this.fetchUserInfo();
+            const nicknameEl = document.getElementById('profileNickname');
+            if (nicknameEl && this.userInfo) {
+                nicknameEl.textContent = this.userInfo.nickname + ' 님';  // "님" 추가
+            }
+
+            // 운동 데이터 가져오기
+            await this.fetchExerciseData();
+            
+            // 성장 통계 업데이트
+            const stats = this.calculateGrowthStats();
+            
+            // 1. 먼저 레벨 업데이트 (헤더)
+            this.updateLevelDisplay();
+            
+            // 2. 기존 카드들 업데이트
+            if (document.getElementById('totalWorkoutDays')) {
+                document.getElementById('totalWorkoutDays').textContent = stats.totalWorkoutDays + '일';
+            }
+            if (document.getElementById('totalBreaths')) {
+                document.getElementById('totalBreaths').textContent = stats.totalBreaths + '번';
+            }
+            
+            // 3. 새로운 카드들 업데이트
+            this.updateMaxConsecutiveCard();
+            this.updateLevelCard(); // 헤더 이후에 호출해서 동기화
+            
+            // 배지 시스템 업데이트 (표시만, 자동 획득 안함)
+            this.updateBadgesDisplay();
+
+            // 커뮤니티 리뷰 캐러셀 초기화 (실제 리뷰 시스템)
+            this.initCommunityCarousel();
+            
+            console.log('📊 프로필 UI 업데이트 완료:', stats);
+        } catch (error) {
+            console.error('프로필 UI 업데이트 실패:', error);
         }
-
-        // 운동 데이터 가져오기
-        await this.fetchExerciseData();
-        
-        // 성장 통계 업데이트
-        const stats = this.calculateGrowthStats();
-        
-        document.getElementById('totalWorkoutDays').textContent = stats.totalWorkoutDays + '일';
-        document.getElementById('totalBreaths').textContent = stats.totalBreaths + '번';
-        // consecutiveDays와 currentIntensity는 새로운 카드로 교체됨
-        
-        // 새로운 카드들 업데이트
-        this.updateMaxConsecutiveCard();
-        this.updateLevelCard();
-
-        // 배지 시스템 업데이트 (표시만, 자동 획득 안함)
-        this.updateBadgesDisplay();
-
-        // 커뮤니티 리뷰 캐러셀 초기화 (실제 리뷰 시스템)
-        this.initCommunityCarousel();
-
-        // 레벨 시스템 업데이트
-        this.updateLevelDisplay();
     }
 
     // 최대 연속 일수 업데이트
@@ -841,16 +851,36 @@ class ProfileDashboard {
 
     // 현재 레벨 카드 업데이트  
     updateLevelCard() {
-        if (window.currentLevelData) {
-            const levelData = window.currentLevelData;
+        try {
+            // 방법 1: 전역 변수 참조 (이미 헤더에서 설정됨)
+            if (window.currentLevelData) {
+                const levelData = window.currentLevelData;
+                
+                const levelEl = document.getElementById('currentLevel');
+                const titleEl = levelEl?.nextElementSibling;
+                
+                if (levelEl) levelEl.textContent = `Lv.${levelData.level}`;
+                if (titleEl) titleEl.textContent = levelData.title;
+                
+                console.log('📊 카드 레벨 동기화 성공:', levelData.level, levelData.title);
+                return;
+            }
             
-            const levelEl = document.getElementById('currentLevel');
-            const titleEl = levelEl?.nextElementSibling;
+            // 방법 2: 직접 계산 (백업)
+            if (typeof window.levelSystem !== 'undefined') {
+                const levelData = window.levelSystem.updateFromExerciseData(this.exerciseData);
+                
+                const levelEl = document.getElementById('currentLevel');
+                const titleEl = levelEl?.nextElementSibling;
+                
+                if (levelEl) levelEl.textContent = `Lv.${levelData.level}`;
+                if (titleEl) titleEl.textContent = levelData.title;
+                
+                console.log('📊 카드 레벨 직접 계산:', levelData.level, levelData.title);
+            }
             
-            if (levelEl) levelEl.textContent = `Lv.${levelData.level}`;
-            if (titleEl) titleEl.textContent = levelData.title;
-            
-            console.log('📊 카드 레벨 동기화:', levelData.level, levelData.title);
+        } catch (error) {
+            console.error('레벨 카드 업데이트 실패:', error);
         }
     }
 
