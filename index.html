@@ -47,6 +47,8 @@
                 // 기록 탭은 아직 개발 중
                 console.log(`${tabName} 탭은 다음 단계에서 개발 예정`);
                 return;
+            } else if (tabName === 'profile') {
+                newScreen = document.getElementById('profileScreen');
             }
             
             // 새 화면이 없거나 현재 화면과 같으면 리턴
@@ -939,6 +941,14 @@
                 </div>
             </div>
         </div>
+        
+        <!-- 👤 프로필 화면 -->
+        <div id="profileScreen" class="screen">
+            <div style="text-align: center; padding: 40px 20px;">
+                <h3>프로필 탭</h3>
+                <p>개발 중입니다...</p>
+            </div>
+        </div>
     </div>
   </div>
 
@@ -974,6 +984,16 @@
                 </svg>
             </div>
             <div class="nav-label">기록</div>
+        </button>
+        
+        <button class="nav-btn" data-tab="profile" onclick="switchTab('profile')">
+            <div class="nav-icon">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </div>
+            <div class="nav-label">프로필</div>
         </button>
     </nav>
 
