@@ -1,4 +1,5 @@
 // 🙋‍♂️ 프로필탭 인라인 구현 (dashboard.js 패턴)
+// ✨ 실시간 커뮤니티 데이터, 배지 시스템, 성장 통계 포함
 
 // 📱 프로필탭 HTML 구조
 const PROFILE_HTML = `
@@ -201,6 +202,7 @@ class ProfileDashboard {
         this.supabaseClient = null;
         this.exerciseData = [];
         this.userInfo = null;
+        this.communityUpdateInterval = null;
     }
 
     // 🔧 초기화
@@ -358,6 +360,112 @@ class ProfileDashboard {
         return [];
     }
 
+    // 🫁 커뮤니티 데이터 업데이트 (기존 스마트 생성 함수 활용)
+    updateCommunityData() {
+        // 기존 generateSmartLiveData 함수 활용
+        if (typeof window.generateSmartLiveData === 'function') {
+            const liveData = window.generateSmartLiveData();
+            
+            // 프로필탭 커뮤니티 섹션 업데이트
+            const communitySection = document.getElementById('profileCommunitySection');
+            if (communitySection) {
+                // 실시간 통계 업데이트
+                const todayActiveEl = communitySection.querySelector('[style*="color: #3B82F6"]');
+                const totalUsersEl = communitySection.querySelector('[style*="color: #22C55E"]');
+                
+                if (todayActiveEl) {
+                    todayActiveEl.textContent = liveData.todayActive.toLocaleString();
+                }
+                if (totalUsersEl) {
+                    totalUsersEl.textContent = liveData.totalUsers.toLocaleString();
+                }
+                
+                console.log('🫁 커뮤니티 데이터 업데이트:', liveData);
+            }
+        } else {
+            // 기존 함수가 없으면 자체 생성
+            const liveData = this.generateFallbackCommunityData();
+            this.applyCommunityData(liveData);
+        }
+    }
+
+    // 🫁 자체 커뮤니티 데이터 생성 (폴백용)
+    generateFallbackCommunityData() {
+        const now = new Date();
+        const hour = now.getHours();
+        const day = now.getDay();
+        
+        // 시간대별 활성도 패턴
+        let hourMultiplier = 1.0;
+        if (hour >= 6 && hour <= 9) hourMultiplier = 1.8; // 아침 피크
+        else if (hour >= 18 && hour <= 22) hourMultiplier = 2.2; // 저녁 피크
+        else if (hour >= 0 && hour <= 5) hourMultiplier = 0.3; // 새벽
+        
+        // 요일별 패턴
+        let dayMultiplier = 1.0;
+        if (day === 0 || day === 6) dayMultiplier = 0.7; // 주말 70%
+        
+        // 기본 데이터 + 성장 패턴
+        const daysSinceStart = Math.floor((now - new Date('2024-01-01')) / (1000 * 60 * 60 * 24));
+        const baseUsers = 8500 + (daysSinceStart * 12); // 하루 12명씩 성장
+        
+        const todayActive = Math.floor(baseUsers * hourMultiplier * dayMultiplier * (0.85 + Math.random() * 0.3));
+        const totalUsers = Math.floor(baseUsers * 1.4);
+        
+        return {
+            todayActive: Math.max(150, todayActive),
+            totalUsers: Math.max(8000, totalUsers),
+            isGrowing: true
+        };
+    }
+
+    // 🫁 커뮤니티 데이터 적용
+    applyCommunityData(data) {
+        const communitySection = document.getElementById('profileCommunitySection');
+        if (!communitySection) return;
+        
+        // 동적 HTML 업데이트 (하드코딩 제거)
+        const updatedHTML = `
+            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 20px;">
+                <span style="font-size: 24px;">🫁</span>
+                <span style="font-size: 18px; font-weight: 600; color: #1E1E1E;">함께하는 숨트 커뮤니티</span>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                <div style="text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: #3B82F6;">${data.todayActive.toLocaleString()}</div>
+                    <div style="font-size: 12px; color: #6B7280;">오늘 활동 중</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="font-size: 24px; font-weight: 700; color: #22C55E;">${data.totalUsers.toLocaleString()}</div>
+                    <div style="font-size: 12px; color: #6B7280;">전체 사용자</div>
+                </div>
+            </div>
+            
+            <div style="background: #F8F9FA; padding: 16px; border-radius: 12px; text-align: center;">
+                <div style="font-size: 14px; color: #6B7280; line-height: 1.5;">
+                    ${this.getRandomMotivationMessage()}
+                </div>
+            </div>
+        `;
+        
+        communitySection.innerHTML = updatedHTML;
+        console.log('🫁 커뮤니티 섹션 업데이트 완료');
+    }
+
+    // 🫁 랜덤 동기부여 메시지
+    getRandomMotivationMessage() {
+        const messages = [
+            '"매일 조금씩 발전하는 우리의 호흡 여정,<br>함께 해서 더욱 의미있어요! 💪"',
+            '"숨쉬는 것만으로도 건강해지고 있어요,<br>우리 모두 화이팅! 🌟"',
+            '"호흡 하나하나가 모여 큰 변화를 만들어요,<br>꾸준히 함께해요! 🚀"',
+            '"깊은 호흡으로 마음도 몸도 건강하게,<br>오늘도 좋은 하루 보내세요! 😊"',
+            '"작은 습관이 큰 변화를 만듭니다,<br>호흡 트레이닝과 함께 성장해요! 🌱"'
+        ];
+        
+        return messages[Math.floor(Math.random() * messages.length)];
+    }
+
     // 📈 오늘 운동 횟수 계산
     getTodayExerciseCount() {
         const today = new Date().toISOString().split('T')[0];
@@ -382,6 +490,39 @@ class ProfileDashboard {
         }
     }
 
+    // 🏆 새로운 배지 체크 (프로필탭에서는 사용 안함 - 자동 획득 방지)
+    // 이 함수는 운동 완료 후나 퀴즈 완료 후에만 호출되어야 함
+    checkAndShowNewBadges() {
+        console.log('⚠️ 프로필탭에서는 배지 자동 체크를 하지 않습니다.');
+        console.log('💡 배지 획득은 운동 완료 후나 퀴즈 완료 후에만 실행됩니다.');
+        
+        // 프로필탭에서는 실행하지 않음
+        return [];
+        
+        /* 
+        // 기존 로직 (주석 처리 - 프로필탭에서는 사용 안함)
+        if (typeof window.checkNewBadges === 'function') {
+            const stats = {
+                totalExercises: this.exerciseData.length,
+                totalBreaths: this.exerciseData.reduce((sum, s) => sum + (s.completed_breaths || 0), 0),
+                consecutiveDays: this.calculateConsecutiveDays()
+            };
+            
+            const newBadges = window.checkNewBadges(stats);
+            
+            if (newBadges.length > 0 && typeof window.showBadgePopup === 'function') {
+                setTimeout(() => {
+                    window.showBadgePopup(newBadges[0]);
+                }, 500);
+            }
+            
+            return newBadges;
+        }
+        
+        return [];
+        */
+    }
+
     // 🎨 UI 업데이트
     async updateUI() {
         // 사용자 정보 업데이트
@@ -402,21 +543,35 @@ class ProfileDashboard {
         document.getElementById('consecutiveDays').textContent = stats.consecutiveDays;
         document.getElementById('currentIntensity').textContent = stats.currentIntensity;
 
-        // 배지 시스템 업데이트 (표시만, 새로운 배지 체크 안함)
+        // 배지 시스템 업데이트 (표시만, 자동 획득 안함)
         this.updateBadgesDisplay();
+
+        // 커뮤니티 데이터 업데이트 (동적 데이터)
+        this.updateCommunityData();
+
+        // 🫁 커뮤니티 데이터 자동 새로고침 (30초마다)
+        this.startCommunityAutoRefresh();
     }
 
-    // 🏆 배지 표시 업데이트 (프로필탭용으로 수정 - 새로운 배지 체크 제거)
+    // 🫁 커뮤니티 자동 새로고침 시작
+    startCommunityAutoRefresh() {
+        // 기존 인터벌 정리
+        if (this.communityUpdateInterval) {
+            clearInterval(this.communityUpdateInterval);
+        }
+        
+        // 30초마다 커뮤니티 데이터 업데이트
+        this.communityUpdateInterval = setInterval(() => {
+            this.updateCommunityData();
+        }, 30000); // 30초
+        
+        console.log('🫁 커뮤니티 자동 새로고침 시작 (30초 간격)');
+    }
+
+    // 🏆 배지 표시 업데이트 (프로필탭용 - 표시만, 획득 로직 제거)
     updateBadgesDisplay() {
         const badgesConfig = this.getBadgesConfig();
         const earnedBadges = this.getEarnedBadges();
-        
-        // 통계 계산 (배지 조건 체크용)
-        const stats = {
-            totalExercises: this.exerciseData.length,
-            totalBreaths: this.exerciseData.reduce((sum, s) => sum + (s.completed_breaths || 0), 0),
-            consecutiveDays: this.calculateConsecutiveDays()
-        };
 
         // 진행률 업데이트
         const progressEl = document.getElementById('profileBadgesProgress');
@@ -441,8 +596,7 @@ class ProfileDashboard {
             `;
         }).join('');
 
-        // 🚫 새로운 배지 체크 및 팝업 표시 제거 (버그 수정)
-        // this.checkAndShowNewBadges(); // 이 줄 제거
+        console.log('🏆 프로필탭 배지 표시 완료 (금색/회색만 표시)');
     }
 
     // 🚪 로그아웃/데이터 삭제
@@ -492,10 +646,17 @@ class ProfileDashboard {
 
     // 🧹 정리
     destroy() {
-        // 이벤트 리스너 정리 등
+        // 이벤트 리스너 정리
         const logoutBtn = document.getElementById('logoutButton');
         if (logoutBtn) {
             logoutBtn.removeEventListener('click', this.handleLogout);
+        }
+        
+        // 커뮤니티 자동 새로고침 정리
+        if (this.communityUpdateInterval) {
+            clearInterval(this.communityUpdateInterval);
+            this.communityUpdateInterval = null;
+            console.log('🫁 커뮤니티 자동 새로고침 정리');
         }
     }
 }
@@ -535,7 +696,7 @@ async function initProfileDashboard() {
     // 전역 변수 등록
     window.profileDashboard = dashboard;
     
-    console.log('✅ 프로필 대시보드 초기화 완료');
+    console.log('✅ 프로필 대시보드 초기화 완료 (배지 + 커뮤니티 연동)');
 }
 
 // 🔧 전역 함수 등록
