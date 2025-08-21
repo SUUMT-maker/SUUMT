@@ -54,8 +54,8 @@ const PROFILE_HTML = `
             <span style="font-size: 18px; font-weight: 600; color: #1E1E1E;">배지 컬렉션</span>
         </div>
         <div id="profileBadgesProgress" style="font-size: 14px; color: #6B7280; margin-bottom: 16px;">수집한 배지: 0/15</div>
-        <div id="profileBadgesGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px;">
-            <!-- 배지들이 JavaScript로 생성됨 -->
+        <div id="profileBadgesGrid" style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px;">
+            <!-- 15개 배지들이 JavaScript로 생성됨 (5x3 그리드) -->
         </div>
     </div>
 
@@ -140,6 +140,13 @@ const PROFILE_CSS = `
     box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
 }
 
+.badge-item.available {
+    background: linear-gradient(135deg, #E3F2FD 0%, #BBDEFB 100%);
+    color: #1976D2;
+    border: 2px solid #2196F3;
+    box-shadow: 0 2px 8px rgba(33, 150, 243, 0.2);
+}
+
 .badge-item.locked {
     background: #F3F4F6;
     color: #9CA3AF;
@@ -147,19 +154,25 @@ const PROFILE_CSS = `
 }
 
 .badge-item:hover.earned {
-    transform: scale(1.1);
+    transform: scale(1.05);
     box-shadow: 0 8px 24px rgba(255, 215, 0, 0.5);
 }
 
+.badge-item:hover.available {
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(33, 150, 243, 0.4);
+}
+
 .badge-icon {
-    font-size: 20px;
-    margin-bottom: 4px;
+    font-size: 16px;
+    margin-bottom: 2px;
 }
 
 .badge-name {
-    font-size: 10px;
+    font-size: 8px;
     font-weight: 600;
-    line-height: 1.2;
+    line-height: 1.1;
+    word-break: keep-all;
 }
 
 @media (max-width: 480px) {
@@ -179,11 +192,15 @@ const PROFILE_CSS = `
     }
     
     .badge-icon {
-        font-size: 16px;
+        font-size: 14px;
     }
     
     .badge-name {
-        font-size: 9px;
+        font-size: 7px;
+    }
+    
+    #profileBadgesGrid {
+        gap: 6px !important;
     }
 }
 </style>
@@ -337,52 +354,20 @@ class ProfileDashboard {
         return consecutive;
     }
 
-    // 🏆 배지 시스템 (기존 BADGES_CONFIG 재사용)
+    // 🏆 배지 시스템 (기존 BADGES_CONFIG 15개 사용)
     getBadgesConfig() {
-        // 기존 BADGES_CONFIG가 있다면 사용, 없다면 기본 배지 설정
+        // 기존 BADGES_CONFIG 15개 그대로 사용
         if (typeof window.BADGES_CONFIG !== 'undefined') {
             return window.BADGES_CONFIG;
         }
         
-        // 기본 배지 설정 (기존 코드에서 복사)
-        return [
-            {
-                id: 'first_step',
-                name: '첫 걸음',
-                icon: '🌱',
-                description: '첫 번째 호흡 트레이닝 완료',
-                condition: (stats) => stats.totalExercises >= 1
-            },
-            {
-                id: 'daily_warrior',
-                name: '일일 전사',
-                icon: '⚡',
-                description: '하루에 3번 이상 트레이닝 완료',
-                condition: (stats) => this.getTodayExerciseCount() >= 3
-            },
-            {
-                id: 'week_challenger',
-                name: '주간 도전자',
-                icon: '🔥',
-                description: '일주일 연속 트레이닝 완료',
-                condition: (stats) => stats.consecutiveDays >= 7
-            },
-            {
-                id: 'breath_master',
-                name: '호흡 마스터',
-                icon: '🫁',
-                description: '누적 호흡 1000회 달성',
-                condition: (stats) => stats.totalBreaths >= 1000
-            },
-            {
-                id: 'consistency_king',
-                name: '꾸준함의 왕',
-                icon: '👑',
-                description: '30일 연속 트레이닝 완료',
-                condition: (stats) => stats.consecutiveDays >= 30
-            }
-            // 더 많은 배지들 추가 가능
-        ];
+        // BADGES_CONFIG가 없으면 전역에서 찾기
+        if (typeof BADGES_CONFIG !== 'undefined') {
+            return BADGES_CONFIG;
+        }
+        
+        console.warn('⚠️ BADGES_CONFIG를 찾을 수 없습니다.');
+        return [];
     }
 
     // 📈 오늘 운동 횟수 계산
@@ -394,13 +379,44 @@ class ProfileDashboard {
         }).length;
     }
 
-    // 🏆 배지 획득 상태 확인
+    // 🏆 배지 획득 상태 확인 (기존 함수 재사용)
     getEarnedBadges() {
+        // 기존 getEarnedBadges 함수 재사용
+        if (typeof window.getEarnedBadges === 'function') {
+            return window.getEarnedBadges();
+        }
+        
+        // 직접 localStorage에서 가져오기
         try {
             return JSON.parse(localStorage.getItem('earnedBadges') || '[]');
         } catch {
             return [];
         }
+    }
+
+    // 🏆 새로운 배지 체크 (기존 로직 재사용)
+    checkAndShowNewBadges() {
+        // 기존 checkNewBadges 함수 재사용
+        if (typeof window.checkNewBadges === 'function') {
+            const stats = {
+                totalExercises: this.exerciseData.length,
+                totalBreaths: this.exerciseData.reduce((sum, s) => sum + (s.completed_breaths || 0), 0),
+                consecutiveDays: this.calculateConsecutiveDays()
+            };
+            
+            const newBadges = window.checkNewBadges(stats);
+            
+            // 새로운 배지가 있으면 팝업 표시 (기존 함수 재사용)
+            if (newBadges.length > 0 && typeof window.showBadgePopup === 'function') {
+                setTimeout(() => {
+                    window.showBadgePopup(newBadges[0]);
+                }, 500);
+            }
+            
+            return newBadges;
+        }
+        
+        return [];
     }
 
     // 🎨 UI 업데이트
@@ -423,14 +439,16 @@ class ProfileDashboard {
         document.getElementById('consecutiveDays').textContent = stats.consecutiveDays;
         document.getElementById('currentIntensity').textContent = stats.currentIntensity;
 
-        // 배지 시스템 업데이트
+        // 배지 시스템 업데이트 (기존 시스템 활용)
         this.updateBadgesDisplay();
     }
 
-    // 🏆 배지 표시 업데이트
+    // 🏆 배지 표시 업데이트 (프로필탭용으로 수정)
     updateBadgesDisplay() {
         const badgesConfig = this.getBadgesConfig();
         const earnedBadges = this.getEarnedBadges();
+        
+        // 통계 계산 (배지 조건 체크용)
         const stats = {
             totalExercises: this.exerciseData.length,
             totalBreaths: this.exerciseData.reduce((sum, s) => sum + (s.completed_breaths || 0), 0),
@@ -443,22 +461,34 @@ class ProfileDashboard {
             progressEl.textContent = `수집한 배지: ${earnedBadges.length}/${badgesConfig.length}`;
         }
 
-        // 배지 그리드 업데이트
+        // 배지 그리드 업데이트 (5x3 그리드로 15개 표시)
         const gridEl = document.getElementById('profileBadgesGrid');
         if (!gridEl) return;
 
         gridEl.innerHTML = badgesConfig.map(badge => {
             const isEarned = earnedBadges.includes(badge.id);
-            const canEarn = badge.condition(stats);
+            
+            // 조건 체크 (획득 가능한지)
+            let canEarn = false;
+            try {
+                canEarn = badge.condition && badge.condition(stats);
+            } catch (error) {
+                // 일부 조건 함수가 없을 수 있음 (퀴즈, 새벽운동 등)
+                canEarn = false;
+            }
             
             return `
-                <div class="badge-item ${isEarned ? 'earned' : 'locked'}" 
-                     title="${badge.description}">
-                    <div class="badge-icon">${badge.icon}</div>
-                    <div class="badge-name">${badge.name}</div>
+                <div class="badge-item ${isEarned ? 'earned' : canEarn ? 'available' : 'locked'}" 
+                     title="${badge.description}" 
+                     data-badge-id="${badge.id}">
+                    <div class="badge-icon">${isEarned ? badge.icon : (canEarn ? badge.icon : '?')}</div>
+                    <div class="badge-name">${isEarned ? badge.name : badge.hint || badge.name}</div>
                 </div>
             `;
         }).join('');
+
+        // 새로운 배지 체크 및 팝업 표시
+        this.checkAndShowNewBadges();
     }
 
     // 🚪 로그아웃/데이터 삭제
@@ -558,4 +588,4 @@ async function initProfileDashboard() {
 window.initProfileTab = initProfileDashboard;
 window.onProfileTabClick = initProfileDashboard;
 
-console.log('🔧 프로필탭 모듈 로드 완료');
+console.log('�� 프로필탭 모듈 로드 완료');
