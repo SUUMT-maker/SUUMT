@@ -16,8 +16,11 @@ const PROFILE_HTML = `
                     <img src="images/suumt-logo.png" alt="숨트레이너" style="width: 32px; height: 32px; border-radius: 50%;" onerror="this.parentNode.innerHTML='🤖';">
                 </div>
                 <div style="flex: 1;">
-                    <h3 id="profileNickname" style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0;">박학재 뉴비님</h3>
-                    <p style="font-size: 14px; font-weight: 400; color: #6b7280; margin: 0;">꾸준한 운동과 챌린지 도전으로 레벨업하세요!</p>
+                    <!-- 닉네임 (여백 증가) -->
+                    <h3 id="profileNickname" style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0 0 6px 0;">박학재 뉴비님</h3>
+                    
+                    <!-- 설명 문구 (여백 증가 + 줄간격 개선) -->
+                    <p style="font-size: 14px; font-weight: 400; color: #6b7280; margin: 0; line-height: 1.5;">꾸준한 운동과 챌린지 도전으로 레벨업하세요!</p>
                 </div>
             </div>
             
