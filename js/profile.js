@@ -43,16 +43,16 @@ const PROFILE_HTML = `
                 <div style="font-size: 13px; color: #6b7280; font-weight: 600;">누적 호흡</div>
             </div>
             
-            <!-- 연속 일수 -->
+            <!-- 최장 연속일 -->
             <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-                <div id="consecutiveDays" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">0</div>
-                <div style="font-size: 12px; color: #6b7280; font-weight: 600;">연속 일수</div>
+                <div id="maxConsecutiveDays" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">0</div>
+                <div style="font-size: 13px; color: #6b7280; font-weight: 600;">최장 연속일</div>
             </div>
             
-            <!-- 현재 강도 -->
+            <!-- 현재 레벨 -->
             <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-                <div id="currentIntensity" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">1.0</div>
-                <div style="font-size: 12px; color: #6b7280; font-weight: 600;">현재 강도</div>
+                <div id="currentLevel" style="font-size: 32px; font-weight: 800; color: #667eea; margin-bottom: 8px;">Lv.1</div>
+                <div style="font-size: 13px; color: #6b7280; font-weight: 600;">뉴비</div>
             </div>
             
         </div>
@@ -800,8 +800,11 @@ class ProfileDashboard {
         
         document.getElementById('totalWorkoutDays').textContent = stats.totalWorkoutDays;
         document.getElementById('totalBreaths').textContent = stats.totalBreaths.toLocaleString();
-        document.getElementById('consecutiveDays').textContent = stats.consecutiveDays;
-        document.getElementById('currentIntensity').textContent = stats.currentIntensity;
+        // consecutiveDays와 currentIntensity는 새로운 카드로 교체됨
+        
+        // 새로운 카드들 업데이트
+        this.updateMaxConsecutiveCard();
+        this.updateLevelCard();
 
         // 배지 시스템 업데이트 (표시만, 자동 획득 안함)
         this.updateBadgesDisplay();
@@ -811,6 +814,60 @@ class ProfileDashboard {
 
         // 레벨 시스템 업데이트
         this.updateLevelDisplay();
+    }
+
+    // 최대 연속 일수 업데이트
+    updateMaxConsecutiveCard() {
+        const maxConsecutive = this.calculateMaxConsecutiveDays();
+        const maxConsecutiveEl = document.getElementById('maxConsecutiveDays');
+        if (maxConsecutiveEl) {
+            maxConsecutiveEl.textContent = maxConsecutive;
+        }
+    }
+
+    // 현재 레벨 카드 업데이트  
+    updateLevelCard() {
+        if (typeof window.levelSystem !== 'undefined') {
+            const levelData = window.levelSystem.getLevelData();
+            
+            const levelEl = document.getElementById('currentLevel');
+            const titleEl = levelEl?.nextElementSibling;
+            
+            if (levelEl) levelEl.textContent = `Lv.${levelData.level}`;
+            if (titleEl) titleEl.textContent = levelData.title;
+        }
+    }
+
+    // 최대 연속 일수 계산
+    calculateMaxConsecutiveDays() {
+        if (!this.exerciseData.length) return 0;
+        
+        const dailyGoal = 40;
+        let maxStreak = 0;
+        let currentStreak = 0;
+        
+        // 날짜별로 그룹화
+        const dateMap = new Map();
+        this.exerciseData.forEach(session => {
+            const dateStr = new Date(session.created_at).toDateString();
+            if (!dateMap.has(dateStr)) {
+                dateMap.set(dateStr, 0);
+            }
+            dateMap.set(dateStr, dateMap.get(dateStr) + (session.completed_breaths || 0));
+        });
+        
+        // 연속 계산
+        const sortedDates = Array.from(dateMap.keys()).sort();
+        for (let i = 0; i < sortedDates.length; i++) {
+            if (dateMap.get(sortedDates[i]) >= dailyGoal) {
+                currentStreak++;
+                maxStreak = Math.max(maxStreak, currentStreak);
+            } else {
+                currentStreak = 0;
+            }
+        }
+        
+        return maxStreak;
     }
 
     // 🏆 배지 표시 업데이트 (프로필탭용 - 표시만, 획득 로직 제거)
