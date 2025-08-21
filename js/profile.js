@@ -751,9 +751,9 @@ class ProfileDashboard {
         
         // 리뷰 내용에 따른 나이대 설정 (더 정확하게)
         let ageGroup;
-        if (reviewText.includes('체력') || reviewText.includes('40대')) ageGroup = '40대';
+        if (reviewText.includes('손자') || reviewText.includes('40년')) ageGroup = '60대';
+        else if (reviewText.includes('체력') || reviewText.includes('40대')) ageGroup = '40대';
         else if (reviewText.includes('나이') || reviewText.includes('건강하게')) ageGroup = '50대';
-        else if (reviewText.includes('손자') || reviewText.includes('40년')) ageGroup = '60대';
         else if (reviewText.includes('계단') || reviewText.includes('운동')) ageGroup = '30대';
         else if (reviewText.includes('UI') || reviewText.includes('앱')) ageGroup = '20대';
         else ageGroup = '30대';
