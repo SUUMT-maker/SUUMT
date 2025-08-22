@@ -1391,10 +1391,17 @@ async function showResultScreen() {
 
 // 통계 데이터 업데이트 함수
 function updateResultStats() {
+    console.log('🔍 [DEBUG] updateResultStats() 시작');
+    console.log('🔍 [DEBUG] window.exerciseData:', window.exerciseData);
+    
     try {
         const timeData = window.exerciseData.exerciseTime.split(':');
         const minutes = parseInt(timeData[0]);
         const seconds = parseInt(timeData[1]);
+        
+        console.log('🔍 [DEBUG] 표시할 값들:');
+        console.log('🔍 [DEBUG] completedSets:', window.exerciseData.completedSets);
+        console.log('🔍 [DEBUG] completedBreaths:', window.exerciseData.completedBreaths);
         
         // 결과 통계 업데이트
         document.getElementById('resistanceInfo').textContent = `${window.exerciseData.resistanceSettings.inhale}/${window.exerciseData.resistanceSettings.exhale}`;
@@ -1402,7 +1409,8 @@ function updateResultStats() {
         document.getElementById('completedSets').textContent = `${window.exerciseData.completedSets}/2`;
         document.getElementById('totalBreathsResult').textContent = `${window.exerciseData.completedBreaths}회`;
         
-        console.log('✅ 통계 데이터 업데이트 완료');
+        console.log('🔍 [DEBUG] DOM 업데이트 완료');
+        console.log('🔍 [DEBUG] completedSets DOM 값:', document.getElementById('completedSets').textContent);
         
     } catch (error) {
         console.error('❌ 통계 데이터 업데이트 중 오류 발생:', error);
