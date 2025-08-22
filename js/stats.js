@@ -166,7 +166,7 @@ async function updateChart() {
         completedBreaths: session.completed_breaths || 0
     }));
     
-    console.log('🔍 변환된 주간 데이터:', convertedHistory);
+    // console.log('🔍 변환된 주간 데이터:', convertedHistory);
     
     try {
         const chartBars = document.getElementById('chartBars');
@@ -183,7 +183,7 @@ async function updateChart() {
             return date;
         });
         
-        console.log('🎯 [그래프] 주간 날짜:', weekDates.map(date => date.toLocaleDateString('ko-KR')));
+        // console.log('🎯 [그래프] 주간 날짜:', weekDates.map(date => date.toLocaleDateString('ko-KR')));
 
         // 차트 하단 요일 업데이트
         const dayLabels = ['월', '화', '수', '목', '금', '토', '일'];  // 월요일 시작
@@ -365,18 +365,18 @@ function getSimpleWeeklyData() {
     const exerciseData = window.exerciseData;
     const history = (exerciseData && Array.isArray(exerciseData)) ? exerciseData : [];
     
-    console.log('🔍 [메시지] 전체 데이터 개수:', history.length);
+    // console.log('🔍 [메시지] 전체 데이터 개수:', history.length);
     
     // 그래프와 정확히 동일한 주간 범위 계산 (7일 전체)
     const weekStart = getWeekStartDate();
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 7);
     
-    console.log('🎯 [메시지] 주간 범위:', {
-        weekStart: weekStart.toLocaleDateString('ko-KR'),
-        weekEnd: weekEnd.toLocaleDateString('ko-KR'),
-        totalDays: 7
-    });
+    // console.log('🎯 [메시지] 주간 범위:', {
+    //     weekStart: weekStart.toLocaleDateString('ko-KR'),
+    //     weekEnd: weekEnd.toLocaleDateString('ko-KR'),
+    //     totalDays: 7
+    // });
     
     // 이번 주 운동 기록만 필터링
     const thisWeekRecords = history.filter(record => {
@@ -405,7 +405,7 @@ function getSimpleWeeklyData() {
         isFirstWeek
     };
     
-    console.log('🔍 [메시지] 계산 결과:', result);
+    // console.log('🔍 [메시지] 계산 결과:', result);
     
     return result;
 }
@@ -444,32 +444,32 @@ function calculateSimpleConsecutiveDays(history) {
 
 // 🎯 메시지 선택 함수 (성과 중심 우선순위)
 function selectInsightMessage(data) {
-    console.log('🔍 [메시지] 선택 조건 데이터:', data);
+    // console.log('🔍 [메시지] 선택 조건 데이터:', data);
     
     // 1순위: 정말 대단한 성과들
     if (data.workoutDays === 7) {
-        console.log('🔍 [메시지] 선택된 메시지: 완벽한 일주일 (workoutDays=7)');
+        // console.log('🔍 [메시지] 선택된 메시지: 완벽한 일주일 (workoutDays=7)');
         return "매일 운동! 이 기세 좋은데요? 🔥";
     }
     
     if (data.consecutiveDays >= 3) {
-        console.log(`🔍 [메시지] 선택된 메시지: 연속 운동 (consecutiveDays=${data.consecutiveDays})`);
+        // console.log(`🔍 [메시지] 선택된 메시지: 연속 운동 (consecutiveDays=${data.consecutiveDays})`);
         return `${data.consecutiveDays}일째! 몸이 기억하기 시작했어요`;
     }
     
     if (data.workoutDays >= 5) {
-        console.log(`🔍 [메시지] 선택된 메시지: 주간 성취감 (workoutDays=${data.workoutDays})`);
+        // console.log(`🔍 [메시지] 선택된 메시지: 주간 성취감 (workoutDays=${data.workoutDays})`);
         return `일주일에 ${data.workoutDays}번! 거의 매일이네요 👏`;
     }
     
     if (data.totalSets >= 10) {
-        console.log(`🔍 [메시지] 선택된 메시지: 양적 성과 (totalSets=${data.totalSets})`);
+        // console.log(`🔍 [메시지] 선택된 메시지: 양적 성과 (totalSets=${data.totalSets})`);
         return `이번 주 ${data.totalSets}세트! 몸이 좋아할 거예요`;
     }
     
     // 마지막 순위: 첫 운동 (성과가 적을 때만)
     if (data.isFirstWeek && data.workoutDays <= 2) {
-        console.log('🔍 [메시지] 선택된 메시지: 첫 걸음 (isFirstWeek=true)');
+        // console.log('🔍 [메시지] 선택된 메시지: 첫 걸음 (isFirstWeek=true)');
         return "첫 운동 끝! 어떠셨어요?";
     }
     
@@ -510,12 +510,6 @@ function calculateMessageData(weeklyData) {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 7);
     
-    console.log('🎯 [메시지] 주간 범위:', {
-        weekStart: weekStart.toLocaleDateString('ko-KR'),
-        weekEnd: weekEnd.toLocaleDateString('ko-KR'),
-        totalDays: 7
-    });
-    
     // 주간 7일 범위 생성 (그래프와 동일) - 타입 안전성 추가
     const weekDates = Array.from({length: 7}, (_, i) => {
         const date = new Date(weekStart);
@@ -531,8 +525,6 @@ function calculateMessageData(weeklyData) {
         return kstDate;
     }).filter(date => date !== null); // null 값 제거
     
-    console.log('🎯 [메시지] KST 주간 날짜들:', weekDates);
-    
     const thisWeekRecords = weeklyData.filter(record => {
         // 수정 (KST 변환 비교 - 그래프와 동일):
         const recordKstDate = getKstDateString(new Date(record.created_at));
@@ -545,11 +537,11 @@ function calculateMessageData(weeklyData) {
         
         const isInWeek = weekDates.includes(recordKstDate);
         
-        console.log('🎯 [메시지] 레코드 KST 변환:', {
-            created_at: record.created_at,
-            recordKstDate: recordKstDate,
-            isInWeek: isInWeek
-        });
+        // console.log('🎯 [메시지] 레코드 KST 변환:', {
+        //     created_at: record.created_at,
+        //     recordKstDate: recordKstDate,
+        //     isInWeek: isInWeek
+        // });
         
         return isInWeek;
     });
@@ -559,8 +551,8 @@ function calculateMessageData(weeklyData) {
         new Date(session.created_at).toDateString()
     ));
     
-    console.log('🎯 [메시지 핵심] 운동한 날짜들:', Array.from(workoutDates));
-    console.log('🎯 [메시지 핵심] workoutDays 계산:', workoutDates.size);
+    // console.log('🎯 [메시지 핵심] 운동한 날짜들:', Array.from(workoutDates));
+    // console.log('🎯 [메시지 핵심] workoutDays 계산:', workoutDates.size);
     
     const totalSets = thisWeekRecords.reduce((sum, record) => 
         sum + (record.completed_sets || 0), 0);
@@ -611,7 +603,7 @@ async function updateWeeklyAIInsight() {
                 .lt('created_at', weekEnd.toISOString());
                 
             weeklyData = sessions || [];
-            console.log('🎯 [메시지] Supabase 데이터:', weeklyData.length, '개');
+            // console.log('🎯 [메시지] Supabase 데이터:', weeklyData.length, '개');
         }
         
         // 기존 getSimpleWeeklyData() 로직에 weeklyData 전달
@@ -629,7 +621,7 @@ async function updateWeeklyAIInsight() {
             chatBubble.innerHTML = message;
             chatBubble.className = `chat-bubble ${messageCategory}`;
             
-            console.log('메신저 스타일 인사이트 업데이트 성공:', message);
+            // console.log('메신저 스타일 인사이트 업데이트 성공:', message);
         }, 1000);
         
     } catch (error) {
