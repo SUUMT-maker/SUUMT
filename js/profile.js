@@ -373,6 +373,9 @@ class ProfileDashboard {
         this.userInfo = null;
         this.reviewCarouselInterval = null;
         this.currentReviewIndex = 0;
+        
+        // 🚀 EXP 업데이트 이벤트 리스너 등록
+        this.setupExpUpdateListener();
     }
 
     // 🔧 초기화
@@ -1202,6 +1205,71 @@ class ProfileDashboard {
             clearInterval(this.reviewCarouselInterval);
             this.reviewCarouselInterval = null;
             console.log('🫁 리뷰 캐러셀 자동 슬라이드 정리');
+        }
+    }
+
+    // 🆕 EXP 업데이트 리스너 설정
+    setupExpUpdateListener() {
+        // 커스텀 이벤트 리스너
+        window.addEventListener('expUpdated', (event) => {
+            console.log('📡 EXP 업데이트 이벤트 수신:', event.detail);
+            this.handleExpUpdate(event.detail);
+        });
+        
+        // 전역 함수 등록 (백업)
+        window.updateProfileFromEXP = (expResult) => {
+            console.log('📡 전역 함수로 EXP 업데이트:', expResult);
+            this.handleExpUpdate({
+                type: 'weekly_challenge',
+                result: expResult
+            });
+        };
+    }
+
+    // 🆕 EXP 업데이트 처리
+    handleExpUpdate(updateData) {
+        try {
+            console.log('🔄 프로필 실시간 업데이트 시작');
+            
+            // 레벨 정보 즉시 업데이트
+            this.updateLevelDisplay();
+            this.updateLevelCard();
+            
+            // 부드러운 애니메이션 효과 (선택사항)
+            this.animateProfileUpdate();
+            
+            console.log('✅ 프로필 실시간 업데이트 완료');
+            
+        } catch (error) {
+            console.error('❌ 프로필 업데이트 실패:', error);
+        }
+    }
+
+    // 🆕 프로필 업데이트 애니메이션 (선택사항)
+    animateProfileUpdate() {
+        // 헤더 카드에 깜빡임 효과
+        const headerCard = document.querySelector('.main-header > div');
+        if (headerCard) {
+            headerCard.style.transition = 'all 0.3s ease';
+            headerCard.style.boxShadow = '0 4px 20px rgba(102, 126, 234, 0.3)';
+            
+            setTimeout(() => {
+                headerCard.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
+            }, 1000);
+        }
+        
+        // 레벨 카드에 강조 효과
+        const levelCard = document.getElementById('currentLevel');
+        if (levelCard) {
+            const parentCard = levelCard.closest('div');
+            parentCard.style.transition = 'all 0.3s ease';
+            parentCard.style.transform = 'scale(1.05)';
+            parentCard.style.boxShadow = '0 8px 25px rgba(102, 126, 234, 0.2)';
+            
+            setTimeout(() => {
+                parentCard.style.transform = 'scale(1)';
+                parentCard.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.08)';
+            }, 800);
         }
     }
 }

@@ -1322,6 +1322,9 @@ class IntegratedRecordsDashboard {
                     console.log(`🎉 Week ${week} 완료! +300 EXP 지급`);
                     console.log(`📊 레벨 변화:`, result);
                     
+                    // 🚀 새로운 추가: 프로필탭 실시간 업데이트 이벤트 발생
+                    this.notifyProfileUpdate(result);
+                    
                     // 토스트 알림
                     this.showEXPToast(week, result);
                 }
@@ -1329,6 +1332,27 @@ class IntegratedRecordsDashboard {
                 console.log(`⚠️ Week ${week} 이미 완료됨 (중복 방지)`);
             }
         }
+    }
+
+    // 🆕 새로운 함수: 프로필탭 업데이트 알림
+    notifyProfileUpdate(expResult) {
+        // 방법 1: 커스텀 이벤트 발생
+        const updateEvent = new CustomEvent('expUpdated', {
+            detail: {
+                type: 'weekly_challenge',
+                exp: 300,
+                result: expResult,
+                timestamp: new Date().toISOString()
+            }
+        });
+        window.dispatchEvent(updateEvent);
+        
+        // 방법 2: 전역 함수 호출 (백업)
+        if (typeof window.updateProfileFromEXP === 'function') {
+            window.updateProfileFromEXP(expResult);
+        }
+        
+        console.log('📡 프로필탭 업데이트 이벤트 발생');
     }
 
     // 토스트 알림
