@@ -1100,32 +1100,76 @@ async function initProfileDashboard() {
         return;
     }
 
-    // HTML 및 CSS 삽입
-    profileScreen.innerHTML = PROFILE_HTML;
-    document.head.insertAdjacentHTML('beforeend', PROFILE_CSS);
-
-    // 대시보드 인스턴스 생성
-    const dashboard = new ProfileDashboard();
-    const initialized = await dashboard.init();
+    // 1단계: 로딩 화면 표시 (페이드 인 애니메이션 포함)
+    profileScreen.innerHTML = `
+        <div id="profileLoadingContainer" style="
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 400px; 
+            padding: 40px; 
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        ">
+            <div class="loading" style="border-top-color: #667eea; margin-bottom: 16px; width: 32px; height: 32px;"></div>
+            <div style="color: #6b7280; font-size: 14px; font-weight: 500;">프로필을 불러오는 중...</div>
+        </div>
+    `;
     
-    if (!initialized) {
+    // 로딩 화면 페이드 인
+    setTimeout(() => {
+        const loadingContainer = document.getElementById('profileLoadingContainer');
+        if (loadingContainer) {
+            loadingContainer.style.opacity = '1';
+        }
+    }, 50);
+    
+    // 2단계: 데이터 로딩 + 최소 시간 보장 (800ms)
+    const dashboard = new ProfileDashboard();
+    const [dashboardData] = await Promise.all([
+        dashboard.init(),
+        new Promise(resolve => setTimeout(resolve, 800)) // 최소 800ms 대기
+    ]);
+    
+    if (!dashboardData) {
         console.warn('⚠️ 프로필 대시보드 초기화 실패');
         return;
     }
-
-    // UI 업데이트
-    await dashboard.updateUI();
-
-    // 이벤트 리스너 등록
-    const logoutBtn = document.getElementById('logoutButton');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', () => dashboard.handleLogout());
-    }
-
-    // 전역 변수 등록
-    window.profileDashboard = dashboard;
     
-    console.log('✅ 프로필 대시보드 초기화 완료 (배지 + 리뷰 캐러셀 연동)');
+    // 3단계: 로딩 화면 페이드 아웃
+    const loadingContainer = document.getElementById('profileLoadingContainer');
+    if (loadingContainer) {
+        loadingContainer.style.opacity = '0';
+    }
+    
+    // 4단계: 페이드 아웃 완료 후 실제 화면 렌더링
+    setTimeout(() => {
+        profileScreen.innerHTML = PROFILE_HTML;
+        document.head.insertAdjacentHTML('beforeend', PROFILE_CSS);
+        
+        // 실제 화면 페이드 인
+        profileScreen.style.opacity = '0';
+        profileScreen.style.transition = 'opacity 0.4s ease-in-out';
+        
+        dashboard.updateUI();
+        
+        setTimeout(() => {
+            profileScreen.style.opacity = '1';
+        }, 50);
+        
+        // 이벤트 리스너 등록
+        const logoutBtn = document.getElementById('logoutButton');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => dashboard.handleLogout());
+        }
+
+        // 전역 변수 등록
+        window.profileDashboard = dashboard;
+        
+        console.log('✅ 프로필 대시보드 초기화 완료 (배지 + 리뷰 캐러셀 연동)');
+    }, 300); // 페이드 아웃 시간과 동일
 }
 
 // 🔧 전역 함수 등록
