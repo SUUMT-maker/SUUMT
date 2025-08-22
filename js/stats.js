@@ -214,30 +214,12 @@ async function updateChart() {
         const recordKstDate = getKstDateString(record.date);
         const targetKstDate = getKstDateString(targetDate.toISOString());
         
-        console.log(`🔍 날짜 비교: ${record.date} → ${recordKstDate} === ${targetKstDate}`);
-        
         return recordKstDate === targetKstDate;
         });
         const dayTotal = dayData.reduce((sum, record) => sum + record.completedSets, 0);
         
-        // 🔍 디버깅: 각 날짜별 데이터 상세 출력 (KST 기준)
-        const targetKstDate = getKstDateString(targetDate.toISOString());
-        console.log(`📅 ${targetKstDate} (KST): ${dayData.length}개 세션, 총 ${dayTotal}세트`);
-        if (dayData.length > 0) {
-            dayData.forEach((record, idx) => {
-                console.log(`  - 세션${idx + 1}: ${record.completedSets}세트 (${record.date})`);
-            });
-        }
-        
         return dayTotal;
     });
-    
-    // 🔍 디버깅: 전체 주간 데이터 요약
-    console.log('📊 주간 데이터 요약:');
-    console.log('  - dailySets 배열:', dailySets);
-    console.log('  - 총 세트수:', dailySets.reduce((sum, sets) => sum + sets, 0));
-    console.log('  - 최대 세트수:', Math.max(...dailySets));
-    console.log('  - 최소 세트수:', Math.min(...dailySets));
 
     // 🎯 동적 Y축 스케일 계산
     const maxSets = Math.max(...dailySets, 4); // 최소 4까지는 표시
@@ -247,11 +229,7 @@ async function updateChart() {
                       yAxisMax <= 8 ? [8, 6, 4, 2, 0] : 
                       [yAxisMax, Math.floor(yAxisMax * 0.75), Math.floor(yAxisMax * 0.5), Math.floor(yAxisMax * 0.25), 0];
     
-    // 🔍 디버깅: Y축 스케일 계산 과정
-    console.log('📏 Y축 스케일 계산:');
-    console.log('  - maxSets:', maxSets);
-    console.log('  - yAxisMax:', yAxisMax);
-    console.log('  - yAxisSteps:', yAxisSteps);
+
 
     // Y축 라벨 업데이트
     const yLabels = chartYAxis.querySelectorAll('.y-label');
@@ -268,13 +246,6 @@ async function updateChart() {
     bars.forEach((bar, index) => {
         const totalSets = dailySets[index];
         const height = Math.min(100, (totalSets / yAxisMax) * 100);
-        
-        // 🔍 디버깅: 각 막대별 높이 계산 과정
-        console.log(`📊 막대${index + 1} (${weekDates[index].toDateString()}):`);
-        console.log(`  - totalSets: ${totalSets}`);
-        console.log(`  - yAxisMax: ${yAxisMax}`);
-        console.log(`  - 계산식: (${totalSets} / ${yAxisMax}) * 100 = ${(totalSets / yAxisMax) * 100}%`);
-        console.log(`  - 최종 height: ${height}%`);
         
         bar.style.height = `${height}%`;
         

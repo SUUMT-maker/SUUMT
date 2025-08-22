@@ -1011,21 +1011,13 @@ class IntegratedRecordsDashboard {
         startOfWeek.setDate(now.getDate() - (now.getDay() + 6) % 7);
         startOfWeek.setHours(0, 0, 0, 0);
         
-        console.log('🔍 [DEBUG] 주간 데이터 필터링:');
-        console.log('🔍 [DEBUG] 현재 날짜:', now);
-        console.log('🔍 [DEBUG] 주 시작일:', startOfWeek);
-        console.log('🔍 [DEBUG] 전체 데이터 개수:', this.exerciseData.length);
-        
         const filtered = this.exerciseData.filter(session => {
             const sessionKstDate = this.getKstDateString(session.created_at);
             const startOfWeekKst = this.getKstDateString(startOfWeek);
             const isThisWeek = sessionKstDate >= startOfWeekKst;
             
-            console.log('🔍 [DEBUG]', sessionKstDate, '>=', startOfWeekKst, ':', isThisWeek);
             return isThisWeek;
         });
-        
-        console.log('🔍 [DEBUG] 필터링된 데이터 개수:', filtered.length);
         return filtered;
     }
 
