@@ -490,29 +490,24 @@ function selectInsightMessage(data) {
     return FALLBACK_MESSAGES[randomIndex];
 }
 
-// 🕐 KST 날짜 변환 함수 (그래프와 동일) - 타입 안전성 추가
+// 🕐 KST 날짜 변환 함수 (그래프와 동일) - 올바른 시간대 변환
 function getKstDateString(date) {
-    // 타입 체크 추가
+    // 타입 체크
     if (!date) return null;
-    
-    // Date 객체가 아니면 변환
     if (!(date instanceof Date)) {
         date = new Date(date);
     }
-    
-    // 유효한 Date인지 확인
     if (isNaN(date.getTime())) {
         console.error('Invalid date:', date);
         return null;
     }
     
-    const utcTime = date.getTime();
-    const kstTime = utcTime + (9 * 60 * 60 * 1000);
-    const kstDate = new Date(kstTime);
+    // 수정 (올바른 방식):
+    const kstDate = new Date(date.toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
     
-    const year = kstDate.getUTCFullYear();
-    const month = String(kstDate.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(kstDate.getUTCDate()).padStart(2, '0');
+    const year = kstDate.getFullYear();
+    const month = String(kstDate.getMonth() + 1).padStart(2, '0');
+    const day = String(kstDate.getDate()).padStart(2, '0');
     
     return `${year}-${month}-${day}`;
 }
