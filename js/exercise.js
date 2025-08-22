@@ -190,6 +190,13 @@ async function completeExercise() {
     clearTimeout(breathingTimer);
     clearInterval(restTimer);
     
+    // 🔍 [DEBUG] completeExercise() 호출됨
+    console.log('🔍 [DEBUG] completeExercise() 호출됨');
+    console.log('🔍 [DEBUG] isAborted:', isAborted);
+    console.log('🔍 [DEBUG] currentSet:', currentSet);
+    console.log('🔍 [DEBUG] currentBreath:', currentBreath);
+    console.log('🔍 [DEBUG] userFeedback:', userFeedback);
+    
     const exerciseTime = Math.floor((getCurrentUserTime() - exerciseStartTime) / 1000);
     const minutes = Math.floor(exerciseTime / 60);
     const seconds = exerciseTime % 60;
@@ -226,6 +233,11 @@ async function completeExercise() {
         }
     }
     
+    // 🔍 [DEBUG] 계산 결과
+    console.log('🔍 [DEBUG] 계산 결과:');
+    console.log('🔍 [DEBUG] actualCompletedSets:', actualCompletedSets);
+    console.log('🔍 [DEBUG] actualCompletedBreaths:', actualCompletedBreaths);
+    
     window.exerciseData = {
         exerciseTime: `${minutes}:${seconds.toString().padStart(2, '0')}`,
         completedSets: actualCompletedSets,
@@ -234,6 +246,10 @@ async function completeExercise() {
         resistanceSettings: { ...resistanceSettings },
         userFeedback: userFeedback
     };
+
+    // 🔍 [DEBUG] window.exerciseData 설정 완료
+    console.log('🔍 [DEBUG] window.exerciseData 설정 완료:');
+    console.log('🔍 [DEBUG] window.exerciseData:', window.exerciseData);
 
     setTimeout(() => {
         showFeedbackScreen();
