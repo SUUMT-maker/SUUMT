@@ -490,8 +490,22 @@ function selectInsightMessage(data) {
     return FALLBACK_MESSAGES[randomIndex];
 }
 
-// 🕐 KST 날짜 변환 함수 (그래프와 동일)
+// 🕐 KST 날짜 변환 함수 (그래프와 동일) - 타입 안전성 추가
 function getKstDateString(date) {
+    // 타입 체크 추가
+    if (!date) return null;
+    
+    // Date 객체가 아니면 변환
+    if (!(date instanceof Date)) {
+        date = new Date(date);
+    }
+    
+    // 유효한 Date인지 확인
+    if (isNaN(date.getTime())) {
+        console.error('Invalid date:', date);
+        return null;
+    }
+    
     const utcTime = date.getTime();
     const kstTime = utcTime + (9 * 60 * 60 * 1000);
     const kstDate = new Date(kstTime);
@@ -520,18 +534,32 @@ function calculateMessageData(weeklyData) {
         totalDays: 7
     });
     
-    // 주간 7일 범위 생성 (그래프와 동일)
+    // 주간 7일 범위 생성 (그래프와 동일) - 타입 안전성 추가
     const weekDates = Array.from({length: 7}, (_, i) => {
         const date = new Date(weekStart);
         date.setDate(weekStart.getDate() + i);
-        return getKstDateString(date);
-    });
+        const kstDate = getKstDateString(date);
+        
+        // null 체크로 안전하게 처리
+        if (!kstDate) {
+            console.error('🎯 [메시지] 주간 날짜 KST 변환 실패:', date);
+            return null;
+        }
+        
+        return kstDate;
+    }).filter(date => date !== null); // null 값 제거
     
     console.log('🎯 [메시지] KST 주간 날짜들:', weekDates);
     
     const thisWeekRecords = weeklyData.filter(record => {
         // 수정 (KST 변환 비교 - 그래프와 동일):
         const recordKstDate = getKstDateString(new Date(record.created_at));
+        
+        // null 체크로 안전하게 처리
+        if (!recordKstDate) {
+            console.warn('🎯 [메시지] KST 변환 실패:', record.created_at);
+            return false;
+        }
         
         const isInWeek = weekDates.includes(recordKstDate);
         
