@@ -2557,6 +2557,12 @@ function updateGoalStats(data) {
 
 // 🎯 기본 목표 카드 설정 (기존 함수명 유지)
 function setDefaultGoalCard() {
+    // ✅ 결과 화면에서는 completedSets를 0으로 설정하지 않음
+    if (document.getElementById('resultScreen').classList.contains('active')) {
+        console.log('🔒 결과 화면에서는 기본값 설정 건너뜀');
+        return;
+    }
+    
     const progressPercentage = document.getElementById('progressPercentage');
     const progressLabel = document.getElementById('progressLabel');
     const targetEl = document.getElementById('targetBreaths');
