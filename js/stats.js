@@ -106,7 +106,16 @@ function getTodayBreaths() {
 
 // 차트 데이터 업데이트 (개선된 주간 구분 + 동적 스케일링)
 function updateChart() {
-    const history = getExerciseHistory();
+    // 수정: 실제 운동 데이터 사용 (기존 localStorage 대신)
+    const history = window.exerciseData || [];
+    
+    // 데이터 변환: Supabase 형식을 기존 형식으로 변환
+    const convertedHistory = history.map(session => ({
+        date: session.created_at,
+        completedSets: session.completed_sets || 0,
+        completedBreaths: session.completed_breaths || 0
+    }));
+    
     const chartBars = document.getElementById('chartBars');
     const chartXAxis = document.getElementById('chartXAxis');
     const chartSubtitle = document.getElementById('chartSubtitle');
@@ -143,9 +152,9 @@ function updateChart() {
     const weekEndStr = formatDateForUser(weekDates[6]);
     chartSubtitle.textContent = `${weekStartStr} ~ ${weekEndStr}`;
 
-    // 🔧 각 날짜별 완료 세트 수 계산
+    // 🔧 각 날짜별 완료 세트 수 계산 (convertedHistory 사용)
     const dailySets = weekDates.map(targetDate => {
-        const dayData = history.filter(record => {
+        const dayData = convertedHistory.filter(record => {
             const recordDate = new Date(record.date);
             return recordDate.toDateString() === targetDate.toDateString();
         });
