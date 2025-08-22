@@ -1253,14 +1253,22 @@ class IntegratedRecordsDashboard {
     generateGoalMessage(progress, goal, isPersonalBest) {
         const currentWeek = this.getCurrentWeek();
         
-        const challengeMessages = {
-            1: "3일 연속? 쉽다고 생각하세요? 막상 해보면 의외로 어려워요!",
-            2: "호흡 200회 모으기 대작전! 과연 일주일 안에 성공할 수 있을까요?",
-            3: "이제 장난 아니에요! 5일 연속, 진짜 끈기를 보여주세요",
-            4: "최종 보스 등장! 주간 280회, 완벽하게 클리어 가능한가요?"
-        };
-        
-        return challengeMessages[currentWeek] || "새로운 도전을 시작해보세요!";
+        switch(currentWeek) {
+            case 1:
+                return "3일만 연속으로 해보세요, 생각보다 쉬울 거예요";
+                
+            case 2:
+                return "이번 주 200회 도전! 하루하루 쌓다 보면 금세예요";
+                
+            case 3:
+                return "5일 연속 도전, 이제 진짜 습관이 만들어질 거예요";
+                
+            case 4:
+                return "280회로 완벽 마무리! 지금까지의 성장을 느껴보세요";
+                
+            default:
+                return "새로운 도전을 시작해보세요";
+        }
     }
 
     // 주간 목표 UI 업데이트 (단순화)
