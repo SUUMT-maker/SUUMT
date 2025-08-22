@@ -360,7 +360,8 @@ const FALLBACK_MESSAGES = [
 
 // 📊 주간 데이터 추출 함수
 function getSimpleWeeklyData() {
-    const history = window.exerciseData || [];
+    const exerciseData = window.exerciseData;
+    const history = (exerciseData && Array.isArray(exerciseData)) ? exerciseData : [];
     const weekStart = getWeekStartDate();
     const weekEnd = getWeekEndDate();
     
