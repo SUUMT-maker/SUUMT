@@ -1378,6 +1378,18 @@ async function showResultScreen() {
             console.error('❌ 운동 배지 체크 중 오류:', error);
         }
         
+        // 🎯 주간활동 그래프 실시간 업데이트
+        try {
+            if (typeof updateChart === 'function') {
+                updateChart();
+                console.log('✅ 주간활동 그래프 실시간 업데이트 완료');
+            } else {
+                console.log('⚠️ updateChart 함수를 찾을 수 없음');
+            }
+        } catch (error) {
+            console.error('❌ 주간활동 그래프 업데이트 중 오류:', error);
+        }
+        
         // 4. AI 분석 섹션 초기화
         resetAIAnalysisSection();
         

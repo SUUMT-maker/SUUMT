@@ -106,15 +106,23 @@ function getTodayBreaths() {
 
 // 차트 데이터 업데이트 (개선된 주간 구분 + 동적 스케일링)
 function updateChart() {
-    // 수정: 실제 운동 데이터 사용 (기존 localStorage 대신)
-    const history = window.exerciseData || [];
+    // 타입 체크 및 안전한 기본값 설정
+    const exerciseData = window.exerciseData || [];
+    
+    // 배열인지 확인
+    if (!Array.isArray(exerciseData)) {
+        console.log('🔍 exerciseData가 배열이 아님:', typeof exerciseData);
+        return; // 또는 빈 차트 표시
+    }
     
     // 데이터 변환: Supabase 형식을 기존 형식으로 변환
-    const convertedHistory = history.map(session => ({
+    const convertedHistory = exerciseData.map(session => ({
         date: session.created_at,
         completedSets: session.completed_sets || 0,
         completedBreaths: session.completed_breaths || 0
     }));
+    
+    console.log('🔍 변환된 데이터:', convertedHistory);
     
     const chartBars = document.getElementById('chartBars');
     const chartXAxis = document.getElementById('chartXAxis');
