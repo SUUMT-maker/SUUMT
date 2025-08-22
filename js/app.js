@@ -1406,11 +1406,24 @@ function updateResultStats() {
         // 결과 통계 업데이트
         document.getElementById('resistanceInfo').textContent = `${window.exerciseData.resistanceSettings.inhale}/${window.exerciseData.resistanceSettings.exhale}`;
         document.getElementById('totalTime').textContent = `${minutes}분 ${seconds}초`;
-        document.getElementById('completedSets').textContent = `${window.exerciseData.completedSets}/2`;
+        document.getElementById('resultCompletedSets').textContent = `${window.exerciseData.completedSets}/2`;
         document.getElementById('totalBreathsResult').textContent = `${window.exerciseData.completedBreaths}회`;
         
         console.log('🔍 [DEBUG] DOM 업데이트 완료');
         console.log('🔍 [DEBUG] completedSets DOM 값:', document.getElementById('completedSets').textContent);
+        
+        // 🔍 [DEBUG] DOM 구조 문제 디버깅 추가
+        console.log('🔍 [DEBUG] DOM 구조 문제 디버깅:');
+        console.log('🔍 [DEBUG] 1. getElementById 결과:', document.getElementById('completedSets'));
+        console.log('🔍 [DEBUG] 2. querySelectorAll 결과:', document.querySelectorAll('[id="completedSets"]'));
+        console.log('🔍 [DEBUG] 3. 현재 활성 화면:', document.querySelector('.screen.active')?.id);
+        console.log('🔍 [DEBUG] 4. 결과 화면 상태:', document.getElementById('resultScreen').classList.contains('active'));
+        
+        // 🔍 [DEBUG] 모든 completedSets 요소의 현재 값 확인
+        const allCompletedSets = document.querySelectorAll('[id="completedSets"]');
+        allCompletedSets.forEach((el, index) => {
+            console.log(`🔍 [DEBUG] 5. completedSets[${index}] ID:`, el.id, '클래스:', el.className, '값:', el.textContent, '화면:', el.closest('.screen')?.id);
+        });
         
     } catch (error) {
         console.error('❌ 통계 데이터 업데이트 중 오류 발생:', error);
