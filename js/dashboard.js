@@ -1011,10 +1011,35 @@ class IntegratedRecordsDashboard {
         
         const startOfWeekKst = this.getKstDateString(startOfWeek); // ✅ KST 기준 변환
         
-        return this.exerciseData.filter(session => {
-            const sessionKstDate = this.getKstDateString(session.created_at); // ✅ KST 기준 변환
-            return sessionKstDate >= startOfWeekKst; // ✅ 동일한 형식으로 비교
+        console.log('📅 getThisWeekData - 주간 데이터 조회:', {
+            now: now.toISOString(),
+            startOfWeek: startOfWeek.toISOString(),
+            startOfWeekKst: startOfWeekKst,
+            totalExerciseData: this.exerciseData.length
         });
+        
+        const weekData = this.exerciseData.filter(session => {
+            const sessionKstDate = this.getKstDateString(session.created_at); // ✅ KST 기준 변환
+            const isInWeek = sessionKstDate >= startOfWeekKst;
+            
+            if (isInWeek) {
+                console.log('✅ 주간 데이터 포함:', {
+                    sessionId: session.id,
+                    sessionDate: session.created_at,
+                    sessionKstDate: sessionKstDate,
+                    completedBreaths: session.completed_breaths
+                });
+            }
+            
+            return isInWeek; // ✅ 동일한 형식으로 비교
+        });
+        
+        console.log('📊 주간 데이터 결과:', {
+            filteredCount: weekData.length,
+            weekDataDates: weekData.map(s => this.getKstDateString(s.created_at))
+        });
+        
+        return weekData;
     }
 
     // 🎯 2개 카드 시스템 함수들
@@ -1167,12 +1192,31 @@ class IntegratedRecordsDashboard {
         const dailyGoal = 40; // 2세트 40호흡
         const daysWithGoal = new Set();
         
+        console.log('🔍 calculateConsecutiveDays 시작:', {
+            weekDataLength: weekData.length,
+            target: target,
+            dailyGoal: dailyGoal
+        });
+        
         weekData.forEach(session => {
             if (session.completed_breaths >= dailyGoal) {
                 const date = this.getKstDateString(session.created_at); // ✅ 수정
                 daysWithGoal.add(date);
+                console.log('✅ 목표 달성 세션:', {
+                    date: date,
+                    completedBreaths: session.completed_breaths,
+                    sessionId: session.id
+                });
+            } else {
+                console.log('❌ 목표 미달성 세션:', {
+                    date: this.getKstDateString(session.created_at),
+                    completedBreaths: session.completed_breaths,
+                    sessionId: session.id
+                });
             }
         });
+        
+        console.log('📅 목표 달성한 날짜들:', Array.from(daysWithGoal));
         
         // 연속일 계산 로직
         let consecutive = 0;
@@ -1184,16 +1228,21 @@ class IntegratedRecordsDashboard {
             
             if (daysWithGoal.has(dateStr)) {
                 consecutive++;
+                console.log(`✅ ${dateStr}: 연속 ${consecutive}일째`);
             } else {
+                console.log(`❌ ${dateStr}: 연속 끊김, 최종 연속일: ${consecutive}`);
                 break;
             }
         }
         
-        return {
+        const result = {
             current: Math.min(consecutive, target),
             target: target,
             percentage: Math.min((consecutive / target) * 100, 100)
         };
+        
+        console.log('🎯 연속일 계산 결과:', result);
+        return result;
     }
 
     // 총 호흡수 계산
@@ -1269,6 +1318,17 @@ class IntegratedRecordsDashboard {
             goalType: goal.type,
             progress: progress,
             percentage: Math.round(progress.percentage)
+        });
+        
+        // 🔍 주간 챌린지 상세 디버깅
+        const weekData = this.getThisWeekData();
+        const consecutiveDays = this.calculateConsecutiveDays(weekData, goal.target);
+        console.log('🎯 주간 챌린지 상세 분석:', {
+            weekDataLength: weekData.length,
+            weekDataDates: weekData.map(s => this.getKstDateString(s.created_at)),
+            consecutiveDays: consecutiveDays,
+            goalTarget: goal.target,
+            calculatedProgress: progress
         });
         
         // UI 요소 업데이트
@@ -1515,6 +1575,12 @@ async function initIntegratedRecordsDashboard() {
         return;
     }
 
+    // 로딩 상태 표시
+    const recordsContent = document.getElementById('recordsContent');
+    if (recordsContent) {
+        recordsContent.style.display = 'block';
+    }
+
     recordsScreen.innerHTML = INTEGRATED_RECORDS_HTML;
 
     const dashboard = new IntegratedRecordsDashboard();
@@ -1527,6 +1593,22 @@ async function initIntegratedRecordsDashboard() {
 
     await dashboard.fetchExerciseData();
     await dashboard.fetchAIAdviceData();
+    
+    // 🔍 주간 챌린지 디버깅 로그 추가
+    console.log('🎯 주간 챌린지 디버깅 시작...');
+    const currentWeek = dashboard.getCurrentWeek();
+    const goal = dashboard.getWeeklyGoal(currentWeek);
+    const weekData = dashboard.getThisWeekData();
+    const consecutiveDays = dashboard.calculateConsecutiveDays(weekData, goal.target);
+    
+    console.log('🎯 주간 챌린지 데이터:', {
+        week: currentWeek,
+        goal: goal,
+        weekDataLength: weekData.length,
+        consecutiveDays: consecutiveDays,
+        weekDataDates: weekData.map(s => dashboard.getKstDateString(s.created_at))
+    });
+    
     dashboard.updateUI();
 
 

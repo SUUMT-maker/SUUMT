@@ -968,7 +968,6 @@ window.showBottomNav = showBottomNav;
 window.hideBottomNav = hideBottomNav;
 window.switchTab = switchTab;
 window.selectWorkoutMode = selectWorkoutMode;
-window.onRecordsTabClick = initRecordsTab; // 기존 함수를 새 함수로 교체
 window.fetchAiAdviceForDate = fetchAiAdviceForDate;
 window.renderRecordSummary = renderRecordSummary;
 window.fetchUserExerciseRecords = fetchUserExerciseRecords;

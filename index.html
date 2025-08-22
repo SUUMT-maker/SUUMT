@@ -845,73 +845,12 @@
 
         <!-- 📒 운동 기록 화면 -->
         <div id="recordsScreen" class="screen">
-            <div class="section-header">
-                <h2 class="section-title"><span class="section-icon">📒</span> 운동 기록</h2>
-                <p class="section-subtitle">운동한 날과 AI 조언 요약을 확인하세요</p>
-            </div>
-
-            <!-- Calendar -->
-            <div class="records-calendar card">
-                <div class="calendar-header">
-                    <button class="calendar-nav-btn" id="prevMonthBtn">‹</button>
-                    <h3 class="calendar-title" id="calendarTitle">2025년 1월</h3>
-                    <button class="calendar-nav-btn" id="nextMonthBtn">›</button>
-                </div>
-                <table class="calendar-table">
-                    <thead>
-                        <tr>
-                            <th>일</th>
-                            <th>월</th>
-                            <th>화</th>
-                            <th>수</th>
-                            <th>목</th>
-                            <th>금</th>
-                            <th>토</th>
-                        </tr>
-                    </thead>
-                    <tbody id="calendarBody">
-                        <!-- 달력 날짜들이 JavaScript로 동적 생성됨 -->
-                    </tbody>
-                </table>
-                <div class="calendar-loading" id="calendarLoading" style="display: none;">
-                    📊 운동 기록을 불러오는 중...
-                </div>
-            </div>
-
-            <!-- Selected Day Summary -->
-            <div class="records-summary card">
-                <h3>선택한 날짜: <span id="selectedDate">-</span></h3>
-                <ul id="recordSummaryList">
-                    <li>운동 세트 수: -</li>
-                    <li>총 운동 시간: -</li>
-                    <li>평균 저항 강도: -</li>
-                </ul>
-            </div>
-
-            <!-- AI Advice Summary -->
-            <div class="records-ai-advice card">
-                <div class="ai-advice-header">
-                    <div class="ai-advice-title">
-                        <span class="ai-advice-icon">🤖</span>
-                        <h3>🤖 AI 숨트레이너 종합 분석</h3>
-                    </div>
-                    <div class="ai-advice-badge" id="aiAdviceBadge" style="display: none;">
-                        새로운 조언
-                    </div>
-                </div>
-                <div class="ai-advice-content">
-                    <div class="ai-advice-loading" id="aiAdviceLoading" style="display: none;">
-                        <div class="loading-spinner"></div>
-                        <span>AI가 조언을 분석하는 중...</span>
-                    </div>
-                    <div class="ai-advice-text" id="aiAdviceSummary">
-                        날짜를 선택하면 AI 숨트레이너의 개인화된 조언을 확인할 수 있습니다.
-                    </div>
-                    <div class="ai-advice-empty" id="aiAdviceEmpty" style="display: none;">
-                        <div class="empty-state-icon">💭</div>
-                        <p>선택한 날짜에 AI 조언이 없습니다.</p>
-                        <small>운동 완료 후 AI가 분석한 조언을 여기서 확인하세요.</small>
-                    </div>
+            <!-- 기록탭은 JavaScript로 동적 생성됩니다 -->
+            <div id="recordsContent" style="display: none;">
+                <!-- 로딩 중 표시 -->
+                <div class="loading-container" style="text-align: center; padding: 40px;">
+                    <div class="loading-spinner" style="width: 40px; height: 40px; border: 4px solid #f3f3f3; border-top: 4px solid #667eea; border-radius: 50%; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                    <p style="color: #6b7280; font-size: 14px;">기록 데이터를 불러오는 중...</p>
                 </div>
             </div>
         </div>
