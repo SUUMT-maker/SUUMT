@@ -70,9 +70,9 @@
 }
 
 .user-avatar img {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
+    width: 48px;           /* 컨테이너와 동일 크기 */
+    height: 48px;          /* 컨테이너와 동일 크기 */
+    object-fit: cover;     /* contain에서 cover로 변경 */
 }
 
 .user-text h4 {
