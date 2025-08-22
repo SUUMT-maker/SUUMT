@@ -1006,40 +1006,25 @@ class IntegratedRecordsDashboard {
     getThisWeekData() {
         const now = new Date();
         const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay()); // 일요일
+        startOfWeek.setDate(now.getDate() - now.getDay());
         startOfWeek.setHours(0, 0, 0, 0);
         
-        const startOfWeekKst = this.getKstDateString(startOfWeek); // ✅ KST 기준 변환
+        console.log('🔍 [DEBUG] 주간 데이터 필터링:');
+        console.log('🔍 [DEBUG] 현재 날짜:', now);
+        console.log('🔍 [DEBUG] 주 시작일:', startOfWeek);
+        console.log('🔍 [DEBUG] 전체 데이터 개수:', this.exerciseData.length);
         
-        console.log('📅 getThisWeekData - 주간 데이터 조회:', {
-            now: now.toISOString(),
-            startOfWeek: startOfWeek.toISOString(),
-            startOfWeekKst: startOfWeekKst,
-            totalExerciseData: this.exerciseData.length
-        });
-        
-        const weekData = this.exerciseData.filter(session => {
-            const sessionKstDate = this.getKstDateString(session.created_at); // ✅ KST 기준 변환
-            const isInWeek = sessionKstDate >= startOfWeekKst;
+        const filtered = this.exerciseData.filter(session => {
+            const sessionKstDate = this.getKstDateString(session.created_at);
+            const startOfWeekKst = this.getKstDateString(startOfWeek);
+            const isThisWeek = sessionKstDate >= startOfWeekKst;
             
-            if (isInWeek) {
-                console.log('✅ 주간 데이터 포함:', {
-                    sessionId: session.id,
-                    sessionDate: session.created_at,
-                    sessionKstDate: sessionKstDate,
-                    completedBreaths: session.completed_breaths
-                });
-            }
-            
-            return isInWeek; // ✅ 동일한 형식으로 비교
+            console.log('🔍 [DEBUG]', sessionKstDate, '>=', startOfWeekKst, ':', isThisWeek);
+            return isThisWeek;
         });
         
-        console.log('📊 주간 데이터 결과:', {
-            filteredCount: weekData.length,
-            weekDataDates: weekData.map(s => this.getKstDateString(s.created_at))
-        });
-        
-        return weekData;
+        console.log('🔍 [DEBUG] 필터링된 데이터 개수:', filtered.length);
+        return filtered;
     }
 
     // 🎯 2개 카드 시스템 함수들
@@ -1198,20 +1183,30 @@ class IntegratedRecordsDashboard {
             dailyGoal: dailyGoal
         });
         
+        // 날짜별로 그룹화해서 하루 전체 호흡수 계산
+        const dailyBreaths = {};
         weekData.forEach(session => {
-            if (session.completed_breaths >= dailyGoal) {
-                const date = this.getKstDateString(session.created_at); // ✅ 수정
+            const date = this.getKstDateString(session.created_at);
+            if (!dailyBreaths[date]) {
+                dailyBreaths[date] = 0;
+            }
+            dailyBreaths[date] += (session.completed_breaths || 0);
+        });
+        
+        // 하루 전체 호흡수가 40호흡 이상인 날만 추가
+        Object.entries(dailyBreaths).forEach(([date, totalBreaths]) => {
+            if (totalBreaths >= dailyGoal) {
                 daysWithGoal.add(date);
-                console.log('✅ 목표 달성 세션:', {
+                console.log('✅ 목표 달성 날짜:', {
                     date: date,
-                    completedBreaths: session.completed_breaths,
-                    sessionId: session.id
+                    totalBreaths: totalBreaths,
+                    dailyGoal: dailyGoal
                 });
             } else {
-                console.log('❌ 목표 미달성 세션:', {
-                    date: this.getKstDateString(session.created_at),
-                    completedBreaths: session.completed_breaths,
-                    sessionId: session.id
+                console.log('❌ 목표 미달성 날짜:', {
+                    date: date,
+                    totalBreaths: totalBreaths,
+                    dailyGoal: dailyGoal
                 });
             }
         });
