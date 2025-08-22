@@ -208,17 +208,18 @@ async function updateChart() {
     // 🔧 각 날짜별 완료 세트 수 계산 (KST 기준)
     const dailySets = weekDates.map(targetDate => {
         const dayData = convertedHistory.filter(record => {
-            // 수정 (KST 기준):
-            const recordKstDate = getKstDateString(new Date(record.date));
-            const targetKstDate = getKstDateString(targetDate);
-            
-            console.log(`🔍 날짜 비교: ${recordKstDate} === ${targetKstDate}`);
-            
-            return recordKstDate === targetKstDate;
+                    // 수정 (KST 기준):
+        const recordKstDate = getKstDateString(record.date);
+        const targetKstDate = getKstDateString(targetDate.toISOString());
+        
+        console.log(`🔍 날짜 비교: ${record.date} → ${recordKstDate} === ${targetKstDate}`);
+        
+        return recordKstDate === targetKstDate;
         });
         const dayTotal = dayData.reduce((sum, record) => sum + record.completedSets, 0);
         
         // 🔍 디버깅: 각 날짜별 데이터 상세 출력 (KST 기준)
+        const targetKstDate = getKstDateString(targetDate.toISOString());
         console.log(`📅 ${targetKstDate} (KST): ${dayData.length}개 세션, 총 ${dayTotal}세트`);
         if (dayData.length > 0) {
             dayData.forEach((record, idx) => {
@@ -310,10 +311,14 @@ async function updateChart() {
     }
 }
 
-// KST 변환 함수 (기록탭에서 사용하던 방식)
-function getKstDateString(date) {
-    const kstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000)); // UTC+9
-    return kstDate.toISOString().split('T')[0]; // YYYY-MM-DD 형식
+// KST 변환 함수 (기록탭에서 사용하던 방식과 정확히 동일)
+function getKstDateString(utcDateString) {
+    const utcDate = new Date(utcDateString);
+    const kstDate = new Date(utcDate.getTime() + 9 * 60 * 60 * 1000);
+    const year = kstDate.getFullYear();
+    const month = String(kstDate.getMonth() + 1).padStart(2, '0');
+    const day = String(kstDate.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
 }
 
 // 기본 차트 표시 함수 추가
