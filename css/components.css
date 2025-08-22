@@ -2226,11 +2226,10 @@
     margin-top: 20px;
 }
 
-.chat-header {
+.chat-message-row {
     display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 8px;
+    align-items: flex-start;
+    gap: 12px;
     padding: 0 4px;
 }
 
@@ -2240,13 +2239,7 @@
     border-radius: 50%;
     border: 1px solid #E5E7EB;
     flex-shrink: 0;
-}
-
-.trainer-name {
-    font-size: 13px;
-    font-weight: 600;
-    color: #374151;
-    flex-grow: 1;
+    margin-top: 2px; /* 메시지와 정렬 */
 }
 
 
@@ -2260,7 +2253,7 @@
     line-height: 1.5;
     color: #374151;
     position: relative;
-    max-width: 85%;
+    flex: 1; /* 남은 공간 모두 사용 */
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
     transition: all 0.3s ease;
 }
@@ -2360,22 +2353,14 @@
         margin-top: 16px;
     }
     
-    .chat-header {
-        gap: 6px;
-        margin-bottom: 6px;
+    .chat-message-row {
+        gap: 8px;
     }
     
     .trainer-avatar {
         width: 24px;
         height: 24px;
-    }
-    
-    .trainer-name {
-        font-size: 12px;
-    }
-    
-    .chat-time {
-        font-size: 10px;
+        margin-top: 1px;
     }
     
     .chat-bubble {
