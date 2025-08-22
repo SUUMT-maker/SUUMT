@@ -42,6 +42,7 @@ window.supabaseClient.auth.onAuthStateChange((event, session) => {
     setTimeout(() => {
         clearGreetingCache(); // 사용자 변경시 캐시 클리어
         updateGreetingCard();
+        updateGoalCard(); // ✅ 이 줄 추가
     }, 500);
   }
 });
@@ -71,6 +72,7 @@ window.supabaseClient.auth.onAuthStateChange((event, session) => {
     setTimeout(() => {
         clearGreetingCache(); // 사용자 변경시 캐시 클리어
         updateGreetingCard();
+        updateGoalCard(); // ✅ 이 줄 추가
     }, 500);
   }
 })();
@@ -1928,6 +1930,11 @@ window.onload = function() {
     loadUserData();
     loadResistanceSettings();
     updateBadgesDisplay();
+    
+    // ✅ 로그인 상태 확인 후 목표 카드 업데이트 추가
+    if (window.currentUserId) {
+        updateGoalCard();
+    }
     
     // 🔥 새로운 기능: 온보딩 스와이프 초기화
     initializeOnboardingSwipe();
