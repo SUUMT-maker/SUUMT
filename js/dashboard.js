@@ -1570,19 +1570,40 @@ async function initIntegratedRecordsDashboard() {
         return;
     }
 
-    // 1단계: 기존 디자인과 일관성 있는 로딩 UI 표시
+    // 1단계: 로딩 화면 표시 (페이드 인 애니메이션 포함)
     recordsScreen.innerHTML = `
-        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 400px; padding: 40px; text-align: center;">
+        <div id="loadingContainer" style="
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 400px; 
+            padding: 40px; 
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+        ">
             <div class="loading" style="border-top-color: #667eea; margin-bottom: 16px; width: 32px; height: 32px;"></div>
             <div style="color: #6b7280; font-size: 14px; font-weight: 500;">운동 기록을 불러오는 중...</div>
         </div>
     `;
     
-    // 2단계: 데이터 로딩 및 초기화
-    const dashboard = new IntegratedRecordsDashboard();
-    const initialized = await dashboard.init();
+    // 로딩 화면 페이드 인
+    setTimeout(() => {
+        const loadingContainer = document.getElementById('loadingContainer');
+        if (loadingContainer) {
+            loadingContainer.style.opacity = '1';
+        }
+    }, 50);
     
-    if (!initialized) {
+    // 2단계: 데이터 로딩 + 최소 시간 보장 (800ms)
+    const dashboard = new IntegratedRecordsDashboard();
+    const [dashboardData] = await Promise.all([
+        dashboard.init(),
+        new Promise(resolve => setTimeout(resolve, 800)) // 최소 800ms 대기
+    ]);
+    
+    if (!dashboardData) {
         console.warn('⚠️ 대시보드 초기화 실패');
         return;
     }
@@ -1605,31 +1626,49 @@ async function initIntegratedRecordsDashboard() {
         weekDataDates: weekData.map(s => dashboard.getKstDateString(s.created_at))
     });
     
-    // 3단계: 데이터 준비 완료 후 실제 화면 렌더링
-    recordsScreen.innerHTML = INTEGRATED_RECORDS_HTML;
-    dashboard.updateUI();
+    // 3단계: 로딩 화면 페이드 아웃
+    const loadingContainer = document.getElementById('loadingContainer');
+    if (loadingContainer) {
+        loadingContainer.style.opacity = '0';
+    }
+    
+    // 4단계: 페이드 아웃 완료 후 실제 화면 렌더링
+    setTimeout(() => {
+        recordsScreen.innerHTML = INTEGRATED_RECORDS_HTML;
+        
+        // 실제 화면 페이드 인
+        recordsScreen.style.opacity = '0';
+        recordsScreen.style.transition = 'opacity 0.4s ease-in-out';
+        
+        dashboard.updateUI();
+        
+        setTimeout(() => {
+            recordsScreen.style.opacity = '1';
+        }, 50);
+        
+        // 이벤트 리스너 설정
+        const prevBtn = document.getElementById('prevMonthBtn');
+        const nextBtn = document.getElementById('nextMonthBtn');
+        
+        if (prevBtn) {
+            prevBtn.addEventListener('click', () => dashboard.navigateCalendar('prev'));
+        }
+        
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => dashboard.navigateCalendar('next'));
+        }
 
-    const prevBtn = document.getElementById('prevMonthBtn');
-    const nextBtn = document.getElementById('nextMonthBtn');
-    
-    if (prevBtn) {
-        prevBtn.addEventListener('click', () => dashboard.navigateCalendar('prev'));
-    }
-    
-    if (nextBtn) {
-        nextBtn.addEventListener('click', () => dashboard.navigateCalendar('next'));
-    }
-
-    window.integratedDashboard = dashboard;
-    
-    console.log('✅ CORS 해결된 AI 동기부여 대시보드 초기화 완료');
-    
-    if (typeof gtag !== 'undefined') {
-        gtag('event', 'motivation_dashboard_initialized_cors_fixed', {
-            user_id: dashboard.userId,
-            timestamp: new Date().toISOString()
-        });
-    }
+        window.integratedDashboard = dashboard;
+        
+        console.log('✅ CORS 해결된 AI 동기부여 대시보드 초기화 완료');
+        
+        if (typeof gtag !== 'undefined') {
+            gtag('event', 'motivation_dashboard_initialized_cors_fixed', {
+                user_id: dashboard.userId,
+                timestamp: new Date().toISOString()
+            });
+        }
+    }, 300); // 페이드 아웃 시간과 동일
 }
 
 // 🎨 추가 CSS (동일)
