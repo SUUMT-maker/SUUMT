@@ -442,52 +442,39 @@ function calculateSimpleConsecutiveDays(history) {
     return consecutiveDays;
 }
 
-// 🎯 메시지 선택 함수 (동적 생성으로 변경)
+// 🎯 메시지 선택 함수 (성과 중심 우선순위)
 function selectInsightMessage(data) {
     console.log('🔍 [메시지] 선택 조건 데이터:', data);
     
-    // 1순위: 특별한 순간들
-    if (data.isFirstWeek) {
-        console.log('🔍 [메시지] 선택된 메시지: 첫 걸음 (isFirstWeek=true)');
-        return "첫 운동 끝! 어떠셨어요?";
-    }
-    
+    // 1순위: 정말 대단한 성과들
     if (data.workoutDays === 7) {
         console.log('🔍 [메시지] 선택된 메시지: 완벽한 일주일 (workoutDays=7)');
         return "매일 운동! 이 기세 좋은데요? 🔥";
     }
     
-    // 2순위: 습관 형성
     if (data.consecutiveDays >= 3) {
         console.log(`🔍 [메시지] 선택된 메시지: 연속 운동 (consecutiveDays=${data.consecutiveDays})`);
         return `${data.consecutiveDays}일째! 몸이 기억하기 시작했어요`;
     }
     
-    // 3순위: 주간 성취감
     if (data.workoutDays >= 5) {
         console.log(`🔍 [메시지] 선택된 메시지: 주간 성취감 (workoutDays=${data.workoutDays})`);
         return `일주일에 ${data.workoutDays}번! 거의 매일이네요 👏`;
     }
     
-    if (data.workoutDays >= 3) {
-        console.log(`🔍 [메시지] 선택된 메시지: 주간 성취감 (workoutDays=${data.workoutDays})`);
-        return `${data.workoutDays}일 운동! 이 정도면 좋은 페이스예요`;
-    }
-    
-    if (data.workoutDays >= 1) {
-        console.log(`🔍 [메시지] 선택된 메시지: 주간 성취감 (workoutDays=${data.workoutDays})`);
-        return "조금씩이라도 계속하는 중!";
-    }
-    
-    // 4순위: 양적 성과
-    if (data.totalSets >= 3) {
+    if (data.totalSets >= 10) {
         console.log(`🔍 [메시지] 선택된 메시지: 양적 성과 (totalSets=${data.totalSets})`);
         return `이번 주 ${data.totalSets}세트! 몸이 좋아할 거예요`;
     }
     
-    // 5순위: 기본 격려 (랜덤)
-    const randomIndex = Math.floor(Math.random() * FALLBACK_MESSAGES.length);
-    return FALLBACK_MESSAGES[randomIndex];
+    // 마지막 순위: 첫 운동 (성과가 적을 때만)
+    if (data.isFirstWeek && data.workoutDays <= 2) {
+        console.log('🔍 [메시지] 선택된 메시지: 첫 걸음 (isFirstWeek=true)');
+        return "첫 운동 끝! 어떠셨어요?";
+    }
+    
+    // 기본 격려
+    return "꾸준히 하는 것만으로도 대단해요";
 }
 
 // 🕐 KST 날짜 변환 함수 (그래프와 동일) - UTC+9 시간 추가 방식
@@ -885,4 +872,5 @@ function handleQuizCompletionBadges() {
 
 
 
+ 
  
