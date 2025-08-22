@@ -997,10 +997,10 @@ function showScreen(screenId) {
 }
 
 // 메인 화면으로 이동
-function goToMain() {
+async function goToMain() {
     showScreen('mainScreen');
     resetExercise();
-    loadUserData();
+    await loadUserData(); // async 호출
 }
 
 // 하단 네비게이션 탭 전환 함수
@@ -1063,9 +1063,9 @@ function selectWorkoutMode(mode) {
 }
 
 // 사용자 데이터 로드
-function loadUserData() {
+async function loadUserData() {
     const stats = getLocalStats();
-    updateChart();
+    await updateChart(); // async 호출
     
     // 🔄 profile.js 의존성 체크 및 커뮤니티 데이터 업데이트
     if (typeof window.getCommunityStats === 'function') {
@@ -1381,7 +1381,7 @@ async function showResultScreen() {
         // 🎯 주간활동 그래프 실시간 업데이트
         try {
             if (typeof updateChart === 'function') {
-                updateChart();
+                await updateChart(); // async 호출
                 console.log('✅ 주간활동 그래프 실시간 업데이트 완료');
             } else {
                 console.log('⚠️ updateChart 함수를 찾을 수 없음');
@@ -1958,8 +1958,8 @@ function hideIntro() {
 }
 
 // 🎬 페이지 초기화
-window.onload = function() {
-    loadUserData();
+window.onload = async function() {
+    await loadUserData(); // async 호출
     loadResistanceSettings();
     updateBadgesDisplay();
     

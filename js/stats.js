@@ -105,24 +105,49 @@ function getTodayBreaths() {
 }
 
 // 차트 데이터 업데이트 (개선된 주간 구분 + 동적 스케일링)
-function updateChart() {
-    // 타입 체크 및 안전한 기본값 설정
-    const exerciseData = window.exerciseData || [];
-    
-    // 배열인지 확인
-    if (!Array.isArray(exerciseData)) {
-        console.log('🔍 exerciseData가 배열이 아님:', typeof exerciseData);
-        return; // 또는 빈 차트 표시
-    }
-    
-    // 데이터 변환: Supabase 형식을 기존 형식으로 변환
-    const convertedHistory = exerciseData.map(session => ({
-        date: session.created_at,
-        completedSets: session.completed_sets || 0,
-        completedBreaths: session.completed_breaths || 0
-    }));
-    
-    console.log('🔍 변환된 데이터:', convertedHistory);
+async function updateChart() {
+    try {
+        // 1단계: Supabase에서 직접 주간 데이터 조회 (일일목표 방식과 동일)
+        let weeklyData = [];
+        
+        if (window.supabaseClient && window.currentUserId) {
+            const weekStart = getWeekStartDate();
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 7);
+            
+            const { data: sessions, error } = await window.supabaseClient
+                .from('exercise_sessions')
+                .select('completed_breaths, completed_sets, created_at')
+                .eq('user_id', window.currentUserId)
+                .gte('created_at', weekStart.toISOString())
+                .lt('created_at', weekEnd.toISOString());
+                
+            if (!error && sessions) {
+                weeklyData = sessions;
+                console.log('✅ Supabase 주간 데이터 조회 성공:', weeklyData.length);
+            }
+        }
+        
+        // 2단계: 로컬 폴백 (일일목표 방식과 동일)
+        if (weeklyData.length === 0 && window.exerciseData && Array.isArray(window.exerciseData)) {
+            weeklyData = window.exerciseData.filter(session => {
+                const sessionDate = new Date(session.created_at);
+                const weekStart = getWeekStartDate();
+                const weekEnd = new Date(weekStart);
+                weekEnd.setDate(weekStart.getDate() + 7);
+                return sessionDate >= weekStart && sessionDate < weekEnd;
+            });
+            console.log('📱 로컬 데이터 폴백 사용:', weeklyData.length);
+        }
+        
+        // 3단계: 차트 업데이트 (기존 로직 활용)
+        const convertedHistory = weeklyData.map(session => ({
+            date: session.created_at,
+            completedSets: session.completed_sets || 0,
+            completedBreaths: session.completed_breaths || 0
+        }));
+        
+        console.log('🔍 변환된 주간 데이터:', convertedHistory);
     
     const chartBars = document.getElementById('chartBars');
     const chartXAxis = document.getElementById('chartXAxis');
@@ -223,6 +248,11 @@ function updateChart() {
     
     // 🎯 AI 인사이트 업데이트 (비동기)
     updateWeeklyAIInsight();
+    
+    } catch (error) {
+        console.error('❌ 주간활동 차트 업데이트 실패:', error);
+        // 에러 시 빈 차트 표시
+    }
 }
 
 // 🎯 새로운 단순화된 AI 인사이트 로직 (에러 수정 버전)
