@@ -400,7 +400,7 @@ function getSimpleWeeklyData() {
     return result;
 }
 
-// 🔄 연속일 계산 (단순화)
+// 🔄 연속일 계산 (단순화) - Supabase 데이터 형식 지원
 function calculateSimpleConsecutiveDays(history) {
     if (history.length === 0) return 0;
     
@@ -413,7 +413,8 @@ function calculateSimpleConsecutiveDays(history) {
         checkDate.setDate(today.getDate() - i);
         
         const hasWorkout = history.some(record => {
-            const recordDate = new Date(record.date);
+            // Supabase 데이터 형식 (created_at) 또는 기존 형식 (date) 모두 지원
+            const recordDate = new Date(record.created_at || record.date);
             return recordDate.toDateString() === checkDate.toDateString();
         });
         
@@ -479,34 +480,90 @@ function selectInsightMessage(data) {
     return FALLBACK_MESSAGES[randomIndex];
 }
 
-// 🚀 메신저 스타일 AI 인사이트 업데이트 함수 (기존 함수 완전 교체)
-function updateWeeklyAIInsight() {
+// 📊 메시지용 데이터 계산 함수 (Supabase 데이터 기반)
+function calculateMessageData(weeklyData) {
+    if (!Array.isArray(weeklyData)) {
+        weeklyData = [];
+    }
+    
+    const weekStart = getWeekStartDate();
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 7);
+    
+    // 이번 주 운동 기록만 필터링
+    const thisWeekRecords = weeklyData.filter(record => {
+        const recordDate = new Date(record.created_at);
+        return recordDate >= weekStart && recordDate < weekEnd;
+    });
+    
+    // 기본 데이터 계산
+    const workoutDays = new Set(thisWeekRecords.map(record => 
+        new Date(record.created_at).toDateString()
+    )).size;
+    
+    const totalSets = thisWeekRecords.reduce((sum, record) => 
+        sum + (record.completed_sets || 0), 0);
+    
+    // 연속일 계산 (전체 히스토리에서)
+    const consecutiveDays = calculateSimpleConsecutiveDays(weeklyData);
+    
+    // 첫 운동 여부
+    const isFirstWeek = weeklyData.length <= thisWeekRecords.length;
+    
+    const result = {
+        workoutDays,
+        totalSets,
+        consecutiveDays,
+        isFirstWeek
+    };
+    
+    console.log('🔍 [메시지] Supabase 데이터 기반 계산 결과:', result);
+    
+    return result;
+}
+
+// 🚀 메신저 스타일 AI 인사이트 업데이트 함수 (Supabase 직접 데이터 가져오기)
+async function updateWeeklyAIInsight() {
     const chatBubble = document.getElementById('chatBubble');
     
     if (!chatBubble) return;
     
     try {
-        // 1초 후 타이핑 애니메이션을 메시지로 변경
+        // 그래프와 동일한 방식으로 데이터 가져오기
+        let weeklyData = [];
+        
+        if (window.supabaseClient && window.currentUserId) {
+            const weekStart = getWeekStartDate();
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 7);
+            
+            const { data: sessions } = await window.supabaseClient
+                .from('exercise_sessions')
+                .select('completed_sets, created_at')
+                .eq('user_id', window.currentUserId)
+                .gte('created_at', weekStart.toISOString())
+                .lt('created_at', weekEnd.toISOString());
+                
+            weeklyData = sessions || [];
+        }
+        
+        // 기존 getSimpleWeeklyData() 로직에 weeklyData 전달
+        const data = calculateMessageData(weeklyData);
+        const message = selectInsightMessage(data);
+        
+        // 메시지 카테고리 결정 (간단한 키워드 기반)
+        let messageCategory = 'encouragement';
+        if (message.includes('연속') || message.includes('완벽') || message.includes('세트') || message.includes('챔피언')) {
+            messageCategory = 'achievement';
+        }
+        
+        // 메시지 표시 (로딩 애니메이션 제거하고 메시지 표시)
         setTimeout(() => {
-            // 주간 데이터 추출
-            const weeklyData = getSimpleWeeklyData();
-            
-            // 메시지 선택
-            const message = selectInsightMessage(weeklyData);
-            
-            // 메시지 카테고리 결정 (간단한 키워드 기반)
-            let messageCategory = 'encouragement';
-            if (message.includes('연속') || message.includes('완벽') || message.includes('세트') || message.includes('챔피언')) {
-                messageCategory = 'achievement';
-            }
-            
-            // 메시지 표시 (로딩 애니메이션 제거하고 메시지 표시)
             chatBubble.innerHTML = message;
             chatBubble.className = `chat-bubble ${messageCategory}`;
             
             console.log('메신저 스타일 인사이트 업데이트 성공:', message);
-            
-        }, 1000); // 1초 타이핑 애니메이션 후 메시지 표시
+        }, 1000);
         
     } catch (error) {
         console.error('메신저 스타일 인사이트 업데이트 실패:', error);
