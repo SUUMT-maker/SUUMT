@@ -362,6 +362,9 @@ const FALLBACK_MESSAGES = [
 function getSimpleWeeklyData() {
     const exerciseData = window.exerciseData;
     const history = (exerciseData && Array.isArray(exerciseData)) ? exerciseData : [];
+    
+    console.log('🔍 [메시지] 전체 데이터 개수:', history.length);
+    
     const weekStart = getWeekStartDate();
     const weekEnd = getWeekEndDate();
     
@@ -385,12 +388,16 @@ function getSimpleWeeklyData() {
     // 첫 운동 여부
     const isFirstWeek = history.length <= thisWeekRecords.length;
     
-    return {
+    const result = {
         workoutDays,
         totalSets,
         consecutiveDays,
         isFirstWeek
     };
+    
+    console.log('🔍 [메시지] 계산 결과:', result);
+    
+    return result;
 }
 
 // 🔄 연속일 계산 (단순화)
@@ -426,35 +433,44 @@ function calculateSimpleConsecutiveDays(history) {
 
 // 🎯 메시지 선택 함수 (동적 생성으로 변경)
 function selectInsightMessage(data) {
+    console.log('🔍 [메시지] 선택 조건 데이터:', data);
+    
     // 1순위: 특별한 순간들
     if (data.isFirstWeek) {
+        console.log('🔍 [메시지] 선택된 메시지: 첫 걸음 (isFirstWeek=true)');
         return "첫 걸음이 가장 어려운 법이에요";
     }
     
     if (data.workoutDays === 7) {
+        console.log('🔍 [메시지] 선택된 메시지: 완벽한 일주일 (workoutDays=7)');
         return "완벽한 일주일! 이 리듬만 유지하면 돼요";
     }
     
     // 2순위: 습관 형성
     if (data.consecutiveDays >= 3) {
+        console.log(`🔍 [메시지] 선택된 메시지: 연속 운동 (consecutiveDays=${data.consecutiveDays})`);
         return `${data.consecutiveDays}일 연속! 이제 습관이 되어가고 있어요`;
     }
     
     // 3순위: 주간 성취감
     if (data.workoutDays >= 5) {
+        console.log(`🔍 [메시지] 선택된 메시지: 주간 성취감 (workoutDays=${data.workoutDays})`);
         return "매일 조금씩, 이게 진짜 실력이에요";
     }
     
     if (data.workoutDays >= 3) {
+        console.log(`🔍 [메시지] 선택된 메시지: 주간 성취감 (workoutDays=${data.workoutDays})`);
         return `바쁜 중에도 ${data.workoutDays}일이나 시간 내셨네요!`;
     }
     
     if (data.workoutDays >= 1) {
+        console.log(`🔍 [메시지] 선택된 메시지: 주간 성취감 (workoutDays=${data.workoutDays})`);
         return "완벽하지 않아도 꾸준히, 그게 답이에요";
     }
     
     // 4순위: 양적 성과
     if (data.totalSets >= 3) {
+        console.log(`🔍 [메시지] 선택된 메시지: 양적 성과 (totalSets=${data.totalSets})`);
         return `${data.totalSets}세트 이상! 정말 열심히 하고 계시네요`;
     }
     
