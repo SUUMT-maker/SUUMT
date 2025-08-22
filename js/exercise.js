@@ -235,6 +235,9 @@ async function completeExercise() {
         userFeedback: userFeedback
     };
 
+    // 🚀 EXP 자동 업데이트 추가
+    await updateEXPAfterExercise();
+
     setTimeout(() => {
         showFeedbackScreen();
     }, 1000);
@@ -481,4 +484,47 @@ function showNormalRest() {
     
     // 전역 타이머는 이미 startRest에서 시작됨
     console.log('⏰ 전역 휴식 타이머 계속 사용 - 남은 시간:', globalRestTime, '초');
+}
+
+// 🆕 EXP 자동 업데이트 함수
+async function updateEXPAfterExercise() {
+    if (typeof window.levelSystem !== 'undefined') {
+        try {
+            console.log('💯 운동 완료! EXP 계산 시작...');
+            
+            // 최신 운동 데이터 가져오기
+            const { data: exerciseData, error } = await window.supabaseClient
+                .from('exercise_sessions')
+                .select('*')
+                .eq('user_id', window.currentUserId)
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error('운동 데이터 가져오기 실패:', error);
+                return;
+            }
+            
+            // EXP 재계산
+            const result = window.levelSystem.updateFromExerciseData(exerciseData || []);
+            
+            console.log('🎮 EXP 업데이트 완료:', result);
+            
+            // 실시간 프로필탭 업데이트 이벤트 발생
+            const expEvent = new CustomEvent('expUpdated', {
+                detail: { 
+                    type: 'daily_exercise', 
+                    result: result,
+                    timestamp: new Date().toISOString()
+                }
+            });
+            window.dispatchEvent(expEvent);
+            
+            console.log('📡 프로필탭 실시간 업데이트 이벤트 발생');
+            
+        } catch (error) {
+            console.error('❌ EXP 업데이트 실패:', error);
+        }
+    } else {
+        console.warn('⚠️ levelSystem이 로드되지 않았습니다');
+    }
 }
