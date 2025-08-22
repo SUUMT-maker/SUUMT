@@ -12,7 +12,7 @@ const INTEGRATED_RECORDS_HTML = `
         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
             <div style="font-size: 20px; font-weight: 700; color: #1E1E1E; display: flex; align-items: center; gap: 8px;">
                 <span id="goalIcon">🔥</span>
-                <span id="goalTitle">꾸준히 챌린지</span>
+                <span id="goalTitle">로딩 중...</span>
             </div>
         </div>
         
@@ -40,7 +40,7 @@ const INTEGRATED_RECORDS_HTML = `
         <!-- AI 메시지 -->
         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; color: #6b7280;">
             <img src="icons/coach-avatar.png" style="width: 24px; height: 24px; border-radius: 50%;" alt="AI">
-            <span id="goalMessage">😊 새로운 도전의 시작! 화이팅! 💪</span>
+            <span id="goalMessage">데이터를 불러오는 중입니다</span>
         </div>
         
     </div>
@@ -1570,14 +1570,15 @@ async function initIntegratedRecordsDashboard() {
         return;
     }
 
-    // 로딩 상태 표시
-    const recordsContent = document.getElementById('recordsContent');
-    if (recordsContent) {
-        recordsContent.style.display = 'block';
-    }
-
-    recordsScreen.innerHTML = INTEGRATED_RECORDS_HTML;
-
+    // 1단계: 기존 디자인과 일관성 있는 로딩 UI 표시
+    recordsScreen.innerHTML = `
+        <div style="display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 400px; padding: 40px; text-align: center;">
+            <div class="loading" style="border-top-color: #667eea; margin-bottom: 16px; width: 32px; height: 32px;"></div>
+            <div style="color: #6b7280; font-size: 14px; font-weight: 500;">운동 기록을 불러오는 중...</div>
+        </div>
+    `;
+    
+    // 2단계: 데이터 로딩 및 초기화
     const dashboard = new IntegratedRecordsDashboard();
     const initialized = await dashboard.init();
     
@@ -1604,9 +1605,9 @@ async function initIntegratedRecordsDashboard() {
         weekDataDates: weekData.map(s => dashboard.getKstDateString(s.created_at))
     });
     
+    // 3단계: 데이터 준비 완료 후 실제 화면 렌더링
+    recordsScreen.innerHTML = INTEGRATED_RECORDS_HTML;
     dashboard.updateUI();
-
-
 
     const prevBtn = document.getElementById('prevMonthBtn');
     const nextBtn = document.getElementById('nextMonthBtn');
