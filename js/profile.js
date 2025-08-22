@@ -33,25 +33,25 @@ const PROFILE_HTML = `
             
             <!-- 운동한 날 -->
             <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-                <div id="totalWorkoutDays" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">0</div>
+                <div id="totalWorkoutDays" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">로딩 중...</div>
                 <div style="font-size: 13px; color: #6b7280; font-weight: 600;">운동한 날</div>
             </div>
             
             <!-- 누적 호흡 -->
             <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-                <div id="totalBreaths" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">0</div>
+                <div id="totalBreaths" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">로딩 중...</div>
                 <div style="font-size: 13px; color: #6b7280; font-weight: 600;">누적 호흡</div>
             </div>
             
             <!-- 연속 일수 -->
             <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-                <div id="consecutiveDays" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">0</div>
+                <div id="consecutiveDays" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">로딩 중...</div>
                 <div style="font-size: 12px; color: #6b7280; font-weight: 600;">연속 일수</div>
             </div>
             
             <!-- 현재 강도 -->
             <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-                <div id="currentIntensity" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">1.0</div>
+                <div id="currentIntensity" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px;">로딩 중...</div>
                 <div style="font-size: 12px; color: #6b7280; font-weight: 600;">현재 강도</div>
             </div>
             
@@ -86,11 +86,11 @@ const PROFILE_HTML = `
         <!-- 실시간 통계 -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
             <div style="text-align: center;">
-                <div id="profileTodayActive" style="font-size: 24px; font-weight: 700; color: #3B82F6;">1,247</div>
+                <div id="profileTodayActive" style="font-size: 24px; font-weight: 700; color: #3B82F6;">로딩 중...</div>
                 <div style="font-size: 12px; color: #6B7280;">오늘 활동 중</div>
             </div>
             <div style="text-align: center;">
-                <div id="profileTotalUsers" style="font-size: 24px; font-weight: 700; color: #1f2937;">12,543</div>
+                <div id="profileTotalUsers" style="font-size: 24px; font-weight: 700; color: #1f2937;">로딩 중...</div>
                 <div style="font-size: 12px; color: #6B7280;">전체 사용자</div>
             </div>
         </div>
