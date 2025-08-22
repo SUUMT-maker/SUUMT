@@ -367,10 +367,16 @@ function getSimpleWeeklyData() {
     
     console.log('🔍 [메시지] 전체 데이터 개수:', history.length);
     
-    // 그래프와 동일한 주간 범위 계산
+    // 그래프와 정확히 동일한 주간 범위 계산 (7일 전체)
     const weekStart = getWeekStartDate();
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 7);
+    
+    console.log('🎯 [메시지] 주간 범위:', {
+        weekStart: weekStart.toLocaleDateString('ko-KR'),
+        weekEnd: weekEnd.toLocaleDateString('ko-KR'),
+        totalDays: 7
+    });
     
     // 이번 주 운동 기록만 필터링
     const thisWeekRecords = history.filter(record => {
@@ -490,10 +496,16 @@ function calculateMessageData(weeklyData) {
         weeklyData = [];
     }
     
-    // 이번 주 운동 기록만 필터링 (그래프와 동일한 주간 범위)
+    // 그래프와 정확히 동일한 주간 범위 계산 (7일 전체)
     const weekStart = getWeekStartDate();
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 7);
+    
+    console.log('🎯 [메시지] 주간 범위:', {
+        weekStart: weekStart.toLocaleDateString('ko-KR'),
+        weekEnd: weekEnd.toLocaleDateString('ko-KR'),
+        totalDays: 7
+    });
     
     const thisWeekRecords = weeklyData.filter(record => {
         const recordDate = new Date(record.created_at);
@@ -538,10 +550,16 @@ async function updateWeeklyAIInsight() {
         let weeklyData = [];
         
         if (window.supabaseClient && window.currentUserId) {
-            // 그래프와 동일한 주간 범위 계산
+            // 그래프와 정확히 동일한 주간 범위 계산 (7일 전체)
             const weekStart = getWeekStartDate();
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekStart.getDate() + 7);
+            
+            console.log('🎯 [메시지] 주간 범위:', {
+                weekStart: weekStart.toLocaleDateString('ko-KR'),
+                weekEnd: weekEnd.toLocaleDateString('ko-KR'),
+                totalDays: 7
+            });
             
             const { data: sessions } = await window.supabaseClient
                 .from('exercise_sessions')
