@@ -205,16 +205,21 @@ async function updateChart() {
         const weekEndStr = formatDateForUser(weekDates[6]);
         chartSubtitle.textContent = `${weekStartStr} ~ ${weekEndStr}`;
 
-    // 🔧 각 날짜별 완료 세트 수 계산 (convertedHistory 사용)
+    // 🔧 각 날짜별 완료 세트 수 계산 (KST 기준)
     const dailySets = weekDates.map(targetDate => {
         const dayData = convertedHistory.filter(record => {
-            const recordDate = new Date(record.date);
-            return recordDate.toDateString() === targetDate.toDateString();
+            // 수정 (KST 기준):
+            const recordKstDate = getKstDateString(new Date(record.date));
+            const targetKstDate = getKstDateString(targetDate);
+            
+            console.log(`🔍 날짜 비교: ${recordKstDate} === ${targetKstDate}`);
+            
+            return recordKstDate === targetKstDate;
         });
         const dayTotal = dayData.reduce((sum, record) => sum + record.completedSets, 0);
         
-        // 🔍 디버깅: 각 날짜별 데이터 상세 출력
-        console.log(`📅 ${targetDate.toDateString()}: ${dayData.length}개 세션, 총 ${dayTotal}세트`);
+        // 🔍 디버깅: 각 날짜별 데이터 상세 출력 (KST 기준)
+        console.log(`📅 ${targetKstDate} (KST): ${dayData.length}개 세션, 총 ${dayTotal}세트`);
         if (dayData.length > 0) {
             dayData.forEach((record, idx) => {
                 console.log(`  - 세션${idx + 1}: ${record.completedSets}세트 (${record.date})`);
@@ -303,6 +308,12 @@ async function updateChart() {
         console.error('❌ 주간활동 차트 업데이트 실패:', error);
         // 에러 시 빈 차트 표시
     }
+}
+
+// KST 변환 함수 (기록탭에서 사용하던 방식)
+function getKstDateString(date) {
+    const kstDate = new Date(date.getTime() + (9 * 60 * 60 * 1000)); // UTC+9
+    return kstDate.toISOString().split('T')[0]; // YYYY-MM-DD 형식
 }
 
 // 기본 차트 표시 함수 추가
