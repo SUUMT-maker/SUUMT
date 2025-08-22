@@ -1009,9 +1009,11 @@ class IntegratedRecordsDashboard {
         startOfWeek.setDate(now.getDate() - now.getDay()); // 일요일
         startOfWeek.setHours(0, 0, 0, 0);
         
+        const startOfWeekKst = this.getKstDateString(startOfWeek); // ✅ KST 기준 변환
+        
         return this.exerciseData.filter(session => {
-            const sessionDate = new Date(session.created_at);
-            return sessionDate >= startOfWeek;
+            const sessionKstDate = this.getKstDateString(session.created_at); // ✅ KST 기준 변환
+            return sessionKstDate >= startOfWeekKst; // ✅ 동일한 형식으로 비교
         });
     }
 
@@ -1167,7 +1169,7 @@ class IntegratedRecordsDashboard {
         
         weekData.forEach(session => {
             if (session.completed_breaths >= dailyGoal) {
-                const date = new Date(session.created_at).toDateString();
+                const date = this.getKstDateString(session.created_at); // ✅ 수정
                 daysWithGoal.add(date);
             }
         });
@@ -1178,7 +1180,7 @@ class IntegratedRecordsDashboard {
         
         for (let i = 0; i < 7; i++) {
             const checkDate = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
-            const dateStr = checkDate.toDateString();
+            const dateStr = this.getKstDateString(checkDate); // ✅ 수정
             
             if (daysWithGoal.has(dateStr)) {
                 consecutive++;
