@@ -1146,8 +1146,8 @@ async function initProfileDashboard() {
     
     // 4단계: 페이드 아웃 완료 후 실제 화면 렌더링
     setTimeout(() => {
-        profileScreen.innerHTML = PROFILE_HTML;
-        document.head.insertAdjacentHTML('beforeend', PROFILE_CSS);
+        document.head.insertAdjacentHTML('beforeend', PROFILE_CSS);  // ✅ CSS 먼저 삽입
+        profileScreen.innerHTML = PROFILE_HTML;        // ✅ HTML 나중에 렌더링
         
         // 실제 화면 페이드 인
         profileScreen.style.opacity = '0';
