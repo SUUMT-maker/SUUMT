@@ -115,13 +115,6 @@ async function updateChart() {
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekStart.getDate() + 7);
             
-            console.log('🔍 [그래프] Supabase 쿼리 범위:', {
-                weekStart: weekStart.toISOString(),
-                weekEnd: weekEnd.toISOString(),
-                weekStartLocal: weekStart.toLocaleString('ko-KR'),
-                weekEndLocal: weekEnd.toLocaleString('ko-KR')
-            });
-            
             const { data: sessions, error } = await window.supabaseClient
                 .from('exercise_sessions')
                 .select('completed_breaths, completed_sets, created_at')
@@ -132,10 +125,6 @@ async function updateChart() {
             if (!error && sessions && sessions.length > 0) {
                 weeklyData = sessions;
                 console.log('✅ Supabase 주간 데이터 사용:', weeklyData.length);
-                console.log('🔍 [그래프] Supabase에서 가져온 데이터:', {
-                    totalRecords: weeklyData.length,
-                    sampleRecords: weeklyData.slice(0, 3)
-                });
             } else {
                 throw new Error('Supabase 데이터 없음');
             }
@@ -194,11 +183,7 @@ async function updateChart() {
             return date;
         });
         
-        console.log('🔍 [그래프] 주간 날짜 배열:', weekDates.map(date => ({
-            date: date.toISOString(),
-            local: date.toLocaleString('ko-KR'),
-            dayOfWeek: date.getDay()
-        })));
+        console.log('🎯 [그래프] 주간 날짜:', weekDates.map(date => date.toLocaleDateString('ko-KR')));
 
         // 차트 하단 요일 업데이트
         const dayLabels = ['월', '화', '수', '목', '금', '토', '일'];  // 월요일 시작
@@ -503,50 +488,23 @@ function calculateMessageData(weeklyData) {
         weeklyData = [];
     }
     
+    // 이번 주 운동 기록만 필터링 (주간 범위)
     const weekStart = getWeekStartDate();
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 7);
     
-    console.log('🔍 [메시지] 주간 범위:', {
-        weekStart: weekStart.toISOString(),
-        weekEnd: weekEnd.toISOString(),
-        weekStartLocal: weekStart.toLocaleString('ko-KR'),
-        weekEndLocal: weekEnd.toLocaleString('ko-KR')
-    });
-    
-    // 이번 주 운동 기록만 필터링
     const thisWeekRecords = weeklyData.filter(record => {
         const recordDate = new Date(record.created_at);
-        const isInWeek = recordDate >= weekStart && recordDate < weekEnd;
-        console.log('🔍 [메시지] 레코드 필터링:', {
-            created_at: record.created_at,
-            recordDate: recordDate.toISOString(),
-            recordDateLocal: recordDate.toLocaleString('ko-KR'),
-            isInWeek: isInWeek
-        });
-        return isInWeek;
+        return recordDate >= weekStart && recordDate < weekEnd;
     });
     
-    console.log('🔍 [메시지] 필터링된 주간 레코드:', thisWeekRecords);
+    // 핵심 정보만 출력
+    const workoutDates = new Set(thisWeekRecords.map(session => 
+        new Date(session.created_at).toDateString()
+    ));
     
-    // 기본 데이터 계산
-    const dateStrings = thisWeekRecords.map(record => {
-        const dateString = new Date(record.created_at).toDateString();
-        console.log('🔍 [메시지] 날짜 변환:', {
-            created_at: record.created_at,
-            dateString: dateString
-        });
-        return dateString;
-    });
-    
-    const uniqueDates = new Set(dateStrings);
-    const workoutDays = uniqueDates.size;
-    
-    console.log('🔍 [메시지] 날짜 처리 과정:', {
-        dateStrings: dateStrings,
-        uniqueDates: Array.from(uniqueDates),
-        workoutDays: workoutDays
-    });
+    console.log('🎯 [메시지 핵심] 운동한 날짜들:', Array.from(workoutDates));
+    console.log('🎯 [메시지 핵심] workoutDays 계산:', workoutDates.size);
     
     const totalSets = thisWeekRecords.reduce((sum, record) => 
         sum + (record.completed_sets || 0), 0);
@@ -558,13 +516,11 @@ function calculateMessageData(weeklyData) {
     const isFirstWeek = weeklyData.length <= thisWeekRecords.length;
     
     const result = {
-        workoutDays,
+        workoutDays: workoutDates.size,
         totalSets,
         consecutiveDays,
         isFirstWeek
     };
-    
-    console.log('🔍 [메시지] Supabase 데이터 기반 계산 결과:', result);
     
     return result;
 }
@@ -584,13 +540,6 @@ async function updateWeeklyAIInsight() {
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekStart.getDate() + 7);
             
-            console.log('🔍 [메시지] Supabase 쿼리 범위:', {
-                weekStart: weekStart.toISOString(),
-                weekEnd: weekEnd.toISOString(),
-                weekStartLocal: weekStart.toLocaleString('ko-KR'),
-                weekEndLocal: weekEnd.toLocaleString('ko-KR')
-            });
-            
             const { data: sessions } = await window.supabaseClient
                 .from('exercise_sessions')
                 .select('completed_sets, created_at')
@@ -599,11 +548,7 @@ async function updateWeeklyAIInsight() {
                 .lt('created_at', weekEnd.toISOString());
                 
             weeklyData = sessions || [];
-            
-            console.log('🔍 [메시지] Supabase에서 가져온 데이터:', {
-                totalRecords: weeklyData.length,
-                sampleRecords: weeklyData.slice(0, 3)
-            });
+            console.log('🎯 [메시지] Supabase 데이터:', weeklyData.length, '개');
         }
         
         // 기존 getSimpleWeeklyData() 로직에 weeklyData 전달
