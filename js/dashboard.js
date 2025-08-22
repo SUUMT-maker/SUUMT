@@ -981,9 +981,9 @@ class IntegratedRecordsDashboard {
             },
             4: {
                 title: '완벽 마스터 챌린지',
-                label: '7일 연속 + 300호흡',
-                target: { consecutive: 7, breaths: 300 },
-                type: 'hybrid'
+                label: '주간 280호흡',
+                target: 280,
+                type: 'total_breaths'
             }
         };
         return goals[week];
@@ -998,8 +998,6 @@ class IntegratedRecordsDashboard {
                 return this.calculateConsecutiveDays(thisWeekData, goal.target);
             case 'total_breaths':
                 return this.calculateTotalBreaths(thisWeekData, goal.target);
-            case 'hybrid':
-                return this.calculateHybridProgress(thisWeekData, goal.target);
         }
     }
 
@@ -1036,8 +1034,8 @@ class IntegratedRecordsDashboard {
                         state: '진행중'
                     },
                     action: {
-                        content: '지금 운동하면',
-                        reward: todayCompleted ? '달성완료 ↗️' : `+1일 ↗️`
+                        content: todayCompleted ? '오늘 운동' : '지금 운동하면',
+                        reward: todayCompleted ? '완료했어요! 👏' : `+1일 ↗️`
                     }
                 };
                 
@@ -1050,8 +1048,8 @@ class IntegratedRecordsDashboard {
                         state: '호흡중'
                     },
                     action: {
-                        content: '지금 운동하면',
-                        reward: remaining === 0 ? '달성완료 ↗️' : `+40회 ↗️`
+                        content: todayCompleted ? '오늘 운동' : '지금 운동하면',
+                        reward: remaining === 0 ? '완료했어요! 👏' : `+40회 ↗️`
                     }
                 };
                 
@@ -1063,42 +1061,29 @@ class IntegratedRecordsDashboard {
                         state: '도전중'
                     },
                     action: {
-                        content: '지금 운동하면',
-                        reward: todayCompleted ? '달성완료 ↗️' : `+1일 ↗️`
+                        content: todayCompleted ? '오늘 운동' : '지금 운동하면',
+                        reward: todayCompleted ? '완료했어요! 👏' : `+1일 ↗️`
                     }
                 };
                 
-            case 4: // 완벽 챌린지 (7일 연속 + 300호흡)
-                const consecutiveResult = goalProgress.details?.consecutive || { current: 0 };
-                const breathsResult = goalProgress.details?.breaths || { current: 0 };
-                
-                const consecutiveNeeded = Math.max(0, 7 - consecutiveResult.current);
-                const breathsNeeded = Math.max(0, 300 - breathsResult.current);
-                
-                let statusContent, reward;
-                if (consecutiveNeeded > 0) {
-                    statusContent = `연속 ${consecutiveResult.current}일째`;
-                    reward = `+1일 ↗️`;
-                } else {
-                    statusContent = `총 ${breathsResult.current}회`;
-                    reward = `+40회 ↗️`;
-                }
-                
+            case 4: // 280호흡 챌린지
+                const currentBreaths4 = goalProgress.current;
+                const remaining4 = Math.max(0, 280 - currentBreaths4);
                 return {
                     status: {
-                        content: statusContent,
+                        content: `총 ${currentBreaths4}회`,
                         state: '완벽도전'
                     },
                     action: {
-                        content: '지금 운동하면',
-                        reward: todayCompleted ? '완벽달성 ↗️' : reward
+                        content: todayCompleted ? '오늘 운동' : '지금 운동하면',
+                        reward: remaining4 === 0 ? '완료했어요! 👏' : `+40회 ↗️`
                     }
                 };
                 
             default:
                 return {
                     status: { content: '준비 중', state: '' },
-                    action: { content: '지금 운동하면', reward: '시작 ↗️' }
+                    action: { content: todayCompleted ? '오늘 운동' : '지금 운동하면', reward: '시작 ↗️' }
                 };
         }
     }
@@ -1262,24 +1247,7 @@ class IntegratedRecordsDashboard {
         };
     }
 
-    // 하이브리드 진행률 계산 (4주차용 - 수정)
-    calculateHybridProgress(weekData, target) {
-        const consecutiveResult = this.calculateConsecutiveDays(weekData, target.consecutive);
-        const breathsResult = this.calculateTotalBreaths(weekData, target.breaths);
-        
-        // 두 조건의 최소값으로 진행률 계산
-        const minProgress = Math.min(consecutiveResult.percentage, breathsResult.percentage);
-        
-        return {
-            current: minProgress,
-            target: 100,
-            percentage: minProgress,
-            details: {
-                consecutive: consecutiveResult,
-                breaths: breathsResult
-            }
-        };
-    }
+
 
     // 목표 메시지 생성 (챌린지별 고정 메시지)
     generateGoalMessage(progress, goal, isPersonalBest) {
@@ -1289,7 +1257,7 @@ class IntegratedRecordsDashboard {
             1: "3일 연속? 쉽다고 생각하세요? 막상 해보면 의외로 어려워요!",
             2: "호흡 200회 모으기 대작전! 과연 일주일 안에 성공할 수 있을까요?",
             3: "이제 장난 아니에요! 5일 연속, 진짜 끈기를 보여주세요",
-            4: "최종 보스 등장! 7일 연속 + 300회, 완벽하게 클리어 가능한가요?"
+            4: "최종 보스 등장! 주간 280회, 완벽하게 클리어 가능한가요?"
         };
         
         return challengeMessages[currentWeek] || "새로운 도전을 시작해보세요!";
