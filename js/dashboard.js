@@ -1035,7 +1035,7 @@ class IntegratedRecordsDashboard {
                     },
                     action: {
                         content: todayCompleted ? '오늘 운동' : '지금 운동하면',
-                        reward: todayCompleted ? '완료했어요! 👏' : `+1일 ↗️`
+                        reward: todayCompleted ? '완료했어요!' : `+1일 ↗️`
                     }
                 };
                 
@@ -1049,7 +1049,7 @@ class IntegratedRecordsDashboard {
                     },
                     action: {
                         content: todayCompleted ? '오늘 운동' : '지금 운동하면',
-                        reward: remaining === 0 ? '완료했어요! 👏' : `+40회 ↗️`
+                        reward: remaining === 0 ? '완료했어요!' : `+40회 ↗️`
                     }
                 };
                 
@@ -1062,7 +1062,7 @@ class IntegratedRecordsDashboard {
                     },
                     action: {
                         content: todayCompleted ? '오늘 운동' : '지금 운동하면',
-                        reward: todayCompleted ? '완료했어요! 👏' : `+1일 ↗️`
+                        reward: todayCompleted ? '완료했어요!' : `+1일 ↗️`
                     }
                 };
                 
@@ -1076,7 +1076,7 @@ class IntegratedRecordsDashboard {
                     },
                     action: {
                         content: todayCompleted ? '오늘 운동' : '지금 운동하면',
-                        reward: remaining4 === 0 ? '완료했어요! 👏' : `+40회 ↗️`
+                        reward: remaining4 === 0 ? '완료했어요!' : `+40회 ↗️`
                     }
                 };
                 
