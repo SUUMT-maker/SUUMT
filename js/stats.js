@@ -490,7 +490,7 @@ function selectInsightMessage(data) {
     return FALLBACK_MESSAGES[randomIndex];
 }
 
-// 🕐 KST 날짜 변환 함수 (그래프와 동일) - 올바른 시간대 변환
+// 🕐 KST 날짜 변환 함수 (그래프와 동일) - UTC+9 시간 추가 방식
 function getKstDateString(date) {
     // 타입 체크
     if (!date) return null;
@@ -502,8 +502,8 @@ function getKstDateString(date) {
         return null;
     }
     
-    // 수정 (올바른 방식):
-    const kstDate = new Date(date.toLocaleString("en-US", {timeZone: "Asia/Seoul"}));
+    // 수정 (그래프와 동일): UTC+9 시간 추가 방식
+    const kstDate = new Date(date.getTime() + 9 * 60 * 60 * 1000);
     
     const year = kstDate.getFullYear();
     const month = String(kstDate.getMonth() + 1).padStart(2, '0');
