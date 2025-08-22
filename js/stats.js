@@ -106,10 +106,10 @@ function getTodayBreaths() {
 
 // 차트 데이터 업데이트 (개선된 주간 구분 + 동적 스케일링)
 async function updateChart() {
+    let weeklyData = [];
+    
     try {
-        // 1단계: Supabase에서 직접 주간 데이터 조회 (일일목표 방식과 동일)
-        let weeklyData = [];
-        
+        // 1단계: Supabase 조회 시도 (일일목표 방식)
         if (window.supabaseClient && window.currentUserId) {
             const weekStart = getWeekStartDate();
             const weekEnd = new Date(weekStart);
@@ -122,68 +122,88 @@ async function updateChart() {
                 .gte('created_at', weekStart.toISOString())
                 .lt('created_at', weekEnd.toISOString());
                 
-            if (!error && sessions) {
+            if (!error && sessions && sessions.length > 0) {
                 weeklyData = sessions;
-                console.log('✅ Supabase 주간 데이터 조회 성공:', weeklyData.length);
+                console.log('✅ Supabase 주간 데이터 사용:', weeklyData.length);
+            } else {
+                throw new Error('Supabase 데이터 없음');
             }
+        } else {
+            throw new Error('Supabase 연결 없음');
         }
         
-        // 2단계: 로컬 폴백 (일일목표 방식과 동일)
-        if (weeklyData.length === 0 && window.exerciseData && Array.isArray(window.exerciseData)) {
-            weeklyData = window.exerciseData.filter(session => {
-                const sessionDate = new Date(session.created_at);
+    } catch (error) {
+        console.log('⚠️ Supabase 조회 실패, 로컬 데이터 사용:', error.message);
+        
+        // 2단계: 로컬 데이터 폴백 (일일목표 방식)
+        try {
+            if (window.exerciseData && Array.isArray(window.exerciseData)) {
                 const weekStart = getWeekStartDate();
                 const weekEnd = new Date(weekStart);
                 weekEnd.setDate(weekStart.getDate() + 7);
-                return sessionDate >= weekStart && sessionDate < weekEnd;
-            });
-            console.log('📱 로컬 데이터 폴백 사용:', weeklyData.length);
+                
+                weeklyData = window.exerciseData.filter(session => {
+                    const sessionDate = new Date(session.created_at);
+                    return sessionDate >= weekStart && sessionDate < weekEnd;
+                });
+                console.log('✅ 로컬 데이터 사용:', weeklyData.length);
+            } else {
+                throw new Error('로컬 데이터 없음');
+            }
+        } catch (localError) {
+            console.log('⚠️ 로컬 데이터도 실패, 기본 차트 표시');
+            
+            // 3단계: 기본 차트 표시 (일일목표의 setDefaultGoalCard 방식)
+            showDefaultChart();
+            return;
         }
-        
-        // 3단계: 차트 업데이트 (기존 로직 활용)
-        const convertedHistory = weeklyData.map(session => ({
-            date: session.created_at,
-            completedSets: session.completed_sets || 0,
-            completedBreaths: session.completed_breaths || 0
-        }));
-        
-        console.log('🔍 변환된 주간 데이터:', convertedHistory);
+    }
     
-    const chartBars = document.getElementById('chartBars');
-    const chartXAxis = document.getElementById('chartXAxis');
-    const chartSubtitle = document.getElementById('chartSubtitle');
-    const chartYAxis = document.querySelector('.chart-y-axis');
-    const bars = chartBars.querySelectorAll('.chart-bar');
+    // 데이터 변환 및 차트 생성 (기존 로직)
+    const convertedHistory = weeklyData.map(session => ({
+        date: session.created_at,
+        completedSets: session.completed_sets || 0,
+        completedBreaths: session.completed_breaths || 0
+    }));
     
-    // 현재 주의 시작일 계산
-    const weekStart = getWeekStartDate();
-    const weekDates = Array.from({length: 7}, (_, i) => {
-        const date = new Date(weekStart);
-        date.setDate(weekStart.getDate() + i);
-        return date;
-    });
-
-    // 차트 하단 요일 업데이트
-    const dayLabels = ['월', '화', '수', '목', '금', '토', '일'];  // 월요일 시작
-    chartXAxis.querySelectorAll('.x-label').forEach((label, index) => {
-        const date = weekDates[index];
-        const dayName = dayLabels[index];
-        const isToday = date.toDateString() === getCurrentUserTime().toDateString();
+    console.log('🔍 변환된 주간 데이터:', convertedHistory);
+    
+    try {
+        const chartBars = document.getElementById('chartBars');
+        const chartXAxis = document.getElementById('chartXAxis');
+        const chartSubtitle = document.getElementById('chartSubtitle');
+        const chartYAxis = document.querySelector('.chart-y-axis');
+        const bars = chartBars.querySelectorAll('.chart-bar');
         
-        label.textContent = dayName;
-        if (isToday) {
-            label.style.fontWeight = 'bold';
-            label.style.color = '#667eea';
-        } else {
-            label.style.fontWeight = 'normal';
-            label.style.color = '#666';
-        }
-    });
+        // 현재 주의 시작일 계산
+        const weekStart = getWeekStartDate();
+        const weekDates = Array.from({length: 7}, (_, i) => {
+            const date = new Date(weekStart);
+            date.setDate(weekStart.getDate() + i);
+            return date;
+        });
 
-    // 주간 제목 업데이트
-    const weekStartStr = formatDateForUser(weekStart);
-    const weekEndStr = formatDateForUser(weekDates[6]);
-    chartSubtitle.textContent = `${weekStartStr} ~ ${weekEndStr}`;
+        // 차트 하단 요일 업데이트
+        const dayLabels = ['월', '화', '수', '목', '금', '토', '일'];  // 월요일 시작
+        chartXAxis.querySelectorAll('.x-label').forEach((label, index) => {
+            const date = weekDates[index];
+            const dayName = dayLabels[index];
+            const isToday = date.toDateString() === getCurrentUserTime().toDateString();
+            
+            label.textContent = dayName;
+            if (isToday) {
+                label.style.fontWeight = 'bold';
+                label.style.color = '#667eea';
+            } else {
+                label.style.fontWeight = 'normal';
+                label.style.color = '#666';
+            }
+        });
+
+        // 주간 제목 업데이트
+        const weekStartStr = formatDateForUser(weekStart);
+        const weekEndStr = formatDateForUser(weekDates[6]);
+        chartSubtitle.textContent = `${weekStartStr} ~ ${weekEndStr}`;
 
     // 🔧 각 날짜별 완료 세트 수 계산 (convertedHistory 사용)
     const dailySets = weekDates.map(targetDate => {
@@ -252,6 +272,32 @@ async function updateChart() {
     } catch (error) {
         console.error('❌ 주간활동 차트 업데이트 실패:', error);
         // 에러 시 빈 차트 표시
+    }
+}
+
+// 기본 차트 표시 함수 추가
+function showDefaultChart() {
+    try {
+        const chartBars = document.getElementById('chartBars');
+        const chartSubtitle = document.getElementById('chartSubtitle');
+        
+        if (chartBars && chartSubtitle) {
+            // 모든 막대를 0으로 설정
+            const bars = chartBars.querySelectorAll('.chart-bar');
+            bars.forEach(bar => {
+                bar.style.height = '0%';
+                bar.classList.remove('highlight', 'super-achiever');
+                bar.innerHTML = '';
+                bar.title = '데이터 없음';
+            });
+            
+            // 제목을 "데이터 없음"으로 설정
+            chartSubtitle.textContent = '데이터를 불러올 수 없습니다';
+            
+            console.log('📊 기본 차트 표시 완료');
+        }
+    } catch (error) {
+        console.error('❌ 기본 차트 표시 실패:', error);
     }
 }
 
