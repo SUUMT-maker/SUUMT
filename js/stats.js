@@ -490,6 +490,19 @@ function selectInsightMessage(data) {
     return FALLBACK_MESSAGES[randomIndex];
 }
 
+// 🕐 KST 날짜 변환 함수 (그래프와 동일)
+function getKstDateString(date) {
+    const utcTime = date.getTime();
+    const kstTime = utcTime + (9 * 60 * 60 * 1000);
+    const kstDate = new Date(kstTime);
+    
+    const year = kstDate.getUTCFullYear();
+    const month = String(kstDate.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(kstDate.getUTCDate()).padStart(2, '0');
+    
+    return `${year}-${month}-${day}`;
+}
+
 // 📊 메시지용 데이터 계산 함수 (Supabase 데이터 기반)
 function calculateMessageData(weeklyData) {
     if (!Array.isArray(weeklyData)) {
@@ -507,9 +520,28 @@ function calculateMessageData(weeklyData) {
         totalDays: 7
     });
     
+    // 주간 7일 범위 생성 (그래프와 동일)
+    const weekDates = Array.from({length: 7}, (_, i) => {
+        const date = new Date(weekStart);
+        date.setDate(weekStart.getDate() + i);
+        return getKstDateString(date);
+    });
+    
+    console.log('🎯 [메시지] KST 주간 날짜들:', weekDates);
+    
     const thisWeekRecords = weeklyData.filter(record => {
-        const recordDate = new Date(record.created_at);
-        return recordDate >= weekStart && recordDate < weekEnd;
+        // 수정 (KST 변환 비교 - 그래프와 동일):
+        const recordKstDate = getKstDateString(new Date(record.created_at));
+        
+        const isInWeek = weekDates.includes(recordKstDate);
+        
+        console.log('🎯 [메시지] 레코드 KST 변환:', {
+            created_at: record.created_at,
+            recordKstDate: recordKstDate,
+            isInWeek: isInWeek
+        });
+        
+        return isInWeek;
     });
     
     // 핵심 정보만 출력
