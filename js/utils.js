@@ -18,9 +18,10 @@ function formatDateForUser(date) {
 
 function getWeekStartDate() {
     const now = getCurrentUserTime();
-    const dayOfWeek = now.getDay(); // 0 = 일요일
+    const dayOfWeek = now.getDay();
     const startDate = new Date(now);
-    startDate.setDate(now.getDate() - dayOfWeek);
+    // 월요일 시작으로 변경
+    startDate.setDate(now.getDate() - (dayOfWeek + 6) % 7);
     startDate.setHours(0, 0, 0, 0);
     return startDate;
 }

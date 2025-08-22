@@ -947,11 +947,12 @@ class IntegratedRecordsDashboard {
 
     // 🎯 4주 순환 목표 시스템 함수들
     
-    // 현재 주차 계산 (일요일 기준)
+    // 현재 주차 계산 (월요일 기준)
     getCurrentWeek() {
         const now = new Date();
         const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay()); // 이번 주 일요일
+        // 월요일 시작으로 변경
+        startOfWeek.setDate(now.getDate() - (now.getDay() + 6) % 7);
         
         const weeksSinceEpoch = Math.floor(startOfWeek.getTime() / (7 * 24 * 60 * 60 * 1000));
         return (weeksSinceEpoch % 4) + 1; // 1-4 순환
@@ -1006,7 +1007,8 @@ class IntegratedRecordsDashboard {
     getThisWeekData() {
         const now = new Date();
         const startOfWeek = new Date(now);
-        startOfWeek.setDate(now.getDate() - now.getDay());
+        // 월요일 시작으로 변경 (기능 동일성 보장)
+        startOfWeek.setDate(now.getDate() - (now.getDay() + 6) % 7);
         startOfWeek.setHours(0, 0, 0, 0);
         
         console.log('🔍 [DEBUG] 주간 데이터 필터링:');

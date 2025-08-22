@@ -122,7 +122,7 @@ function updateChart() {
     });
 
     // 차트 하단 요일 업데이트
-    const dayLabels = ['일', '월', '화', '수', '목', '금', '토'];
+    const dayLabels = ['월', '화', '수', '목', '금', '토', '일'];  // 월요일 시작
     chartXAxis.querySelectorAll('.x-label').forEach((label, index) => {
         const date = weekDates[index];
         const dayName = dayLabels[index];
