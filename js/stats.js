@@ -367,8 +367,10 @@ function getSimpleWeeklyData() {
     
     console.log('🔍 [메시지] 전체 데이터 개수:', history.length);
     
+    // 그래프와 동일한 주간 범위 계산
     const weekStart = getWeekStartDate();
-    const weekEnd = getWeekEndDate();
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekStart.getDate() + 7);
     
     // 이번 주 운동 기록만 필터링
     const thisWeekRecords = history.filter(record => {
@@ -488,7 +490,7 @@ function calculateMessageData(weeklyData) {
         weeklyData = [];
     }
     
-    // 이번 주 운동 기록만 필터링 (주간 범위)
+    // 이번 주 운동 기록만 필터링 (그래프와 동일한 주간 범위)
     const weekStart = getWeekStartDate();
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 7);
@@ -536,6 +538,7 @@ async function updateWeeklyAIInsight() {
         let weeklyData = [];
         
         if (window.supabaseClient && window.currentUserId) {
+            // 그래프와 동일한 주간 범위 계산
             const weekStart = getWeekStartDate();
             const weekEnd = new Date(weekStart);
             weekEnd.setDate(weekStart.getDate() + 7);
