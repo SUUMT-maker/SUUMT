@@ -1153,72 +1153,68 @@ class IntegratedRecordsDashboard {
         return consecutive;
     }
 
-    // 연속일 계산
+    // 연속일 계산 (주간, '최근 달성일' 앵커 방식)
     calculateConsecutiveDays(weekData, target) {
-        // 구현: 연속 달성 일수 계산
         const dailyGoal = 40; // 2세트 40호흡
-        const daysWithGoal = new Set();
-        
+
         console.log('🔍 calculateConsecutiveDays 시작:', {
             weekDataLength: weekData.length,
-            target: target,
-            dailyGoal: dailyGoal
+            target,
+            dailyGoal
         });
-        
-        // 날짜별로 그룹화해서 하루 전체 호흡수 계산
+
+        // 1) 날짜별 합산 후, 일일 목표(>=40) 달성한 날짜 집합 만들기 (YYYY-MM-DD, KST 기준)
         const dailyBreaths = {};
         weekData.forEach(session => {
             const date = this.getKstDateString(session.created_at);
-            if (!dailyBreaths[date]) {
-                dailyBreaths[date] = 0;
-            }
+            if (!dailyBreaths[date]) dailyBreaths[date] = 0;
             dailyBreaths[date] += (session.completed_breaths || 0);
         });
-        
-        // 하루 전체 호흡수가 40호흡 이상인 날만 추가
+
+        const daysWithGoal = new Set();
         Object.entries(dailyBreaths).forEach(([date, totalBreaths]) => {
-            if (totalBreaths >= dailyGoal) {
+            const ok = totalBreaths >= dailyGoal;
+            if (ok) {
                 daysWithGoal.add(date);
-                console.log('✅ 목표 달성 날짜:', {
-                    date: date,
-                    totalBreaths: totalBreaths,
-                    dailyGoal: dailyGoal
-                });
+                console.log('✅ 목표 달성 날짜:', { date, totalBreaths, dailyGoal });
             } else {
-                console.log('❌ 목표 미달성 날짜:', {
-                    date: date,
-                    totalBreaths: totalBreaths,
-                    dailyGoal: dailyGoal
-                });
+                console.log('❌ 목표 미달성 날짜:', { date, totalBreaths, dailyGoal });
             }
         });
-        
-        console.log('📅 목표 달성한 날짜들:', Array.from(daysWithGoal));
-        
-        // 연속일 계산 로직
-        let consecutive = 0;
-        const today = new Date();
-        
-        for (let i = 0; i < 7; i++) {
-            const checkDate = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
-            const dateStr = this.getKstDateString(checkDate); // ✅ 수정
-            
-            if (daysWithGoal.has(dateStr)) {
-                consecutive++;
-                console.log(`✅ ${dateStr}: 연속 ${consecutive}일째`);
-            } else {
-                console.log(`❌ ${dateStr}: 연속 끊김, 최종 연속일: ${consecutive}`);
-                break;
-            }
+
+        if (daysWithGoal.size === 0) {
+            const result = { current: 0, target, percentage: 0 };
+            console.log('🎯 연속일 계산 결과(달성일 없음):', result);
+            return result;
         }
-        
+
+        // 2) 앵커 날짜 = 이번 주 달성일 중 "가장 최근(최댓값)"
+        const anchor = [...daysWithGoal].sort().pop(); // YYYY-MM-DD 문자열 정렬은 시간순과 일치
+        console.log('📌 앵커 날짜(최근 달성일):', anchor);
+
+        // 3) 앵커부터 하루씩 -1일 감소하며 연속 확인
+        let consecutive = 0;
+        const prevDate = (yyyyMmDd) => {
+            const d = new Date(yyyyMmDd);    // 'YYYY-MM-DD'는 UTC 기준으로 파싱됨 → 하루 단위 계산에 문제 없음
+            d.setDate(d.getDate() - 1);
+            return d.toISOString().split('T')[0]; // 동일 포맷 유지
+        };
+
+        let cursor = anchor;
+        while (daysWithGoal.has(cursor)) {
+            consecutive++;
+            console.log(`✅ ${cursor}: 연속 ${consecutive}일째`);
+            cursor = prevDate(cursor);
+        }
+        console.log(`⛔ 끊김 지점: ${cursor} (최종 연속일: ${consecutive})`);
+
+        // 4) 결과 반환 (호환 유지)
         const result = {
             current: Math.min(consecutive, target),
-            target: target,
+            target,
             percentage: Math.min((consecutive / target) * 100, 100)
         };
-        
-        console.log('🎯 연속일 계산 결과:', result);
+        console.log('🎯 연속일 계산 결과:', { ...result, anchor, finalConsecutive: consecutive });
         return result;
     }
 
