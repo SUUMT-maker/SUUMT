@@ -998,6 +998,9 @@ class IntegratedRecordsDashboard {
                 return this.calculateConsecutiveDays(thisWeekData, goal.target);
             case 'total_breaths':
                 return this.calculateTotalBreaths(thisWeekData, goal.target);
+            default:
+                console.error('Unknown goal type:', goal.type);
+                return { current: 0, target: goal.target || 0, percentage: 0 };
         }
     }
 
@@ -1287,7 +1290,9 @@ class IntegratedRecordsDashboard {
         
         // 🔍 주간 챌린지 상세 디버깅
         const weekData = this.getThisWeekData();
-        const consecutiveDays = this.calculateConsecutiveDays(weekData, goal.target);
+        // 타입별로 적절한 진행률 정보 사용
+        const consecutiveDays = (goal.type === 'consecutive') ? progress : 
+                               { current: 0, target: goal.target, percentage: 0 };
         console.log('🎯 주간 챌린지 상세 분석:', {
             weekDataLength: weekData.length,
             weekDataDates: weekData.map(s => this.getKstDateString(s.created_at)),
