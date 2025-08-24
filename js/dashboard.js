@@ -1008,17 +1008,22 @@ class IntegratedRecordsDashboard {
     getThisWeekData() {
         const now = new Date();
         const startOfWeek = new Date(now);
-        // 월요일 시작으로 변경 (기능 동일성 보장)
+        // 월요일 시작으로 설정
         startOfWeek.setDate(now.getDate() - (now.getDay() + 6) % 7);
         startOfWeek.setHours(0, 0, 0, 0);
         
+        // 일요일 끝으로 설정 (23:59:59)
+        const endOfWeek = new Date(startOfWeek);
+        endOfWeek.setDate(startOfWeek.getDate() + 6);
+        endOfWeek.setHours(23, 59, 59, 999);
+        
         const filtered = this.exerciseData.filter(session => {
             const sessionKstDate = this.getKstDateString(session.created_at);
-            const startOfWeekKst = this.getKstDateString(startOfWeek);
-            const isThisWeek = sessionKstDate >= startOfWeekKst;
-            
-            return isThisWeek;
+            const startKstDate = this.getKstDateString(startOfWeek);
+            const endKstDate = this.getKstDateString(endOfWeek);
+            return sessionKstDate >= startKstDate && sessionKstDate <= endKstDate;
         });
+        
         return filtered;
     }
 
@@ -1117,13 +1122,14 @@ class IntegratedRecordsDashboard {
     isTodayCompleted(weekData) {
         const today = this.getKstDateString(new Date().toISOString());
         const todayData = weekData.filter(session => 
-            this.getKstDateString(session.created_at) === today
+            this.getKstDateString(session.created_at) === today &&
+            !session.is_aborted // 중단된 세션 제외
         );
         
         const todayBreaths = todayData.reduce((sum, session) => 
             sum + (session.completed_breaths || 0), 0);
         
-        return todayBreaths >= 40; // 일일 목표 달성 여부
+        return todayBreaths >= 40;
     }
 
     // 연속 일수 계산
@@ -1220,8 +1226,25 @@ class IntegratedRecordsDashboard {
 
     // 총 호흡수 계산
     calculateTotalBreaths(weekData, target) {
-        const totalBreaths = weekData.reduce((sum, session) => 
-            sum + (session.completed_breaths || 0), 0);
+        console.log('📊 총 호흡수 계산 시작 (일일 40회 제한 적용)');
+        
+        if (!Array.isArray(weekData) || weekData.length === 0) {
+            return { current: 0, target, percentage: 0 };
+        }
+        
+        // 날짜별 호흡수 그룹핑
+        const dailyBreaths = {};
+        weekData.forEach(session => {
+            if (!session.is_aborted) { // 중단되지 않은 세션만
+                const date = this.getKstDateString(session.created_at);
+                if (!dailyBreaths[date]) dailyBreaths[date] = 0;
+                dailyBreaths[date] += (session.completed_breaths || 0);
+            }
+        });
+        
+        // 각 날짜별 최대 40회로 제한하여 합산
+        const totalBreaths = Object.values(dailyBreaths)
+            .reduce((sum, daily) => sum + Math.min(daily, 40), 0);
         
         return {
             current: totalBreaths,
