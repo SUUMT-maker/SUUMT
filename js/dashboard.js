@@ -922,25 +922,50 @@ class IntegratedRecordsDashboard {
 
 
 
+    // 주간 챌린지 상태 계산 (중복 계산 방지)
+    calculateWeeklyChallengeState() {
+        const currentWeek = this.getCurrentWeek();
+        const weekData = this.getThisWeekData();
+        const goal = this.getWeeklyGoal(currentWeek);
+        const goalProgress = this.calculateWeekProgress(goal);
+        const cardData = this.getWeeklyTwoCards(currentWeek, weekData, goalProgress);
+        
+        return {
+            currentWeek,
+            weekData,
+            goal,
+            goalProgress,
+            cardData
+        };
+    }
+
     // 🎨 UI 업데이트 (2개 카드 시스템)
     updateUI() {
-        // 기존 calculateStats() 관련 코드 제거
-        // document.getElementById('dashboardTotalBreaths').textContent = stats.totalBreaths; // 삭제
-        // document.getElementById('dashboardAvgBreaths').textContent = stats.avgBreaths; // 삭제
-        // document.getElementById('dashboardCompletionRate').textContent = stats.completionRate; // 삭제
-        // document.getElementById('dashboardAvgResistance').textContent = stats.avgResistance; // 삭제
+        try {
+            // 한 번만 계산하여 결과 공유
+            const weeklyState = this.calculateWeeklyChallengeState();
+            
+            // UI 업데이트
+            this.updateTwoCards(weeklyState);
+            this.updateWeeklyGoal(weeklyState);
+            this.renderCalendar();
+            
+        } catch (error) {
+            console.error('⚠️ UI 업데이트 중 오류:', error);
+            // 기본값으로 폴백
+            this.showErrorState();
+        }
+    }
 
-        // 새로운 2개 카드 업데이트 추가
-        this.updateTwoCards();
+    // 에러 상태 표시 (폴백)
+    showErrorState() {
+        // 기본 상태로 폴백
+        document.getElementById('statusContent').textContent = '데이터 로딩 중';
+        document.getElementById('statusState').textContent = '';
+        document.getElementById('actionContent').textContent = '잠시만 기다려주세요';
+        document.getElementById('actionReward').textContent = '';
         
-        // 주간 목표 업데이트
-        this.updateWeeklyGoal();
-        
-        // 달력 렌더링
-        this.renderCalendar();
-        
-        // ✨ AI 동기부여는 사용자 요청 시에만 실행
-        // this.loadMotivationMessage(); // 제거됨
+        document.getElementById('goalPercentage').textContent = '0%';
     }
 
 
@@ -1107,25 +1132,25 @@ class IntegratedRecordsDashboard {
     }
 
     // 2개 카드 UI 업데이트 (수정된 요소명 사용)
-    updateTwoCards() {
-        const currentWeek = this.getCurrentWeek();
-        const weekData = this.getThisWeekData();
-        const goal = this.getWeeklyGoal(currentWeek);
-        const goalProgress = this.calculateWeekProgress(goal);
+    updateTwoCards(weeklyState) {
+        if (!weeklyState || !weeklyState.cardData) {
+            console.warn('⚠️ 카드 데이터가 없습니다');
+            return;
+        }
         
-        console.log(`[카드 업데이트] Week ${currentWeek}, Progress:`, goalProgress);
+        const { cardData } = weeklyState;
         
-        const cardData = this.getWeeklyTwoCards(currentWeek, weekData, goalProgress);
-        
-        // 카드 1: 현재 상태
-        document.getElementById('statusContent').textContent = cardData.status.content;
-        document.getElementById('statusState').textContent = cardData.status.state;
+        // 카드 1: 현재 상태  
+        const statusElement = document.getElementById('statusContent');
+        const stateElement = document.getElementById('statusState');
+        if (statusElement) statusElement.textContent = cardData.status.content;
+        if (stateElement) stateElement.textContent = cardData.status.state;
         
         // 카드 2: 행동 유도
-        document.getElementById('actionContent').textContent = cardData.action.content;
-        document.getElementById('actionReward').textContent = cardData.action.reward;
-        
-        console.log('[카드 데이터]', cardData);
+        const actionContentElement = document.getElementById('actionContent');
+        const actionRewardElement = document.getElementById('actionReward');
+        if (actionContentElement) actionContentElement.textContent = cardData.action.content;
+        if (actionRewardElement) actionContentElement.textContent = cardData.action.reward;
     }
 
     // 오늘 운동 완료 여부 확인
@@ -1304,10 +1329,8 @@ class IntegratedRecordsDashboard {
     }
 
     // 주간 목표 UI 업데이트 (단순화)
-    updateWeeklyGoal() {
-        const currentWeek = this.getCurrentWeek();
-        const goal = this.getWeeklyGoal(currentWeek);
-        const progress = this.calculateWeekProgress(goal);
+    updateWeeklyGoal(weeklyState) {
+        const { currentWeek, goal, goalProgress: progress } = weeklyState;
         
         // 🔍 데이터 일관성 디버깅 로그
         console.log('🎯 updateWeeklyGoal - 데이터 일관성 체크:', {
