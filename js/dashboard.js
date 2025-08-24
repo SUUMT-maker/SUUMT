@@ -931,6 +931,13 @@ class IntegratedRecordsDashboard {
         const goalProgress = this.calculateWeekProgress(goal);
         const cardData = this.getWeeklyTwoCards(currentWeek, weekData, goalProgress);
         
+        console.log('🎯 최종 주간 상태:', {
+            currentWeek,
+            goalType: goal.type,
+            progress: goalProgress,
+            cardData
+        });
+        
         return {
             currentWeek,
             weekData,
@@ -1072,10 +1079,13 @@ class IntegratedRecordsDashboard {
         // 액션 카드 (오른쪽) 생성  
         const actionCard = this.getActionCard(week, goalProgress, todayCompleted, weekCompleted);
         
-        return {
+        const result = {
             status: statusCard,
             action: actionCard
         };
+
+        console.log('🎯 최종 카드 결과:', result);
+        return result;
     }
 
     // 상태 카드 생성 (왼쪽)
@@ -1142,12 +1152,15 @@ class IntegratedRecordsDashboard {
 
     // 2개 카드 UI 업데이트 (수정된 요소명 사용)
     updateTwoCards(weeklyState) {
+        console.log('🔧 updateTwoCards 시작:', weeklyState);
+        
         if (!weeklyState || !weeklyState.cardData) {
             console.warn('⚠️ 카드 데이터가 없습니다');
             return;
         }
         
         const { cardData } = weeklyState;
+        console.log('🎯 적용할 카드 데이터:', cardData);
         
         // 카드 1: 현재 상태  
         const statusElement = document.getElementById('statusContent');
@@ -1160,6 +1173,8 @@ class IntegratedRecordsDashboard {
         const actionRewardElement = document.getElementById('actionReward');
         if (actionContentElement) actionContentElement.textContent = cardData.action.content;
         if (actionRewardElement) actionContentElement.textContent = cardData.action.reward;
+        
+        console.log('✅ 카드 업데이트 완료');
     }
 
     // 오늘 운동 완료 여부 확인
