@@ -925,6 +925,7 @@ class IntegratedRecordsDashboard {
     // 주간 챌린지 상태 계산 (중복 계산 방지)
     calculateWeeklyChallengeState() {
         const currentWeek = this.getCurrentWeek();
+        console.log(`🎯 주간 챌린지 계산 (Week ${currentWeek})`);
         const weekData = this.getThisWeekData();
         const goal = this.getWeeklyGoal(currentWeek);
         const goalProgress = this.calculateWeekProgress(goal);
@@ -1198,11 +1199,7 @@ class IntegratedRecordsDashboard {
     calculateConsecutiveDays(weekData, target) {
         const dailyGoal = 40; // 2세트 40호흡
 
-        console.log('🔍 calculateConsecutiveDays 시작:', {
-            weekDataLength: weekData.length,
-            target,
-            dailyGoal
-        });
+
 
         // 1) 날짜별 합산 후, 일일 목표(>=40) 달성한 날짜 집합 만들기 (YYYY-MM-DD, KST 기준)
         const dailyBreaths = {};
@@ -1217,21 +1214,16 @@ class IntegratedRecordsDashboard {
             const ok = totalBreaths >= dailyGoal;
             if (ok) {
                 daysWithGoal.add(date);
-                console.log('✅ 목표 달성 날짜:', { date, totalBreaths, dailyGoal });
-            } else {
-                console.log('❌ 목표 미달성 날짜:', { date, totalBreaths, dailyGoal });
             }
         });
 
         if (daysWithGoal.size === 0) {
             const result = { current: 0, target, percentage: 0 };
-            console.log('🎯 연속일 계산 결과(달성일 없음):', result);
             return result;
         }
 
         // 2) 앵커 날짜 = 이번 주 달성일 중 "가장 최근(최댓값)"
         const anchor = [...daysWithGoal].sort().pop(); // YYYY-MM-DD 문자열 정렬은 시간순과 일치
-        console.log('📌 앵커 날짜(최근 달성일):', anchor);
 
         // 3) 앵커부터 하루씩 -1일 감소하며 연속 확인
         let consecutive = 0;
@@ -1244,10 +1236,8 @@ class IntegratedRecordsDashboard {
         let cursor = anchor;
         while (daysWithGoal.has(cursor)) {
             consecutive++;
-            console.log(`✅ ${cursor}: 연속 ${consecutive}일째`);
             cursor = prevDate(cursor);
         }
-        console.log(`⛔ 끊김 지점: ${cursor} (최종 연속일: ${consecutive})`);
 
         // 4) 결과 반환 (호환 유지)
         const result = {
@@ -1255,13 +1245,11 @@ class IntegratedRecordsDashboard {
             target,
             percentage: Math.min((consecutive / target) * 100, 100)
         };
-        console.log('🎯 연속일 계산 결과:', { ...result, anchor, finalConsecutive: consecutive });
         return result;
     }
 
     // 총 호흡수 계산
     calculateTotalBreaths(weekData, target) {
-        console.log('📊 총 호흡수 계산 시작 (일일 40회 제한 적용)');
         
         if (!Array.isArray(weekData) || weekData.length === 0) {
             return { current: 0, target, percentage: 0 };
