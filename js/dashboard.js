@@ -1019,6 +1019,8 @@ class IntegratedRecordsDashboard {
     calculateWeekProgress(goal) {
         const thisWeekData = this.getThisWeekData();
         
+        console.log(`🎯 주간 진행률 계산 - 타입: ${goal.type}, 목표: ${goal.target}`);
+        
         switch(goal.type) {
             case 'consecutive':
                 return this.calculateConsecutiveDays(thisWeekData, goal.target);
@@ -1057,8 +1059,12 @@ class IntegratedRecordsDashboard {
     
     // 주차별 카드 내용 설정 (새로운 챌린지 시스템 적용)
     getWeeklyTwoCards(week, weekData, goalProgress) {
+        console.log(`🎯 카드 생성 - Week: ${week}, Progress:`, goalProgress);
+        
         const todayCompleted = this.isTodayCompleted(weekData);
         const weekCompleted = goalProgress.percentage >= 100;
+        
+        console.log(`📊 상태 체크 - 오늘완료: ${todayCompleted}, 주간완료: ${weekCompleted}`);
         
         // 상태 카드 (왼쪽) 생성
         const statusCard = this.getStatusCard(week, goalProgress);
@@ -1098,6 +1104,8 @@ class IntegratedRecordsDashboard {
 
     // 액션 카드 생성 (오른쪽)
     getActionCard(week, goalProgress, todayCompleted, weekCompleted) {
+        console.log(`🎯 액션카드 생성 - Week: ${week}, 오늘완료: ${todayCompleted}, 주간완료: ${weekCompleted}`);
+        
         // 주간 목표 이미 달성
         if (weekCompleted) {
             return {
