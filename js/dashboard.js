@@ -1032,67 +1032,77 @@ class IntegratedRecordsDashboard {
     // 주차별 카드 내용 설정 (새로운 챌린지 시스템 적용)
     getWeeklyTwoCards(week, weekData, goalProgress) {
         const todayCompleted = this.isTodayCompleted(weekData);
+        const weekCompleted = goalProgress.percentage >= 100;
         
+        // 상태 카드 (왼쪽) 생성
+        const statusCard = this.getStatusCard(week, goalProgress);
+        
+        // 액션 카드 (오른쪽) 생성  
+        const actionCard = this.getActionCard(week, goalProgress, todayCompleted, weekCompleted);
+        
+        return {
+            status: statusCard,
+            action: actionCard
+        };
+    }
+
+    // 상태 카드 생성 (왼쪽)
+    getStatusCard(week, goalProgress) {
         switch(week) {
-            case 1: // 3일 연속 챌린지
-                const currentDays1 = goalProgress.current;
+            case 1:
+            case 3:
+                const days = goalProgress.current;
                 return {
-                    status: {
-                        content: `연속 ${currentDays1}일째`,
-                        state: '진행중'
-                    },
-                    action: {
-                        content: todayCompleted ? '오늘 운동' : '지금 운동하면',
-                        reward: todayCompleted ? '완료했어요!' : `+1일 ↗️`
-                    }
+                    content: `연속 ${days}일째`,
+                    state: days > 0 ? '도전중' : '시작 준비'
                 };
-                
-            case 2: // 200호흡 챌린지
-                const currentBreaths = goalProgress.current;
-                const remaining = Math.max(0, 200 - currentBreaths);
+            case 2:
+            case 4:
                 return {
-                    status: {
-                        content: `총 ${currentBreaths}회`,
-                        state: '호흡중'
-                    },
-                    action: {
-                        content: todayCompleted ? '오늘 운동' : '지금 운동하면',
-                        reward: remaining === 0 ? '완료했어요!' : `+40회 ↗️`
-                    }
+                    content: `누적 ${goalProgress.current}회`,
+                    state: `목표의 ${Math.round(goalProgress.percentage)}%`
                 };
-                
-            case 3: // 5일 연속 챌린지
-                const currentDays3 = goalProgress.current;
-                return {
-                    status: {
-                        content: `연속 ${currentDays3}일째`,
-                        state: '도전중'
-                    },
-                    action: {
-                        content: todayCompleted ? '오늘 운동' : '지금 운동하면',
-                        reward: todayCompleted ? '완료했어요!' : `+1일 ↗️`
-                    }
-                };
-                
-            case 4: // 280호흡 챌린지
-                const currentBreaths4 = goalProgress.current;
-                const remaining4 = Math.max(0, 280 - currentBreaths4);
-                return {
-                    status: {
-                        content: `총 ${currentBreaths4}회`,
-                        state: '완벽도전'
-                    },
-                    action: {
-                        content: todayCompleted ? '오늘 운동' : '지금 운동하면',
-                        reward: remaining4 === 0 ? '완료했어요!' : `+40회 ↗️`
-                    }
-                };
-                
             default:
                 return {
-                    status: { content: '준비 중', state: '' },
-                    action: { content: todayCompleted ? '오늘 운동' : '지금 운동하면', reward: '시작 ↗️' }
+                    content: '준비 중',
+                    state: ''
                 };
+        }
+    }
+
+    // 액션 카드 생성 (오른쪽)
+    getActionCard(week, goalProgress, todayCompleted, weekCompleted) {
+        // 주간 목표 이미 달성
+        if (weekCompleted) {
+            return {
+                content: '이번주 목표',
+                reward: '달성 완료! 🎉'
+            };
+        }
+        
+        // 오늘 이미 운동 완료
+        if (todayCompleted) {
+            return {
+                content: '오늘 운동',
+                reward: '완료했어요! ✅'
+            };
+        }
+        
+        // 오늘 운동 안함 - 주차별 차별화
+        if (week === 1 || week === 3) {
+            // 연속일 챌린지
+            return {
+                content: '지금 운동하면',
+                reward: '+1일 연속 ↗️'
+            };
+        } else {
+            // 호흡수 챌린지 - 남은 목표와 일일 최대 40회 고려
+            const remaining = Math.max(0, goalProgress.target - goalProgress.current);
+            const canAdd = Math.min(40, remaining);
+            return {
+                content: '지금 운동하면',
+                reward: `+${canAdd}회 ↗️`
+            };
         }
     }
 
