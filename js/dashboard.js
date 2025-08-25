@@ -1206,12 +1206,13 @@ class IntegratedRecordsDashboard {
     isTodayCompleted(weekData) {
         const today = this.getKstDateString(new Date().toISOString());
         const todayData = weekData.filter(session => 
-            this.getKstDateString(session.created_at) === today &&
-            !session.is_aborted // 중단된 세션 제외
+            this.getKstDateString(session.created_at) === today
         );
         
         const todayBreaths = todayData.reduce((sum, session) => 
             sum + (session.completed_breaths || 0), 0);
+        
+        console.log(`📊 오늘 호흡수 계산: ${todayBreaths}회 (중단 세션 포함)`);
         
         return todayBreaths >= 40;
     }
@@ -1273,20 +1274,19 @@ class IntegratedRecordsDashboard {
 
     // 총 호흡수 계산
     calculateTotalBreaths(weekData, target) {
+        console.log('📊 호흡수 계산 - 중단 여부 무관하게 모든 completed_breaths 합산');
         
         if (!Array.isArray(weekData) || weekData.length === 0) {
             return { current: 0, target, percentage: 0 };
         }
         
-        // 날짜별 호흡수 그룹핑
-        const dailyBreaths = {};
-        weekData.forEach(session => {
-            if (!session.is_aborted) { // 중단되지 않은 세션만
-                const date = this.getKstDateString(session.created_at);
-                if (!dailyBreaths[date]) dailyBreaths[date] = 0;
-                dailyBreaths[date] += (session.completed_breaths || 0);
-            }
-        });
+            // 날짜별 호흡수 그룹핑
+    const dailyBreaths = {};
+    weekData.forEach(session => {
+        const date = this.getKstDateString(session.created_at);
+        if (!dailyBreaths[date]) dailyBreaths[date] = 0;
+        dailyBreaths[date] += (session.completed_breaths || 0);
+    });
         
         // 각 날짜별 최대 40회로 제한하여 합산
         const totalBreaths = Object.values(dailyBreaths)
