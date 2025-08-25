@@ -1033,7 +1033,8 @@ class IntegratedRecordsDashboard {
         
         switch(goal.type) {
             case 'consecutive':
-                return this.calculateConsecutiveDays(thisWeekData, goal.target);
+                // 연속일 계산 제거 - 항상 0 반환
+                return { current: 0, target: goal.target, percentage: 0 };
             case 'total_breaths':
                 return this.calculateTotalBreaths(thisWeekData, goal.target);
             default:
@@ -1215,32 +1216,7 @@ class IntegratedRecordsDashboard {
         return todayBreaths >= 40;
     }
 
-    // 연속 일수 계산
-    getCurrentConsecutiveDays() {
-        const dailyGoal = 40;
-        let consecutive = 0;
-        const today = new Date();
-        
-        for (let i = 0; i < 30; i++) {
-            const checkDate = new Date(today.getTime() - i * 24 * 60 * 60 * 1000);
-            const dateStr = this.getKstDateString(checkDate.toISOString());
-            
-            const dayData = this.exerciseData.filter(session => 
-                this.getKstDateString(session.created_at) === dateStr
-            );
-            
-            const dayBreaths = dayData.reduce((sum, session) => 
-                sum + (session.completed_breaths || 0), 0);
-        
-            if (dayBreaths >= dailyGoal) {
-                consecutive++;
-            } else {
-                break;
-            }
-        }
-        
-        return consecutive;
-    }
+
 
     // 연속일 계산 (주간, '최근 달성일' 앵커 방식)
     calculateConsecutiveDays(weekData, target) {
@@ -1286,11 +1262,11 @@ class IntegratedRecordsDashboard {
             cursor = prevDate(cursor);
         }
 
-        // 4) 결과 반환 (호환 유지)
+        // 4) 결과 반환 (호환 유지) - 연속일 계산 제거
         const result = {
-            current: Math.min(consecutive, target),
+            current: 0,
             target,
-            percentage: Math.min((consecutive / target) * 100, 100)
+            percentage: 0
         };
         return result;
     }
@@ -1383,13 +1359,9 @@ class IntegratedRecordsDashboard {
         
         // 🔍 주간 챌린지 상세 디버깅 (weeklyState에서 가져온 데이터 사용)
         const weekData = weeklyState.weekData;
-        // 타입별로 적절한 진행률 정보 사용
-        const consecutiveDays = (goal.type === 'consecutive') ? progress : 
-                               { current: 0, target: goal.target, percentage: 0 };
         console.log('🎯 주간 챌린지 상세 분석:', {
             weekDataLength: weekData.length,
             weekDataDates: weekData.map(s => this.getKstDateString(s.created_at)),
-            consecutiveDays: consecutiveDays,
             goalTarget: goal.target,
             calculatedProgress: progress
         });
@@ -1684,13 +1656,11 @@ async function initIntegratedRecordsDashboard() {
     const currentWeek = dashboard.getCurrentWeek();
     const goal = dashboard.getWeeklyGoal(currentWeek);
     const weekData = dashboard.getThisWeekData();
-    const consecutiveDays = dashboard.calculateConsecutiveDays(weekData, goal.target);
     
     console.log('🎯 주간 챌린지 데이터:', {
         week: currentWeek,
         goal: goal,
         weekDataLength: weekData.length,
-        consecutiveDays: consecutiveDays,
         weekDataDates: weekData.map(s => dashboard.getKstDateString(s.created_at))
     });
     
