@@ -1116,6 +1116,17 @@ class IntegratedRecordsDashboard {
         }
     }
 
+    // 오늘 호흡수 계산
+    getTodayBreaths() {
+        const today = this.getKstDateString(new Date().toISOString());
+        const todayData = this.exerciseData.filter(session => 
+            this.getKstDateString(session.created_at) === today
+        );
+        
+        return todayData.reduce((sum, session) => 
+            sum + (session.completed_breaths || 0), 0);
+    }
+
     // 액션 카드 생성 (오른쪽)
     getActionCard(week, goalProgress, todayCompleted, weekCompleted) {
         console.log(`🎯 액션카드 생성 - Week: ${week}, 오늘완료: ${todayCompleted}, 주간완료: ${weekCompleted}`);
@@ -1144,9 +1155,11 @@ class IntegratedRecordsDashboard {
                 reward: '+1일 연속 ↗️'
             };
         } else {
-            // 호흡수 챌린지 - 남은 목표와 일일 최대 40회 고려
-            const remaining = Math.max(0, goalProgress.target - goalProgress.current);
-            const canAdd = Math.min(40, remaining);
+            // 호흡수 챌린지 - 오늘 실제 운동량 반영
+            const todayBreaths = this.getTodayBreaths();
+            const remainingDaily = Math.max(0, 40 - todayBreaths);
+            const remainingWeekly = Math.max(0, goalProgress.target - goalProgress.current);
+            const canAdd = Math.min(remainingDaily, remainingWeekly);
             return {
                 content: '지금 운동하면',
                 reward: `+${canAdd}회 ↗️`
