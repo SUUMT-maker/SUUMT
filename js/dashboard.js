@@ -1442,22 +1442,18 @@ class IntegratedRecordsDashboard {
             const isSelected = this.selectedDate === dateStr;
             
             let classes = ['calendar-day'];
-            let styles = ['padding: 8px', 'text-align: center', 'cursor: pointer', 'transition: all 0.2s ease', 'border-radius: 8px'];
             
             if (isToday) {
                 classes.push('today');
-                styles.push('background: #ddd6fe', 'color: #6366f1', 'font-weight: 600');
             }
             if (hasRecord) {
                 classes.push('has-record');
-                styles.push('background: #3B82F6', 'color: white', 'font-weight: 600');
             }
             if (isSelected) {
                 classes.push('selected');
-                styles.push('background: #1D4ED8', 'color: white', 'transform: scale(1.05)');
             }
             
-            currentWeek += `<td class="${classes.join(' ')}" style="${styles.join('; ')}; color: #374151;" data-date="${dateStr}" onclick="window.integratedDashboard.onDateClick('${dateStr}')">${day}</td>`;
+            currentWeek += `<td class="${classes.join(' ')}" data-date="${dateStr}" onclick="window.integratedDashboard.onDateClick('${dateStr}')">${day}</td>`;
             
             if ((firstDay.getDay() + day - 1) % 7 === 6) {
                 html += `<tr>${currentWeek}</tr>`;
@@ -1483,26 +1479,11 @@ class IntegratedRecordsDashboard {
         const prevSelected = document.querySelector('.calendar-day.selected');
         if (prevSelected) {
             prevSelected.classList.remove('selected');
-            // 기존 스타일 복원 시 텍스트 유지 확인
-            if (prevSelected.classList.contains('has-record')) {
-                prevSelected.style.background = '#dcfce7';
-                prevSelected.style.color = '#16a34a';
-            } else if (prevSelected.classList.contains('today')) {
-                prevSelected.style.background = '#ddd6fe';
-                prevSelected.style.color = '#6366f1';
-            } else {
-                prevSelected.style.background = '';
-                prevSelected.style.color = '#374151'; // 기본 텍스트 색상 명시적 설정
-            }
-            prevSelected.style.transform = '';
         }
         
         const newSelected = document.querySelector(`[data-date="${dateStr}"]`);
         if (newSelected) {
             newSelected.classList.add('selected');
-            newSelected.style.background = '#1D4ED8';
-            newSelected.style.color = 'white'; // 선택 시 텍스트 색상 명시적 설정
-            newSelected.style.transform = 'scale(1.05)';
         }
         
         this.selectedDate = dateStr;
@@ -1688,6 +1669,49 @@ async function initIntegratedRecordsDashboard() {
     // 4단계: 페이드 아웃 완료 후 실제 화면 렌더링
     setTimeout(() => {
         recordsScreen.innerHTML = INTEGRATED_RECORDS_HTML;
+        
+        // 캘린더 토큰 스타일 주입 (중복 방지)
+        if (!document.head.querySelector('#calendar-token-styles')) {
+            const calendarStyles = document.createElement('style');
+            calendarStyles.id = 'calendar-token-styles';
+            calendarStyles.textContent = `
+:root{
+  --cal-fg:#374151;
+  --cal-hover-bg:#f3f4f6;
+  --cal-radius:8px;
+  --cal-scale:1.05;
+
+  --cal-selected-bg:#1D4ED8;
+  --cal-selected-fg:#ffffff;
+
+  --cal-has-bg:#3B82F6;
+  --cal-has-fg:#ffffff;
+
+  --cal-today-bg:#ddd6fe;
+  --cal-today-fg:#6366f1;
+}
+.calendar-table .calendar-day{
+  padding:8px; text-align:center; cursor:pointer; transition:all .2s ease;
+  border-radius:var(--cal-radius); color:var(--cal-fg);
+}
+.calendar-table .calendar-day:hover:not(.selected):not(.has-record):not(.today){
+  background:var(--cal-hover-bg);
+}
+.calendar-table .calendar-day.has-record:not(.selected){
+  background:var(--cal-has-bg); color:var(--cal-has-fg); font-weight:600;
+}
+.calendar-table .calendar-day.today:not(.selected){
+  background:var(--cal-today-bg); color:var(--cal-today-fg); font-weight:600;
+}
+.calendar-table .calendar-day.selected{
+  background:var(--cal-selected-bg) !important; color:var(--cal-selected-fg) !important;
+  transform:scale(var(--cal-scale));
+  font-weight:700;
+}
+.calendar-table .empty{ padding:8px; color:#d1d5db; }
+            `;
+            document.head.appendChild(calendarStyles);
+        }
         
         // 실제 화면 페이드 인
         recordsScreen.style.opacity = '0';
