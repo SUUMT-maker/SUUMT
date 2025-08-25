@@ -1338,19 +1338,19 @@ class IntegratedRecordsDashboard {
         
         switch(currentWeek) {
             case 1:
-                return "3일만 연속으로 해보세요, 생각보다 쉬울 거예요";
+                return "일일 미션을 3일 연속으로 성공해 보세요.\n작은 성취가 이어질 때, 습관이 시작됩니다!";
                 
             case 2:
-                return "이번 주 200회 도전! 하루하루 쌓다 보면 금세예요";
+                return "이번 주 목표는 총 200회 달성!\n하루하루 쌓이는 숫자가 당신의 힘이 됩니다 💪";
                 
             case 3:
-                return "5일 연속 도전, 이제 진짜 습관이 만들어질 거예요";
+                return "일일 미션을 5일 연속으로 성공해 보세요.\n꾸준함이 쌓일 때 진짜 변화가 찾아옵니다 🔥";
                 
             case 4:
-                return "280회로 완벽 마무리! 지금까지의 성장을 느껴보세요";
+                return "이번 주 280회를 모두 채우면, 완벽한 마무리!\n끝까지 해낸 성취감이 더 큰 도전을 준비하게 합니다 🎉";
                 
             default:
-                return "새로운 도전을 시작해보세요";
+                return "새로운 도전을\n시작해보세요";
         }
     }
 
@@ -1782,6 +1782,12 @@ const INTEGRATED_CSS = `
 .motivation-action-btn:hover {
     background: rgba(255, 255, 255, 0.3) !important;
     transform: translateY(-2px);
+}
+
+#goalMessage { 
+    white-space: pre-line; 
+    line-height: 1.4; 
+    text-align: center; 
 }
 
 @media (max-width: 480px) {
