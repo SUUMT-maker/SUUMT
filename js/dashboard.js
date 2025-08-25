@@ -1097,16 +1097,18 @@ class IntegratedRecordsDashboard {
         switch(week) {
             case 1:
             case 3:
+                // 연속일 챌린지 - 현재 성과 중심
                 const days = goalProgress.current;
                 return {
                     content: `연속 ${days}일째`,
-                    state: days > 0 ? '도전중' : '시작 준비'
+                    state: '도전중'
                 };
             case 2:
             case 4:
+                // 호흡수 챌린지 - 누적 표시
                 return {
                     content: `누적 ${goalProgress.current}회`,
-                    state: `목표의 ${Math.round(goalProgress.percentage)}%`
+                    state: '도전중'
                 };
             default:
                 return {
