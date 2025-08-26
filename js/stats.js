@@ -363,8 +363,8 @@ function getSimpleWeeklyData() {
     const totalSets = thisWeekRecords.reduce((sum, record) => 
         sum + (record.completedSets || 0), 0);
     
-    // 연속일 계산 (전체 히스토리에서)
-    const consecutiveDays = calculateSimpleConsecutiveDays(history);
+    // 연속일 계산 (주간 데이터에서)
+    const weeklyConsecutiveDays = calculateWeeklyConsecutiveDays(thisWeekRecords);
     
     // 첫 운동 여부
     const isFirstWeek = history.length <= thisWeekRecords.length;
@@ -372,13 +372,45 @@ function getSimpleWeeklyData() {
     const result = {
         workoutDays,
         totalSets,
-        consecutiveDays,
+        weeklyConsecutiveDays,
         isFirstWeek
     };
     
     // console.log('🔍 [메시지] 계산 결과:', result);
     
     return result;
+}
+
+// 🔄 주간 연속일 계산 (차트와 동일한 데이터 기준)
+function calculateWeeklyConsecutiveDays(sessions) {
+    if (!Array.isArray(sessions) || sessions.length === 0) return 0;
+    
+    // 주간 날짜 배열 생성 (월~일 7일)
+    const weekStart = getWeekStartDate();
+    const weekDates = Array.from({length: 7}, (_, i) => {
+        const date = new Date(weekStart);
+        date.setDate(weekStart.getDate() + i);
+        return date;
+    });
+    
+    let consecutiveDays = 0;
+    
+    // 오늘부터 거꾸로 계산
+    for (let i = weekDates.length - 1; i >= 0; i--) {
+        const hasWorkout = sessions.some(session => {
+            const sessionDate = getKstDateString(session.created_at);
+            const targetDate = getKstDateString(weekDates[i].toISOString());
+            return sessionDate === targetDate;
+        });
+        
+        if (hasWorkout) {
+            consecutiveDays++;
+        } else {
+            break; // 연속이 끊어지면 중단
+        }
+    }
+    
+    return consecutiveDays;
 }
 
 // 🔄 연속일 계산 (단순화) - Supabase 데이터 형식 지원
@@ -413,29 +445,34 @@ function calculateSimpleConsecutiveDays(history) {
     return consecutiveDays;
 }
 
-// 🎯 메시지 선택 함수 (성과 중심 우선순위)
+// 🎯 메시지 선택 함수 (주간 기준 동기부여 메시지)
 function selectInsightMessage(data) {
     // console.log('🔍 [메시지] 선택 조건 데이터:', data);
     
     // 1순위: 정말 대단한 성과들
     if (data.workoutDays === 7) {
         // console.log('🔍 [메시지] 선택된 메시지: 완벽한 일주일 (workoutDays=7)');
-        return "매일 운동! 이 기세 좋은데요? 🔥";
+        return "완벽한 일주일! 건강 계좌에 꽉 찬 적금이네요";
     }
     
-    if (data.consecutiveDays >= 3) {
-        // console.log(`🔍 [메시지] 선택된 메시지: 연속 운동 (consecutiveDays=${data.consecutiveDays})`);
-        return `${data.consecutiveDays}일째! 몸이 기억하기 시작했어요`;
+    if (data.weeklyConsecutiveDays >= 3) {
+        // console.log(`🔍 [메시지] 선택된 메시지: 주간 연속 운동 (weeklyConsecutiveDays=${data.weeklyConsecutiveDays})`);
+        return `이번 주 ${data.weeklyConsecutiveDays}일 연속! 폐활량이 슬금슬금 늘고 있어요`;
     }
     
     if (data.workoutDays >= 5) {
         // console.log(`🔍 [메시지] 선택된 메시지: 주간 성취감 (workoutDays=${data.workoutDays})`);
-        return `일주일에 ${data.workoutDays}번! 거의 매일이네요 👏`;
+        return `주 ${data.workoutDays}회! 이 페이스면 체력 업그레이드 완료 예정`;
     }
     
     if (data.totalSets >= 10) {
         // console.log(`🔍 [메시지] 선택된 메시지: 양적 성과 (totalSets=${data.totalSets})`);
-        return `이번 주 ${data.totalSets}세트! 몸이 좋아할 거예요`;
+        return `이번 주 ${data.totalSets}세트! 심장이 더 튼튼해지고 있어요`;
+    }
+    
+    if (data.workoutDays >= 2) {
+        // console.log(`🔍 [메시지] 선택된 메시지: 주간 시작 (workoutDays=${data.workoutDays})`);
+        return "이번 주 벌써 2번! 습관의 씨앗이 뿌리를 내리고 있어요";
     }
     
     // 마지막 순위: 첫 운동 (성과가 적을 때만)
@@ -445,7 +482,7 @@ function selectInsightMessage(data) {
     }
     
     // 기본 격려
-    return "꾸준히 하는 것만으로도 대단해요";
+    return "미래의 내가 지금의 나에게 고마워할 거예요";
 }
 
 // 🕐 KST 날짜 변환 함수 (그래프와 동일) - UTC+9 시간 추가 방식
@@ -528,8 +565,8 @@ function calculateMessageData(weeklyData) {
     const totalSets = thisWeekRecords.reduce((sum, record) => 
         sum + (record.completed_sets || 0), 0);
     
-    // 연속일 계산 (전체 히스토리에서)
-    const consecutiveDays = calculateSimpleConsecutiveDays(weeklyData);
+    // 연속일 계산 (주간 데이터에서)
+    const weeklyConsecutiveDays = calculateWeeklyConsecutiveDays(weeklyData);
     
     // 첫 운동 여부
     const isFirstWeek = weeklyData.length <= thisWeekRecords.length;
@@ -537,7 +574,7 @@ function calculateMessageData(weeklyData) {
     const result = {
         workoutDays: workoutDates.size,
         totalSets,
-        consecutiveDays,
+        weeklyConsecutiveDays,
         isFirstWeek
     };
     
@@ -577,7 +614,7 @@ async function updateWeeklyAIInsight() {
             // console.log('🎯 [메시지] Supabase 데이터:', weeklyData.length, '개');
         }
         
-        // 기존 getSimpleWeeklyData() 로직에 weeklyData 전달
+        // 차트와 동일한 주간 데이터로 메시지 생성
         const data = calculateMessageData(weeklyData);
         const message = selectInsightMessage(data);
         
