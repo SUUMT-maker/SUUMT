@@ -15,7 +15,25 @@ document.addEventListener('DOMContentLoaded', function() {
   if (loginBtn) {
     loginBtn.onclick = loginWithKakao;
   }
+  
+  const testLoginBtn = document.getElementById('testLoginBtn');
+  if (testLoginBtn) {
+    testLoginBtn.onclick = skipLogin;
+  }
 });
+
+function skipLogin() {
+    window.currentUserId = 'test_user';
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('homeScreen').style.display = 'block';
+    
+    setTimeout(() => {
+        if (typeof clearGreetingCache === 'function') clearGreetingCache();
+        if (typeof updateGreetingCard === 'function') updateGreetingCard();
+        if (typeof updateGoalCard === 'function') updateGoalCard();
+        if (typeof updateChart === 'function') updateChart();
+    }, 500);
+}
 
 // 3️⃣ 로그인 상태 감지
 window.supabaseClient.auth.onAuthStateChange((event, session) => {
