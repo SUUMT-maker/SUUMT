@@ -38,43 +38,32 @@ self.addEventListener('install', event => {
   );
 });
 
-// 🔄 강제 캐시 정리 및 자동 제어권 획득
 self.addEventListener('activate', event => {
-  console.log(`SW: Activating version ${VERSION}`);
+  console.log(`SW: Activating version ${VERSION} - 전체 캐시 정리 모드`);
   
   event.waitUntil(
     caches.keys()
       .then(cacheNames => {
-        console.log('SW: Found caches:', cacheNames);
-        
-        // 모든 기존 캐시 강제 삭제 (버전 상관없이)
+        // 모든 캐시 강제 삭제
         const deletePromises = cacheNames.map(cacheName => {
-          console.log(`SW: Deleting cache: ${cacheName}`);
+          console.log(`SW: 캐시 삭제: ${cacheName}`);
           return caches.delete(cacheName);
         });
-        
         return Promise.all(deletePromises);
       })
       .then(() => {
-        console.log('SW: All old caches deleted, creating new cache');
-        // 새로운 캐시 생성
-        return caches.open(CACHE_NAME);
-      })
-      .then(() => {
-        console.log('SW: Taking immediate control');
+        console.log('SW: 모든 캐시 삭제 완료');
         return self.clients.claim();
       })
       .then(() => {
-        // 모든 클라이언트에 강제 업데이트 신호
         return self.clients.matchAll();
       })
       .then(clients => {
         clients.forEach(client => {
-          console.log('SW: Sending force update signal');
           client.postMessage({ 
-            type: 'FORCE_UPDATE', 
+            type: 'CACHE_UPDATED', 
             version: VERSION,
-            message: '캐시가 완전히 정리되었습니다'
+            message: '캐시 완전 정리 완료'
           });
         });
       })
