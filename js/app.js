@@ -1999,7 +1999,7 @@ async function initSimpleUpdateSystem() {
         
         // 업데이트 메시지 리스너
         navigator.serviceWorker.addEventListener('message', event => {
-1.0.9            if (event.data.type === 'CACHE_UPDATED') {
+            if (event.data.type === 'CACHE_UPDATED') {
                 const newVersion = event.data.version;
                 const currentVersion = window.versionManager?.currentVersion || '1.0.9';
                 
