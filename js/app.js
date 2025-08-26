@@ -1983,101 +1983,42 @@ window.onload = async function() {
     }, 2000); // 2초 후 체크
 };
 
-// 🔄 자동 업데이트 시스템 초기화
-function initAutoUpdateSystem() {
-  if ('serviceWorker' in navigator) {
-    console.log('🔄 Auto-update system initializing...');
+// 간단한 업데이트 체크 시스템
+async function initSimpleUpdateSystem() {
+    if (!('serviceWorker' in navigator)) return;
     
-    // 현재 앱 버전 가져오기
-    const currentVersion = document.querySelector('meta[name="version"]')?.content || '1.0.4';
-    console.log(`📱 Current app version: ${currentVersion}`);
-    
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => {
-        console.log('✅ SW: Registered successfully');
+    try {
+        console.log('업데이트 시스템 초기화...');
         
-        // 🔄 즉시 업데이트 확인
-        registration.update();
+        // Service Worker 등록
+        const registration = await navigator.serviceWorker.register('/sw.js');
+        console.log('Service Worker 등록 완료');
         
-        // ⏰ 주기적 업데이트 확인 (5분마다)
-        setInterval(() => {
-          console.log('🔄 Checking for updates...');
-          registration.update();
-        }, 5 * 60 * 1000);
+        // 앱 시작 시 한 번만 업데이트 체크
+        await registration.update();
         
-        // 📡 SW 메시지 수신
+        // 업데이트 메시지 리스너
         navigator.serviceWorker.addEventListener('message', event => {
-          if (event.data.type === 'CACHE_UPDATED') {
-            const newVersion = event.data.version;
-            console.log(`✨ New version detected: ${newVersion} (current: ${currentVersion})`);
-            
-            // 🔍 버전 비교 - 버전이 변경된 경우에만 업데이트
-            if (newVersion !== currentVersion) {
-              console.log(`버전 변경 감지: ${currentVersion} → ${newVersion}`);
-              
-              // UpdateManager를 사용한 사용자 친화적 업데이트
-              if (window.updateManager) {
-                window.updateManager.performUpdate(newVersion, currentVersion);
-              } else {
-                console.error('UpdateManager를 사용할 수 없어 직접 새로고침합니다');
-                setTimeout(() => {
-                  if (!document.hidden) {
-                    window.location.reload();
-                  }
-                }, 1000);
-              }
-            } else {
-              console.log('ℹ️ Same version detected, skipping reload');
+1.0.9            if (event.data.type === 'CACHE_UPDATED') {
+                const newVersion = event.data.version;
+                const currentVersion = window.versionManager?.currentVersion || '1.0.9';
+                
+                if (newVersion !== currentVersion && window.updateManager) {
+                    window.updateManager.performUpdate(newVersion, currentVersion);
+                }
             }
-          }
         });
         
-        // 🔄 컨트롤러 변경 감지 (백업) - 버전 확인 후 처리
-        navigator.serviceWorker.addEventListener('controllerchange', () => {
-          console.log('🔄 SW: Controller changed, checking version...');
-          
-          // Service Worker에서 버전 정보 요청
-          if (navigator.serviceWorker.controller) {
-            const messageChannel = new MessageChannel();
-            messageChannel.port1.onmessage = event => {
-              const swVersion = event.data.version;
-              console.log(`📱 SW version: ${swVersion}, App version: ${currentVersion}`);
-              
-              if (swVersion !== currentVersion) {
-                console.log(`컨트롤러 버전 불일치 감지: ${currentVersion} → ${swVersion}`);
-                
-                // UpdateManager를 사용한 사용자 친화적 업데이트
-                if (window.updateManager) {
-                  window.updateManager.performUpdate(swVersion, currentVersion);
-                } else {
-                  console.error('UpdateManager를 사용할 수 없어 직접 새로고침합니다');
-                  if (!document.hidden) {
-                    window.location.reload();
-                  }
-                }
-              } else {
-                console.log('ℹ️ Version match, no reload needed');
-              }
-            };
-            
-            navigator.serviceWorker.controller.postMessage(
-              { type: 'GET_VERSION' }, 
-              [messageChannel.port2]
-            );
-          }
-        });
-      })
-      .catch(error => {
-        console.error('❌ SW: Registration failed', error);
-      });
-  }
+    } catch (error) {
+        console.error('Service Worker 등록 실패:', error);
+    }
 }
 
-// 🚀 DOM 로드 시 자동 업데이트 시스템 시작
+// 🚀 DOM 로드 시 간단한 업데이트 시스템 시작
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initAutoUpdateSystem);
+  document.addEventListener('DOMContentLoaded', initSimpleUpdateSystem);
 } else {
-  initAutoUpdateSystem();
+  initSimpleUpdateSystem();
 }
 
 // 🚀 인삿말 캐싱 시스템
