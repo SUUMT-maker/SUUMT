@@ -1168,20 +1168,9 @@ class IntegratedRecordsDashboard {
         } else {
             // 호흡수 챌린지 - 오늘 실제 운동량 반영
             const todayBreaths = this.getTodayBreaths();
-            
-            // 일일 목표 이미 달성한 경우
-            if (todayBreaths >= 40) {
-                return {
-                    content: '오늘 목표',
-                    reward: '달성 완료! ✅'
-                };
-            }
-            
-            // 일일 목표 미달성 - 남은 운동량 계산
-            const remainingDaily = 40 - todayBreaths;
+            const remainingDaily = Math.max(0, 40 - todayBreaths);
             const remainingWeekly = Math.max(0, goalProgress.target - goalProgress.current);
             const canAdd = Math.min(remainingDaily, remainingWeekly);
-            
             return {
                 content: '지금 운동하면',
                 reward: `+${canAdd}회 ↗️`
@@ -1239,7 +1228,10 @@ class IntegratedRecordsDashboard {
 
     // 오늘 운동 완료 여부 확인
     isTodayCompleted(weekData) {
-        const today = this.getKstDateString(new Date().toISOString());
+        const now = new Date();
+        const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+        const today = kstNow.toISOString().split('T')[0];
+        
         const todayData = weekData.filter(session => 
             this.getKstDateString(session.created_at) === today
         );
