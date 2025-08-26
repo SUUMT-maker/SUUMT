@@ -1126,29 +1126,16 @@ class IntegratedRecordsDashboard {
 
     // 오늘 호흡수 계산
     getTodayBreaths() {
-        const today = this.getKstDateString(new Date().toISOString());
-        console.log('🔍 getTodayBreaths 진단 - 오늘 날짜:', today);
+        const now = new Date();
+        const kstNow = new Date(now.getTime() + 9 * 60 * 60 * 1000);
+        const today = kstNow.toISOString().split('T')[0];
         
-        console.log('🔍 전체 exerciseData 개수:', this.exerciseData?.length || 0);
+        const todayData = this.exerciseData.filter(session => 
+            this.getKstDateString(session.created_at) === today
+        );
         
-        const todayData = this.exerciseData.filter(session => {
-            const sessionDate = this.getKstDateString(session.created_at);
-            console.log('🔍 세션 날짜 비교:', sessionDate, '===', today, sessionDate === today);
-            return sessionDate === today;
-        });
-        
-        console.log('🔍 오늘 세션 개수:', todayData.length);
-        console.log('🔍 오늘 세션 데이터:', todayData.map(s => ({
-            created_at: s.created_at,
-            completed_breaths: s.completed_breaths,
-            is_aborted: s.is_aborted
-        })));
-        
-        const totalBreaths = todayData.reduce((sum, session) => 
+        return todayData.reduce((sum, session) => 
             sum + (session.completed_breaths || 0), 0);
-        
-        console.log('🔍 최종 오늘 호흡수:', totalBreaths);
-        return totalBreaths;
     }
 
     // 액션 카드 생성 (오른쪽)
