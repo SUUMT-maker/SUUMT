@@ -924,6 +924,12 @@ class IntegratedRecordsDashboard {
 
     // 주간 챌린지 상태 계산 (중복 계산 방지)
     calculateWeeklyChallengeState() {
+        console.log('🔍 exerciseData 상태:', {
+            length: this.exerciseData?.length || 0,
+            latest: this.exerciseData?.[0]?.created_at,
+            latest_breaths: this.exerciseData?.[0]?.completed_breaths
+        });
+        
         const currentWeek = this.getCurrentWeek();
         console.log(`🎯 주간 챌린지 계산 (Week ${currentWeek})`);
         const weekData = this.getThisWeekData();
@@ -1121,12 +1127,28 @@ class IntegratedRecordsDashboard {
     // 오늘 호흡수 계산
     getTodayBreaths() {
         const today = this.getKstDateString(new Date().toISOString());
-        const todayData = this.exerciseData.filter(session => 
-            this.getKstDateString(session.created_at) === today
-        );
+        console.log('🔍 getTodayBreaths 진단 - 오늘 날짜:', today);
         
-        return todayData.reduce((sum, session) => 
+        console.log('🔍 전체 exerciseData 개수:', this.exerciseData?.length || 0);
+        
+        const todayData = this.exerciseData.filter(session => {
+            const sessionDate = this.getKstDateString(session.created_at);
+            console.log('🔍 세션 날짜 비교:', sessionDate, '===', today, sessionDate === today);
+            return sessionDate === today;
+        });
+        
+        console.log('🔍 오늘 세션 개수:', todayData.length);
+        console.log('🔍 오늘 세션 데이터:', todayData.map(s => ({
+            created_at: s.created_at,
+            completed_breaths: s.completed_breaths,
+            is_aborted: s.is_aborted
+        })));
+        
+        const totalBreaths = todayData.reduce((sum, session) => 
             sum + (session.completed_breaths || 0), 0);
+        
+        console.log('🔍 최종 오늘 호흡수:', totalBreaths);
+        return totalBreaths;
     }
 
     // 액션 카드 생성 (오른쪽)
