@@ -1146,7 +1146,7 @@ class IntegratedRecordsDashboard {
         if (weekCompleted) {
             return {
                 content: '이번주 목표',
-                reward: '달성 완료! 🎉'
+                reward: '달성 완료 🎉'
             };
         }
         
@@ -1154,7 +1154,7 @@ class IntegratedRecordsDashboard {
         if (todayCompleted) {
             return {
                 content: '오늘 운동',
-                reward: '완료했어요! ✅'
+                reward: '완료했어요 ✅'
             };
         }
         
