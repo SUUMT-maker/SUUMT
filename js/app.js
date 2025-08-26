@@ -2011,14 +2011,19 @@ function initAutoUpdateSystem() {
             const newVersion = event.data.version;
             console.log(`✨ New version detected: ${newVersion} (current: ${currentVersion})`);
             
-            // 🔍 버전 비교 - 버전이 변경된 경우에만 새로고침
+            // 🔍 버전 비교 - 버전이 변경된 경우에만 업데이트
             if (newVersion !== currentVersion) {
-              console.log(`🔄 Version changed from ${currentVersion} to ${newVersion}, auto-reloading...`);
-              // 🔄 부드러운 새로고침 (사용자가 활성 상태일 때만)
-              if (!document.hidden) {
+              console.log(`버전 변경 감지: ${currentVersion} → ${newVersion}`);
+              
+              // UpdateManager를 사용한 사용자 친화적 업데이트
+              if (window.updateManager) {
+                window.updateManager.performUpdate(newVersion, currentVersion);
+              } else {
+                console.error('UpdateManager를 사용할 수 없어 직접 새로고침합니다');
                 setTimeout(() => {
-                  console.log('🔄 Auto-reloading for version update...');
-                  window.location.reload();
+                  if (!document.hidden) {
+                    window.location.reload();
+                  }
                 }, 1000);
               }
             } else {
@@ -2039,9 +2044,16 @@ function initAutoUpdateSystem() {
               console.log(`📱 SW version: ${swVersion}, App version: ${currentVersion}`);
               
               if (swVersion !== currentVersion) {
-                console.log('🔄 Version mismatch detected, reloading...');
-                if (!document.hidden) {
-                  window.location.reload();
+                console.log(`컨트롤러 버전 불일치 감지: ${currentVersion} → ${swVersion}`);
+                
+                // UpdateManager를 사용한 사용자 친화적 업데이트
+                if (window.updateManager) {
+                  window.updateManager.performUpdate(swVersion, currentVersion);
+                } else {
+                  console.error('UpdateManager를 사용할 수 없어 직접 새로고침합니다');
+                  if (!document.hidden) {
+                    window.location.reload();
+                  }
                 }
               } else {
                 console.log('ℹ️ Version match, no reload needed');

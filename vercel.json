@@ -30,55 +30,55 @@
       ]
     },
     {
-      "source": "/index.html",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "no-cache, no-store, must-revalidate, max-age=0"
-        },
-        {
-          "key": "Pragma", 
-          "value": "no-cache"
-        },
-        {
-          "key": "Expires",
-          "value": "0"
-        },
-        {
-          "key": "X-Version",
-          "value": "1.0.9"
-        }
-      ]
+              "source": "/index.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate, max-age=0"
+          },
+          {
+            "key": "Pragma", 
+            "value": "no-cache"
+          },
+          {
+            "key": "Expires",
+            "value": "0"
+          },
+          {
+            "key": "X-Version",
+            "value": "latest"
+          }
+        ]
     },
     {
-      "source": "/sw.js",
-      "headers": [
-        {
-          "key": "Cache-Control",
-          "value": "public, max-age=0, must-revalidate"
-        },
-        {
-          "key": "Service-Worker-Allowed",
-          "value": "1.0.9"
-        },
-        {
-          "key": "X-Version",
-          "value": "1.0.9"
-        }
-      ]
+              "source": "/sw.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=0, must-revalidate"
+          },
+          {
+            "key": "Service-Worker-Allowed",
+            "value": "/"
+          },
+          {
+            "key": "X-Version",
+            "value": "latest"
+          }
+        ]
     },
     {
-      "source": "/manifest.json",
-      "headers": [
-        {
-          "key": "Cache-Control", 
-          "value": "public, max-age=0, must-revalidate"
-        },
-        {
-          "key": "X-Version",
-          "value": "1.0.9"
-        }
-      ]
+              "source": "/manifest.json",
+        "headers": [
+          {
+            "key": "Cache-Control", 
+            "value": "public, max-age=0, must-revalidate"
+          },
+          {
+            "key": "X-Version",
+            "value": "latest"
+          }
+        ]
     },
     {
       "source": "/icons/(.*)",
