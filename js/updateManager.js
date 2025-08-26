@@ -66,19 +66,32 @@ class UpdateManager {
         console.log(`업데이트 시작: ${currentVersion} → ${newVersion}`);
 
         try {
-            // 업데이트 UI 표시
+            // 1단계: 사용자 데이터 백업
+            console.log('사용자 데이터 백업 시작...');
+            const userDataBackup = this.backupUserData();
+            
+            // 백업 데이터를 sessionStorage에 저장 (업데이트 후 복구용)
+            sessionStorage.setItem('userDataBackup', JSON.stringify(userDataBackup));
+            console.log('사용자 데이터 백업 완료');
+
+            // 2단계: 캐시 정리
+            console.log('캐시 정리 시작...');
+            await this.clearAllCaches();
+            console.log('캐시 정리 완료');
+
+            // 3단계: 업데이트 UI 표시
             const overlay = this.createUpdateUI();
             document.body.appendChild(overlay);
             
             const progressBar = overlay.querySelector('#progress-bar');
 
-            // 진행률 시뮬레이션
+            // 4단계: 진행률 시뮬레이션
             await this.updateProgress(progressBar, 20, 800);
             await this.updateProgress(progressBar, 60, 800);  
             await this.updateProgress(progressBar, 90, 500);
             await this.updateProgress(progressBar, 100, 300);
             
-            // 완료 후 새로고침
+            // 5단계: 완료 후 새로고침
             console.log('업데이트 완료, 새로고침 실행');
             window.location.reload();
             
@@ -118,6 +131,35 @@ class UpdateManager {
         
         // 에러 발생시에도 새로고침
         window.location.reload();
+    }
+
+    /**
+     * 사용자 데이터 백업
+     */
+    backupUserData() {
+        const userDataKeys = ['exercise_history', 'user_stats', 'user_settings', 'profile_data', 'training_records'];
+        const backup = {};
+        
+        userDataKeys.forEach(key => {
+            const data = localStorage.getItem(key);
+            if (data) backup[key] = data;
+        });
+        
+        console.log('사용자 데이터 백업 완료');
+        return backup;
+    }
+
+    /**
+     * 캐시 완전 정리
+     */
+    async clearAllCaches() {
+        try {
+            const cacheNames = await caches.keys();
+            await Promise.all(cacheNames.map(name => caches.delete(name)));
+            console.log('캐시 정리 완료');
+        } catch (error) {
+            console.error('캐시 정리 실패:', error);
+        }
     }
 }
 
