@@ -38,44 +38,50 @@ self.addEventListener('install', event => {
   );
 });
 
-// 🔄 자동 제어권 획득
+// 🔄 강제 캐시 정리 및 자동 제어권 획득
 self.addEventListener('activate', event => {
-  console.log(`🔄 SW: Activating version ${VERSION}`);
+  console.log(`SW: Activating version ${VERSION}`);
   
   event.waitUntil(
     caches.keys()
       .then(cacheNames => {
-        const deletePromises = cacheNames
-          .filter(cacheName => !cacheName.includes(VERSION))
-          .map(cacheName => {
-            console.log(`🗑️ SW: Deleting old cache ${cacheName}`);
-            return caches.delete(cacheName);
-          });
+        console.log('SW: Found caches:', cacheNames);
+        
+        // 모든 기존 캐시 강제 삭제 (버전 상관없이)
+        const deletePromises = cacheNames.map(cacheName => {
+          console.log(`SW: Deleting cache: ${cacheName}`);
+          return caches.delete(cacheName);
+        });
         
         return Promise.all(deletePromises);
       })
       .then(() => {
-        console.log('✨ SW: Taking immediate control');
-        return self.clients.claim(); // 🔧 즉시 제어권 획득
+        console.log('SW: All old caches deleted, creating new cache');
+        // 새로운 캐시 생성
+        return caches.open(CACHE_NAME);
       })
       .then(() => {
-        // 🔄 모든 클라이언트에 버전 업데이트 신호 전송
+        console.log('SW: Taking immediate control');
+        return self.clients.claim();
+      })
+      .then(() => {
+        // 모든 클라이언트에 강제 업데이트 신호
         return self.clients.matchAll();
       })
       .then(clients => {
         clients.forEach(client => {
-          // 🔍 버전 변경 감지 - 클라이언트의 현재 버전과 비교
+          console.log('SW: Sending force update signal');
           client.postMessage({ 
-            type: 'CACHE_UPDATED', 
+            type: 'FORCE_UPDATE', 
             version: VERSION,
-            timestamp: Date.now()
+            message: '캐시가 완전히 정리되었습니다'
           });
         });
       })
   );
 });
 
-// 📡 네트워크 전략: 네트워크 우선, 캐시 백업
+// 📡 강화된 네트워크 전략: HTML 파일은 항상 네트워크 우선
 self.addEventListener('fetch', event => {
   // 🚫 외부 API는 캐시하지 않음
   if (event.request.url.includes('supabase.co') || 
@@ -84,23 +90,20 @@ self.addEventListener('fetch', event => {
     return; // 그냥 네트워크 요청
   }
 
-  // HTML 페이지는 항상 네트워크 우선
-  if (event.request.mode === 'navigate') {
+  // HTML 파일은 항상 네트워크 우선 (캐시 손상 방지)
+  if (event.request.destination === 'document') {
     event.respondWith(
       fetch(event.request)
         .then(response => {
-          // 네트워크 성공 시 캐시 업데이트
-          if (response && response.status === 200) {
-            const responseToCache = response.clone();
-            caches.open(STATIC_CACHE).then(cache => {
-              cache.put(event.request, responseToCache);
-            });
-          }
+          // 새로운 캐시에 저장
+          const responseClone = response.clone();
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseClone);
+          });
           return response;
         })
         .catch(() => {
-          // 네트워크 실패 시 캐시에서
-          return caches.match('/');
+          return caches.match(event.request);
         })
     );
     return;
