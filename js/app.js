@@ -2089,20 +2089,20 @@ const SIMPLE_GREETINGS = {
     
     streak_2_3: [
         "어제도 오늘도! 벌써 습관이 되어가네요 😊",
-        "{{days}}일째네요! 좋은 리듬이에요",
-        "연속 {{days}}일! 몸이 기억하고 있을 거예요"
+        "정말 꾸준하시네요! 좋은 리듬이에요",
+        "몸이 기억하고 있을 거예요! 멋져요"
     ],
     
     streak_4_6: [
-        "{{days}}일째! 정말 꾸준하시네요 👏",
-        "벌써 {{days}}일! 확실히 달라지고 있어요",
-        "{{days}}일 연속! 이제 진짜 습관이네요"
+        "정말 꾸준하시네요! 대단해요 👏",
+        "확실히 달라지고 있어요! 좋은 변화네요",
+        "이제 진짜 습관이 되셨네요! 멋져요"
     ],
     
     streak_7_plus: [
-        "일주일째! 정말 대단해요 🌟",
-        "꾸준히 하고 계시네요! 멋져요",
-        "{{days}}일 연속! 이미 마스터 수준이에요"
+        "정말 대단해요! 꾸준함의 힘이네요 🌟",
+        "꾸준히 하고 계시네요! 정말 멋져요",
+        "이미 마스터 수준이에요! 놀라워요"
     ],
     
     default_morning: "오늘도 화이팅 ☀️",
@@ -2277,18 +2277,15 @@ function generateSimpleGreeting(userInfo, motivationData) {
     }
     else if (consecutiveDays >= 7) {
         const streakMessages = SIMPLE_GREETINGS.streak_7_plus;
-        message = streakMessages[Math.floor(Math.random() * streakMessages.length)]
-            .replace('{{days}}', consecutiveDays);
+        message = streakMessages[Math.floor(Math.random() * streakMessages.length)];
     }
     else if (consecutiveDays >= 4) {
         const streakMessages = SIMPLE_GREETINGS.streak_4_6;
-        message = streakMessages[Math.floor(Math.random() * streakMessages.length)]
-            .replace('{{days}}', consecutiveDays);
+        message = streakMessages[Math.floor(Math.random() * streakMessages.length)];
     }
     else if (consecutiveDays >= 2) {
         const streakMessages = SIMPLE_GREETINGS.streak_2_3;
-        message = streakMessages[Math.floor(Math.random() * streakMessages.length)]
-            .replace('{{days}}', consecutiveDays);
+        message = streakMessages[Math.floor(Math.random() * streakMessages.length)];
     }
     else {
         if (currentHour >= 5 && currentHour < 12) {
