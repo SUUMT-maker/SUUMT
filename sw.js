@@ -1,4 +1,4 @@
-const VERSION = '1.1.1';
+const VERSION = '2.0.0';
 const CACHE_NAME = `breath-trainer-v${VERSION}`;
 const STATIC_CACHE = `static-${VERSION}`;
 
@@ -23,17 +23,12 @@ const STATIC_ASSETS = [
 
 // 🚀 즉시 활성화 - 자동 업데이트
 self.addEventListener('install', event => {
-  console.log(`🚀 SW: Installing version ${VERSION}`);
-  
+  console.log('SW: Emergency update installing');
   event.waitUntil(
     caches.open(STATIC_CACHE)
-      .then(cache => {
-        console.log('✅ SW: Cache updated');
-        return cache.addAll(STATIC_ASSETS);
-      })
       .then(() => {
-        console.log('🔄 SW: Skipping waiting - auto update');
-        return self.skipWaiting(); // 🔧 즉시 활성화
+        console.log('SW: Skip waiting for emergency update');
+        return self.skipWaiting();
       })
   );
 });
