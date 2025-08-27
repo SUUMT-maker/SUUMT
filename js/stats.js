@@ -452,32 +452,38 @@ function selectInsightMessage(data) {
     // 1순위: 정말 대단한 성과들
     if (data.workoutDays === 7) {
         // console.log('🔍 [메시지] 선택된 메시지: 완벽한 일주일 (workoutDays=7)');
-        return "완벽한 일주일! 건강 계좌에 꽉 찬 적금이네요";
+        return "일주일 완주했어요! 호흡운동으로 건강 계좌에 꽉 찬 적금이네요";
     }
     
     if (data.weeklyConsecutiveDays >= 3) {
         // console.log(`🔍 [메시지] 선택된 메시지: 주간 연속 운동 (weeklyConsecutiveDays=${data.weeklyConsecutiveDays})`);
-        return `이번 주 ${data.weeklyConsecutiveDays}일 연속! 폐활량이 슬금슬금 늘고 있어요`;
+        return `이번 주 ${data.weeklyConsecutiveDays}일 연속 호흡운동! 폐활량이 슬금슬금 늘고 있어요`;
     }
     
     if (data.workoutDays >= 5) {
         // console.log(`🔍 [메시지] 선택된 메시지: 주간 성취감 (workoutDays=${data.workoutDays})`);
-        return `주 ${data.workoutDays}회! 이 페이스면 체력 업그레이드 완료 예정`;
+        return `주 ${data.workoutDays}회나 해냈어요! 호흡운동으로 체력 업그레이드 완료 예정`;
     }
     
     if (data.totalSets >= 10) {
         // console.log(`🔍 [메시지] 선택된 메시지: 양적 성과 (totalSets=${data.totalSets})`);
-        return `이번 주 ${data.totalSets}세트! 심장이 더 튼튼해지고 있어요`;
+        const breathingMessages = [
+            `이번 주 ${data.totalSets}세트나 해냈어요! 폐활량이 늘고 있을 거예요`,
+            `이번 주 호흡운동 ${data.totalSets}세트 완주! 스트레스가 줄어들고 있어요`,
+            `이번 주 ${data.totalSets}세트 달성! 집중력이 높아지고 있을 거예요`,
+            `호흡운동 ${data.totalSets}세트 성공! 마음이 더 평온해지고 있어요`
+        ];
+        return breathingMessages[Math.floor(Math.random() * breathingMessages.length)];
     }
     
     if (data.workoutDays >= 2) {
         // console.log(`🔍 [메시지] 선택된 메시지: 주간 시작 (workoutDays=${data.workoutDays})`);
-        return "이번 주 벌써 2번! 습관의 씨앗이 뿌리를 내리고 있어요";
+        return "이번 주 벌써 2번! 호흡운동 습관의 씨앗이 뿌리를 내리고 있어요";
     }
     
     // 운동 1번만 한 경우
     if (data.workoutDays === 1) {
-        return "첫 세트 완료! 중간에 멈춰도 완성한 세트만 기록돼요. 내일도 도전해보세요";
+        return "첫 운동 완료! 중간에 멈춰도 완성한 세트만 기록돼요. 내일도 도전해보세요";
     }
     
     // 처음 사용자/이번 주 운동 없는 경우
