@@ -97,7 +97,7 @@ const PROFILE_HTML = `
         
         <!-- 리뷰 캐러셀 -->
         <div class="reviews-carousel" style="background: #F8F9FA; border-radius: 16px; padding: 16px; overflow: hidden; position: relative; height: 160px;">
-            <div class="reviews-slider" id="profileReviewsSlider" style="display: flex; transition: transform 0.5s ease; height: 100%;">
+            <div class="reviews-slider" id="profileReviewsSlider" style="display: flex; transition: transform 0.3s ease; height: 100%;">
                 <!-- 리뷰 카드들이 JavaScript로 생성됨 -->
             </div>
             <div class="carousel-dots" id="profileCarouselDots" style="display: flex; justify-content: center; gap: 6px; margin-top: 12px;">
@@ -189,11 +189,11 @@ const PROFILE_CSS = `
     height: 160px; /* 카드 높이 140px에 맞춰 전체 높이 증가 */
 }
 
-.reviews-slider {
-    display: flex;
-    transition: transform 0.5s ease;
-    height: calc(100% - 24px);
-}
+    .reviews-slider {
+        display: flex;
+        transition: transform 0.3s ease;
+        height: calc(100% - 24px);
+    }
 
 .review-card {
     min-width: 100%;
@@ -648,6 +648,7 @@ class ProfileDashboard {
 
         
         // 캐러셀 점들 생성
+        // 기존 도트 이벤트 완전 정리
         carouselDots.innerHTML = '';
         reviewsData.forEach((_, index) => {
             const dot = document.createElement('div');
@@ -685,18 +686,19 @@ class ProfileDashboard {
 
     // 🫁 자동 슬라이드 시작
     startReviewAutoSlide(totalReviews) {
-        // 기존 인터벌 정리
+        // 기존 인터벌 정리 강화
         if (this.reviewCarouselInterval) {
             clearInterval(this.reviewCarouselInterval);
+            this.reviewCarouselInterval = null;
         }
         
-        // 6초마다 자동 전환 (여유로운 속도로 변경)
+        // 6000 → 4000으로 변경
         this.reviewCarouselInterval = setInterval(() => {
             this.currentReviewIndex = (this.currentReviewIndex + 1) % totalReviews;
             this.goToReview(this.currentReviewIndex);
-        }, 6000); // 4000 → 6000
+        }, 4000);
         
-        console.log('🫁 리뷰 자동 슬라이드 시작 (6초 간격)');
+        console.log('🫁 리뷰 자동 슬라이드 시작 (4초 간격)');
     }
 
     // 📈 오늘 운동 횟수 계산
