@@ -16,47 +16,13 @@ const PROFILE_HTML = `
                     <h3 id="profileNickname" style="font-size: 16px; font-weight: 600; color: #1f2937; margin: 0 0 4px 0;">AI 숨트레이너 님</h3>
                     <p class="greeting-message" style="font-size: 14px; font-weight: 400; color: #1f2937; margin: 0 0 8px 0;">나의 호흡 운동 여정을 확인해보세요</p>
                     
-                    <!-- 레벨 진행률 바 -->
-                    <div id="levelProgressContainer" style="background: #f3f4f6; border-radius: 8px; height: 6px; overflow: hidden; margin-top: 8px;">
-                        <div id="levelProgressBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s ease; border-radius: 8px;"></div>
-                    </div>
-                    <div id="levelInfo" style="font-size: 11px; color: #6b7280; margin-top: 4px;">Lv.1 뉴비 (0/166 EXP)</div>
+
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 2. 나의 성장 (2x2 그리드) -->
-    <div style="margin: 0 20px 24px;">
-        <div style="font-size: 18px; font-weight: 700; color: #1f2937; margin-bottom: 20px; padding-left: 0px;">나의 성장</div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-            
-            <!-- 운동한 날 -->
-            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-                <div id="totalWorkoutDays" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px; visibility: hidden;">000</div>
-                <div style="font-size: 13px; color: #6b7280; font-weight: 600;">운동한 날</div>
-            </div>
-            
-            <!-- 누적 호흡 -->
-            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-                <div id="totalBreaths" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px; visibility: hidden;">0,000</div>
-                <div style="font-size: 13px; color: #6b7280; font-weight: 600;">누적 호흡</div>
-            </div>
-            
-            <!-- 연속 일수 -->
-            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-                <div id="consecutiveDays" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px; visibility: hidden;">000</div>
-                <div style="font-size: 12px; color: #6b7280; font-weight: 600;">연속 일수</div>
-            </div>
-            
-            <!-- 현재 강도 -->
-            <div style="background: white; border: 1px solid #E7E7E7; border-radius: 20px; padding: 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-                <div id="currentIntensity" style="font-size: 32px; font-weight: 800; color: #1f2937; margin-bottom: 8px; visibility: hidden;">0.0</div>
-                <div style="font-size: 12px; color: #6b7280; font-weight: 600;">현재 강도</div>
-            </div>
-            
-        </div>
-    </div>
+    <!-- 레벨시스템 카드 영역 -->
 
     <!-- 3. 배지 컬렉션 -->
     <div id="profileBadgesSection" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 32px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
@@ -411,54 +377,7 @@ class ProfileDashboard {
     }
 
     // 📈 성장 통계 계산
-    calculateGrowthStats() {
-        if (!this.exerciseData.length) {
-            return {
-                totalWorkoutDays: 0,
-                totalBreaths: 0,
-                consecutiveDays: 0,
-                currentIntensity: 1.0
-            };
-        }
 
-        // 운동한 날 수 계산 (중복 제거)
-        const workoutDates = new Set();
-        let totalBreaths = 0;
-        let totalSessions = 0;
-        let avgInhaleResistance = 0;
-        let avgExhaleResistance = 0;
-
-        this.exerciseData.forEach(session => {
-            // 날짜 추가 (중복 자동 제거)
-            const date = new Date(session.created_at).toDateString();
-            workoutDates.add(date);
-            
-            // 호흡 수 누적
-            totalBreaths += (session.completed_breaths || 0);
-            
-            // 저항 강도 누적
-            if (!session.is_aborted) {
-                totalSessions++;
-                avgInhaleResistance += (session.inhale_resistance || 0);
-                avgExhaleResistance += (session.exhale_resistance || 0);
-            }
-        });
-
-        // 연속 일수 계산
-        const consecutiveDays = this.calculateConsecutiveDays();
-        
-        // 현재 강도 계산 (평균 저항 강도)
-        const currentIntensity = totalSessions > 0 ? 
-            Math.round(((avgInhaleResistance + avgExhaleResistance) / (totalSessions * 2)) * 10) / 10 :
-            1.0;
-
-        return {
-            totalWorkoutDays: workoutDates.size,
-            totalBreaths: totalBreaths,
-            consecutiveDays: consecutiveDays,
-            currentIntensity: currentIntensity
-        };
-    }
 
     // 📅 연속 일수 계산
     calculateConsecutiveDays() {
@@ -734,28 +653,7 @@ class ProfileDashboard {
         // 프로필탭에서는 실행하지 않음
         return [];
         
-        /* 
-        // 기존 로직 (주석 처리 - 프로필탭에서는 사용 안함)
-        if (typeof window.checkNewBadges === 'function') {
-            const stats = {
-                totalExercises: this.exerciseData.length,
-                totalBreaths: this.exerciseData.reduce((sum, s) => sum + (s.completed_breaths || 0), 0),
-                consecutiveDays: this.calculateConsecutiveDays()
-            };
-            
-            const newBadges = window.checkNewBadges(stats);
-            
-            if (newBadges.length > 0 && typeof window.showBadgePopup === 'function') {
-                setTimeout(() => {
-                    window.showBadgePopup(newBadges[0]);
-                }, 500);
-            }
-            
-            return newBadges;
-        }
-        
-        return [];
-        */
+
     }
 
 
@@ -772,20 +670,7 @@ class ProfileDashboard {
         // 운동 데이터 가져오기
         await this.fetchExerciseData();
         
-        // 성장 통계 업데이트
-        const stats = this.calculateGrowthStats();
-        
-        document.getElementById('totalWorkoutDays').style.visibility = 'visible';
-        document.getElementById('totalWorkoutDays').textContent = stats.totalWorkoutDays;
-        
-        document.getElementById('totalBreaths').style.visibility = 'visible';
-        document.getElementById('totalBreaths').textContent = stats.totalBreaths.toLocaleString();
-        
-        document.getElementById('consecutiveDays').style.visibility = 'visible';
-        document.getElementById('consecutiveDays').textContent = stats.consecutiveDays;
-        
-        document.getElementById('currentIntensity').style.visibility = 'visible';
-        document.getElementById('currentIntensity').textContent = stats.currentIntensity;
+
 
         // 배지 시스템 업데이트 (표시만, 자동 획득 안함)
         this.updateBadgesDisplay();
@@ -994,7 +879,6 @@ class ProfileDashboard {
                     totalExp: 0,
                     currentLevel: 1,
                     lastExpGain: [],
-                    consecutiveDays: 0,
                     lastExerciseDate: null
                 };
                 window.levelSystem.saveExpData();
