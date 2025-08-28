@@ -1135,12 +1135,34 @@ window.communityDataCache = {
         const hour = now.getHours();
         const day = now.getDay();
         
-        // 기준 데이터 (현실적 범위)
-        const daysSinceStart = Math.floor((now - new Date('2024-01-01')) / (1000 * 60 * 60 * 24));
-        const baseUsers = 5200 + (daysSinceStart * 14);
-        const totalUsers = Math.min(baseUsers, 7500);
+        // 새로운 기준: 2025년 8월 28일부터 300명 시작
+        const startDate = new Date('2025-08-28');
+        const daysSinceStart = Math.floor((now - startDate) / (1000 * 60 * 60 * 24));
         
-        // 시간대별 활성도 패턴
+        // 사이클 계산 (증가 → 감소 → 증가 반복)
+        const maxUsers = 14980;
+        const minUsers = 14700;
+        const growthDays = Math.floor((maxUsers - 300) / 6.5); // 평균 6.5명씩 증가
+        const declineDays = 7; // 7일간 감소
+        const cycleDays = growthDays + declineDays;
+        
+        const cyclePosition = daysSinceStart % cycleDays;
+        let totalUsers;
+        
+        if (cyclePosition < growthDays) {
+            // 증가 단계: 300명부터 시작해서 4-9명씩 증가
+            const growthDay = cyclePosition;
+            const baseGrowth = 300 + (growthDay * 6.5); // 평균 증가
+            const randomFactor = (Math.random() - 0.5) * 2.5; // ±1.25 변동
+            totalUsers = Math.min(Math.floor(baseGrowth + randomFactor), maxUsers);
+        } else {
+            // 감소 단계: 7일간 14980 → 14700으로 감소
+            const declineDay = cyclePosition - growthDays;
+            const declineAmount = ((maxUsers - minUsers) / declineDays) * declineDay;
+            totalUsers = Math.floor(maxUsers - declineAmount);
+        }
+        
+        // 시간대별 활성도 패턴 (기존 유지)
         let hourMultiplier = 1.0;
         if (hour >= 6 && hour <= 8) hourMultiplier = 1.2;
         else if (hour >= 19 && hour <= 21) hourMultiplier = 1.5;
@@ -1148,24 +1170,24 @@ window.communityDataCache = {
         else if (hour >= 0 && hour <= 5) hourMultiplier = 0.3;
         else hourMultiplier = 0.9;
         
-        // 요일별 패턴
+        // 요일별 패턴 (기존 유지)
         let dayMultiplier = 1.0;
         if (day === 0) dayMultiplier = 0.7;
         else if (day === 6) dayMultiplier = 0.8;
         else if (day >= 1 && day <= 5) dayMultiplier = 1.0;
         
-        // 일일 활성 사용자 계산
+        // 일일 활성 사용자 계산 (18% 기준)
         const baseDailyActive = Math.floor(totalUsers * 0.18);
         const todayActive = Math.floor(baseDailyActive * hourMultiplier * dayMultiplier);
         
         // 최종 범위 제한
-        const finalTodayActive = Math.max(300, Math.min(todayActive, Math.floor(totalUsers * 0.25)));
-        const finalTotalUsers = Math.max(5000, totalUsers);
+        const finalTodayActive = Math.max(54, Math.min(todayActive, Math.floor(totalUsers * 0.25)));
+        const finalTotalUsers = Math.max(300, totalUsers);
         
         return {
             todayActive: finalTodayActive,
             totalUsers: finalTotalUsers,
-            isGrowing: true
+            isGrowing: cyclePosition < growthDays
         };
     }
 };
