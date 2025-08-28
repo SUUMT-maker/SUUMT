@@ -531,61 +531,61 @@ class ProfileDashboard {
         return [
             {
                 text: "숨트로 폐활량이 정말 늘었어요!<br>계단 오를 때 숨이 덜 차요 👍",
-                author: "김상우",
+                author: "brea****(30대)",
                 rating: "⭐⭐⭐⭐⭐",
                 avatar: "김"
             },
             {
                 text: "운동 후 호흡이 훨씬 편해졌습니다.<br>꾸준히 하니까 확실히 달라져요!",
-                author: "박영희", 
+                author: "vita****(30대)", 
                 rating: "⭐⭐⭐⭐⭐",
                 avatar: "박"
             },
             {
                 text: "처음엔 힘들었는데 이제 2단계까지!<br>성취감 최고예요!",
-                author: "이민수",
+                author: "brea****(30대)",
                 rating: "⭐⭐⭐⭐⭐", 
                 avatar: "이"
             },
             {
                 text: "숨트 앱 덕분에 매일 꾸준히 하게 되네요.<br>UI도 예쁘고 재미있어요!",
-                author: "정하나",
+                author: "vita****(20대)",
                 rating: "⭐⭐⭐⭐⭐",
                 avatar: "정"
             },
             {
                 text: "호흡근 운동이 이렇게 중요한 줄 몰랐어요.<br>숨트 강력 추천합니다!",
-                author: "최준호",
+                author: "acti****(30대)",
                 rating: "⭐⭐⭐⭐⭐",
                 avatar: "최"
             },
             {
                 text: "40대 되니까 체력 관리가 정말 중요하더라고요.<br>숨트로 꾸준히 하니까 몸이 가벼워졌어요!",
-                author: "이민수",
+                author: "brea****(40대)",
                 rating: "⭐⭐⭐⭐⭐",
                 avatar: "이"
             },
             {
                 text: "나이 들어서도 건강하게 살려면 호흡이 기본.<br>매일 10분씩이라도 하니까 확실히 달라져요.",
-                author: "김영호", 
+                author: "brea****(50대)", 
                 rating: "⭐⭐⭐⭐⭐",
                 avatar: "김"
             },
             {
                 text: "손자들과 놀아줄 체력을 위해 시작했는데<br>생각보다 재미있고 효과도 좋네요!",
-                author: "박순자",
+                author: "vita****(60대)",
                 rating: "⭐⭐⭐⭐⭐", 
                 avatar: "박"
             },
             {
                 text: "복잡한 운동은 힘든데 숨트는 간단해서 좋아요.<br>집에서 편하게 할 수 있어서 만족합니다.",
-                author: "최광수",
+                author: "acti****(30대)",
                 rating: "⭐⭐⭐⭐⭐",
                 avatar: "최"
             },
             {
                 text: "40년 넘게 살면서 호흡 운동이 이렇게 중요한 줄<br>이제야 알았네요. 늦었지만 열심히 하고 있어요!",
-                author: "정혜숙",
+                author: "vita****(40대)",
                 rating: "⭐⭐⭐⭐⭐",
                 avatar: "정"
             }
@@ -636,7 +636,7 @@ class ProfileDashboard {
             reviewCard.innerHTML = `
                 <div class="review-content">
                     <div class="review-header-center" style="display: flex; align-items: center; gap: 6px; justify-content: center; margin-bottom: 8px;">
-                        <span class="review-name">${this.generateAnonymousId(review.author, review.text)}</span>
+                        <span class="review-name">${review.author}</span>
                         <span class="review-rating">${review.rating}</span>
                     </div>
                     <div class="review-text">${review.text}</div>
@@ -758,34 +758,7 @@ class ProfileDashboard {
         */
     }
 
-    // 🆔 익명 아이디 생성 함수
-    generateAnonymousId(originalName, reviewText) {
-        const prefixes = ['breath', 'healthy', 'active', 'fresh', 'strong', 'vital'];
-        const suffixes = ['lover', 'life', 'user', 'fan', 'pro', 'master'];
-        
-        // 리뷰 내용에 따른 나이대 설정 (더 정확하게)
-        let ageGroup;
-        if (reviewText.includes('손자') || reviewText.includes('40년')) ageGroup = '60대';
-        else if (reviewText.includes('체력') || reviewText.includes('40대')) ageGroup = '40대';
-        else if (reviewText.includes('나이') || reviewText.includes('건강하게')) ageGroup = '50대';
-        else if (reviewText.includes('계단') || reviewText.includes('운동')) ageGroup = '30대';
-        else if (reviewText.includes('UI') || reviewText.includes('앱')) ageGroup = '20대';
-        else ageGroup = '30대';
-        
-        const nameHash = originalName.charCodeAt(0) % prefixes.length;
-        const textHash = reviewText.length % suffixes.length;
-        
-        // 전체 아이디 생성
-        const fullId = `${prefixes[nameHash]}${suffixes[textHash]}`;
-        
-        // 마스킹 처리: 앞 3-4글자만 표시, 나머지는 *
-        const visibleLength = Math.min(4, Math.max(3, fullId.length - 3));
-        const visiblePart = fullId.substring(0, visibleLength);
-        const maskLength = fullId.length - visibleLength;
-        const maskedPart = '*'.repeat(maskLength);
-        
-        return `${visiblePart}${maskedPart}(${ageGroup})`;
-    }
+
 
     // 🎨 UI 업데이트
     async updateUI() {
