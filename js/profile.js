@@ -1092,6 +1092,161 @@ class ProfileDashboard {
         return levelInfo;
     }
 
+    // 🎁 레벨시스템 - 일일미션 경험치 지급
+    async awardDailyMissionExp() {
+        if (!this.userId || !this.supabaseClient) {
+            console.warn('사용자 ID 또는 Supabase 클라이언트가 없습니다.');
+            return false;
+        }
+
+        try {
+            // 오늘 이미 일일미션 경험치를 받았는지 확인
+            const today = new Date().toISOString().split('T')[0];
+            const { data: todayExp, error: checkError } = await this.supabaseClient
+                .from('user_exp_events')
+                .select('id')
+                .eq('user_id', this.userId)
+                .eq('event_type', 'daily_mission')
+                .gte('achieved_at', today + 'T00:00:00Z')
+                .lt('achieved_at', today + 'T23:59:59Z');
+
+            if (checkError) {
+                console.error('일일미션 중복 체크 실패:', checkError);
+                return false;
+            }
+
+            if (todayExp && todayExp.length > 0) {
+                console.log('오늘 이미 일일미션 경험치를 받았습니다.');
+                return false;
+            }
+
+            // 경험치 이벤트 추가
+            const { data: expEvent, error: expError } = await this.supabaseClient
+                .from('user_exp_events')
+                .insert({
+                    user_id: this.userId,
+                    event_type: 'daily_mission',
+                    exp_amount: 50
+                })
+                .select();
+
+            if (expError) {
+                console.error('일일미션 경험치 추가 실패:', expError);
+                return false;
+            }
+
+            // 사용자 레벨 데이터 업데이트
+            await this.updateUserLevelData(50);
+            
+            // UI 업데이트
+            await this.updateLevelSystemUI();
+
+            console.log('✅ 일일미션 경험치 50 EXP 지급 완료!');
+            return true;
+
+        } catch (error) {
+            console.error('일일미션 경험치 지급 중 오류:', error);
+            return false;
+        }
+    }
+
+    // 🎁 레벨시스템 - 주간챌린지 경험치 지급
+    async awardWeeklyChallengeExp() {
+        if (!this.userId || !this.supabaseClient) {
+            console.warn('사용자 ID 또는 Supabase 클라이언트가 없습니다.');
+            return false;
+        }
+
+        try {
+            // 이번 주에 이미 주간챌린지 경험치를 받았는지 확인
+            const now = new Date();
+            const weekStart = new Date(now.setDate(now.getDate() - now.getDay()));
+            weekStart.setHours(0, 0, 0, 0);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            weekEnd.setHours(23, 59, 59, 999);
+
+            const { data: weekExp, error: checkError } = await this.supabaseClient
+                .from('user_exp_events')
+                .insert({
+                    user_id: this.userId,
+                    event_type: 'weekly_challenge',
+                    exp_amount: 300
+                })
+                .select();
+
+            if (expError) {
+                console.error('주간챌린지 경험치 추가 실패:', expError);
+                return false;
+            }
+
+            // 사용자 레벨 데이터 업데이트
+            await this.updateUserLevelData(300);
+            
+            // UI 업데이트
+            await this.updateLevelSystemUI();
+
+            console.log('✅ 주간챌린지 경험치 300 EXP 지급 완료!');
+            return true;
+
+        } catch (error) {
+            console.error('주간챌린지 경험치 지급 중 오류:', error);
+            return false;
+        }
+    }
+
+    // 🎁 레벨시스템 - 사용자 레벨 데이터 업데이트
+    async updateUserLevelData(addExp) {
+        try {
+            // 현재 레벨 데이터 조회
+            const { data: currentLevel, error: selectError } = await this.supabaseClient
+                .from('user_levels')
+                .select('*')
+                .eq('user_id', this.userId)
+                .single();
+
+            const newTotalExp = (currentLevel?.total_exp || 0) + addExp;
+            const newLevelInfo = this.calculateLevelFromExp(newTotalExp);
+
+            if (currentLevel) {
+                // 기존 데이터 업데이트
+                const { error: updateError } = await this.supabaseClient
+                    .from('user_levels')
+                    .update({
+                        total_exp: newTotalExp,
+                        current_level: newLevelInfo.level,
+                        level_title: newLevelInfo.title,
+                        last_updated: new Date().toISOString()
+                    })
+                    .eq('user_id', this.userId);
+
+                if (updateError) {
+                    console.error('레벨 데이터 업데이트 실패:', updateError);
+                }
+            } else {
+                // 새 데이터 생성
+                const { error: insertError } = await this.supabaseClient
+                    .from('user_levels')
+                    .insert({
+                        user_id: this.userId,
+                        total_exp: newTotalExp,
+                        current_level: newLevelInfo.level,
+                        level_title: newLevelInfo.title
+                    });
+
+                if (insertError) {
+                    console.error('레벨 데이터 생성 실패:', insertError);
+                }
+            }
+
+            console.log(`💫 레벨 데이터 업데이트: +${addExp} EXP (총 ${newTotalExp} EXP)`);
+
+        } catch (error) {
+            console.error('레벨 데이터 업데이트 중 오류:', error);
+        }
+    }
+
     // 🧹 정리
     destroy() {
         // 이벤트 리스너 정리
