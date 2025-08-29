@@ -395,12 +395,16 @@ function getSimpleWeeklyData() {
         return recordDate >= weekStart && recordDate < weekEnd;
     });
     
-    // 현재 날짜를 기반으로 이번 주의 월요일 날짜를 계산합니다.
+    // 현재 주(Week)의 시작과 끝을 계산합니다.
     const today = new Date();
     const currentDay = today.getDay(); // 0:일요일, 1:월요일 ... 6:토요일
     const diff = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1);
     const startOfWeek = new Date(today.setDate(diff));
     startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
 
     // thisWeekRecords 배열에서 이번 주 월요일부터 현재까지의 기록만 필터링합니다.
     const thisWeekFilteredRecords = thisWeekRecords.filter(record => {
