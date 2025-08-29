@@ -1299,6 +1299,29 @@ async function initProfileDashboard() {
 window.initProfileTab = initProfileDashboard;
 window.onProfileTabClick = initProfileDashboard;
 
+// 레벨시스템 전역 함수 등록
+window.awardDailyExp = async function() {
+    if (!window.profileDashboard) {
+        console.warn('ProfileDashboard가 초기화되지 않았습니다.');
+        return false;
+    }
+    
+    console.log('일일미션 경험치 지급 시작...');
+    const result = await window.profileDashboard.awardDailyMissionExp();
+    return result;
+};
+
+window.awardWeeklyExp = async function() {
+    if (!window.profileDashboard) {
+        console.warn('ProfileDashboard가 초기화되지 않았습니다.');
+        return false;
+    }
+    
+    console.log('주간챌린지 경험치 지급 시작...');
+    const result = await window.profileDashboard.awardWeeklyChallengeExp();
+    return result;
+};
+
 console.log('🙋‍♂️ 프로필탭 모듈 로드 완료');
 
 // 🔄 커뮤니티 데이터 캐싱 시스템 (마스터)
