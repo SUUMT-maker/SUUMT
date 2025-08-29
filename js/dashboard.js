@@ -1160,7 +1160,7 @@ class IntegratedRecordsDashboard {
         if (weekCompleted) {
             return {
                 content: '이번주 목표',
-                reward: '달성 완료 🎉'
+                reward: '달성 🎉'
             };
         }
         
@@ -1168,7 +1168,7 @@ class IntegratedRecordsDashboard {
         if (todayCompleted) {
             return {
                 content: '오늘 운동',
-                reward: '완료했어요 ✅'
+                reward: '완료 ✅'
             };
         }
         
@@ -1177,7 +1177,7 @@ class IntegratedRecordsDashboard {
             // 연속일 챌린지
             return {
                 content: '지금 운동하면',
-                reward: '+1일 연속 ↗️'
+                reward: '+1일 ↗️'
             };
         } else {
             // 호흡수 챌린지 - 오늘 실제 운동량 반영
