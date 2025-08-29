@@ -723,6 +723,8 @@ class ProfileDashboard {
         // 커뮤니티 리뷰 캐러셀 초기화 (실제 리뷰 시스템)
         this.initCommunityCarousel();
 
+        // 레벨시스템 업데이트
+        await this.updateLevelSystemUI();
 
     }
 
@@ -944,7 +946,151 @@ class ProfileDashboard {
         }
     }
 
+    // 🎮 레벨시스템 - 사용자 레벨 데이터 조회
+    async fetchUserLevelData() {
+        if (!this.userId || !this.supabaseClient) {
+            return {
+                total_exp: 0,
+                current_level: 1,
+                level_title: '호흡 새싹',
+                daily_exp: 0,
+                weekly_exp: 0
+            };
+        }
 
+        try {
+            // user_levels 테이블에서 현재 레벨 데이터 조회
+            const { data: levelData, error: levelError } = await this.supabaseClient
+                .from('user_levels')
+                .select('*')
+                .eq('user_id', this.userId)
+                .single();
+
+            if (levelError && levelError.code !== 'PGRST116') { // PGRST116 = no rows found
+                console.error('레벨 데이터 조회 실패:', levelError);
+                return this.getDefaultLevelData();
+            }
+
+            // user_exp_events에서 경험치 분류별 총합 조회
+            const { data: expEvents, error: expError } = await this.supabaseClient
+                .from('user_exp_events')
+                .select('event_type, exp_amount')
+                .eq('user_id', this.userId);
+
+            if (expError) {
+                console.error('경험치 이벤트 조회 실패:', expError);
+            }
+
+            // 일일미션과 주간챌린지 경험치 분류
+            const daily_exp = (expEvents || [])
+                .filter(event => event.event_type === 'daily_mission')
+                .reduce((sum, event) => sum + event.exp_amount, 0);
+
+            const weekly_exp = (expEvents || [])
+                .filter(event => event.event_type === 'weekly_challenge')
+                .reduce((sum, event) => sum + event.exp_amount, 0);
+
+            return {
+                total_exp: levelData?.total_exp || 0,
+                current_level: levelData?.current_level || 1,
+                level_title: levelData?.level_title || '호흡 새싹',
+                daily_exp,
+                weekly_exp
+            };
+
+        } catch (error) {
+            console.error('레벨 데이터 조회 중 오류:', error);
+            return this.getDefaultLevelData();
+        }
+    }
+
+    // 🎮 레벨시스템 - 기본 레벨 데이터 반환
+    getDefaultLevelData() {
+        return {
+            total_exp: 0,
+            current_level: 1,
+            level_title: '호흡 새싹',
+            daily_exp: 0,
+            weekly_exp: 0
+        };
+    }
+
+    // 🎮 레벨시스템 - 경험치로 레벨 계산
+    calculateLevelFromExp(totalExp) {
+        const levelConfig = LEVEL_CONFIG.find(config => 
+            totalExp >= config.minExp && totalExp < config.maxExp
+        ) || LEVEL_CONFIG[LEVEL_CONFIG.length - 1]; // 최고 레벨 처리
+
+        const currentExp = totalExp - levelConfig.minExp;
+        const requiredExp = levelConfig.maxExp === 999999 ? 0 : levelConfig.maxExp - levelConfig.minExp;
+        const progress = requiredExp > 0 ? Math.round((currentExp / requiredExp) * 100) : 100;
+
+        return {
+            level: levelConfig.level,
+            title: levelConfig.title,
+            icon: levelConfig.icon,
+            currentExp: totalExp,
+            levelMinExp: levelConfig.minExp,
+            levelMaxExp: levelConfig.maxExp,
+            progressExp: currentExp,
+            requiredExp: requiredExp,
+            progress: Math.min(progress, 100)
+        };
+    }
+
+    // 🎮 레벨시스템 - UI 업데이트
+    async updateLevelSystemUI() {
+        const levelData = await this.fetchUserLevelData();
+        const levelInfo = this.calculateLevelFromExp(levelData.total_exp);
+
+        // 레벨 아바타 업데이트
+        const levelAvatar = document.getElementById('levelAvatar');
+        if (levelAvatar) {
+            levelAvatar.textContent = `Lv.${levelInfo.level}`;
+        }
+
+        // 레벨 타이틀 업데이트
+        const levelTitle = document.getElementById('levelTitle');
+        if (levelTitle) {
+            levelTitle.textContent = levelInfo.title;
+        }
+
+        // 진행률 업데이트
+        const levelProgress = document.getElementById('levelProgress');
+        if (levelProgress) {
+            if (levelInfo.level === 7) {
+                levelProgress.textContent = `${levelInfo.currentExp} EXP (최고레벨)`;
+            } else {
+                levelProgress.textContent = `${levelInfo.progressExp} / ${levelInfo.requiredExp} EXP`;
+            }
+        }
+
+        // 퍼센트 업데이트
+        const levelPercentage = document.getElementById('levelPercentage');
+        if (levelPercentage) {
+            levelPercentage.textContent = `${levelInfo.progress}%`;
+        }
+
+        // 프로그레스 바 업데이트
+        const levelProgressBar = document.getElementById('levelProgressBar');
+        if (levelProgressBar) {
+            levelProgressBar.style.width = `${levelInfo.progress}%`;
+        }
+
+        // 경험치 표시 업데이트
+        const dailyExpAmount = document.getElementById('dailyExpAmount');
+        if (dailyExpAmount) {
+            dailyExpAmount.textContent = levelData.daily_exp.toLocaleString();
+        }
+
+        const weeklyExpAmount = document.getElementById('weeklyExpAmount');
+        if (weeklyExpAmount) {
+            weeklyExpAmount.textContent = levelData.weekly_exp.toLocaleString();
+        }
+
+        console.log('🎮 레벨시스템 UI 업데이트 완료:', levelInfo);
+        return levelInfo;
+    }
 
     // 🧹 정리
     destroy() {
