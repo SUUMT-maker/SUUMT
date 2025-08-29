@@ -605,7 +605,7 @@ function getKstDateString(date) {
 }
 
 // 📊 메시지용 데이터 계산 함수 (Supabase 데이터 기반)
-function calculateMessageData(weeklyData) {
+function calculateMessageData(workoutDays, weeklyData) {
     if (!Array.isArray(weeklyData)) {
         weeklyData = [];
     }
@@ -651,13 +651,7 @@ function calculateMessageData(weeklyData) {
         return isInWeek;
     });
     
-    // 핵심 정보만 출력
-    const workoutDates = new Set(thisWeekRecords.map(session => 
-        new Date(session.created_at).toDateString()
-    ));
-    
-    // console.log('🎯 [메시지 핵심] 운동한 날짜들:', Array.from(workoutDates));
-    // console.log('🎯 [메시지 핵심] workoutDays 계산:', workoutDates.size);
+    // workoutDays는 외부에서 전달받은 값을 사용
     
     const totalSets = thisWeekRecords.reduce((sum, record) => 
         sum + (record.completed_sets || 0), 0);
@@ -669,7 +663,7 @@ function calculateMessageData(weeklyData) {
     const isFirstWeek = weeklyData.length <= thisWeekRecords.length;
     
     const result = {
-        workoutDays: workoutDates.size,
+        workoutDays, // 인자로 받은 workoutDays를 그대로 사용
         totalSets,
         weeklyConsecutiveDays,
         isFirstWeek
@@ -712,7 +706,9 @@ async function updateWeeklyAIInsight() {
         }
         
         // 차트와 동일한 주간 데이터로 메시지 생성
-        const data = calculateMessageData(weeklyData);
+        // 올바른 workoutDays 값을 가져오기 위해 getSimpleWeeklyData 사용
+        const weeklyStats = getSimpleWeeklyData();
+        const data = calculateMessageData(weeklyStats.workoutDays, weeklyData);
         const message = selectInsightMessage(data);
         
         // 메시지 카테고리 결정 (간단한 키워드 기반)
