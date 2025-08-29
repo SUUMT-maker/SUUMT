@@ -48,11 +48,11 @@ const PROFILE_HTML = `
         
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div style="text-align: center; padding: 16px; background: #F8F9FA; border-radius: 16px;">
-                <div id="dailyExpAmount" style="font-size: 24px; font-weight: 700; color: #3B82F6; margin-bottom: 4px;">700</div>
+                <div id="dailyExpAmount" style="font-size: 24px; font-weight: 700; color: #3B82F6; margin-bottom: 4px;">0</div>
                 <div style="font-size: 12px; color: #6B7280;">일일미션 EXP</div>
             </div>
             <div style="text-align: center; padding: 16px; background: #F8F9FA; border-radius: 16px;">
-                <div id="dailyExpAmount" style="font-size: 24px; font-weight: 700; color: #8B5CF6; margin-bottom: 4px;">300</div>
+                <div id="weeklyExpAmount" style="font-size: 24px; font-weight: 700; color: #8B5CF6; margin-bottom: 4px;">0</div>
                 <div style="font-size: 12px; color: #6B7280;">주간챌린지 EXP</div>
             </div>
         </div>
