@@ -1081,6 +1081,20 @@ class IntegratedRecordsDashboard {
         const todayCompleted = this.isTodayCompleted(weekData);
         const weekCompleted = goalProgress.percentage >= 100;
         
+        // 주간챌린지 완료 시 경험치 지급
+        if (weekCompleted && typeof window.awardWeeklyExp === 'function') {
+            console.log('🎯 주간챌린지 완료! 경험치 지급 시작...');
+            window.awardWeeklyExp().then(success => {
+                if (success) {
+                    console.log('✅ 주간챌린지 경험치 300 EXP 지급 성공!');
+                } else {
+                    console.log('ℹ️ 주간챌린지 경험치 지급 완료 (이미 이번주 받음)');
+                }
+            }).catch(error => {
+                console.error('❌ 주간챌린지 경험치 지급 실패:', error);
+            });
+        }
+        
         console.log(`📊 상태 체크 - 오늘완료: ${todayCompleted}, 주간완료: ${weekCompleted}`);
         
         // 상태 카드 (왼쪽) 생성
