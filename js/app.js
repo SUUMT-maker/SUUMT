@@ -2466,6 +2466,22 @@ function updateGoalProgress(data) {
     
     // 100% 달성 시 축하 이펙트
     if (isCompleted) {
+        // 일일미션 40회 달성 시 경험치 지급
+        if (typeof window.awardDailyExp === 'function') {
+            console.log('🎯 일일미션 40회 달성! 경험치 지급 시작...');
+            window.awardDailyExp().then(success => {
+                if (success) {
+                    console.log('✅ 일일미션 경험치 50 EXP 지급 성공!');
+                } else {
+                    console.log('ℹ️ 일일미션 경험치 지급 완료 (이미 오늘 받음)');
+                }
+            }).catch(error => {
+                console.error('❌ 일일미션 경험치 지급 실패:', error);
+            });
+        } else {
+            console.warn('⚠️ 일일미션 경험치 지급 함수를 찾을 수 없습니다.');
+        }
+
         setTimeout(() => {
             // 1. 진행률 색상 변경 (파란색 → 초록색)
             progressCircle.style.stroke = '#22c55e';
