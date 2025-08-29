@@ -24,6 +24,40 @@ const PROFILE_HTML = `
 
     <!-- 레벨시스템 카드 영역 -->
 
+    <!-- 2. 나의 레벨 시스템 카드 -->
+    <div id="profileLevelCard" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 32px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+        <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
+            <h3 style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0;">나의 레벨</h3>
+        </div>
+        
+        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
+            <div id="levelAvatar" style="width: 60px; height: 60px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 700; flex-shrink: 0;">
+                Lv.2
+            </div>
+            <div style="flex: 1;">
+                <div id="levelTitle" style="font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 8px;">호흡 새싹</div>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                    <span id="levelProgress" style="font-size: 14px; color: #6b7280;">1000 / 1200 EXP</span>
+                    <span id="levelPercentage" style="font-size: 12px; color: #6b7280;">83%</span>
+                </div>
+                <div style="background: #f3f4f6; border-radius: 8px; height: 8px; overflow: hidden;">
+                    <div id="levelProgressBar" style="background: linear-gradient(90deg, #10B981 0%, #059669 100%); height: 100%; width: 83%; transition: width 0.3s ease; border-radius: 8px;"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+            <div style="text-align: center; padding: 16px; background: #F8F9FA; border-radius: 16px;">
+                <div id="dailyExpAmount" style="font-size: 24px; font-weight: 700; color: #3B82F6; margin-bottom: 4px;">700</div>
+                <div style="font-size: 12px; color: #6B7280;">일일미션 EXP</div>
+            </div>
+            <div style="text-align: center; padding: 16px; background: #F8F9FA; border-radius: 16px;">
+                <div id="dailyExpAmount" style="font-size: 24px; font-weight: 700; color: #8B5CF6; margin-bottom: 4px;">300</div>
+                <div style="font-size: 12px; color: #6B7280;">주간챌린지 EXP</div>
+            </div>
+        </div>
+    </div>
+
     <!-- 3. 배지 컬렉션 -->
     <div id="profileBadgesSection" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 32px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
         <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
@@ -305,6 +339,17 @@ const PROFILE_CSS = `
 }
 </style>
 `;
+
+// 레벨시스템 설정 (7단계)
+const LEVEL_CONFIG = [
+    { level: 1, title: "호흡 새싹", minExp: 0, maxExp: 500, icon: "🌱" },
+    { level: 2, title: "호흡 새싹", minExp: 500, maxExp: 1200, icon: "🌱" },
+    { level: 3, title: "호흡 나무", minExp: 1200, maxExp: 2200, icon: "🌳" },
+    { level: 4, title: "호흡 숲", minExp: 2200, maxExp: 3500, icon: "🌲" },
+    { level: 5, title: "호흡 마스터", minExp: 3500, maxExp: 5200, icon: "🧘‍♂️" },
+    { level: 6, title: "호흡 달인", minExp: 5200, maxExp: 7500, icon: "🌟" },
+    { level: 7, title: "호흡 신", minExp: 7500, maxExp: 999999, icon: "👑" }
+];
 
 // 🧠 프로필 대시보드 클래스
 class ProfileDashboard {
