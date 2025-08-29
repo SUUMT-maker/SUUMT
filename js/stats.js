@@ -125,6 +125,26 @@ async function updateChart() {
             if (!error && sessions && sessions.length > 0) {
                 weeklyData = sessions;
                 console.log('✅ Supabase 주간 데이터 사용:', weeklyData.length);
+                
+                // 🔍 버그 원인 분석을 위한 상세 로그 추가
+                console.log('🔍 [시간대 분석] Supabase 조회 결과 전체:', sessions);
+                console.log('🔍 [시간대 분석] 조회 범위:', {
+                    weekStart: weekStart.toISOString(),
+                    weekEnd: weekEnd.toISOString(),
+                    weekStartLocal: weekStart.toLocaleString('ko-KR'),
+                    weekEndLocal: weekEnd.toLocaleString('ko-KR')
+                });
+                
+                // 각 record.date의 원본 값과 변환된 값 분석
+                sessions.forEach((record, index) => {
+                    console.log(`🔍 [시간대 분석] Record ${index}:`, {
+                        originalDate: record.created_at,
+                        newDateObject: new Date(record.created_at),
+                        toISOString: new Date(record.created_at).toISOString(),
+                        toDateString: new Date(record.created_at).toDateString(),
+                        toLocaleString: new Date(record.created_at).toLocaleString('ko-KR')
+                    });
+                });
             } else {
                 throw new Error('Supabase 데이터 없음');
             }
@@ -147,6 +167,26 @@ async function updateChart() {
                     return sessionDate >= weekStart && sessionDate < weekEnd;
                 });
                 console.log('✅ 로컬 데이터 사용:', weeklyData.length);
+                
+                // 🔍 버그 원인 분석을 위한 상세 로그 추가 (로컬 데이터)
+                console.log('🔍 [시간대 분석] 로컬 데이터 조회 결과 전체:', weeklyData);
+                console.log('🔍 [시간대 분석] 로컬 데이터 조회 범위:', {
+                    weekStart: weekStart.toISOString(),
+                    weekEnd: weekEnd.toISOString(),
+                    weekStartLocal: weekStart.toLocaleString('ko-KR'),
+                    weekEndLocal: weekEnd.toLocaleString('ko-KR')
+                });
+                
+                // 각 session.created_at의 원본 값과 변환된 값 분석
+                weeklyData.forEach((session, index) => {
+                    console.log(`🔍 [시간대 분석] Local Session ${index}:`, {
+                        originalCreatedAt: session.created_at,
+                        newDateObject: new Date(session.created_at),
+                        toISOString: new Date(session.created_at).toISOString(),
+                        toDateString: new Date(session.created_at).toDateString(),
+                        toLocaleString: new Date(session.created_at).toLocaleString('ko-KR')
+                    });
+                });
             } else {
                 throw new Error('로컬 데이터 없음');
             }
@@ -376,6 +416,29 @@ function getSimpleWeeklyData() {
     const workoutDays = new Set(thisWeekFilteredRecords.map(record =>
         record.date.split('T')[0] // 'YYYY-MM-DD' 형식으로 날짜를 통일하여 중복 제거
     )).size;
+    
+    // 🔍 버그 원인 분석을 위한 상세 로그 추가 (workoutDays 계산)
+    console.log('🔍 [시간대 분석] workoutDays 계산 과정:', {
+        thisWeekRecords: thisWeekRecords.length,
+        thisWeekFilteredRecords: thisWeekFilteredRecords.length,
+        workoutDays: workoutDays,
+        startOfWeek: startOfWeek.toISOString(),
+        endOfWeek: endOfWeek.toISOString(),
+        startOfWeekLocal: startOfWeek.toLocaleString('ko-KR'),
+        endOfWeekLocal: endOfWeek.toLocaleString('ko-KR')
+    });
+    
+    // 필터링된 각 기록의 날짜 정보 상세 분석
+    thisWeekFilteredRecords.forEach((record, index) => {
+        console.log(`🔍 [시간대 분석] Filtered Record ${index}:`, {
+            originalDate: record.date,
+            newDateObject: new Date(record.date),
+            toISOString: new Date(record.date).toISOString(),
+            toDateString: new Date(record.date).toDateString(),
+            toLocaleString: new Date(record.date).toLocaleString('ko-KR'),
+            splitResult: record.date.split('T')[0]
+        });
+    });
     
     const totalSets = thisWeekRecords.reduce((sum, record) => 
         sum + (record.completedSets || 0), 0);
