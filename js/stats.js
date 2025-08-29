@@ -355,9 +355,26 @@ function getSimpleWeeklyData() {
         return recordDate >= weekStart && recordDate < weekEnd;
     });
     
-    // 기본 데이터 계산
-    const workoutDays = new Set(thisWeekRecords.map(record => 
-        new Date(record.date).toDateString()
+    // 현재 날짜를 기반으로 이번 주의 시작일(월요일)과 종료일(일요일)을 계산합니다.
+    const today = new Date();
+    const currentDay = today.getDay(); // 일요일 0, 월요일 1 ... 토요일 6
+    const diff = today.getDate() - currentDay + (currentDay === 0 ? -6 : 1); // 월요일을 주의 시작으로 맞춤
+    const startOfWeek = new Date(today.setDate(diff));
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const endOfWeek = new Date(startOfWeek);
+    endOfWeek.setDate(startOfWeek.getDate() + 6);
+    endOfWeek.setHours(23, 59, 59, 999);
+
+    // thisWeekRecords 배열에서 이번 주에 해당하는 기록만 필터링합니다.
+    const thisWeekFilteredRecords = thisWeekRecords.filter(record => {
+      const recordDate = new Date(record.date);
+      return recordDate >= startOfWeek && recordDate <= endOfWeek;
+    });
+
+    // 필터링된 기록으로 운동 횟수를 정확하게 계산합니다.
+    const workoutDays = new Set(thisWeekFilteredRecords.map(record =>
+        record.date.split('T')[0] // 'YYYY-MM-DD' 형식으로 날짜를 통일하여 중복 제거
     )).size;
     
     const totalSets = thisWeekRecords.reduce((sum, record) => 
