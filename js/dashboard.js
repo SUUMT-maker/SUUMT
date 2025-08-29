@@ -1304,11 +1304,12 @@ class IntegratedRecordsDashboard {
             cursor = prevDate(cursor);
         }
 
-        // 4) 결과 반환 (호환 유지) - 연속일 계산 제거
+        // 4) 결과 반환
+        const percentage = Math.min((consecutive / target) * 100, 100);
         const result = {
-            current: 0,
+            current: consecutive,
             target,
-            percentage: 0
+            percentage: percentage
         };
         return result;
     }
