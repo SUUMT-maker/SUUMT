@@ -127,24 +127,7 @@ async function updateChart() {
                 console.log('✅ Supabase 주간 데이터 사용:', weeklyData.length);
                 
                 // 🔍 버그 원인 분석을 위한 상세 로그 추가
-                console.log('🔍 [시간대 분석] Supabase 조회 결과 전체:', sessions);
-                console.log('🔍 [시간대 분석] 조회 범위:', {
-                    weekStart: weekStart.toISOString(),
-                    weekEnd: weekEnd.toISOString(),
-                    weekStartLocal: weekStart.toLocaleString('ko-KR'),
-                    weekEndLocal: weekEnd.toLocaleString('ko-KR')
-                });
                 
-                // 각 record.date의 원본 값과 변환된 값 분석
-                sessions.forEach((record, index) => {
-                    console.log(`🔍 [시간대 분석] Record ${index}:`, {
-                        originalDate: record.created_at,
-                        newDateObject: new Date(record.created_at),
-                        toISOString: new Date(record.created_at).toISOString(),
-                        toDateString: new Date(record.created_at).toDateString(),
-                        toLocaleString: new Date(record.created_at).toLocaleString('ko-KR')
-                    });
-                });
             } else {
                 throw new Error('Supabase 데이터 없음');
             }
@@ -168,25 +151,7 @@ async function updateChart() {
                 });
                 console.log('✅ 로컬 데이터 사용:', weeklyData.length);
                 
-                // 🔍 버그 원인 분석을 위한 상세 로그 추가 (로컬 데이터)
-                console.log('🔍 [시간대 분석] 로컬 데이터 조회 결과 전체:', weeklyData);
-                console.log('🔍 [시간대 분석] 로컬 데이터 조회 범위:', {
-                    weekStart: weekStart.toISOString(),
-                    weekEnd: weekEnd.toISOString(),
-                    weekStartLocal: weekStart.toLocaleString('ko-KR'),
-                    weekEndLocal: weekEnd.toLocaleString('ko-KR')
-                });
-                
-                // 각 session.created_at의 원본 값과 변환된 값 분석
-                weeklyData.forEach((session, index) => {
-                    console.log(`🔍 [시간대 분석] Local Session ${index}:`, {
-                        originalCreatedAt: session.created_at,
-                        newDateObject: new Date(session.created_at),
-                        toISOString: new Date(session.created_at).toISOString(),
-                        toDateString: new Date(session.created_at).toDateString(),
-                        toLocaleString: new Date(session.created_at).toLocaleString('ko-KR')
-                    });
-                });
+
             } else {
                 throw new Error('로컬 데이터 없음');
             }
@@ -206,7 +171,7 @@ async function updateChart() {
         completedBreaths: session.completed_breaths || 0
     }));
     
-    // console.log('🔍 변환된 주간 데이터:', convertedHistory);
+
     
     try {
         const chartBars = document.getElementById('chartBars');
@@ -223,7 +188,7 @@ async function updateChart() {
             return date;
         });
         
-        // console.log('🎯 [그래프] 주간 날짜:', weekDates.map(date => date.toLocaleDateString('ko-KR')));
+
 
         // 차트 하단 요일 업데이트
         const dayLabels = ['월', '화', '수', '목', '금', '토', '일'];  // 월요일 시작
@@ -376,18 +341,14 @@ function getSimpleWeeklyData() {
     const exerciseData = window.exerciseData;
     const history = (exerciseData && Array.isArray(exerciseData)) ? exerciseData : [];
     
-    // console.log('🔍 [메시지] 전체 데이터 개수:', history.length);
+
     
     // 그래프와 정확히 동일한 주간 범위 계산 (7일 전체)
     const weekStart = getWeekStartDate();
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 7);
     
-    // console.log('🎯 [메시지] 주간 범위:', {
-    //     weekStart: weekStart.toLocaleDateString('ko-KR'),
-    //     weekEnd: weekEnd.toLocaleDateString('ko-KR'),
-    //     totalDays: 7
-    // });
+    
     
     // 이번 주 운동 기록만 필터링
     const thisWeekRecords = history.filter(record => {
@@ -417,28 +378,7 @@ function getSimpleWeeklyData() {
         new Date(record.date).toDateString()
     )).size;
     
-    // 🔍 버그 원인 분석을 위한 상세 로그 추가 (workoutDays 계산)
-    console.log('🔍 [시간대 분석] workoutDays 계산 과정:', {
-        thisWeekRecords: thisWeekRecords.length,
-        thisWeekFilteredRecords: thisWeekFilteredRecords.length,
-        workoutDays: workoutDays,
-        startOfWeek: startOfWeek.toISOString(),
-        endOfWeek: endOfWeek.toISOString(),
-        startOfWeekLocal: startOfWeek.toLocaleString('ko-KR'),
-        endOfWeekLocal: endOfWeek.toLocaleString('ko-KR')
-    });
-    
-    // 필터링된 각 기록의 날짜 정보 상세 분석
-    thisWeekFilteredRecords.forEach((record, index) => {
-        console.log(`🔍 [시간대 분석] Filtered Record ${index}:`, {
-            originalDate: record.date,
-            newDateObject: new Date(record.date),
-            toISOString: new Date(record.date).toISOString(),
-            toDateString: new Date(record.date).toDateString(),
-            toLocaleString: new Date(record.date).toLocaleString('ko-KR'),
-            splitResult: record.date.split('T')[0]
-        });
-    });
+
     
     const totalSets = thisWeekRecords.reduce((sum, record) => 
         sum + (record.completedSets || 0), 0);
@@ -456,7 +396,7 @@ function getSimpleWeeklyData() {
         isFirstWeek
     };
     
-    // console.log('🔍 [메시지] 계산 결과:', result);
+
     
     return result;
 }
@@ -527,26 +467,26 @@ function calculateSimpleConsecutiveDays(history) {
 
 // 🎯 메시지 선택 함수 (주간 기준 동기부여 메시지)
 function selectInsightMessage(data) {
-    // console.log('🔍 [메시지] 선택 조건 데이터:', data);
+
     
     // 1순위: 정말 대단한 성과들
     if (data.workoutDays === 7) {
-        // console.log('🔍 [메시지] 선택된 메시지: 완벽한 일주일 (workoutDays=7)');
+
         return "일주일 완주했어요! 호흡운동으로 건강 계좌에 꽉 찬 적금이네요";
     }
     
     if (data.weeklyConsecutiveDays >= 3) {
-        // console.log(`🔍 [메시지] 선택된 메시지: 주간 연속 운동 (weeklyConsecutiveDays=${data.weeklyConsecutiveDays})`);
+
         return `이번 주 ${data.weeklyConsecutiveDays}일 연속 호흡운동! 폐활량이 슬금슬금 늘고 있어요`;
     }
     
     if (data.workoutDays >= 5) {
-        // console.log(`🔍 [메시지] 선택된 메시지: 주간 성취감 (workoutDays=${data.workoutDays})`);
+
         return `주 ${data.workoutDays}회나 해냈어요! 호흡운동으로 체력 업그레이드 완료 예정`;
     }
     
     if (data.totalSets >= 10) {
-        // console.log(`🔍 [메시지] 선택된 메시지: 양적 성과 (totalSets=${data.totalSets})`);
+
         const breathingMessages = [
             `이번 주 ${data.totalSets}세트나 해냈어요! 폐활량이 늘고 있을 거예요`,
             `이번 주 호흡운동 ${data.totalSets}세트 완주! 스트레스가 줄어들고 있어요`,
@@ -557,7 +497,7 @@ function selectInsightMessage(data) {
     }
     
     if (data.workoutDays >= 2) {
-        // console.log(`🔍 [메시지] 선택된 메시지: 주간 시작 (workoutDays=${data.workoutDays})`);
+
         return "이번 주 벌써 2번! 호흡운동 습관의 씨앗이 뿌리를 내리고 있어요";
     }
     
@@ -578,7 +518,7 @@ function selectInsightMessage(data) {
     
     // 마지막 순위: 첫 운동 (성과가 적을 때만)
     if (data.isFirstWeek && data.workoutDays <= 2) {
-        // console.log('🔍 [메시지] 선택된 메시지: 첫 걸음 (isFirstWeek=true)');
+
         return "첫 운동 끝! 어떠셨어요?";
     }
     
@@ -706,7 +646,7 @@ async function updateWeeklyAIInsight() {
                 .lt('created_at', weekEnd.toISOString());
                 
             weeklyData = sessions || [];
-            // console.log('🎯 [메시지] Supabase 데이터:', weeklyData.length, '개');
+
         }
         
         // 차트와 동일한 주간 데이터로 메시지 생성
@@ -726,7 +666,7 @@ async function updateWeeklyAIInsight() {
             chatBubble.innerHTML = message;
             chatBubble.className = `chat-bubble ${messageCategory}`;
             
-            // console.log('메신저 스타일 인사이트 업데이트 성공:', message);
+
         }, 1000);
         
     } catch (error) {
