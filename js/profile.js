@@ -678,8 +678,7 @@ class ProfileDashboard {
         // 커뮤니티 리뷰 캐러셀 초기화 (실제 리뷰 시스템)
         this.initCommunityCarousel();
 
-        // 레벨 시스템 업데이트
-        this.updateLevelDisplay();
+
     }
 
     // 🏆 배지 표시 업데이트 (프로필탭용 - 표시만, 획득 로직 제거)
@@ -873,16 +872,7 @@ class ProfileDashboard {
             window.currentUserId = null;
             window.currentUserInfo = null;
             
-            // 레벨 시스템 초기화
-            if (window.levelSystem) {
-                window.levelSystem.expData = {
-                    totalExp: 0,
-                    currentLevel: 1,
-                    lastExpGain: [],
-                    lastExerciseDate: null
-                };
-                window.levelSystem.saveExpData();
-            }
+
             
             console.log('✅ 로컬 데이터 삭제 완료');
             
@@ -909,37 +899,7 @@ class ProfileDashboard {
         }
     }
 
-    // 🎮 레벨 표시 업데이트
-    updateLevelDisplay() {
-        if (typeof window.levelSystem === 'undefined') {
-            console.warn('레벨 시스템이 로드되지 않았습니다.');
-            return;
-        }
-        
-        // 운동 데이터로 레벨 업데이트
-        const levelData = window.levelSystem.updateFromExerciseData(this.exerciseData);
-        
-        // 닉네임에 레벨 표시
-        const nicknameEl = document.getElementById('profileNickname');
-        if (nicknameEl && this.userInfo) {
-            nicknameEl.textContent = `${this.userInfo.nickname} Lv.${levelData.level} ${levelData.title}`;
-        }
-        
-        // 진행률 바 업데이트
-        const progressBar = document.getElementById('levelProgressBar');
-        if (progressBar) {
-            progressBar.style.width = `${levelData.progress}%`;
-        }
-        
-        // 레벨 정보 업데이트
-        const levelInfo = document.getElementById('levelInfo');
-        if (levelInfo) {
-            const nextLevelExp = levelData.maxExp === 999999 ? '최고레벨' : levelData.maxExp;
-            levelInfo.textContent = `Lv.${levelData.level} ${levelData.title} (${levelData.currentExp}/${nextLevelExp} EXP)`;
-        }
-        
-        console.log('🎮 레벨 업데이트:', levelData);
-    }
+
 
     // 🧹 정리
     destroy() {
