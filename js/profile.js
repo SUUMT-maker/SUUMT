@@ -966,9 +966,33 @@ class ProfileDashboard {
                 .eq('user_id', this.userId)
                 .single();
 
-            if (levelError && levelError.code !== 'PGRST116') { // PGRST116 = no rows found
-                console.error('레벨 데이터 조회 실패:', levelError);
-                return this.getDefaultLevelData();
+            if (levelError) {
+                if (levelError.code === 'PGRST116') {
+                    // 데이터가 없으면 자동 초기화
+                    console.log('레벨 데이터가 없습니다. 자동 초기화를 시작합니다.');
+                    const initialized = await this.initializeUserLevel();
+                    
+                    if (initialized) {
+                        // 초기화 성공 시 다시 조회
+                        const { data: newLevelData, error: retryError } = await this.supabaseClient
+                            .from('user_levels')
+                            .select('*')
+                            .eq('user_id', this.userId)
+                            .single();
+                            
+                        if (!retryError && newLevelData) {
+                            levelData = newLevelData;
+                        } else {
+                            console.error('초기화 후 재조회 실패:', retryError);
+                            return this.getDefaultLevelData();
+                        }
+                    } else {
+                        return this.getDefaultLevelData();
+                    }
+                } else {
+                    console.error('레벨 데이터 조회 실패:', levelError);
+                    return this.getDefaultLevelData();
+                }
             }
 
             // user_exp_events에서 경험치 분류별 총합 조회
@@ -1001,6 +1025,41 @@ class ProfileDashboard {
         } catch (error) {
             console.error('레벨 데이터 조회 중 오류:', error);
             return this.getDefaultLevelData();
+        }
+    }
+
+    // 🎮 레벨시스템 - 사용자 레벨 데이터 자동 초기화
+    async initializeUserLevel() {
+        if (!this.userId || !this.supabaseClient) {
+            console.warn('사용자 ID 또는 Supabase 클라이언트가 없어 초기화할 수 없습니다.');
+            return false;
+        }
+
+        try {
+            console.log('사용자 레벨 데이터 자동 초기화 시작:', this.userId);
+            
+            const { data, error } = await this.supabaseClient
+                .from('user_levels')
+                .insert({
+                    user_id: this.userId,
+                    total_exp: 0,
+                    current_level: 1,
+                    level_title: '호흡 새싹'
+                })
+                .select()
+                .single();
+
+            if (error) {
+                console.error('레벨 데이터 초기화 실패:', error);
+                return false;
+            }
+
+            console.log('레벨 데이터 초기화 성공:', data);
+            return true;
+
+        } catch (error) {
+            console.error('레벨 데이터 초기화 중 오류:', error);
+            return false;
         }
     }
 
