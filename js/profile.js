@@ -1216,16 +1216,29 @@ class ProfileDashboard {
                 adjustedSize = 80 + ((progressPercent - 20) / 60) * 60;
             }
 
-            // 물 높이 설정 - 넓이는 고정, 높이만 경험치에 따라 조정
-            const adjustedHeight = (progressPercent / 100) * 180; // 높이만 0% ~ 180%로 조정
+            // 물 높이와 넓이 설정 - 단계별 조정으로 자연스럽게
+            let adjustedHeight, adjustedWidth, leftPosition;
+
+            if (progressPercent <= 50) {
+                // 50% 이하: 높이는 선형 증가, 넓이는 100% 유지
+                adjustedHeight = (progressPercent / 50) * 100; // 0% ~ 100%
+                adjustedWidth = 100;
+                leftPosition = 0;
+            } else {
+                // 50% 이상: 높이와 넓이 모두 증가
+                adjustedHeight = 100 + ((progressPercent - 50) / 50) * 80; // 100% ~ 180%
+                adjustedWidth = 100 + ((progressPercent - 50) / 50) * 50; // 100% ~ 150%
+                leftPosition = (100 - adjustedWidth) / 2; // 중앙 정렬
+            }
 
             levelWaves.style.height = `${adjustedHeight}%`;
-            levelWaves.style.width = `100%`; // 넓이는 항상 100% 고정
-            levelWaves.style.left = `0%`; // 왼쪽 위치도 0% 고정
+            levelWaves.style.width = `${adjustedWidth}%`;
+            levelWaves.style.left = `${leftPosition}%`;
 
             console.log('경험치:', progressPercent + '%');
-            console.log('적용된 높이:', adjustedHeight + '%');
-            console.log('넓이: 100% (고정)');
+            console.log('높이:', adjustedHeight + '%');
+            console.log('넓이:', adjustedWidth + '%');
+            console.log('위치:', leftPosition + '%');
 
             // 파도 가상 요소들의 위치도 물 높이에 따라 조정
             const waveTransform = progressPercent < 20 
