@@ -32,7 +32,7 @@ const PROFILE_HTML = `
         
         <div class="level-container" style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px; position: relative;">
             <div class="level-loader">
-                <div class="level-waves" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; border-radius: 50%; background: rgb(30, 146, 255); box-shadow: inset 0 0 50px rgba(0,0,0,.3); transition: height 0.5s ease-in-out;"></div>
+                <div class="level-waves" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; border-radius: 50%; background: rgb(30, 146, 255); box-shadow: inset 0 0 50px rgba(0,0,0,.3); transition: height 0.5s ease-in-out;"></div>
             </div>
         </div>
         
@@ -1191,6 +1191,23 @@ class ProfileDashboard {
         }
 
         console.log('🎮 레벨시스템 UI 업데이트 완료:', levelInfo);
+
+        // 경험치 진행률에 따른 물 높이 계산 및 적용
+        const levelWaves = document.querySelector('.level-waves');
+        if (levelWaves && levelInfo) {
+            // 현재 레벨에서의 경험치 진행률 계산
+            const currentLevelMinExp = levelInfo.levelMinExp || 0;
+            const currentLevelMaxExp = levelInfo.levelMaxExp || 500;
+            const currentLevelExp = Math.max(0, levelData.total_exp - currentLevelMinExp);
+            const levelExpRange = currentLevelMaxExp - currentLevelMinExp;
+            const progressPercent = Math.min(100, Math.max(0, (currentLevelExp / levelExpRange) * 100));
+            
+            // 물 높이 설정 (0% ~ 100%)
+            levelWaves.style.height = `${progressPercent}%`;
+            
+            console.log(`경험치 연동: ${levelData.total_exp}/${currentLevelMaxExp} (${progressPercent.toFixed(1)}%)`);
+        }
+
         return levelInfo;
     }
 
