@@ -1202,8 +1202,11 @@ class ProfileDashboard {
             const levelExpRange = currentLevelMaxExp - currentLevelMinExp;
             const progressPercent = Math.min(100, Math.max(0, (currentLevelExp / levelExpRange) * 100));
             
-            // 물 높이 설정 (0% ~ 100%)
-            levelWaves.style.height = `${progressPercent}%`;
+            // 물 높이 설정 - 원을 가득 채우기 위해 최대값을 120%로 조정
+            const adjustedHeight = (progressPercent / 100) * 120; // 100% → 120% 변환
+            levelWaves.style.height = `${adjustedHeight}%`;
+
+            console.log('조정된 물 높이:', `${adjustedHeight}%`);
 
             // 파도 가상 요소들의 위치도 물 높이에 따라 조정
             const waveTransform = progressPercent < 20 
