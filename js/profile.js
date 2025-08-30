@@ -356,9 +356,11 @@ const PROFILE_CSS = `
     0% {
         transform: translate(-50%, -75%) translateY(0);
     }
-
+    50% {
+        transform: translate(-50%, -75%) translateY(5px);
+    }
     100% {
-        transform: transform: translate(-50%, -75%) translateY(2px); /* 물결이 위로 2px 이동 */
+        transform: translate(-50%, -75%) translateY(0);
     }
 }
 </style>
