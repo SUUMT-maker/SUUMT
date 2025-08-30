@@ -1216,12 +1216,16 @@ class ProfileDashboard {
                 adjustedSize = 80 + ((progressPercent - 20) / 60) * 60;
             }
 
-            levelWaves.style.height = `${adjustedSize}%`;
-            levelWaves.style.width = `${adjustedSize}%`;
-            levelWaves.style.left = `${(100 - adjustedSize) / 2}%`;
+            // 물 높이 설정 - 넓이는 고정, 높이만 경험치에 따라 조정
+            const adjustedHeight = (progressPercent / 100) * 180; // 높이만 0% ~ 180%로 조정
+
+            levelWaves.style.height = `${adjustedHeight}%`;
+            levelWaves.style.width = `100%`; // 넓이는 항상 100% 고정
+            levelWaves.style.left = `0%`; // 왼쪽 위치도 0% 고정
 
             console.log('경험치:', progressPercent + '%');
-            console.log('적용된 크기:', adjustedSize + '%');
+            console.log('적용된 높이:', adjustedHeight + '%');
+            console.log('넓이: 100% (고정)');
 
             // 파도 가상 요소들의 위치도 물 높이에 따라 조정
             const waveTransform = progressPercent < 20 
