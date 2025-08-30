@@ -355,14 +355,14 @@ const PROFILE_CSS = `
     border-radius: 45%;
     background: rgb(248, 248, 248);
     animation: wave-slosh 5s ease-in-out infinite alternate;
-    height: 60%; /* 기존 200%에서 60%로 줄임 */
+    height: 20%; /* 기존 200%에서 20%로 줄임 */
 }
 
 .level-waves::after {
     border-radius: 40%;
     background: rgba(255, 255, 255, .5);
     animation: wave-slosh 10s ease-in-out infinite alternate;
-    height: 60%; /* 기존 200%에서 60%로 줄임 */
+    height: 20%; /* 기존 200%에서 20%로 줄임 */
 }
 
 @keyframes wave-slosh {
