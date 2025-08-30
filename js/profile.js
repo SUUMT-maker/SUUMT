@@ -354,11 +354,11 @@ const PROFILE_CSS = `
 
 @keyframes wave91234 {
     0% {
-        transform: translate(-50%, -75%) rotate(0deg);
+        transform: translate(-50%, -75%);
     }
 
     100% {
-        transform: translate(-50%, -75%) rotate(360deg);
+        transform: translate(-50%, -75%);
     }
 }
 </style>
