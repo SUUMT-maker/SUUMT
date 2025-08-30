@@ -32,7 +32,7 @@ const PROFILE_HTML = `
         
         <div class="level-container" style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px; position: relative;">
             <div class="level-loader">
-                <div class="level-waves" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; border-radius: 50%; background: rgb(30, 146, 255); box-shadow: inset 0 0 50px rgba(0,0,0,.3); transition: height 0.5s ease-in-out;"></div>
+                <div class="level-waves" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 0%; border-radius: 50%; background: rgb(30, 146, 255); box-shadow: inset 0 0 var(--dynamic-shadow-size, 25px) rgba(0,0,0,.3); transition: height 0.5s ease-in-out;"></div>
             </div>
         </div>
         
@@ -1213,6 +1213,10 @@ class ProfileDashboard {
             const waveYPosition = -75 + (progressPercent / 100) * 25;
             levelWaves.style.setProperty('--dynamic-wave-height', waveHeight + '%');
             levelWaves.style.setProperty('--dynamic-wave-transform', `translate(-50%, ${waveYPosition}%)`);
+            
+            // 그림자 크기를 경험치에 비례하여 조정
+            const shadowSize = Math.max(10, progressPercent * 0.5); // 10px ~ 50px 범위
+            levelWaves.style.setProperty('--dynamic-shadow-size', shadowSize + 'px');
             
             console.log('경험치:', progressPercent + '%');
             console.log('물 높이:', adjustedHeight + '%');
