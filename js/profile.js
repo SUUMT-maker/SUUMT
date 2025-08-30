@@ -31,7 +31,7 @@ const PROFILE_HTML = `
         </div>
         
         <div class="level-container" style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px; position: relative;">
-            <div class="level-loader" style="width: 100px; height: 100px; overflow: hidden; border: 1px solid transparent; box-shadow: 0 0 0 2px rgb(25, 116, 253); border-radius: 50%; position: relative;">
+            <div class="level-loader">
                 <div class="level-waves" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; border-radius: 50%; background: rgb(30, 146, 255); box-shadow: inset 0 0 50px rgba(0,0,0,.3); transition: height 0.5s ease-in-out;"></div>
             </div>
         </div>
@@ -117,6 +117,16 @@ const PROFILE_CSS = `
     min-height: 100vh;
     background: #F8F9FA;
     padding-bottom: 80px;
+}
+
+.level-loader {
+    width: 240px;
+    height: 240px;
+    overflow: hidden;
+    border: 1px solid transparent;
+    box-shadow: 0 0 0 2px rgb(25, 116, 253);
+    border-radius: 50%;
+    position: relative;
 }
 
 #logoutButton:hover {
