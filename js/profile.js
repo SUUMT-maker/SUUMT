@@ -364,21 +364,11 @@ const PROFILE_CSS = `
 }
 
 @keyframes wave-slosh {
-    0% {
-        transform: translate(-50%, -75%) translateX(0) translateY(0) rotate(0deg);
-    }
-    25% {
-        transform: translate(-50%, -75%) translateX(-5%) translateY(2.5px) rotate(-5deg);
-    }
-    50% {
-        transform: translate(-50%, -75%) translateX(0) translateY(5px) rotate(0deg);
-    }
-    75% {
-        transform: translate(-50%, -75%) translateX(5%) translateY(2.5px) rotate(5deg);
-    }
-    100% {
-        transform: translate(-50%, -75%) translateX(0) translateY(0) rotate(0deg);
-    }
+    0% { transform: var(--wave-transform, translate(-50%, -75%)) translateX(0) translateY(0) rotate(0deg); }
+    25% { transform: var(--wave-transform, translate(-50%, -75%)) translateX(-5%) translateY(2.5px) rotate(-5deg); }
+    50% { transform: var(--wave-transform, translate(-50%, -75%)) translateX(0) translateY(5px) rotate(0deg); }
+    75% { transform: var(--wave-transform, translate(-50%, -75%)) translateX(5%) translateY(2.5px) rotate(5deg); }
+    100% { transform: var(--wave-transform, translate(-50%, -75%)) translateX(0) translateY(0) rotate(0deg); }
 }
 </style>
 `;
