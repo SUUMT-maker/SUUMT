@@ -30,19 +30,9 @@ const PROFILE_HTML = `
             <h3 style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0;">나의 레벨</h3>
         </div>
         
-        <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 20px;">
-            <div id="levelAvatar" style="width: 60px; height: 60px; background: linear-gradient(135deg, #10B981 0%, #059669 100%); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 14px; font-weight: 700; flex-shrink: 0;">
-                Lv.2
-            </div>
-            <div style="flex: 1;">
-                <div id="levelTitle" style="font-size: 16px; font-weight: 600; color: #1f2937; margin-bottom: 8px;">호흡 새싹</div>
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                    <span id="levelProgress" style="font-size: 14px; color: #6b7280;">1000 / 1200 EXP</span>
-                    <span id="levelPercentage" style="font-size: 12px; color: #6b7280;">83%</span>
-                </div>
-                <div style="background: #f3f4f6; border-radius: 8px; height: 8px; overflow: hidden;">
-                    <div id="levelProgressBar" style="background: linear-gradient(90deg, #10B981 0%, #059669 100%); height: 100%; width: 83%; transition: width 0.3s ease; border-radius: 8px;"></div>
-                </div>
+        <div class="level-container" style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px; position: relative;">
+            <div class="level-loader" style="width: 100px; height: 100px; overflow: hidden; border: 1px solid transparent; box-shadow: 0 0 0 2px rgb(25, 116, 253); border-radius: 50%; position: relative;">
+                <div class="level-waves" style="position: absolute; bottom: 0; left: 0; width: 100%; height: 50%; border-radius: 50%; background: rgb(30, 146, 255); box-shadow: inset 0 0 50px rgba(0,0,0,.3); transition: height 0.5s ease-in-out;"></div>
             </div>
         </div>
         
@@ -335,6 +325,40 @@ const PROFILE_CSS = `
     
     .review-text {
         font-size: 12px !important;
+    }
+}
+
+.level-waves::before,
+.level-waves::after {
+    content: '';
+    position: absolute;
+    width: 200%;
+    height: 200%;
+    top: 0;
+    left: 50%;
+    transform: translate(-50%, -75%);
+    background: #000;
+}
+
+.level-waves::before {
+    border-radius: 45%;
+    background: rgb(248, 248, 248);
+    animation: wave91234 5s linear infinite;
+}
+
+.level-waves::after {
+    border-radius: 40%;
+    background: rgba(255, 255, 255, .5);
+    animation: wave91234 10s linear infinite;
+}
+
+@keyframes wave91234 {
+    0% {
+        transform: translate(-50%, -75%) rotate(0deg);
+    }
+
+    100% {
+        transform: translate(-50%, -75%) rotate(360deg);
     }
 }
 </style>
