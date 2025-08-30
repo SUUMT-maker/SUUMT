@@ -358,7 +358,7 @@ const PROFILE_CSS = `
         transform: translate(-50%, -75%) translateX(0) translateY(0);
     }
     50% {
-        transform: translate(-50%, -75%) translateX(-2%) translateY(2px);
+        transform: translate(-50%, -75%) translateX(-5%) translateY(10px);
     }
     100% {
         transform: translate(-50%, -75%) translateX(0) translateY(0);
