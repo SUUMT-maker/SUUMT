@@ -337,42 +337,31 @@ const PROFILE_CSS = `
     top: 0;
     left: 50%;
     transform: translate(-50%, -75%);
+    /* 기타 속성은 그대로 둡니다. */
     background: #000;
 }
 
 .level-waves::before {
     border-radius: 45%;
     background: rgb(248, 248, 248);
-    animation: wave91234 5s linear infinite, horizontal-wave 5s ease-in-out infinite alternate;
+    animation: wave-slosh 5s ease-in-out infinite alternate;
 }
 
 .level-waves::after {
     border-radius: 40%;
     background: rgba(255, 255, 255, .5);
-    animation: wave91234 10s linear infinite, horizontal-wave 10s ease-in-out infinite alternate;
+    animation: wave-slosh 10s ease-in-out infinite alternate;
 }
 
-@keyframes wave91234 {
+@keyframes wave-slosh {
     0% {
-        transform: translate(-50%, -75%) translateY(0);
+        transform: translate(-50%, -75%) translateX(0) translateY(0);
     }
     50% {
-        transform: translate(-50%, -75%) translateY(5px);
+        transform: translate(-50%, -75%) translateX(-2%) translateY(2px);
     }
     100% {
-        transform: translate(-50%, -75%) translateY(0);
-    }
-}
-
-@keyframes horizontal-wave {
-    0% {
-        transform: translateX(0);
-    }
-    50% {
-        transform: translateX(-10px);
-    }
-    100% {
-        transform: translateX(0);
+        transform: translate(-50%, -75%) translateX(0) translateY(0);
     }
 }
 </style>
