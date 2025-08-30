@@ -343,11 +343,10 @@ const PROFILE_CSS = `
     content: '';
     position: absolute;
     width: 200%;
-    height: 200%;
+    height: var(--dynamic-wave-height, 50%);
     top: 0;
     left: 50%;
-    transform: var(--wave-transform, translate(-50%, -75%));
-    /* 기타 속성은 그대로 둡니다. */
+    transform: var(--dynamic-wave-transform, translate(-50%, -75%));
     background: #000;
 }
 
@@ -355,22 +354,20 @@ const PROFILE_CSS = `
     border-radius: 45%;
     background: rgb(248, 248, 248);
     animation: wave-slosh 5s ease-in-out infinite alternate;
-    height: 20%; /* 기존 200%에서 20%로 줄임 */
 }
 
 .level-waves::after {
     border-radius: 40%;
     background: rgba(255, 255, 255, .5);
     animation: wave-slosh 10s ease-in-out infinite alternate;
-    height: 20%; /* 기존 200%에서 20%로 줄임 */
 }
 
 @keyframes wave-slosh {
-    0% { transform: var(--wave-transform, translate(-50%, -75%)) translateX(0) translateY(0) rotate(0deg); }
-    25% { transform: var(--wave-transform, translate(-50%, -75%)) translateX(-5%) translateY(2.5px) rotate(-5deg); }
-    50% { transform: var(--wave-transform, translate(-50%, -75%)) translateX(0) translateY(5px) rotate(0deg); }
-    75% { transform: var(--wave-transform, translate(-50%, -75%)) translateX(5%) translateY(2.5px) rotate(5deg); }
-    100% { transform: var(--wave-transform, translate(-50%, -75%)) translateX(0) translateY(0) rotate(0deg); }
+    0% { transform: var(--dynamic-wave-transform, translate(-50%, -75%)) translateX(0) translateY(0) rotate(0deg); }
+    25% { transform: var(--dynamic-wave-transform, translate(-50%, -75%)) translateX(-5%) translateY(2.5px) rotate(-5deg); }
+    50% { transform: var(--dynamic-wave-transform, translate(-50%, -75%)) translateX(0) translateY(5px) rotate(0deg); }
+    75% { transform: var(--dynamic-wave-transform, translate(-50%, -75%)) translateX(5%) translateY(2.5px) rotate(5deg); }
+    100% { transform: var(--dynamic-wave-transform, translate(-50%, -75%)) translateX(0) translateY(0) rotate(0deg); }
 }
 </style>
 `;
@@ -1232,13 +1229,11 @@ class ProfileDashboard {
             console.log('적용된 넓이:', adjustedWidth + '%');
             console.log('왼쪽 위치:', leftPosition + '%');
 
-            // 파도 가상 요소들의 위치를 물 높이에 맞춰 동적 조정
-            const waveYPosition = -75 + (progressPercent / 100) * 50; // -75% ~ -25% 범위로 조정
-            const waveTransform = `translate(-50%, ${waveYPosition}%)`;
-                
-            levelWaves.style.setProperty('--wave-transform', waveTransform);
-
-            console.log('파도 Y 위치:', waveYPosition + '%');
+            // 파도 높이와 위치를 물 높이에 맞춰 통합 조정
+            const waveHeight = Math.min(50 + progressPercent, 100);
+            const waveYPosition = -75 + (progressPercent / 100) * 25;
+            levelWaves.style.setProperty('--dynamic-wave-height', waveHeight + '%');
+            levelWaves.style.setProperty('--dynamic-wave-transform', `translate(-50%, ${waveYPosition}%)`);
             
             console.log(`경험치 연동: ${levelData.total_exp}/${currentLevelMaxExp} (${progressPercent.toFixed(1)}%)`);
         }
