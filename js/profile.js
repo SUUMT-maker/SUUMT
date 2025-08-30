@@ -1191,51 +1191,32 @@ class ProfileDashboard {
             const levelExpRange = currentLevelMaxExp - currentLevelMinExp;
             const progressPercent = Math.min(100, Math.max(0, (currentLevelExp / levelExpRange) * 100));
             
-            // 물 높이 설정 - 최소/최대 크기 제한으로 자연스럽게 조정
-            let adjustedSize;
-
-            if (progressPercent <= 20) {
-                // 20% 이하: 최소 크기 유지 (20% 고정)
-                adjustedSize = 20;
-            } else if (progressPercent >= 80) {
-                // 80% 이상: 높은 정확도로 크기 조정 (80% ~ 180%)
-                adjustedSize = 80 + ((progressPercent - 80) / 20) * 100;
-            } else {
-                // 20% ~ 80%: 선형적 크기 조정 (20% ~ 80%)
-                adjustedSize = 80 + ((progressPercent - 20) / 60) * 60;
-            }
-
-            // 물 높이와 넓이 설정 - 단계별 조정으로 자연스럽게
+            // 물 높이와 넓이 설정
             let adjustedHeight, adjustedWidth, leftPosition;
-
+            
             if (progressPercent <= 50) {
-                // 50% 이하: 높이는 선형 증가, 넓이는 100% 유지
-                adjustedHeight = (progressPercent / 50) * 100; // 0% ~ 100%
+                adjustedHeight = (progressPercent / 50) * 100;
                 adjustedWidth = 100;
                 leftPosition = 0;
             } else {
-                // 50% 이상: 높이와 넓이 모두 증가
-                adjustedHeight = 100 + ((progressPercent - 50) / 50) * 80; // 100% ~ 180%
-                adjustedWidth = 100 + ((progressPercent - 50) / 50) * 50; // 100% ~ 150%
-                leftPosition = (100 - adjustedWidth) / 2; // 중앙 정렬
+                adjustedHeight = 100 + ((progressPercent - 50) / 50) * 80;
+                adjustedWidth = 100 + ((progressPercent - 50) / 50) * 50;
+                leftPosition = (100 - adjustedWidth) / 2;
             }
-
+            
             levelWaves.style.height = `${adjustedHeight}%`;
             levelWaves.style.width = `${adjustedWidth}%`;
             levelWaves.style.left = `${leftPosition}%`;
-
-            console.log('경험치:', progressPercent + '%');
-            console.log('적용된 높이:', adjustedHeight + '%');
-            console.log('적용된 넓이:', adjustedWidth + '%');
-            console.log('왼쪽 위치:', leftPosition + '%');
-
-            // 파도 높이와 위치를 물 높이에 맞춰 통합 조정
-            const waveHeight = Math.min(50 + progressPercent, 100);
+            
+            // 파도 높이와 위치 - 경험치에 비례하여 조정
+            const waveHeight = Math.max(20, progressPercent * 0.8); // 20% ~ 80% 범위
             const waveYPosition = -75 + (progressPercent / 100) * 25;
             levelWaves.style.setProperty('--dynamic-wave-height', waveHeight + '%');
             levelWaves.style.setProperty('--dynamic-wave-transform', `translate(-50%, ${waveYPosition}%)`);
             
-            console.log(`경험치 연동: ${levelData.total_exp}/${currentLevelMaxExp} (${progressPercent.toFixed(1)}%)`);
+            console.log('경험치:', progressPercent + '%');
+            console.log('물 높이:', adjustedHeight + '%');
+            console.log('파도 높이:', waveHeight + '%');
         }
 
         return levelInfo;
