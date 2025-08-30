@@ -1202,14 +1202,26 @@ class ProfileDashboard {
             const levelExpRange = currentLevelMaxExp - currentLevelMinExp;
             const progressPercent = Math.min(100, Math.max(0, (currentLevelExp / levelExpRange) * 100));
             
-            // 대안: width와 height를 함께 조정
-            const adjustedSize = (progressPercent / 100) * 180; 
+            // 물 높이 설정 - 최소/최대 크기 제한으로 자연스럽게 조정
+            let adjustedSize;
+
+            if (progressPercent <= 20) {
+                // 20% 이하: 최소 크기 유지 (20% 고정)
+                adjustedSize = 20;
+            } else if (progressPercent >= 80) {
+                // 80% 이상: 높은 정확도로 크기 조정 (80% ~ 180%)
+                adjustedSize = 80 + ((progressPercent - 80) / 20) * 100;
+            } else {
+                // 20% ~ 80%: 선형적 크기 조정 (20% ~ 80%)
+                adjustedSize = 80 + ((progressPercent - 20) / 60) * 60;
+            }
+
             levelWaves.style.height = `${adjustedSize}%`;
             levelWaves.style.width = `${adjustedSize}%`;
             levelWaves.style.left = `${(100 - adjustedSize) / 2}%`;
 
-            console.log('조정된 크기:', `${adjustedSize}%`);
-            console.log('조정된 위치:', `${(100 - adjustedSize) / 2}%`);
+            console.log('경험치:', progressPercent + '%');
+            console.log('적용된 크기:', adjustedSize + '%');
 
             // 파도 가상 요소들의 위치도 물 높이에 따라 조정
             const waveTransform = progressPercent < 20 
