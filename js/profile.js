@@ -354,11 +354,11 @@ const PROFILE_CSS = `
 
 @keyframes wave91234 {
     0% {
-        transform: translate(-50%, -75%);
+        transform: translate(-50%, -75%) translateY(0);
     }
 
     100% {
-        transform: translate(-50%, -75%);
+        transform: transform: translate(-50%, -75%) translateY(2px); /* 물결이 위로 2px 이동 */
     }
 }
 </style>
