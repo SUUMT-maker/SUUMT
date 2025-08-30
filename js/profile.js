@@ -1240,15 +1240,13 @@ class ProfileDashboard {
             console.log('적용된 넓이:', adjustedWidth + '%');
             console.log('왼쪽 위치:', leftPosition + '%');
 
-            // 파도를 물 높이보다 살짝 위에 위치시켜 입체감 연출
-            const baseWavePosition = -75 + (progressPercent / 100) * 50; // 기본 위치
-            const waveYPosition = baseWavePosition - 10; // 물보다 10% 위에 위치
+            // 파도 가상 요소들의 위치를 물 높이에 맞춰 동적 조정
+            const waveYPosition = -75 + (progressPercent / 100) * 50; // -75% ~ -25% 범위로 조정
             const waveTransform = `translate(-50%, ${waveYPosition}%)`;
                 
             levelWaves.style.setProperty('--wave-transform', waveTransform);
 
-            console.log('물 높이:', adjustedHeight + '%');
-            console.log('파도 위치:', waveYPosition + '% (물보다 위)');
+            console.log('파도 Y 위치:', waveYPosition + '%');
             
             console.log(`경험치 연동: ${levelData.total_exp}/${currentLevelMaxExp} (${progressPercent.toFixed(1)}%)`);
         }
