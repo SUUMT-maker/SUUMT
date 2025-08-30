@@ -120,11 +120,11 @@ const PROFILE_CSS = `
 }
 
 .level-loader {
-    width: 240px;
-    height: 240px;
+    width: 200px;
+    height: 200px;
     overflow: hidden;
     border: 1px solid transparent;
-    box-shadow: 0 0 0 2px rgb(25, 116, 253);
+    box-shadow: 0 0 0 4px rgb(25, 116, 253);
     border-radius: 50%;
     position: relative;
 }
