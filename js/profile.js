@@ -342,7 +342,7 @@ const PROFILE_CSS = `
 .level-waves::after {
     content: '';
     position: absolute;
-    width: 200%;
+    width: 100%;
     height: var(--dynamic-wave-height, 50%);
     top: 0;
     left: 50%;
