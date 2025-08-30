@@ -346,7 +346,7 @@ const PROFILE_CSS = `
     height: 200%;
     top: 0;
     left: 50%;
-    transform: translate(-50%, -75%);
+    transform: var(--wave-transform, translate(-50%, -75%));
     /* 기타 속성은 그대로 둡니다. */
     background: #000;
 }
@@ -1204,6 +1204,13 @@ class ProfileDashboard {
             
             // 물 높이 설정 (0% ~ 100%)
             levelWaves.style.height = `${progressPercent}%`;
+
+            // 파도 가상 요소들의 위치도 물 높이에 따라 조정
+            const waveTransform = progressPercent < 20 
+                ? `translate(-50%, ${-75 + (20 - progressPercent) * 2}%)` 
+                : `translate(-50%, -75%)`;
+                
+            levelWaves.style.setProperty('--wave-transform', waveTransform);
             
             console.log(`경험치 연동: ${levelData.total_exp}/${currentLevelMaxExp} (${progressPercent.toFixed(1)}%)`);
         }
