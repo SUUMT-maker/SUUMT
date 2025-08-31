@@ -5,28 +5,13 @@
 const PROFILE_HTML = `
 <div class="profile-screen-container" style="padding-top: max(40px, env(safe-area-inset-top));">
     
-    <!-- 1. 프로필 헤더 (레벨 시스템 포함) -->
-    <div class="main-header" style="padding: 20px; margin-bottom: 24px;">
-        <div class="user-greeting">
-            <div class="user-info" style="display: flex; align-items: center; gap: 12px;">
-                <div class="user-avatar" style="width: 48px; height: 48px; background: #EEF1F3; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                    <img src="images/suumt-logo.png" alt="숨트레이너" style="width: 32px; height: 32px; border-radius: 50%;" onerror="this.parentNode.innerHTML='🤖';">
-                </div>
-                <div class="user-text" style="flex: 1;">
-                    <h3 id="profileNickname" style="font-size: 16px; font-weight: 600; color: #1f2937; margin: 0 0 4px 0;">AI 숨트레이너 님</h3>
-                    <p class="greeting-message" style="font-size: 14px; font-weight: 400; color: #1f2937; margin: 0 0 8px 0;">나의 호흡 운동 여정을 확인해보세요</p>
-                    
 
-                </div>
-            </div>
-        </div>
-    </div>
 
     <!-- 레벨시스템 카드 영역 -->
 
     <!-- 2. 나의 레벨 시스템 카드 -->
-    <div id="profileLevelCard" style="background: white; border: 1px solid #E7E7E7; border-radius: 32px; padding: 32px 24px 28px 24px; margin: 0 20px 32px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
+    <div id="profileLevelCard" style="background: white; border: 1px solid #E7E7E7; border-radius: 32px; padding: 32px 24px 28px 24px; margin: max(40px, env(safe-area-inset-top)) 20px 32px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
             <div style="font-size: 20px; font-weight: 700; color: #1E1E1E; display: flex; align-items: center; gap: 8px;">
                 <span id="levelTitle"></span>
                 <span id="levelIcon"></span>
