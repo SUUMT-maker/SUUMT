@@ -141,7 +141,6 @@ const PROFILE_CSS = `
     height: 200px;
     overflow: hidden;
     border: 10px solid #f0f0f0;
-    box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
     border-radius: 50%;
     position: relative;
 }
