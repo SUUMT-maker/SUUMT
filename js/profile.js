@@ -1208,8 +1208,9 @@ class ProfileDashboard {
             levelWaves.style.width = `${adjustedWidth}%`;
             levelWaves.style.left = `${leftPosition}%`;
             
-            // 가상 파도를 메인 파도와 완벽히 동기화
-            const waveHeight = adjustedHeight; // 메인 파도와 동일한 높이
+            // 경험치에 따라 가상 파도 비율 조정
+            const waveRatio = progressPercent < 50 ? 0.4 : 0.2; // 낮은 경험치일 때 더 큰 비율
+            const waveHeight = adjustedHeight * waveRatio;
             const waveYPosition = -50; // 메인 파도 위에 정확히 위치
             levelWaves.style.setProperty('--dynamic-wave-height', waveHeight + '%');
             levelWaves.style.setProperty('--dynamic-wave-transform', `translate(-50%, ${waveYPosition}%)`);
