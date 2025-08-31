@@ -3,14 +3,14 @@
 
 // 📱 프로필탭 HTML 구조
 const PROFILE_HTML = `
-<div class="profile-screen-container" style="padding-top: max(40px, env(safe-area-inset-top));">
+<div class="profile-screen-container">
     
 
 
     <!-- 레벨시스템 카드 영역 -->
 
     <!-- 2. 나의 레벨 시스템 카드 -->
-    <div id="profileLevelCard" style="background: white; border: 1px solid #E7E7E7; border-radius: 32px; padding: 32px 24px 28px 24px; margin: max(40px, env(safe-area-inset-top)) 20px 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+    <div id="profileLevelCard" style="background: white; border: 1px solid #E7E7E7; border-radius: 32px; padding: 32px 24px 28px 24px; margin: 0 20px 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
             <div style="font-size: 20px; font-weight: 700; color: #1E1E1E; display: flex; align-items: center; gap: 8px;">
                 <span id="levelTitle"></span>
@@ -126,6 +126,7 @@ const PROFILE_CSS = `
 .profile-screen-container {
     min-height: 100vh;
     background: #F8F9FA;
+    padding-top: max(40px, env(safe-area-inset-top));
     padding-bottom: 80px;
 }
 
