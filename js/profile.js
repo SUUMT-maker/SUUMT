@@ -1191,37 +1191,18 @@ class ProfileDashboard {
             const levelExpRange = currentLevelMaxExp - currentLevelMinExp;
             const progressPercent = Math.min(100, Math.max(0, (currentLevelExp / levelExpRange) * 100));
             
-            // 물 높이와 넓이 설정
-            let adjustedHeight, adjustedWidth, leftPosition;
-            
-            if (progressPercent <= 50) {
-                adjustedHeight = (progressPercent / 50) * 100;
-                adjustedWidth = 100;
-                leftPosition = 0;
-            } else {
-                adjustedHeight = 100 + ((progressPercent - 50) / 50) * 80;
-                adjustedWidth = 100 + ((progressPercent - 50) / 50) * 50;
-                leftPosition = (100 - adjustedWidth) / 2;
-            }
-            
-            levelWaves.style.height = `${adjustedHeight}%`;
-            levelWaves.style.width = `${adjustedWidth}%`;
-            levelWaves.style.left = `${leftPosition}%`;
-            
-            // 경험치에 따라 가상 파도 비율 조정
-            const waveRatio = progressPercent < 50 ? 0.4 : 0.2; // 낮은 경험치일 때 더 큰 비율
-            const waveHeight = adjustedHeight * waveRatio;
-            const waveYPosition = -50; // 메인 파도 위에 정확히 위치
-            levelWaves.style.setProperty('--dynamic-wave-height', waveHeight + '%');
-            levelWaves.style.setProperty('--dynamic-wave-transform', `translate(-50%, ${waveYPosition}%)`);
-            
-            // 그림자 크기를 경험치에 비례하여 조정
-            const shadowSize = Math.max(10, progressPercent * 0.5); // 10px ~ 50px 범위
-            levelWaves.style.setProperty('--dynamic-shadow-size', shadowSize + 'px');
-            
+            // 새로운 간단한 구조: 메인파도는 고정, 가상파도만 조정
+            levelWaves.style.height = '100%'; // 메인파도는 항상 100% 고정
+            levelWaves.style.width = '100%'; // 넓이도 100% 고정  
+            levelWaves.style.left = '0%'; // 위치도 고정
+
+            // 가상파도는 상단에서부터 (100 - 경험치%)만큼 덮어씌움
+            const coverHeight = 100 - progressPercent; // 덮을 높이 계산
+            levelWaves.style.setProperty('--dynamic-wave-height', coverHeight + '%');
+            levelWaves.style.setProperty('--dynamic-wave-transform', 'translate(-50%, 0%)'); // 상단 기준
+
             console.log('경험치:', progressPercent + '%');
-            console.log('물 높이:', adjustedHeight + '%');
-            console.log('파도 높이:', waveHeight + '%');
+            console.log('가상파도 덮는 높이:', coverHeight + '%');
         }
 
         return levelInfo;
