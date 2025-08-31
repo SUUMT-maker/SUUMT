@@ -1283,7 +1283,7 @@ class ProfileDashboard {
                 .insert({
                     user_id: this.userId,
                     event_type: 'daily_mission',
-                    exp_amount: 50
+                    exp_amount: 40
                 })
                 .select();
 
@@ -1293,12 +1293,12 @@ class ProfileDashboard {
             }
 
             // 사용자 레벨 데이터 업데이트
-            await this.updateUserLevelData(50);
+            await this.updateUserLevelData(40);
             
             // UI 업데이트
             await this.updateLevelSystemUI();
 
-            console.log('✅ 일일미션 경험치 50 EXP 지급 완료!');
+            console.log('✅ 일일미션 경험치 40 숨 지급 완료!');
             return true;
 
         } catch (error) {
@@ -1329,7 +1329,7 @@ class ProfileDashboard {
                 .insert({
                     user_id: this.userId,
                     event_type: 'weekly_challenge',
-                    exp_amount: 300
+                    exp_amount: 400
                 })
                 .select();
 
@@ -1339,12 +1339,12 @@ class ProfileDashboard {
             }
 
             // 사용자 레벨 데이터 업데이트
-            await this.updateUserLevelData(300);
+            await this.updateUserLevelData(400);
             
             // UI 업데이트
             await this.updateLevelSystemUI();
 
-            console.log('✅ 주간챌린지 경험치 300 EXP 지급 완료!');
+            console.log('✅ 주간챌린지 경험치 400 숨 지급 완료!');
             return true;
 
         } catch (error) {
