@@ -399,13 +399,55 @@ const PROFILE_CSS = `
 
 // 레벨시스템 설정 (7단계)
 const LEVEL_CONFIG = [
-    { level: 1, title: "첫 숨결", minExp: 0, maxExp: 500, icon: "🌱" },
-    { level: 2, title: "고른 숨", minExp: 500, maxExp: 1200, icon: "🌱" },
-    { level: 3, title: "깊은 숨", minExp: 1200, maxExp: 2200, icon: "🌳" },
-    { level: 4, title: "맑은 숨", minExp: 2200, maxExp: 3500, icon: "🌲" },
-    { level: 5, title: "고요한 숨", minExp: 3500, maxExp: 5200, icon: "🧘‍♂️" },
-    { level: 6, title: "완전한 숨", minExp: 5200, maxExp: 7500, icon: "🌟" },
-    { level: 7, title: "황금 숨", minExp: 7500, maxExp: 999999, icon: "👑" }
+    { 
+        level: 1, 
+        title: "첫 숨결", 
+        minExp: 0, 
+        maxExp: 500, 
+        icon: `<svg width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><circle cx="30" cy="30" r="8" fill="#3b82f6" opacity="0.6"><animate attributeName="r" values="6;10;6" dur="2s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.4;0.8;0.4" dur="2s" repeatCount="indefinite"/></circle></svg>`
+    },
+    { 
+        level: 2, 
+        title: "고른 숨", 
+        minExp: 500, 
+        maxExp: 1200, 
+        icon: `<svg width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><path d="M10,30 Q20,20 30,30 T50,30" stroke="#3b82f6" stroke-width="3" fill="none" opacity="0.7"><animate attributeName="d" values="M10,30 Q20,20 30,30 T50,30;M10,30 Q20,40 30,30 T50,30;M10,30 Q20,20 30,30 T50,30" dur="3s" repeatCount="indefinite"/></path></svg>`
+    },
+    { 
+        level: 3, 
+        title: "깊은 숨", 
+        minExp: 1200, 
+        maxExp: 2200, 
+        icon: `<svg width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><path d="M10,30 Q17.5,10 25,30 T40,30 Q47.5,50 55,30" stroke="#2563eb" stroke-width="3" fill="none"><animate attributeName="stroke-opacity" values="0.5;1;0.5" dur="2.5s" repeatCount="indefinite"/></path></svg>`
+    },
+    { 
+        level: 4, 
+        title: "맑은 숨", 
+        minExp: 2200, 
+        maxExp: 3500, 
+        icon: `<svg width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="clear-gradient" x1="0%" y1="0%" x2="100%" y2="0%"><stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3" /><stop offset="50%" style="stop-color:#60a5fa;stop-opacity:0.8" /><stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.3" /></linearGradient></defs><ellipse cx="30" cy="30" rx="20" ry="12" fill="url(#clear-gradient)"><animate attributeName="ry" values="10;15;10" dur="3s" repeatCount="indefinite"/></ellipse></svg>`
+    },
+    { 
+        level: 5, 
+        title: "고요한 숨", 
+        minExp: 3500, 
+        maxExp: 5200, 
+        icon: `<svg width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="peaceful-gradient"><stop offset="0%" style="stop-color:#60a5fa;stop-opacity:0.8" /><stop offset="70%" style="stop-color:#3b82f6;stop-opacity:0.4" /><stop offset="100%" style="stop-color:#1e40af;stop-opacity:0.1" /></linearGradient></defs><circle cx="30" cy="30" r="5" fill="url(#peaceful-gradient)"><animate attributeName="r" values="5;18;5" dur="4s" repeatCount="indefinite"/></circle></svg>`
+    },
+    { 
+        level: 6, 
+        title: "완전한 숨", 
+        minExp: 5200, 
+        maxExp: 7500, 
+        icon: `<svg width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="perfect-gradient" x1="0%" y1="0%" x2="100%" y2="100%"><stop offset="0%" style="stop-color:#2563eb;stop-opacity:0.8" /><stop offset="100%" style="stop-color:#1d4ed8;stop-opacity:0.6" /></linearGradient></defs><polygon points="30,10 45,25 45,35 30,50 15,35 15,25" fill="url(#perfect-gradient)"><animateTransform attributeName="transform" attributeType="XML" type="rotate" values="0 30 30;360 30 30" dur="6s" repeatCount="indefinite"/></polygon></svg>`
+    },
+    { 
+        level: 7, 
+        title: "황금 숨", 
+        minExp: 7500, 
+        maxExp: 999999, 
+        icon: `<svg width="24" height="24" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="golden-gradient"><stop offset="0%" style="stop-color:#fbbf24;stop-opacity:1" /><stop offset="50%" style="stop-color:#f59e0b;stop-opacity:0.8" /><stop offset="100%" style="stop-color:#d97706;stop-opacity:0.6" /></linearGradient></defs><path d="M30,10 Q40,20 30,30 Q20,40 30,50 Q40,40 30,30 Q20,20 30,10" fill="url(#golden-gradient)"><animateTransform attributeName="transform" attributeType="XML" type="rotate" values="0 30 30;360 30 30" dur="8s" repeatCount="indefinite"/><animate attributeName="opacity" values="0.7;1;0.7" dur="2s" repeatCount="indefinite"/></path></svg>`
+    }
 ];
 
 // 🧠 프로필 대시보드 클래스
