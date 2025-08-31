@@ -1210,7 +1210,7 @@ class ProfileDashboard {
         // 헤더 정보 업데이트
         const levelIcon = document.getElementById('levelIcon');
         if (levelIcon) {
-            levelIcon.textContent = levelInfo.icon;
+            levelIcon.innerHTML = levelInfo.icon;
         }
 
         const levelNumber = document.getElementById('levelNumber');
