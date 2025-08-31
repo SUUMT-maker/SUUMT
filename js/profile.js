@@ -29,9 +29,6 @@ const PROFILE_HTML = `
         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
             <div style="font-size: 20px; font-weight: 700; color: #1E1E1E; display: flex; align-items: center; gap: 8px;">
                 <span id="levelIcon">🌱</span>
-                <span>레벨 </span>
-                <span id="levelNumber">1</span>
-                <span> · </span>
                 <span id="levelTitle">호흡 새싹</span>
             </div>
         </div>
@@ -44,14 +41,14 @@ const PROFILE_HTML = `
         
         <div id="levelExpInfo" style="margin: 16px 0 20px 0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="font-size: 12px; color: #6b7280; font-weight: 600;">레벨 경험치</span>
+                <span style="font-size: 12px; color: #6b7280; font-weight: 600;">LV.<span id="levelNumber">1</span></span>
                 <span style="font-size: 12px; color: #6b7280; font-weight: 600;">
-                    <span id="currentLevelExp">250</span> / <span id="requiredLevelExp">500</span> EXP
+                    <span id="currentLevelExp">250</span>/<span id="requiredLevelExp">500</span> exp
                 </span>
             </div>
             
             <!-- 새로 추가할 프로그레스바 -->
-            <div style="background: #f3f4f6; border-radius: 8px; height: 8px; overflow: hidden; margin: 0 auto; width: 200px;">
+            <div style="background: #f3f4f6; border-radius: 8px; height: 8px; overflow: hidden;">
                 <div id="levelProgressBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s ease; border-radius: 8px;"></div>
             </div>
         </div>
