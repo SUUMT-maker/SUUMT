@@ -10,7 +10,7 @@ const PROFILE_HTML = `
     <!-- 레벨시스템 카드 영역 -->
 
     <!-- 2. 나의 레벨 시스템 카드 -->
-    <div id="profileLevelCard" style="background: white; border: 1px solid #E7E7E7; border-radius: 32px; padding: 32px 24px 28px 24px; margin: max(40px, env(safe-area-inset-top)) 20px 32px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+    <div id="profileLevelCard" style="background: white; border: 1px solid #E7E7E7; border-radius: 32px; padding: 32px 24px 28px 24px; margin: max(40px, env(safe-area-inset-top)) 20px 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
             <div style="font-size: 20px; font-weight: 700; color: #1E1E1E; display: flex; align-items: center; gap: 8px;">
                 <span id="levelTitle"></span>
@@ -59,7 +59,7 @@ const PROFILE_HTML = `
     </div>
 
     <!-- 3. 배지 컬렉션 -->
-    <div id="profileBadgesSection" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 32px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+    <div id="profileBadgesSection" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
         <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
             <h3 style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0;">배지 컬렉션</h3>
         </div>
@@ -107,7 +107,7 @@ const PROFILE_HTML = `
     </div>
 
     <!-- 5. 계정 관리 (단순화) -->
-    <div style="margin: 0 20px 60px; padding: 20px; text-align: center;">
+    <div style="margin: 0 20px 24px; padding: 20px; text-align: center;">
         <button id="logoutButton" style="background: none; border: none; color: #9ca3af; font-size: 13px; font-weight: 400; cursor: pointer; text-decoration: underline; transition: color 0.3s ease; padding: 8px;">
             계정 및 데이터 완전 삭제
         </button>
