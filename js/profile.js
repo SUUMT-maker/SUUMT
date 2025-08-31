@@ -68,8 +68,7 @@ const PROFILE_HTML = `
         <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; color: #6b7280; margin-top: 20px;">
             <img src="icons/coach-avatar.png" style="width: 24px; height: 24px; border-radius: 50%;" alt="AI">
             <span style="text-align: center; line-height: 1.5;">
-                꾸준한 운동과 챌린지 도전으로 레벨업하세요!<br>
-                하루 40회 호흡 달성시 50 EXP, 주간 챌린지 완료시 300 EXP를 획득합니다
+                일일미션과 주간챌린지를 완료해서 '숨'을 가득 채우세요!
             </span>
         </div>
     </div>
