@@ -352,7 +352,7 @@ const PROFILE_CSS = `
 
 .level-waves::before {
     border-radius: 45%;
-    background: rgb(248, 248, 248);
+    background: rgb(255, 255, 255);
     animation: wave-slosh 5s ease-in-out infinite alternate;
 }
 
