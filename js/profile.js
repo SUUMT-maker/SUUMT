@@ -343,7 +343,7 @@ const PROFILE_CSS = `
     content: '';
     position: absolute;
     width: 110%; /* 100% → 110%로 증가 */
-    height: var(--dynamic-wave-height, 50%);
+    height: calc(var(--dynamic-wave-height, 50%) + 10%); /* 높이에 10% 추가 */
     top: -5%; /* 상단도 약간 넘어가게 */
     left: 50%;
     transform: var(--dynamic-wave-transform, translate(-50%, -75%));
