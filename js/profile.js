@@ -25,9 +25,15 @@ const PROFILE_HTML = `
     <!-- 레벨시스템 카드 영역 -->
 
     <!-- 2. 나의 레벨 시스템 카드 -->
-    <div id="profileLevelCard" style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 32px; padding: 24px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-        <div style="margin-bottom: 24px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
-            <h3 style="font-size: 18px; font-weight: 700; color: #1f2937; margin: 0;">나의 레벨</h3>
+    <div id="profileLevelCard" style="background: white; border: 1px solid #E7E7E7; border-radius: 32px; padding: 32px 24px 28px 24px; margin: 0 20px 32px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
+        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
+            <div style="font-size: 20px; font-weight: 700; color: #1E1E1E; display: flex; align-items: center; gap: 8px;">
+                <span id="levelIcon">🌱</span>
+                <span>레벨 </span>
+                <span id="levelNumber">1</span>
+                <span> · </span>
+                <span id="levelTitle">호흡 새싹</span>
+            </div>
         </div>
         
         <div class="level-container" style="display: flex; justify-content: center; align-items: center; margin-bottom: 20px; position: relative;">
@@ -36,14 +42,20 @@ const PROFILE_HTML = `
             </div>
         </div>
         
+        <div id="levelExpInfo" style="text-align: center; margin: 16px 0 20px 0;">
+            <div style="font-size: 20px; font-weight: 700; color: #1f2937;">
+                <span id="currentLevelExp">250</span> / <span id="requiredLevelExp">500</span> EXP
+            </div>
+        </div>
+        
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div style="text-align: center; padding: 16px; background: #F8F9FA; border-radius: 16px;">
                 <div id="dailyExpAmount" style="font-size: 24px; font-weight: 700; color: #3B82F6; margin-bottom: 4px;">0</div>
-                <div style="font-size: 12px; color: #6B7280;">일일미션 EXP</div>
+                <div style="font-size: 14px; font-weight: 600; color: #6b7280;">일일미션 EXP</div>
             </div>
             <div style="text-align: center; padding: 16px; background: #F8F9FA; border-radius: 16px;">
                 <div id="weeklyExpAmount" style="font-size: 24px; font-weight: 700; color: #8B5CF6; margin-bottom: 4px;">0</div>
-                <div style="font-size: 12px; color: #6B7280;">주간챌린지 EXP</div>
+                <div style="font-size: 14px; font-weight: 600; color: #6b7280;">주간챌린지 EXP</div>
             </div>
         </div>
     </div>
@@ -1140,7 +1152,17 @@ class ProfileDashboard {
             levelAvatar.textContent = `Lv.${levelInfo.level}`;
         }
 
-        // 레벨 타이틀 업데이트
+        // 헤더 정보 업데이트
+        const levelIcon = document.getElementById('levelIcon');
+        if (levelIcon) {
+            levelIcon.textContent = levelInfo.icon;
+        }
+
+        const levelNumber = document.getElementById('levelNumber');
+        if (levelNumber) {
+            levelNumber.textContent = levelInfo.level;
+        }
+
         const levelTitle = document.getElementById('levelTitle');
         if (levelTitle) {
             levelTitle.textContent = levelInfo.title;
@@ -1177,6 +1199,17 @@ class ProfileDashboard {
         const weeklyExpAmount = document.getElementById('weeklyExpAmount');
         if (weeklyExpAmount) {
             weeklyExpAmount.textContent = levelData.weekly_exp.toLocaleString();
+        }
+
+        // 경험치 수치 표시 영역 업데이트
+        const currentLevelExp = document.getElementById('currentLevelExp');
+        if (currentLevelExp) {
+            currentLevelExp.textContent = levelInfo.progressExp;
+        }
+
+        const requiredLevelExp = document.getElementById('requiredLevelExp');
+        if (requiredLevelExp) {
+            requiredLevelExp.textContent = levelInfo.requiredExp;
         }
 
         console.log('🎮 레벨시스템 UI 업데이트 완료:', levelInfo);
