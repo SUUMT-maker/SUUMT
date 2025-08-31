@@ -43,8 +43,13 @@ const PROFILE_HTML = `
         </div>
         
         <div id="levelExpInfo" style="text-align: center; margin: 16px 0 20px 0;">
-            <div style="font-size: 20px; font-weight: 700; color: #1f2937;">
+            <div style="font-size: 20px; font-weight: 700; color: #1f2937; margin-bottom: 8px;">
                 <span id="currentLevelExp">250</span> / <span id="requiredLevelExp">500</span> EXP
+            </div>
+            
+            <!-- 새로 추가할 프로그레스바 -->
+            <div style="background: #f3f4f6; border-radius: 8px; height: 8px; overflow: hidden; margin: 0 auto; width: 200px;">
+                <div id="levelProgressBar" style="background: linear-gradient(90deg, #667eea 0%, #764ba2 100%); height: 100%; width: 0%; transition: width 0.3s ease; border-radius: 8px;"></div>
             </div>
         </div>
         
@@ -359,7 +364,7 @@ const PROFILE_CSS = `
     top: -5%; /* 상단도 약간 넘어가게 */
     left: 50%;
     transform: var(--dynamic-wave-transform, translate(-50%, -75%));
-    background: #000;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
 .level-waves::before {
@@ -1201,17 +1206,6 @@ class ProfileDashboard {
             weeklyExpAmount.textContent = levelData.weekly_exp.toLocaleString();
         }
 
-        // 경험치 수치 표시 영역 업데이트
-        const currentLevelExp = document.getElementById('currentLevelExp');
-        if (currentLevelExp) {
-            currentLevelExp.textContent = levelInfo.progressExp;
-        }
-
-        const requiredLevelExp = document.getElementById('requiredLevelExp');
-        if (requiredLevelExp) {
-            requiredLevelExp.textContent = levelInfo.requiredExp;
-        }
-
         console.log('🎮 레벨시스템 UI 업데이트 완료:', levelInfo);
 
         // 경험치 진행률에 따른 물 높이 계산 및 적용
@@ -1236,6 +1230,12 @@ class ProfileDashboard {
 
             console.log('경험치:', progressPercent + '%');
             console.log('가상파도 덮는 높이:', coverHeight + '%');
+        }
+
+        // 프로그레스바 업데이트 (기존 코드 끝에 추가)
+        const progressBar = document.getElementById('levelProgressBar');
+        if (progressBar) {
+            progressBar.style.width = levelInfo.progress + '%';
         }
 
         return levelInfo;
