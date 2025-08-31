@@ -342,9 +342,9 @@ const PROFILE_CSS = `
 .level-waves::after {
     content: '';
     position: absolute;
-    width: 100%;
+    width: 110%; /* 100% → 110%로 증가 */
     height: var(--dynamic-wave-height, 50%);
-    top: 0;
+    top: -5%; /* 상단도 약간 넘어가게 */
     left: 50%;
     transform: var(--dynamic-wave-transform, translate(-50%, -75%));
     background: #000;
