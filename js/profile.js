@@ -65,10 +65,10 @@ const PROFILE_HTML = `
         </div>
         
         <!-- 레벨업 설명 (Dashboard와 동일한 스타일) -->
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; color: #6b7280; margin-top: 20px;">
-            <img src="icons/coach-avatar.png" style="width: 24px; height: 24px; border-radius: 50%;" alt="AI">
+        <div style="display: flex; align-items: flex-start; justify-content: center; gap: 8px; font-size: 14px; color: #6b7280; margin-top: 20px;">
+            <img src="icons/coach-avatar.png" style="width: 24px; height: 24px; border-radius: 50%; margin-top: 2px;" alt="AI">
             <span style="text-align: center; line-height: 1.5;">
-                일일미션과 주간챌린지를 완료해서 '숨'을 가득 채우세요!
+                일일미션과 주간챌린지로<br>'숨'을 채워보세요!
             </span>
         </div>
     </div>
