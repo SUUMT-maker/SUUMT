@@ -140,7 +140,7 @@ const PROFILE_CSS = `
     width: 200px;
     height: 200px;
     overflow: hidden;
-    border: 12px solid #f0f0f0;
+    border: 10px solid #f0f0f0;
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.25);
     border-radius: 50%;
     position: relative;
