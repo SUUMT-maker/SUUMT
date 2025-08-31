@@ -399,13 +399,13 @@ const PROFILE_CSS = `
 
 // 레벨시스템 설정 (7단계)
 const LEVEL_CONFIG = [
-    { level: 1, title: "호흡 새싹", minExp: 0, maxExp: 500, icon: "🌱" },
-    { level: 2, title: "호흡 새싹", minExp: 500, maxExp: 1200, icon: "🌱" },
-    { level: 3, title: "호흡 나무", minExp: 1200, maxExp: 2200, icon: "🌳" },
-    { level: 4, title: "호흡 숲", minExp: 2200, maxExp: 3500, icon: "🌲" },
-    { level: 5, title: "호흡 마스터", minExp: 3500, maxExp: 5200, icon: "🧘‍♂️" },
-    { level: 6, title: "호흡 달인", minExp: 5200, maxExp: 7500, icon: "🌟" },
-    { level: 7, title: "호흡 신", minExp: 7500, maxExp: 999999, icon: "👑" }
+    { level: 1, title: "첫 숨결", minExp: 0, maxExp: 500, icon: "🌱" },
+    { level: 2, title: "고른 숨", minExp: 500, maxExp: 1200, icon: "🌱" },
+    { level: 3, title: "깊은 숨", minExp: 1200, maxExp: 2200, icon: "🌳" },
+    { level: 4, title: "맑은 숨", minExp: 2200, maxExp: 3500, icon: "🌲" },
+    { level: 5, title: "고요한 숨", minExp: 3500, maxExp: 5200, icon: "🧘‍♂️" },
+    { level: 6, title: "완전한 숨", minExp: 5200, maxExp: 7500, icon: "🌟" },
+    { level: 7, title: "황금 숨", minExp: 7500, maxExp: 999999, icon: "👑" }
 ];
 
 // 🧠 프로필 대시보드 클래스
