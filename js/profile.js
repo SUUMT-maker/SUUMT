@@ -43,7 +43,7 @@ const PROFILE_HTML = `
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                 <span style="font-size: 12px; color: #6b7280; font-weight: 600;">LV.<span id="levelNumber">1</span></span>
                 <span style="font-size: 12px; color: #6b7280; font-weight: 600;">
-                    <span id="currentLevelExp">250</span>/<span id="requiredLevelExp">500</span> exp
+                    <span id="currentLevelExp">250</span>/<span id="requiredLevelExp">500</span> 숨
                 </span>
             </div>
             
@@ -56,11 +56,11 @@ const PROFILE_HTML = `
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
             <div style="text-align: center; padding: 16px; background: #F8F9FA; border-radius: 16px;">
                 <div id="dailyExpAmount" style="font-size: 24px; font-weight: 700; color: #3B82F6; margin-bottom: 4px;">0</div>
-                <div style="font-size: 14px; font-weight: 600; color: #6b7280;">일일미션 EXP</div>
+                <div style="font-size: 14px; font-weight: 600; color: #6b7280;">일일미션 숨</div>
             </div>
             <div style="text-align: center; padding: 16px; background: #F8F9FA; border-radius: 16px;">
                 <div id="weeklyExpAmount" style="font-size: 24px; font-weight: 700; color: #8B5CF6; margin-bottom: 4px;">0</div>
-                <div style="font-size: 14px; font-weight: 600; color: #6b7280;">주간챌린지 EXP</div>
+                <div style="font-size: 14px; font-weight: 600; color: #6b7280;">주간챌린지 숨</div>
             </div>
         </div>
         
@@ -1185,9 +1185,9 @@ class ProfileDashboard {
         const levelProgress = document.getElementById('levelProgress');
         if (levelProgress) {
             if (levelInfo.level === 7) {
-                levelProgress.textContent = `${levelInfo.currentExp} EXP (최고레벨)`;
+                levelProgress.textContent = `${levelInfo.currentExp} 숨 (최고레벨)`;
             } else {
-                levelProgress.textContent = `${levelInfo.progressExp} / ${levelInfo.requiredExp} EXP`;
+                levelProgress.textContent = `${levelInfo.progressExp} / ${levelInfo.requiredExp} 숨`;
             }
         }
 
