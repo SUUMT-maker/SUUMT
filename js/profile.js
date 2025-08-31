@@ -26,10 +26,10 @@ const PROFILE_HTML = `
 
     <!-- 2. 나의 레벨 시스템 카드 -->
     <div id="profileLevelCard" style="background: white; border: 1px solid #E7E7E7; border-radius: 32px; padding: 32px 24px 28px 24px; margin: 0 20px 32px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
+        <div style="display: flex; align-items: center; justify-content: flex-start; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
             <div style="font-size: 20px; font-weight: 700; color: #1E1E1E; display: flex; align-items: center; gap: 8px;">
-                <span id="levelIcon">🌱</span>
-                <span id="levelTitle">호흡 새싹</span>
+                <span id="levelTitle"></span>
+                <span id="levelIcon"></span>
             </div>
         </div>
         
@@ -41,9 +41,9 @@ const PROFILE_HTML = `
         
         <div id="levelExpInfo" style="margin: 16px 0 20px 0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <span style="font-size: 12px; color: #6b7280; font-weight: 600;">LV.<span id="levelNumber">1</span></span>
+                <span style="font-size: 12px; color: #6b7280; font-weight: 600;">LV.<span id="levelNumber"></span></span>
                 <span style="font-size: 12px; color: #6b7280; font-weight: 600;">
-                    <span id="currentLevelExp">250</span>/<span id="requiredLevelExp">500</span> 숨
+                    <span id="currentLevelExp"></span>/<span id="requiredLevelExp"></span> 숨
                 </span>
             </div>
             
@@ -1207,7 +1207,12 @@ class ProfileDashboard {
             levelAvatar.textContent = `Lv.${levelInfo.level}`;
         }
 
-        // 헤더 정보 업데이트
+        // 헤더 정보 업데이트 (순서 변경됨)
+        const levelTitle = document.getElementById('levelTitle');
+        if (levelTitle) {
+            levelTitle.textContent = levelInfo.title;
+        }
+
         const levelIcon = document.getElementById('levelIcon');
         if (levelIcon) {
             levelIcon.innerHTML = levelInfo.icon;
@@ -1218,9 +1223,15 @@ class ProfileDashboard {
             levelNumber.textContent = levelInfo.level;
         }
 
-        const levelTitle = document.getElementById('levelTitle');
-        if (levelTitle) {
-            levelTitle.textContent = levelInfo.title;
+        // 경험치 수치 업데이트 (동적으로)
+        const currentLevelExp = document.getElementById('currentLevelExp');
+        if (currentLevelExp) {
+            currentLevelExp.textContent = levelInfo.progressExp;
+        }
+
+        const requiredLevelExp = document.getElementById('requiredLevelExp');
+        if (requiredLevelExp) {
+            requiredLevelExp.textContent = levelInfo.requiredExp;
         }
 
         // 진행률 업데이트
