@@ -42,9 +42,12 @@ const PROFILE_HTML = `
             </div>
         </div>
         
-        <div id="levelExpInfo" style="text-align: center; margin: 16px 0 20px 0;">
-            <div style="font-size: 20px; font-weight: 700; color: #1f2937; margin-bottom: 8px;">
-                <span id="currentLevelExp">250</span> / <span id="requiredLevelExp">500</span> EXP
+        <div id="levelExpInfo" style="margin: 16px 0 20px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <span style="font-size: 12px; color: #6b7280; font-weight: 600;">레벨 경험치</span>
+                <span style="font-size: 12px; color: #6b7280; font-weight: 600;">
+                    <span id="currentLevelExp">250</span> / <span id="requiredLevelExp">500</span> EXP
+                </span>
             </div>
             
             <!-- 새로 추가할 프로그레스바 -->
