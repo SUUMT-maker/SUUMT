@@ -1978,6 +1978,8 @@
 .goal-card-header {
     text-align: center;
     margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 2px solid #F1F5F9; /* 주간챌린지와 동일한 구분선 추가 */
 }
 
 .goal-card-title {
@@ -2000,7 +2002,7 @@
 .circular-progress-container {
     position: relative;
     display: inline-block;
-    margin-bottom: 32px;
+    margin-bottom: 20px; /* 32px에서 20px로 줄여서 높이 조정 */
 }
 
 .circular-progress {
@@ -2184,7 +2186,7 @@
     }
     
     .goal-card-title {
-        font-size: 18px;
+        font-size: 20px; /* 주간활동과 동일한 크기로 수정 */
     }
     
     .goal-card-icon {
