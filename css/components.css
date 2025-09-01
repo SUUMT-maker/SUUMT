@@ -2087,7 +2087,7 @@
 /* 하단 통계 카드들 */
 .goal-stats {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-columns: 1fr 1fr; /* 2개 카드로 변경 */
     gap: 20px;
 }
 
