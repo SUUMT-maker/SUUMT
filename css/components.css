@@ -1976,27 +1976,24 @@
 
 /* 카드 상단 제목 영역 */
 .goal-card-header {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
+    text-align: center;
     margin-bottom: 20px;
-    padding-bottom: 16px;
-    border-bottom: 2px solid #F1F5F9;
 }
 
 .goal-card-title {
     font-size: 20px;
     font-weight: 700;
     color: #1E1E1E;
-    margin-bottom: 8px;
+    margin: 0 0 8px 0;
+    display: block;
 }
 
 .goal-card-description {
     font-size: 14px;
     color: #666;
-    margin: 0 0 12px 0;
+    margin: 0;
     font-weight: 400;
+    display: block;
 }
 
 /* 원형 프로그레스 컨테이너 */
