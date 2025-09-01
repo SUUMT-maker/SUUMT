@@ -8,13 +8,13 @@ const INTEGRATED_RECORDS_HTML = `
     <!-- 1. 4주 순환 목표 시스템 (맨 위로 이동, 노치 여백 포함) -->
     <div id="weeklyGoalCard" style="background: white; border: 1px solid #E7E7E7; border-radius: 32px; padding: 32px 24px 28px 24px; margin: max(40px, env(safe-area-inset-top)) 20px 24px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
         
-        <!-- 카드 헤더 -->
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
-            <div style="font-size: 20px; font-weight: 700; color: #1E1E1E; display: flex; align-items: center; gap: 8px;">
-                <span id="goalIcon">🔥</span>
-                <span id="goalTitle">로딩 중...</span>
-            </div>
+            <!-- 카드 헤더 -->
+    <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
+        <div style="font-size: 20px; font-weight: 700; color: #1E1E1E; text-align: center;">
+            <div id="goalTitle" style="margin-bottom: 8px;">로딩 중...</div>
+            <div id="goalDescription" style="font-size: 14px; color: #666; font-weight: 400; margin-bottom: 12px;">일일 미션을 3일 연속으로 도전해 보세요!</div>
         </div>
+    </div>
         
         <!-- 원형 프로그레스 -->
         <div style="position: relative; display: inline-block; margin-bottom: 32px;">
@@ -37,11 +37,7 @@ const INTEGRATED_RECORDS_HTML = `
             <span id="goalCurrent">0일</span> / <span id="goalTarget">4일</span> 완료
         </div>
         
-        <!-- AI 메시지 -->
-        <div style="display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; color: #6b7280;">
-            <img src="icons/coach-avatar.png" style="width: 24px; height: 24px; border-radius: 50%;" alt="AI">
-            <span id="goalMessage">데이터를 불러오는 중입니다</span>
-        </div>
+        
         
     </div>
 
@@ -1428,7 +1424,7 @@ class IntegratedRecordsDashboard {
         
         // 메시지 업데이트
         const message = this.generateGoalMessage(progress, goal, false); // 개인 최고 기록 로직은 나중에 추가
-        document.getElementById('goalMessage').textContent = message;
+        document.getElementById('goalDescription').textContent = message;
     }
 
     // 📅 달력 렌더링
