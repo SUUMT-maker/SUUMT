@@ -31,29 +31,21 @@ const INTEGRATED_RECORDS_HTML = `
                 <div id="goalLabel" style="font-size: 16px; color: #6b7280; font-weight: 600; transition: all 0.3s ease;">4일 연속 달성</div>
             </div>
         </div>
-        
 
-        
-        
-        
+        <!-- 하단 통계 카드들 (1단계와 동일한 스타일) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 32px;">
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; text-align: center;">
+                <div id="statusContent" style="font-size: 20px; font-weight: 700; color: #1f2937; margin-bottom: 4px;">연속 0일째</div>
+                <div id="statusState" style="font-size: 14px; color: #6b7280;">도전중</div>
+            </div>
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 1px solid #667eea; border-radius: 16px; padding: 16px; text-align: center;">
+                <div id="actionContent" style="font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9); margin-bottom: 4px;">지금 운동하면</div>
+                <div id="actionReward" style="font-size: 20px; font-weight: 700; color: white;">+1일 ↗️</div>
+            </div>
+        </div>
     </div>
 
-    <!-- 2. 2개 가이드 카드 (챌린지 바로 아래) -->
-    <div id="guidanceCards" style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 20px; margin-bottom: 24px;">
-        
-        <!-- 카드 1: 현재 상태 -->
-        <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease; text-align: center;">
-            <div id="statusContent" style="font-size: 20px; font-weight: 700; color: #1f2937; line-height: 1.3; margin-bottom: 8px;">연속 2일째</div>
-            <div id="statusState" style="font-size: 14px; font-weight: 600; color: #6b7280;">유지중</div>
-        </div>
 
-        <!-- 카드 2: 행동 유도 - 보상을 크게, 행동을 작게 -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: 1px solid #E7E7E7; border-radius: 24px; padding: 20px; box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3); transition: all 0.3s ease; text-align: center;">
-            <div id="actionContent" style="font-size: 14px; font-weight: 600; color: rgba(255,255,255,0.9); line-height: 1.3; margin-bottom: 8px;">지금 운동하면</div>
-            <div id="actionReward" style="font-size: 24px; font-weight: 700; color: white;">+1일 ↗️</div>
-        </div>
-
-    </div>
 
     <!-- 3. AI 종합 평가 (기존 노치 여백 제거, 일반 마진으로) -->
     <div style="background: white; border: 1px solid #E7E7E7; border-radius: 24px; margin: 0 20px 24px; padding: 20px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); transition: all 0.3s ease;">
