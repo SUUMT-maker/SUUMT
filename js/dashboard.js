@@ -33,7 +33,7 @@ const INTEGRATED_RECORDS_HTML = `
         </div>
 
         <!-- 하단 통계 카드들 (1단계와 동일한 스타일) -->
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 32px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 20px;">
             <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px; padding: 16px; text-align: center;">
                 <div id="statusContent" style="font-size: 20px; font-weight: 700; color: #1f2937; margin-bottom: 4px;">연속 0일째</div>
                 <div id="statusState" style="font-size: 14px; color: #6b7280;">도전중</div>
