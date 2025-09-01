@@ -2103,7 +2103,7 @@
 
 .goal-stat-card.highlight {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    color: white !important;
     transform: translateY(-4px);
     box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
     border-color: #667eea;
@@ -2126,7 +2126,7 @@
 }
 
 .goal-stat-card.highlight .stat-number {
-    color: white;
+    color: white !important;
 }
 
 .goal-stat-card .stat-label {
@@ -2136,7 +2136,12 @@
 }
 
 .goal-stat-card.highlight .stat-label {
-    color: white;
+    color: white !important;
+}
+
+/* highlight 카드 내부의 progress-label도 흰색으로 */
+.goal-stat-card.highlight .progress-label {
+    color: white !important;
 }
 
 /* 100% 달성 축하 이펙트 */
