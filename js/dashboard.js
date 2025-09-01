@@ -12,7 +12,7 @@ const INTEGRATED_RECORDS_HTML = `
     <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #F1F5F9;">
         <div style="font-size: 20px; font-weight: 700; color: #1E1E1E; text-align: center;">
             <div id="goalTitle" style="margin-bottom: 8px;">로딩 중...</div>
-            <div id="goalDescription" style="font-size: 14px; color: #666; font-weight: 400; margin-bottom: 12px;">일일 미션을 3일 연속으로 도전해 보세요!</div>
+            <div id="goalDescriptionHeader" style="font-size: 14px; color: #666; font-weight: 400; margin-bottom: 12px;">일일 미션을 3일 연속으로 도전해 보세요!</div>
         </div>
     </div>
         
@@ -32,10 +32,7 @@ const INTEGRATED_RECORDS_HTML = `
             </div>
         </div>
         
-        <!-- 목표 설명 (단순화로 숨김 처리) -->
-        <div id="goalDescription" style="display: none; font-size: 16px; color: #374151; margin-bottom: 20px; line-height: 1.5;">
-            <span id="goalCurrent">0일</span> / <span id="goalTarget">4일</span> 완료
-        </div>
+
         
         
         
@@ -1419,12 +1416,11 @@ class IntegratedRecordsDashboard {
         const offset = circumference - (percentage / 100) * circumference;
         progressStroke.style.strokeDashoffset = offset;
         
-        // 목표 설명 단순화 - 복잡한 분수 제거
-        document.getElementById('goalDescription').style.display = 'none'; // 숨김
+
         
         // 메시지 업데이트
         const message = this.generateGoalMessage(progress, goal, false); // 개인 최고 기록 로직은 나중에 추가
-        document.getElementById('goalDescription').textContent = message;
+        document.getElementById('goalDescriptionHeader').textContent = message;
     }
 
     // 📅 달력 렌더링
