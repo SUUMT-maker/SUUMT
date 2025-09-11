@@ -1,8 +1,0 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.annieeinna.suumt",
-    "sha256_cert_fingerprints": ["0E:98:DB:08:55:BB:77:4D:53:D0:8F:21:C6:3C:DA:A1:A3:64:77:59:0A:BB:DB:07:22:E2:13:96:C8:15:66:65"]
-  }
-}]
