@@ -1,8 +1,15 @@
-[{
-  "relation": ["delegate_permission/common.handle_all_urls"],
-  "target": {
-    "namespace": "android_app",
-    "package_name": "com.annieeinna.suumt",
-    "sha256_cert_fingerprints": ["96:A5:1A:A3:9E:E3:6C:E1:03:C3:00:F3:9A:87:03:A8:C8:18:5F:5B:78:C7:6D:95:F2:85:8F:C2:76:D5:2C:D4"]
+[
+  {
+    "relation": [
+      "delegate_permission/common.handle_all_urls"
+    ],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.annieeinna.suumt",
+      "sha256_cert_fingerprints": [
+        "96:A5:1A:A3:9E:E3:6C:E1:03:C3:00:F3:9A:87:03:A8:C8:18:5F:5B:78:C7:6D:95:F2:85:8F:C2:76:D5:2C:D4",
+        "96:A5:1A:A3:9E:E3:6C:E1:03:C3:00:F3:9A:87:03:A8:C8:1B:5F:5B:78:C7:6D:95:F2:85:BF:C2:76:D5:2C:D4"
+      ]
+    }
   }
-}]
+]
