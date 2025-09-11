@@ -59,7 +59,7 @@ class VersionManager {
         }
 
         // 3. 최종 폴백
-        this.currentVersion = '2.0.0';
+        this.currentVersion = '3.0.0';
         return this.currentVersion;
     }
 

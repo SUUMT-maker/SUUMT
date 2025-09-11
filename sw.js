@@ -1,4 +1,4 @@
-const VERSION = '2.0.0';
+const VERSION = '3.0.0';
 const CACHE_NAME = `breath-trainer-v${VERSION}`;
 const STATIC_CACHE = `static-${VERSION}`;
 
