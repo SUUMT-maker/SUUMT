@@ -2001,7 +2001,7 @@ async function initSimpleUpdateSystem() {
         navigator.serviceWorker.addEventListener('message', event => {
             if (event.data.type === 'CACHE_UPDATED') {
                 const newVersion = event.data.version;
-                const currentVersion = window.versionManager?.currentVersion || '2.0.0';
+                const currentVersion = window.versionManager?.currentVersion || '3.0.0';
                 
                 if (newVersion !== currentVersion && window.updateManager) {
                     window.updateManager.performUpdate(newVersion, currentVersion);
